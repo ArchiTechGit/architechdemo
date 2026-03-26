@@ -441,9 +441,7 @@ export default function Home() {
       </div>
 
       {/* Main layout */}
-      <div className="relative" style={{ background: "linear-gradient(180deg, #0B1520 0%, #0D1825 100%)" }}>
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 100% 0%, rgba(5,195,221,0.04) 0%, transparent 60%)" }} />
-        <div className="container mx-auto px-4 py-8 relative">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
           {/* Left: Phone (2/5) */}
@@ -728,7 +726,6 @@ export default function Home() {
             </div>
 
           </div>
-        </div>
         </div>
       </div>
 
