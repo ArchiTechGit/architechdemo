@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArchiTech Demo</title>
+  <link rel="icon" type="image/png" href="./brand_assets/senate-logo-white.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { background: #060810; color: #D8EDF5; font-family: 'Space Mono', monospace; display: flex; align-items: center; justify-content: center; }
+    .toc { display: flex; flex-direction: column; gap: 12px; }
+    .toc-label { font-size: 9px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: #3D5A70; margin-bottom: 8px; }
+    .toc-divider { width: 100%; height: 1px; background: rgba(120,175,210,0.10); margin: 4px 0; }
+    .toc-item { display: flex; align-items: center; gap: 16px; text-decoration: none; color: #4A6878; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; transition: color 0.2s ease; padding: 4px 0; }
+    .toc-item:hover { color: #D8EDF5; }
+    .toc-item:focus-visible { outline: 2px solid #C86A28; outline-offset: 4px; }
+    .toc-num { font-size: 9px; color: #243545; min-width: 20px; }
+  </style>
+</head>
+<body>
+  <nav class="toc" aria-label="Demos">
+    <div class="toc-label">Demos</div>
+    <div class="toc-divider"></div>
+    <a href="/wxcc/" class="toc-item">
+      <span class="toc-num">01</span>
+      <span>Webex CC Workflow Demo</span>
+    </a>
+  </nav>
+</body>
+</html>
