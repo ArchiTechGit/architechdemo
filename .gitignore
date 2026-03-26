@@ -2,8 +2,7 @@
 **/node_modules
 .pnpm-store/
 
-# Build outputs
-dist/
+# Build outputs (demo dist/ folders committed for GitHub Pages)
 build/
 
 # Environment variables

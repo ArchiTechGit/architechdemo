@@ -2,8 +2,7 @@
 **/node_modules
 .pnpm-store/
 
-# Build outputs
-dist/
+# Build outputs (dist/ committed for GitHub Pages deployment)
 build/
 *.dist
 
