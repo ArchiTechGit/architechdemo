@@ -593,12 +593,11 @@ export default function Home() {
                       </div>
 
                       <div
-                        className={`flex-1 rounded-xl border transition-all duration-500 ${
-                          isTriggered ? "border-[#00A991]/35 bg-[#00A991]/10" :
-                          isNext ? "border-primary/40 bg-card" :
-                          "border-white/6 bg-card/50"
+                        className={`flex-1 rounded-xl border bg-card transition-all duration-500 ${
+                          isTriggered ? "border-[#00A991]/30" :
+                          isNext ? "border-white/12" :
+                          "border-white/6"
                         }`}
-                        style={isNext ? { boxShadow: "0 0 0 1px rgba(5,195,221,0.15), 0 8px 32px rgba(5,195,221,0.06)" } : undefined}
                       >
                         {/* Always-visible header row */}
                         <div className="flex items-center gap-2 px-4 pt-3 pb-3">
