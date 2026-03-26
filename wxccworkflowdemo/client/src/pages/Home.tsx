@@ -134,7 +134,7 @@ export default function Home() {
         setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
         setStatVisible(true);
       }, 350);
-    }, 5000);
+    }, 12000);
   };
 
   useEffect(() => {
@@ -144,7 +144,7 @@ export default function Home() {
         setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
         setStatVisible(true);
       }, 350);
-    }, 5000);
+    }, 12000);
     return () => { if (statIntervalRef.current) clearInterval(statIntervalRef.current); };
   }, []);
 
