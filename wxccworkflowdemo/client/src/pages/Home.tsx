@@ -448,8 +448,7 @@ export default function Home() {
 
           {/* Left: Phone (2/5) */}
           <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start">
-            <Card className="border border-primary/20 bg-[#0D1F38] shadow-xl overflow-hidden" style={{ boxShadow: "0 0 0 1px rgba(5,195,221,0.08), 0 24px 60px rgba(0,0,0,0.5)" }}>
-              <div className="h-0.5 bg-gradient-to-r from-primary/70 via-primary/30 to-transparent" />
+            <Card className="border border-white/8 bg-card overflow-hidden" style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
               <div className="p-4 border-b border-white/6 space-y-3">
                 <div>
                   <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
@@ -571,16 +570,6 @@ export default function Home() {
 
           {/* Right: Journey (3/5) */}
           <div className="lg:col-span-3 space-y-4">
-            <div className="mb-4">
-              <div className="flex items-center gap-4 mb-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-1 h-5 bg-primary rounded-full" />
-                  <span className="text-sm font-black text-white uppercase tracking-widest">The Patient Journey</span>
-                </div>
-                <div className="flex-1 h-px bg-primary/20" />
-              </div>
-              <p className="text-sm text-white/60 pl-3.5">Trigger each stage to fire a live workflow to the patient's mobile.</p>
-            </div>
 
             <div className="relative">
               <div className="absolute left-[13px] top-6 bottom-6 w-px bg-white/8" />
