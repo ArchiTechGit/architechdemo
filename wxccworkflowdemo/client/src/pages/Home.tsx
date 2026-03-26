@@ -61,25 +61,39 @@ const STAGE_META = [
 
 const IMPACT_STATS = [
   {
-    hero: "$75K",
-    headline: "50–80% of manual effort removed per interaction.",
-    body: "At ~6,500 interactions per year — derived from MDHS's own activity data — that returns up to",
-    highlight: "1,300 hours of clinical staff time",
-    tail: "back to direct patient care. Worth up to $75,000 annually.",
+    hero: "20x",
+    headline: "More cost-effective per interaction than a manual phone call.",
+    body: "Routine patient communications cost $10–$30 each when handled by clinical staff. The same outcome delivered digitally costs",
+    highlight: "$0.12–$0.20 per interaction",
+    tail: "— a gap that compounds across every touchpoint, at every facility size.",
   },
   {
-    hero: "38%",
-    headline: "Fewer no-shows with automated appointment reminders.",
-    body: "Each missed appointment costs a health system an average of",
-    highlight: "$150 in lost revenue",
-    tail: "Intelligent, timely SMS nudges fill schedule gaps before they become lost income.",
+    hero: "80%",
+    headline: "Of manual effort eliminated on appointment confirmation workflows.",
+    body: "Multiple call attempts, voicemail handling, manual documentation, follow-up — all replaced by a single automated message.",
+    highlight: "Validated end-to-end during the Proof of Value.",
+    tail: "No clinical judgment required. No staff time consumed.",
   },
   {
-    hero: "68%",
-    headline: "Of patients prefer digital communication over phone calls.",
-    body: "Meeting patients where they already are — on their phones — drives",
-    highlight: "higher engagement and faster responses",
-    tail: "across the entire patient journey, with better care outcomes at lower cost.",
+    hero: "~$84",
+    headline: "In staff cost recovered per patient episode — all five workflows.",
+    body: "Pre-admission, appointment confirmation, reschedule, cancellation, post-op notification. At 2,000 surgical cases that's $168K returned. At 10,000 cases,",
+    highlight: "the saving exceeds $840K annually",
+    tail: "The platform cost stays fixed as volume grows.",
+  },
+  {
+    hero: "250hrs",
+    headline: "Of clinical staff time recovered for every 1,000 interactions automated.",
+    body: "At a blended average of 15 minutes per manual call, each thousand touchpoints automated returns",
+    highlight: "~$14,000 in clinical capacity",
+    tail: "Small facility. Large network. The math scales either way.",
+  },
+  {
+    hero: "12–18",
+    headline: "Months to full break-even. Net positive every year after.",
+    body: "Total first-year investment $71K–$96K including one-time setup. Annual return scales with patient volume —",
+    highlight: "higher volume means faster break-even",
+    tail: "and a larger compounding return from year two onward.",
   },
 ];
 
@@ -100,15 +114,38 @@ export default function Home() {
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const goToStat = (index: number) => {
+    setStatVisible(false);
+    setTimeout(() => {
+      setStatIndex(index);
+      setStatVisible(true);
+    }, 350);
+  };
+
+  const advanceStat = (dir: 1 | -1) => {
+    const next = (statIndex + dir + IMPACT_STATS.length) % IMPACT_STATS.length;
+    goToStat(next);
+    if (statIntervalRef.current) clearInterval(statIntervalRef.current);
+    statIntervalRef.current = setInterval(() => {
       setStatVisible(false);
       setTimeout(() => {
         setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
         setStatVisible(true);
       }, 350);
     }, 5000);
-    return () => clearInterval(interval);
+  };
+
+  useEffect(() => {
+    statIntervalRef.current = setInterval(() => {
+      setStatVisible(false);
+      setTimeout(() => {
+        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
+        setStatVisible(true);
+      }, 350);
+    }, 5000);
+    return () => { if (statIntervalRef.current) clearInterval(statIntervalRef.current); };
   }, []);
 
   const allComplete = triggeredStages.size === JOURNEY_STAGES.length;
@@ -213,7 +250,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
 
       {/* Header */}
-      <div className="h-14 bg-[#0B1520] border-b border-[#05C3DD]/10 flex items-center px-6 md:px-10 justify-between">
+      <div className="h-14 bg-[#0B1520] border-b border-primary/10 flex items-center px-6 md:px-10 justify-between">
         <div className="flex items-center gap-3">
           {/* ArchiTech logo — screen blend makes black bg transparent on dark surfaces */}
           <img
@@ -231,7 +268,7 @@ export default function Home() {
             <h1 className="text-[13px] font-bold text-white uppercase tracking-wide leading-tight">
               The Digital Front Door — Patient Experience Journey
             </h1>
-            <p className="text-[10px] font-bold text-[#05C3DD] tracking-[0.18em] uppercase mt-0.5">
+            <p className="text-[10px] font-bold text-primary tracking-[0.18em] uppercase mt-0.5">
               [ Live Demonstration ]
             </p>
           </div>
@@ -247,7 +284,6 @@ export default function Home() {
         className="relative border-b border-white/8 overflow-hidden"
         style={{ background: "#0B1520" }}
       >
-        {/* Background image */}
         <img
           src={bgImage}
           alt=""
@@ -255,7 +291,6 @@ export default function Home() {
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           style={{ opacity: 0.18, mixBlendMode: "luminosity" }}
         />
-        {/* Dark overlay to maintain readability */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{ background: "linear-gradient(135deg, rgba(11,21,32,0.85) 0%, rgba(13,24,37,0.7) 50%, rgba(19,41,75,0.85) 100%)" }}
@@ -270,17 +305,32 @@ export default function Home() {
         >
           {/* Hero number */}
           <div className="flex-shrink-0 flex items-end gap-3">
-            <span className="font-black text-[#05C3DD] leading-none" style={{ fontSize: "clamp(56px, 7vw, 88px)" }}>{IMPACT_STATS[statIndex].hero}</span>
+            <span className="font-black text-primary leading-none" style={{ fontSize: "clamp(56px, 7vw, 88px)" }}>{IMPACT_STATS[statIndex].hero}</span>
             <div className="pb-2">
-              <div className="w-8 h-0.5 bg-[#05C3DD] mb-2" />
+              <div className="w-8 h-0.5 bg-primary mb-2" />
+              {/* Dot indicators + prev/next controls */}
               <div className="flex gap-1.5 items-center">
+                <button
+                  onClick={() => advanceStat(-1)}
+                  aria-label="Previous stat"
+                  className="w-4 h-4 flex items-center justify-center text-white/30 hover:text-primary transition-colors"
+                  style={{ fontSize: "10px" }}
+                >‹</button>
                 {IMPACT_STATS.map((_, i) => (
-                  <span
+                  <button
                     key={i}
-                    className="rounded-full transition-all duration-300"
+                    onClick={() => goToStat(i)}
+                    aria-label={`Show stat ${i + 1}`}
+                    className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                     style={{ width: i === statIndex ? "16px" : "5px", height: "5px", background: i === statIndex ? "rgba(5,195,221,0.8)" : "rgba(255,255,255,0.2)" }}
                   />
                 ))}
+                <button
+                  onClick={() => advanceStat(1)}
+                  aria-label="Next stat"
+                  className="w-4 h-4 flex items-center justify-center text-white/30 hover:text-primary transition-colors"
+                  style={{ fontSize: "10px" }}
+                >›</button>
               </div>
             </div>
           </div>
@@ -304,62 +354,88 @@ export default function Home() {
         <div className="container mx-auto px-6 md:px-10 py-7">
           <div className="flex items-center gap-4 mb-6">
             <div className="flex items-center gap-2.5">
-              <div className="w-1 h-5 bg-[#05C3DD] rounded-full" />
+              <div className="w-1 h-5 bg-primary rounded-full" />
               <span className="text-sm font-black text-white uppercase tracking-widest">Journey Overview</span>
             </div>
-            <div className="flex-1 h-px bg-[#05C3DD]/20" />
-            <span className="text-xs text-white/50 font-mono">3 stages · end-to-end digital</span>
+            <div className="flex-1 h-px bg-primary/20" />
+            <span className="text-xs text-muted-foreground font-mono">3 stages · end-to-end digital</span>
           </div>
 
           <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-0">
-            {JOURNEY_STAGES.map((stage, i) => {
-              const { icon: Icon, shortDesc } = STAGE_META[i];
-              return (
-                <div key={stage.id} className="flex flex-col md:flex-row items-stretch flex-1">
-                  {/* Card */}
-                  <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/20 hover:bg-white/[0.04] transition-colors duration-300">
-                    {/* Top row: chapter + icon */}
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="font-mono text-xs font-bold px-1.5 py-0.5 rounded border text-[#05C3DD]/70 border-[#05C3DD]/20 bg-[#05C3DD]/8"
-                      >
-                        {stage.chapter}
-                      </span>
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-[#05C3DD]/15 bg-[#05C3DD]/8">
-                        <Icon className="w-3.5 h-3.5 text-[#05C3DD]/50" />
-                      </div>
-                    </div>
 
-                    {/* Stage name */}
-                    <div>
-                      <h3 className="font-black text-white text-base leading-tight mb-1.5">{stage.label}</h3>
-                      <p className="text-sm text-white/70 leading-relaxed">{shortDesc}</p>
-                    </div>
-
-                    {/* SMS pill */}
-                    <div className="mt-auto flex items-center gap-1.5 pt-3 border-t border-white/6">
-                      <Phone className="w-3 h-3 text-[#05C3DD]/40" />
-                      <span className="text-xs text-[#05C3DD]/40 font-mono">SMS to patient</span>
-                    </div>
-                  </div>
-
-                  {/* Connector */}
-                  {i < JOURNEY_STAGES.length - 1 && (
-                    <div className="hidden md:flex items-center flex-shrink-0 px-2">
-                      <div className="flex items-center gap-0.5">
-                        <div
-                          className="w-8 h-px"
-                          style={{ background: "repeating-linear-gradient(to right, rgba(5,195,221,0.35) 0px, rgba(5,195,221,0.35) 4px, transparent 4px, transparent 8px)" }}
-                        />
-                        <svg width="6" height="9" viewBox="0 0 6 9" fill="none" className="flex-shrink-0" style={{ color: "rgba(5,195,221,0.4)" }}>
-                          <path d="M0 0L6 4.5L0 9V0Z" fill="currentColor" />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
+            {/* Card 01 — Initiation: chapter watermark, cyan tech feel */}
+            <div className="flex flex-col md:flex-row items-stretch flex-1">
+              <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
+                <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>01</span>
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4 text-primary/60" />
+                  <span className="font-mono text-xs font-bold text-primary/50">01</span>
                 </div>
-              );
-            })}
+                <div className="flex-1">
+                  <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[0].label}</h3>
+                  <p className="text-sm text-white/70 leading-relaxed">{STAGE_META[0].shortDesc}</p>
+                </div>
+                <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
+                  <Phone className="w-3 h-3 text-primary/40" />
+                  <span className="text-xs text-primary/40 font-mono">SMS to patient</span>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center flex-shrink-0 px-2">
+                <div className="flex items-center gap-0.5">
+                  <div className="w-8 h-px" style={{ background: "repeating-linear-gradient(to right, rgba(5,195,221,0.35) 0px, rgba(5,195,221,0.35) 4px, transparent 4px, transparent 8px)" }} />
+                  <svg width="6" height="9" viewBox="0 0 6 9" fill="none" className="flex-shrink-0" style={{ color: "rgba(5,195,221,0.4)" }}><path d="M0 0L6 4.5L0 9V0Z" fill="currentColor" /></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 02 — Process: checklist of what gets done digitally */}
+            <div className="flex flex-col md:flex-row items-stretch flex-1">
+              <div className="flex-1 rounded-xl border border-[#05C3DD]/12 bg-[#05C3DD]/[0.02] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/22 hover:bg-[#05C3DD]/[0.035] transition-colors duration-300">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-primary/60" />
+                  <span className="font-mono text-xs font-bold text-primary/50">02</span>
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-base leading-tight mb-3">{JOURNEY_STAGES[1].label}</h3>
+                  <div className="space-y-2">
+                    {["Health history", "Insurance verification", "Consent forms"].map((item) => (
+                      <div key={item} className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
+                        <span className="text-xs text-white/55 font-mono">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-auto pt-3 border-t border-white/6">
+                  <span className="text-xs text-white/35 font-mono">All digital. Before arrival.</span>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center flex-shrink-0 px-2">
+                <div className="flex items-center gap-0.5">
+                  <div className="w-8 h-px" style={{ background: "repeating-linear-gradient(to right, rgba(5,195,221,0.35) 0px, rgba(5,195,221,0.35) 4px, transparent 4px, transparent 8px)" }} />
+                  <svg width="6" height="9" viewBox="0 0 6 9" fill="none" className="flex-shrink-0" style={{ color: "rgba(5,195,221,0.4)" }}><path d="M0 0L6 4.5L0 9V0Z" fill="currentColor" /></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 03 — Outcome: green accent, stat callout */}
+            <div className="flex flex-col md:flex-row items-stretch flex-1">
+              <div className="flex-1 rounded-xl border border-[#00A991]/15 bg-[#00A991]/[0.02] p-5 flex flex-col gap-3 hover:border-[#00A991]/25 hover:bg-[#00A991]/[0.04] transition-colors duration-300">
+                <div className="flex items-center gap-2">
+                  <Stethoscope className="w-4 h-4 text-[#00A991]/60" />
+                  <span className="font-mono text-xs font-bold text-[#00A991]/50">03</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[2].label}</h3>
+                  <p className="text-sm text-white/70 leading-relaxed">{STAGE_META[2].shortDesc}</p>
+                </div>
+                <div className="flex items-center gap-3 pt-3 border-t border-[#00A991]/10">
+                  <span className="text-2xl font-black text-[#00A991] leading-none">68%</span>
+                  <span className="text-xs text-white/40 font-mono leading-tight">of patients prefer<br />digital over phone</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -374,8 +450,8 @@ export default function Home() {
               <div className="p-4 border-b border-white/6 space-y-3">
                 <div>
                   <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
-                    <User className="w-3 h-3 text-white/55" />
-                    <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Patient Name</span>
+                    <User className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Name</span>
                   </label>
                   <Input
                     id="patient-name"
@@ -383,13 +459,13 @@ export default function Home() {
                     placeholder="Sarah Johnson"
                     value={patientName}
                     onChange={(e) => setPatientName(e.target.value)}
-                    className="h-10 text-sm border border-white/15 focus:border-[#05C3DD]/70 bg-input text-foreground placeholder:text-white/20"
+                    className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
                   />
                 </div>
                 <div>
                   <label htmlFor="patient-mobile" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
-                    <Phone className="w-3 h-3 text-white/55" />
-                    <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Patient Mobile</span>
+                    <Phone className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Mobile</span>
                   </label>
                   <Input
                     id="patient-mobile"
@@ -397,7 +473,7 @@ export default function Home() {
                     placeholder="+61 2 1234 5678"
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
-                    className="h-10 text-sm border border-white/15 focus:border-[#05C3DD]/70 bg-input text-foreground placeholder:text-white/20"
+                    className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
                   />
                 </div>
               </div>
@@ -406,10 +482,11 @@ export default function Home() {
                 <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(5,195,221,0.05) 0%, transparent 70%)" }} />
                 <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${phonePulse ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(ellipse 90% 80% at 50% 50%, rgba(5,195,221,0.18) 0%, transparent 65%)" }} />
                 <div
-                  className="relative bg-[#13294B] z-10"
+                  className="relative bg-card z-10"
                   style={{
-                    width: "230px",
-                    height: "470px",
+                    width: "100%",
+                    maxWidth: "230px",
+                    aspectRatio: "230 / 470",
                     borderRadius: "46px",
                     border: "7px solid #1A3460",
                     boxShadow: phonePulse
@@ -458,7 +535,7 @@ export default function Home() {
                       ) : (
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 mb-3">
-                            <div className="w-7 h-7 rounded-full bg-[#05C3DD] flex items-center justify-center flex-shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold" style={{ fontSize: "9px" }}>AT</span>
                             </div>
                             <span className="text-slate-500 text-xs">ArchiTech · now</span>
@@ -514,7 +591,7 @@ export default function Home() {
                       <div className="flex-shrink-0 flex items-start pt-[14px] z-10">
                         <div className={`w-[10px] h-[10px] rounded-full border-2 transition-all duration-500 ${
                           isTriggered ? "border-[#00A991] bg-[#00A991] shadow-[0_0_8px_rgba(0,169,145,0.6)]" :
-                          isNext ? "border-[#05C3DD] bg-[#05C3DD]/20 shadow-[0_0_8px_rgba(5,195,221,0.4)]" :
+                          isNext ? "border-[#05C3DD] bg-primary/20 shadow-[0_0_8px_rgba(5,195,221,0.4)]" :
                           "border-white/15 bg-transparent"
                         }`} />
                       </div>
@@ -522,7 +599,7 @@ export default function Home() {
                       <div
                         className={`flex-1 rounded-xl border transition-all duration-500 ${
                           isTriggered ? "border-[#00A991]/35 bg-[#00A991]/10" :
-                          isNext ? "border-[#05C3DD]/40 bg-card" :
+                          isNext ? "border-primary/40 bg-card" :
                           "border-white/6 bg-card/50"
                         }`}
                         style={isNext ? { boxShadow: "0 0 0 1px rgba(5,195,221,0.15), 0 8px 32px rgba(5,195,221,0.06)" } : undefined}
@@ -531,7 +608,7 @@ export default function Home() {
                         <div className="flex items-center gap-2 px-4 pt-3 pb-3">
                           <span className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded border transition-all duration-500 flex-shrink-0 ${
                             isTriggered ? "text-[#00A991] border-[#00A991]/30 bg-[#00A991]/10" :
-                            isNext ? "text-[#05C3DD] border-[#05C3DD]/30 bg-[#05C3DD]/8" :
+                            isNext ? "text-[#05C3DD] border-primary/30 bg-primary/8" :
                             "text-white/20 border-white/8"
                           }`}>
                             {stage.chapter}
@@ -567,7 +644,7 @@ export default function Home() {
                             <Button
                               onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
                               disabled={!!loadingStage}
-                              className="w-full bg-[#05C3DD] hover:bg-[#55CAFD] active:bg-[#0055B8] text-[#0D1825] font-bold text-sm h-10 border-0 shadow-[0_4px_20px_rgba(5,195,221,0.3)]"
+                              className="w-full bg-primary hover:bg-[#55CAFD] active:bg-[#0055B8] text-primary-foreground font-bold text-sm h-10 border-0 shadow-[0_4px_20px_rgba(5,195,221,0.3)]"
                             >
                               {isLoading ? (
                               <>
@@ -633,11 +710,11 @@ export default function Home() {
               <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[#00A991]/40 bg-[#00A991]/8">
                 <div>
                   <p className="text-sm font-black text-[#00A991]">All stages complete.</p>
-                  <p className="text-xs text-white/60 mt-0.5">Ready to show your impact summary.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Ready to show your impact summary.</p>
                 </div>
                 <Button
                   onClick={() => setShowCompleteModal(true)}
-                  className="flex-shrink-0 bg-[#00A991] hover:bg-[#16CECC] active:bg-[#00A991] text-[#0D1825] font-bold text-sm border-0 shadow-[0_4px_20px_rgba(0,169,145,0.3)]"
+                  className="flex-shrink-0 bg-[#00A991] hover:bg-[#16CECC] active:bg-[#00A991] text-primary-foreground font-bold text-sm border-0 shadow-[0_4px_20px_rgba(0,169,145,0.3)]"
                 >
                   View Summary →
                 </Button>
@@ -646,9 +723,9 @@ export default function Home() {
 
             {/* Tech stack */}
             <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap pt-1">
-              <span className="text-xs text-white/45 uppercase tracking-widest">Powered by</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">Powered by</span>
               {TECH_STACK.map((tech) => (
-                <span key={tech} className="text-xs text-[#7F8FA9] border border-[#05C3DD]/15 px-2 py-0.5 rounded-md font-mono">{tech}</span>
+                <span key={tech} className="text-xs text-muted-foreground border border-primary/15 px-2 py-0.5 rounded-md font-mono">{tech}</span>
               ))}
             </div>
 
@@ -694,8 +771,8 @@ export default function Home() {
 
             {/* QR */}
             <div className="pt-6 border-t border-white/8 flex flex-col items-center gap-3">
-              <p className="text-sm text-white/55">Want a personalised workshop for your organisation?</p>
-              <div className="p-2 rounded-xl border border-white/10 bg-[#0D1825]/40">
+              <p className="text-sm text-muted-foreground">Want a personalised workshop for your organisation?</p>
+              <div className="p-2 rounded-xl border border-white/10 bg-background/40">
                 <img
                   src={qrUrl}
                   alt="Scan to visit architech.net.au"
