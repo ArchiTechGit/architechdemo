@@ -260,7 +260,7 @@ export default function Home() {
         >
           {/* Hero number */}
           <div className="flex-shrink-0 flex items-end gap-3">
-            <span className="font-black text-white leading-none" style={{ fontSize: "clamp(56px, 7vw, 88px)" }}>{IMPACT_STATS[statIndex].hero}</span>
+            <span className="font-black text-[#05C3DD] leading-none" style={{ fontSize: "clamp(56px, 7vw, 88px)" }}>{IMPACT_STATS[statIndex].hero}</span>
             <div className="pb-2">
               <div className="w-8 h-0.5 bg-[#05C3DD] mb-2" />
               <div className="flex gap-1.5 items-center">
@@ -277,12 +277,12 @@ export default function Home() {
           <div className="hidden md:block w-px self-stretch bg-white/10" />
           {/* Story */}
           <div className="flex-1">
-            <p className="text-lg md:text-xl font-semibold text-white mb-2 leading-snug">
+            <p className="text-lg md:text-xl font-black text-white mb-2 leading-snug">
               {IMPACT_STATS[statIndex].headline}
             </p>
-            <p className="text-sm text-white/45 leading-relaxed">
+            <p className="text-base text-white/75 leading-relaxed">
               {IMPACT_STATS[statIndex].body}{" "}
-              <span className="text-white/70 font-semibold">{IMPACT_STATS[statIndex].highlight}</span>
+              <span className="text-white font-bold">{IMPACT_STATS[statIndex].highlight}</span>
               {" "}{IMPACT_STATS[statIndex].tail}
             </p>
           </div>
@@ -292,10 +292,13 @@ export default function Home() {
       {/* Journey Overview Diagram */}
       <div className="border-b border-white/8" style={{ background: "linear-gradient(180deg, #0D1825 0%, #0B1520 100%)" }}>
         <div className="container mx-auto px-6 md:px-10 py-7">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-xs font-semibold text-white/20 uppercase tracking-widest">Journey overview</span>
-            <div className="flex-1 h-px bg-white/6" />
-            <span className="text-xs text-white/15 font-mono">3 stages · end-to-end digital</span>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-2.5">
+              <div className="w-1 h-5 bg-[#05C3DD] rounded-full" />
+              <span className="text-sm font-black text-white uppercase tracking-widest">Journey Overview</span>
+            </div>
+            <div className="flex-1 h-px bg-[#05C3DD]/20" />
+            <span className="text-xs text-white/50 font-mono">3 stages · end-to-end digital</span>
           </div>
 
           <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-0">
@@ -319,8 +322,8 @@ export default function Home() {
 
                     {/* Stage name */}
                     <div>
-                      <h3 className="font-bold text-white text-sm leading-tight mb-1.5">{stage.label}</h3>
-                      <p className="text-xs text-white/35 leading-relaxed">{shortDesc}</p>
+                      <h3 className="font-black text-white text-base leading-tight mb-1.5">{stage.label}</h3>
+                      <p className="text-sm text-white/70 leading-relaxed">{shortDesc}</p>
                     </div>
 
                     {/* SMS pill */}
@@ -361,8 +364,8 @@ export default function Home() {
               <div className="p-4 border-b border-white/6 space-y-3">
                 <div>
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <User className="w-3 h-3 text-white/25" />
-                    <span className="text-xs font-semibold text-white/25 uppercase tracking-widest">Patient Name</span>
+                    <User className="w-3 h-3 text-white/55" />
+                    <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Patient Name</span>
                   </div>
                   <Input
                     type="text"
@@ -374,8 +377,8 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <Phone className="w-3 h-3 text-white/25" />
-                    <span className="text-xs font-semibold text-white/25 uppercase tracking-widest">Patient Mobile</span>
+                    <Phone className="w-3 h-3 text-white/55" />
+                    <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Patient Mobile</span>
                   </div>
                   <Input
                     type="tel"
@@ -476,8 +479,8 @@ export default function Home() {
           {/* Right: Journey (3/5) */}
           <div className="lg:col-span-3 space-y-4">
             <div className="mb-2">
-              <h2 className="text-2xl font-bold text-white mb-1">The Patient Journey</h2>
-              <p className="text-sm text-white/35">Trigger each stage to fire a live workflow to the patient's mobile.</p>
+              <h2 className="text-2xl font-black text-white mb-1">The Patient Journey</h2>
+              <p className="text-base text-white/70">Trigger each stage to fire a live workflow to the patient's mobile.</p>
             </div>
 
             <div className="relative">
@@ -520,10 +523,10 @@ export default function Home() {
                           }`}>
                             {stage.chapter}
                           </span>
-                          <h3 className={`font-bold transition-colors duration-500 flex-1 ${
-                            isTriggered ? "text-[#00A991] text-sm" :
-                            isNext ? "text-white text-base" :
-                            "text-white/30 text-sm"
+                          <h3 className={`font-black transition-colors duration-500 flex-1 ${
+                            isTriggered ? "text-[#00A991] text-base" :
+                            isNext ? "text-white text-lg" :
+                            "text-white/40 text-base"
                           }`}>
                             {stage.label}
                           </h3>
@@ -575,7 +578,7 @@ export default function Home() {
                         {/* Expandable details */}
                         {isExpanded && (
                           <div className="px-4 pb-4 pt-3 border-t border-white/6 space-y-4">
-                            <p className="text-sm leading-relaxed text-white/55">
+                            <p className="text-base leading-relaxed text-white/80">
                               {stage.narrative}
                             </p>
                             {/* Workflow diagram placeholder */}
@@ -607,9 +610,9 @@ export default function Home() {
 
             {/* Tech stack */}
             <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap pt-1">
-              <span className="text-xs text-white/15 uppercase tracking-widest">Powered by</span>
+              <span className="text-xs text-white/45 uppercase tracking-widest">Powered by</span>
               {TECH_STACK.map((tech) => (
-                <span key={tech} className="text-xs text-white/25 border border-white/8 px-2 py-0.5 rounded-md font-mono">{tech}</span>
+                <span key={tech} className="text-xs text-[#7F8FA9] border border-[#05C3DD]/15 px-2 py-0.5 rounded-md font-mono">{tech}</span>
               ))}
             </div>
 
