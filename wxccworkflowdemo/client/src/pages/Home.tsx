@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { CalendarDays, Check, ChevronDown, ClipboardList, Loader2, Phone, Stethoscope, User } from "lucide-react";
 import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
-import { useEffect, useState } from "react";
+import qrUrl from "@/assets/qr-architech.png";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface JourneyStage {
@@ -96,6 +98,7 @@ export default function Home() {
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -113,12 +116,16 @@ export default function Home() {
 
   useEffect(() => {
     if (allComplete) {
-      const t = setTimeout(() => setShowCompleteModal(true), 10000);
+      const t = setTimeout(() => setShowCompleteModal(true), 30000);
       return () => clearTimeout(t);
     } else {
       setShowCompleteModal(false);
     }
   }, [allComplete]);
+
+  useEffect(() => {
+    return () => { stepRevealTimeoutsRef.current.forEach(clearTimeout); };
+  }, []);
 
   const validateInputs = () => {
     if (!mobileNumber.trim()) { toast.error("Mobile number is required"); return false; }
@@ -171,11 +178,12 @@ export default function Home() {
       setLastTriggeredStage(workflowId);
       setPhonePulse(true);
       setTimeout(() => setPhonePulse(false), 2000);
-      [450, 950, 1500].forEach((delay, idx) => {
+      const revealTimeouts = [450, 950, 1500].map((delay, idx) =>
         setTimeout(() => {
           setStageStepReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
-        }, delay);
-      });
+        }, delay)
+      );
+      stepRevealTimeoutsRef.current.push(...revealTimeouts);
       toast.success(`${workflowLabel} sent`, { description: mobileNumber });
     } catch (error) {
       toast.error("Workflow trigger failed", { description: error instanceof Error ? error.message : "Unknown error" });
@@ -185,6 +193,8 @@ export default function Home() {
   };
 
   const resetJourney = () => {
+    stepRevealTimeoutsRef.current.forEach(clearTimeout);
+    stepRevealTimeoutsRef.current = [];
     setTriggeredStages(new Set());
     setLastTriggeredStage(null);
     setPhonePulse(false);
@@ -307,7 +317,7 @@ export default function Home() {
               return (
                 <div key={stage.id} className="flex flex-col md:flex-row items-stretch flex-1">
                   {/* Card */}
-                  <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/20 hover:bg-white/[0.04] transition-all duration-300">
+                  <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/20 hover:bg-white/[0.04] transition-colors duration-300">
                     {/* Top row: chapter + icon */}
                     <div className="flex items-center justify-between">
                       <span
@@ -363,11 +373,12 @@ export default function Home() {
             <Card className="border border-white/10 bg-card shadow-xl overflow-hidden">
               <div className="p-4 border-b border-white/6 space-y-3">
                 <div>
-                  <div className="flex items-center gap-1.5 mb-1.5">
+                  <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
                     <User className="w-3 h-3 text-white/55" />
                     <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Patient Name</span>
-                  </div>
+                  </label>
                   <Input
+                    id="patient-name"
                     type="text"
                     placeholder="Sarah Johnson"
                     value={patientName}
@@ -376,11 +387,12 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5 mb-1.5">
+                  <label htmlFor="patient-mobile" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
                     <Phone className="w-3 h-3 text-white/55" />
                     <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Patient Mobile</span>
-                  </div>
+                  </label>
                   <Input
+                    id="patient-mobile"
                     type="tel"
                     placeholder="+61 2 1234 5678"
                     value={mobileNumber}
@@ -466,12 +478,13 @@ export default function Home() {
               </div>
 
               <div className="px-4 pb-4">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={resetJourney}
-                  className="w-full text-xs font-semibold text-white/40 hover:text-white py-2 border border-white/15 hover:border-white/35 rounded-lg hover:bg-white/5 transition-colors"
+                  className="w-full text-xs font-semibold text-white/40 hover:text-white h-9 border border-white/15 hover:border-white/35 hover:bg-white/5"
                 >
                   ↺ Reset & Replay
-                </button>
+                </Button>
               </div>
             </Card>
           </div>
@@ -556,7 +569,12 @@ export default function Home() {
                               disabled={!!loadingStage}
                               className="w-full bg-[#05C3DD] hover:bg-[#55CAFD] active:bg-[#0055B8] text-[#0D1825] font-bold text-sm h-10 border-0 shadow-[0_4px_20px_rgba(5,195,221,0.3)]"
                             >
-                              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send to Patient →"}
+                              {isLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                                <span className="sr-only">Sending workflow...</span>
+                              </>
+                            ) : "Send to Patient →"}
                             </Button>
                           )}
                         </div>
@@ -564,6 +582,8 @@ export default function Home() {
                         {/* Expand toggle */}
                         <button
                           onClick={() => toggleExpanded(stage.id)}
+                          aria-expanded={isExpanded}
+                          aria-controls={`stage-details-${stage.id}`}
                           className={`w-full flex items-center gap-1.5 px-4 py-2 border-t transition-colors ${
                             isExpanded ? "border-white/8 text-white/40 hover:text-white/60" : "border-white/6 text-white/20 hover:text-white/40"
                           }`}
@@ -577,7 +597,7 @@ export default function Home() {
 
                         {/* Expandable details */}
                         {isExpanded && (
-                          <div className="px-4 pb-4 pt-3 border-t border-white/6 space-y-4">
+                          <div id={`stage-details-${stage.id}`} className="px-4 pb-4 pt-3 border-t border-white/6 space-y-4">
                             <p className="text-base leading-relaxed text-white/80">
                               {stage.narrative}
                             </p>
@@ -608,6 +628,22 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Presenter control — shown when all stages complete */}
+            {allComplete && (
+              <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[#00A991]/40 bg-[#00A991]/8">
+                <div>
+                  <p className="text-sm font-black text-[#00A991]">All stages complete.</p>
+                  <p className="text-xs text-white/60 mt-0.5">Ready to show your impact summary.</p>
+                </div>
+                <Button
+                  onClick={() => setShowCompleteModal(true)}
+                  className="flex-shrink-0 bg-[#00A991] hover:bg-[#16CECC] active:bg-[#00A991] text-[#0D1825] font-bold text-sm border-0 shadow-[0_4px_20px_rgba(0,169,145,0.3)]"
+                >
+                  View Summary →
+                </Button>
+              </div>
+            )}
+
             {/* Tech stack */}
             <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap pt-1">
               <span className="text-xs text-white/45 uppercase tracking-widest">Powered by</span>
@@ -620,65 +656,61 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Journey Complete — modal overlay */}
-      {showCompleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-md" />
+      {/* Journey Complete — modal */}
+      <Dialog open={showCompleteModal} onOpenChange={setShowCompleteModal}>
+        <DialogContent
+          className="max-w-lg border-2 border-[#00A991]/50 p-0 overflow-hidden rounded-3xl"
+          aria-labelledby="modal-title"
+          style={{
+            background: "linear-gradient(160deg, #0D2A24 0%, #0D1825 60%)",
+            boxShadow: "0 0 0 1px rgba(0,169,145,0.2), 0 40px 80px rgba(0,0,0,0.8), 0 0 120px rgba(0,169,145,0.08)",
+          }}
+        >
+          {/* Top accent line */}
+          <div className="h-1 bg-gradient-to-r from-[#00A991] via-[#05C3DD] to-[#00A991]" />
 
-          {/* Modal */}
-          <div
-            className="relative z-10 w-full max-w-lg rounded-3xl border-2 border-[#00A991]/50 overflow-hidden shadow-2xl"
-            style={{
-              background: "linear-gradient(160deg, #0D2A24 0%, #0D1825 60%)",
-              boxShadow: "0 0 0 1px rgba(0,169,145,0.2), 0 40px 80px rgba(0,0,0,0.8), 0 0 120px rgba(0,169,145,0.08)",
-            }}
-          >
-            {/* Top accent line */}
-            <div className="h-1 bg-gradient-to-r from-[#00A991] via-[#05C3DD] to-[#00A991]" />
+          <div className="px-10 py-10 text-center">
+            {/* Icon */}
+            <div
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-[#00A991] mb-6"
+              style={{ background: "radial-gradient(circle, rgba(0,169,145,0.15) 0%, transparent 70%)", boxShadow: "0 0 40px rgba(0,169,145,0.2)" }}
+            >
+              <Check className="w-10 h-10 text-[#00A991]" aria-hidden="true" />
+            </div>
 
-            <div className="px-10 py-10 text-center">
-              {/* Icon */}
-              <div
-                className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-[#00A991] mb-6"
-                style={{ background: "radial-gradient(circle, rgba(0,169,145,0.15) 0%, transparent 70%)", boxShadow: "0 0 40px rgba(0,169,145,0.2)" }}
-              >
-                <Check className="w-10 h-10 text-[#00A991]" />
-              </div>
+            <h2 id="modal-title" className="text-4xl font-black text-white mb-2">Journey Complete</h2>
+            <p className="text-[#00A991] font-bold mb-5">Zero phone calls. 100% digital.</p>
+            <p className="text-white/75 text-base leading-relaxed max-w-sm mx-auto mb-8">
+              Scheduling, pre-admission, and post-operative follow-up — all delivered to the patient's mobile automatically, end-to-end.
+            </p>
 
-              <h2 className="text-4xl font-black text-white mb-2">Journey Complete</h2>
-              <p className="text-[#00A991] font-semibold mb-5">Zero phone calls. 100% digital.</p>
-              <p className="text-white/45 text-sm leading-relaxed max-w-sm mx-auto mb-8">
-                Scheduling, pre-admission, and post-operative follow-up — all delivered to the patient's mobile automatically, end-to-end.
-              </p>
+            <Button
+              onClick={resetJourney}
+              variant="outline"
+              className="inline-flex items-center gap-2 px-7 border-[#00A991]/40 hover:border-[#00A991] text-[#00A991] hover:bg-[#00A991]/10 hover:text-[#00A991] rounded-xl font-bold mb-8 bg-transparent"
+            >
+              ↺ Run Another Demo
+            </Button>
 
-              <button
-                onClick={resetJourney}
-                className="inline-flex items-center gap-2 px-7 py-3 border border-[#00A991]/40 hover:border-[#00A991] text-[#00A991] hover:bg-[#00A991]/10 rounded-xl font-semibold text-sm transition-colors mb-8"
-              >
-                ↺ Run Another Demo
-              </button>
-
-              {/* QR */}
-              <div className="pt-6 border-t border-white/8 flex flex-col items-center gap-3">
-                <p className="text-xs text-white/30">Want a personalised workshop for your organisation?</p>
-                <div className="p-2 rounded-xl border border-white/10 bg-[#0D1825]/40">
-                  <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=https://architech.net.au&color=05C3DD&bgcolor=13294B&margin=8&qzone=1"
-                    alt="Scan to book a workshop"
-                    className="w-28 h-28 rounded-lg"
-                  />
-                </div>
+            {/* QR */}
+            <div className="pt-6 border-t border-white/8 flex flex-col items-center gap-3">
+              <p className="text-sm text-white/55">Want a personalised workshop for your organisation?</p>
+              <div className="p-2 rounded-xl border border-white/10 bg-[#0D1825]/40">
                 <img
-                  src={logoUrl}
-                  alt="ArchiTech"
-                  style={{ height: "28px", width: "auto", mixBlendMode: "screen" }}
+                  src={qrUrl}
+                  alt="Scan to visit architech.net.au"
+                  className="w-28 h-28 rounded-lg"
                 />
               </div>
+              <img
+                src={logoUrl}
+                alt="ArchiTech"
+                style={{ height: "28px", width: "auto", mixBlendMode: "screen" }}
+              />
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
