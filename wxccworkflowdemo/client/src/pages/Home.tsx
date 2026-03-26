@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, Loader2, Phone, Stethoscope, User } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ClipboardList, Loader2, Phone, Stethoscope, User } from "lucide-react";
+import bgImage from "@/assets/background.jpeg";
+import logoUrl from "@/assets/logo_darkbackground.png";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -201,30 +203,56 @@ export default function Home() {
     <div className="min-h-screen bg-background">
 
       {/* Header */}
-      <div className="h-14 bg-[#0B1520] border-b border-white/8 flex items-center px-6 md:px-10 justify-between">
+      <div className="h-14 bg-[#0B1520] border-b border-[#05C3DD]/10 flex items-center px-6 md:px-10 justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-[#05C3DD]/15 rounded-lg flex items-center justify-center border border-[#05C3DD]/30">
-            <Activity className="w-3.5 h-3.5 text-[#05C3DD]" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-white leading-tight">Digital Patient Experience</h1>
-            <p className="text-xs text-white/30">Webex Contact Center · Live Demo</p>
+          {/* ArchiTech logo — screen blend makes black bg transparent on dark surfaces */}
+          <img
+            src={logoUrl}
+            alt="ArchiTech"
+            style={{
+              height: "36px",
+              width: "auto",
+              maxWidth: "none",
+              mixBlendMode: "screen",
+              flexShrink: 0,
+            }}
+          />
+          <div className="border-l border-white/10 pl-3">
+            <h1 className="text-[13px] font-bold text-white uppercase tracking-wide leading-tight">
+              The Digital Front Door — Patient Experience Journey
+            </h1>
+            <p className="text-[10px] font-bold text-[#05C3DD] tracking-[0.18em] uppercase mt-0.5">
+              [ Live Demonstration ]
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-green-500/10 border border-green-400/25 rounded-full px-3 py-1.5">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs font-bold text-green-400 tracking-wider uppercase">Live</span>
+        <div className="flex items-center gap-2 border border-[#00A991]/40 rounded-full px-3 py-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse-subtle flex-shrink-0" />
+          <span className="text-xs font-bold text-[#00A991] tracking-wider uppercase">Live</span>
         </div>
       </div>
 
       {/* Impact banner */}
       <div
         className="relative border-b border-white/8 overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #0D1825 0%, #0B1520 50%, #13294B 100%)" }}
+        style={{ background: "#0B1520" }}
       >
+        {/* Background image */}
+        <img
+          src={bgImage}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ opacity: 0.18, mixBlendMode: "luminosity" }}
+        />
+        {/* Dark overlay to maintain readability */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 60% 100% at 0% 50%, rgba(5,195,221,0.07) 0%, transparent 60%)" }}
+          style={{ background: "linear-gradient(135deg, rgba(11,21,32,0.85) 0%, rgba(13,24,37,0.7) 50%, rgba(19,41,75,0.85) 100%)" }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 60% 100% at 0% 50%, rgba(5,195,221,0.08) 0%, transparent 60%)" }}
         />
         <div
           className="container mx-auto px-6 md:px-10 py-8 flex items-center gap-8 md:gap-12 relative"
@@ -638,7 +666,11 @@ export default function Home() {
                     className="w-28 h-28 rounded-lg"
                   />
                 </div>
-                <p className="text-xs text-[#05C3DD]/50 font-mono tracking-wide">architech.net.au</p>
+                <img
+                  src={logoUrl}
+                  alt="ArchiTech"
+                  style={{ height: "28px", width: "auto", mixBlendMode: "screen" }}
+                />
               </div>
             </div>
           </div>
