@@ -398,7 +398,8 @@ export default function Home() {
             </div>
 
             {/* Card 02 — Pre-Admission */}
-            <div className="rounded-xl border border-[#05C3DD]/12 bg-[#05C3DD]/[0.02] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/22 hover:bg-[#05C3DD]/[0.035] transition-colors duration-300">
+            <div className="rounded-xl border border-[#05C3DD]/12 bg-[#05C3DD]/[0.02] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/22 hover:bg-[#05C3DD]/[0.035] transition-colors duration-300 relative overflow-hidden">
+              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>02</span>
               <div className="flex items-center gap-2">
                 <ClipboardList className="w-4 h-4 text-primary/60" />
                 <span className="font-mono text-xs font-bold text-primary/50">02</span>
@@ -437,7 +438,8 @@ export default function Home() {
             </div>
 
             {/* Card 04 — Recovery */}
-            <div className="rounded-xl border border-[#00A991]/15 bg-[#00A991]/[0.02] p-5 flex flex-col gap-3 hover:border-[#00A991]/25 hover:bg-[#00A991]/[0.04] transition-colors duration-300">
+            <div className="rounded-xl border border-[#00A991]/15 bg-[#00A991]/[0.02] p-5 flex flex-col gap-3 hover:border-[#00A991]/25 hover:bg-[#00A991]/[0.04] transition-colors duration-300 relative overflow-hidden">
+              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>04</span>
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-[#00A991]/60" />
                 <span className="font-mono text-xs font-bold text-[#00A991]/50">04</span>
