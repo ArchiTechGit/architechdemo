@@ -447,37 +447,6 @@ export default function Home() {
           {/* Left: Phone (2/5) */}
           <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start">
             <Card className="border border-white/12 bg-background overflow-hidden" style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
-              <div className="p-4 border-b border-white/6 space-y-3">
-                <div>
-                  <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
-                    <User className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Name</span>
-                  </label>
-                  <Input
-                    id="patient-name"
-                    type="text"
-                    placeholder="Sarah Johnson"
-                    value={patientName}
-                    onChange={(e) => setPatientName(e.target.value)}
-                    className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="patient-mobile" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
-                    <Phone className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Mobile</span>
-                  </label>
-                  <Input
-                    id="patient-mobile"
-                    type="tel"
-                    placeholder="+61 2 1234 5678"
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value)}
-                    className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
-                  />
-                </div>
-              </div>
-
               <div className="relative flex justify-center items-center py-10 px-4">
                 <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(5,195,221,0.05) 0%, transparent 70%)" }} />
                 <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${phonePulse ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(ellipse 90% 80% at 50% 50%, rgba(5,195,221,0.18) 0%, transparent 65%)" }} />
@@ -568,6 +537,38 @@ export default function Home() {
 
           {/* Right: Journey (3/5) */}
           <div className="lg:col-span-3 space-y-4">
+
+            {/* Form inputs — side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
+                  <User className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Name</span>
+                </label>
+                <Input
+                  id="patient-name"
+                  type="text"
+                  placeholder="Sarah Johnson"
+                  value={patientName}
+                  onChange={(e) => setPatientName(e.target.value)}
+                  className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                />
+              </div>
+              <div>
+                <label htmlFor="patient-mobile" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
+                  <Phone className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Mobile</span>
+                </label>
+                <Input
+                  id="patient-mobile"
+                  type="tel"
+                  placeholder="+61 2 1234 5678"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                />
+              </div>
+            </div>
 
             <div className="relative">
               <div className="absolute left-[13px] top-6 bottom-6 w-px bg-white/8" />
