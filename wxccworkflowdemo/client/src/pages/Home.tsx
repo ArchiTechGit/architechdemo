@@ -122,7 +122,7 @@ export default function Home() {
   const [phonePulse, setPhonePulse] = useState(false);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
-  const [overviewOpen, setOverviewOpen] = useState(true);
+  const [overviewOpen, setOverviewOpen] = useState(false);
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   useEffect(() => {
@@ -377,12 +377,14 @@ export default function Home() {
           >
             <div className="flex items-center gap-2.5">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <span className="text-sm font-black text-white uppercase tracking-widest">Journey Overview</span>
+              <span className="text-base font-black text-white uppercase tracking-widest">Journey Overview</span>
             </div>
             <div className="flex-1 h-px bg-primary/20" />
-            <div className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <span className="text-xs text-muted-foreground font-mono">4 stages · end-to-end digital</span>
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
+              <div className={`w-7 h-7 rounded-full border border-white/15 bg-white/5 flex items-center justify-center transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/10 ${overviewOpen ? "" : ""}`}>
+                <ChevronDown className={`w-4 h-4 text-white/60 transition-transform duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
+              </div>
             </div>
           </button>
 
@@ -473,7 +475,7 @@ export default function Home() {
         <div className="flex items-center gap-4 mb-6 px-0">
           <div className="flex items-center gap-2.5">
             <div className="w-1 h-5 bg-primary rounded-full" />
-            <span className="text-sm font-black text-white uppercase tracking-widest">Journey Demonstration</span>
+            <span className="text-base font-black text-white uppercase tracking-widest">Journey Demonstration</span>
           </div>
           <div className="flex-1 h-px bg-primary/20" />
         </div>
