@@ -471,7 +471,7 @@ export default function Home() {
       </div>
 
       {/* Main layout */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 md:px-10 py-8">
         <div className="flex items-center gap-4 mb-6 px-0">
           <div className="flex items-center gap-2.5">
             <div className="w-1 h-5 bg-primary rounded-full" />
