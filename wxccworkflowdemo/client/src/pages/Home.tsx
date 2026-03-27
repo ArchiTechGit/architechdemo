@@ -446,7 +446,7 @@ export default function Home() {
 
           {/* Left: Phone (2/5) */}
           <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start">
-            <Card className="border border-white/8 bg-card overflow-hidden" style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+            <Card className="border border-white/12 bg-background overflow-hidden" style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
               <div className="p-4 border-b border-white/6 space-y-3">
                 <div>
                   <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
