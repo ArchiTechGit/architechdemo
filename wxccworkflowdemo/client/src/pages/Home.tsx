@@ -112,6 +112,12 @@ export default function Home() {
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+  useEffect(() => {
+    const tick = () => setClockTime(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+    const id = setInterval(tick, 10000);
+    return () => clearInterval(id);
+  }, []);
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -478,7 +484,7 @@ export default function Home() {
                   <div className="absolute bg-white flex flex-col overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
                     {/* Status bar */}
                     <div className="flex justify-between items-center px-5 bg-white flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
-                      <span className="font-bold text-slate-800" style={{ fontSize: "11px" }}>9:41</span>
+                      <span className="font-bold text-slate-800" style={{ fontSize: "11px" }}>{clockTime}</span>
                       <div className="flex items-center gap-1.5">
                         {/* Signal bars */}
                         <div className="flex items-end gap-px">
@@ -568,10 +574,10 @@ export default function Home() {
           <div className="lg:col-span-3 space-y-4">
 
             {/* Form inputs — side by side */}
-            <div className="grid grid-cols-2 gap-4 pt-2 pb-1">
-              <div>
-                <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
-                  <User className="w-3 h-3 text-muted-foreground" />
+            <div className="grid grid-cols-2 gap-5 pt-1 pb-2">
+              <div className="space-y-2">
+                <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
+                  <User className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Name</span>
                 </label>
                 <Input
@@ -580,12 +586,12 @@ export default function Home() {
                   placeholder="Sarah Johnson"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                  className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
                 />
               </div>
-              <div>
-                <label htmlFor="patient-mobile" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
-                  <Phone className="w-3 h-3 text-muted-foreground" />
+              <div className="space-y-2">
+                <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
+                  <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Mobile</span>
                 </label>
                 <Input
@@ -594,7 +600,7 @@ export default function Home() {
                   placeholder="+61 2 1234 5678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  className="h-10 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                  className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
                 />
               </div>
             </div>
