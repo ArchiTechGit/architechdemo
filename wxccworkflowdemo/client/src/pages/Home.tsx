@@ -451,31 +451,59 @@ export default function Home() {
                 <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(5,195,221,0.05) 0%, transparent 70%)" }} />
                 <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${phonePulse ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(ellipse 90% 80% at 50% 50%, rgba(5,195,221,0.18) 0%, transparent 65%)" }} />
                 <div
-                  className="relative bg-card z-10"
+                  className="relative z-10"
                   style={{
                     width: "100%",
-                    maxWidth: "230px",
+                    maxWidth: "300px",
                     aspectRatio: "230 / 470",
-                    borderRadius: "46px",
-                    border: "7px solid #1A3460",
+                    borderRadius: "50px",
+                    background: "linear-gradient(160deg, #2e2e30 0%, #1a1a1c 40%, #111113 100%)",
                     boxShadow: phonePulse
-                      ? "0 30px 70px rgba(0,0,0,0.7), 0 0 80px rgba(5,195,221,0.28), 0 0 0 3px rgba(5,195,221,0.15)"
-                      : "0 30px 70px rgba(0,0,0,0.7), 0 0 40px rgba(0,0,0,0.4)",
+                      ? "0 30px 70px rgba(0,0,0,0.8), 0 0 80px rgba(5,195,221,0.28), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.12)"
+                      : "0 30px 70px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.10)",
                     transition: "box-shadow 0.6s ease",
+                    padding: "10px",
                   }}
                 >
-                  <div className="absolute inset-0 bg-white flex flex-col overflow-hidden" style={{ borderRadius: "40px" }}>
-                    <div className="flex justify-between items-center px-4 pt-3 pb-1.5 bg-white flex-shrink-0">
-                      <span className="font-bold text-slate-800 text-xs">9:41</span>
-                      <div className="flex items-end gap-0.5">
-                        <div className="w-0.5 h-2 bg-slate-700 rounded-sm" />
-                        <div className="w-0.5 h-2.5 bg-slate-700 rounded-sm" />
-                        <div className="w-0.5 h-3 bg-slate-700 rounded-sm" />
-                        <div className="ml-1.5 w-4 h-2.5 border border-slate-700 rounded-sm relative overflow-hidden">
-                          <div className="absolute left-0 top-0 bottom-0 w-3/4 bg-slate-700" />
+                  {/* Left buttons: mute + vol up + vol down */}
+                  <div style={{ position: "absolute", left: "-4px", top: "90px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ width: "3px", height: "22px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
+                    <div style={{ width: "3px", height: "34px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
+                    <div style={{ width: "3px", height: "34px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
+                  </div>
+                  {/* Right button: power */}
+                  <div style={{ position: "absolute", right: "-4px", top: "120px", width: "3px", height: "52px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "0 2px 2px 0", boxShadow: "1px 0 2px rgba(0,0,0,0.5)" }} />
+
+                  {/* Screen */}
+                  <div className="absolute bg-white flex flex-col overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
+                    {/* Status bar */}
+                    <div className="flex justify-between items-center px-5 bg-white flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
+                      <span className="font-bold text-slate-800" style={{ fontSize: "11px" }}>9:41</span>
+                      <div className="flex items-center gap-1.5">
+                        {/* Signal bars */}
+                        <div className="flex items-end gap-px">
+                          <div className="w-1 h-1.5 bg-slate-700 rounded-sm" />
+                          <div className="w-1 h-2 bg-slate-700 rounded-sm" />
+                          <div className="w-1 h-2.5 bg-slate-700 rounded-sm" />
+                          <div className="w-1 h-3 bg-slate-700 rounded-sm" />
+                        </div>
+                        {/* WiFi */}
+                        <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+                          <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#374151"/>
+                          <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                          <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                        </svg>
+                        {/* Battery */}
+                        <div className="flex items-center gap-px">
+                          <div className="border border-slate-700 rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px" }}>
+                            <div className="absolute left-0 top-0 bottom-0 bg-slate-700" style={{ width: "75%" }} />
+                          </div>
+                          <div className="bg-slate-700 rounded-sm" style={{ width: "2px", height: "5px" }} />
                         </div>
                       </div>
                     </div>
+                    {/* Dynamic Island */}
+                    <div className="absolute bg-black" style={{ top: "8px", left: "50%", transform: "translateX(-50%)", width: "72px", height: "24px", borderRadius: "12px", zIndex: 10 }} />
                     <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex-shrink-0">
                       <p className="font-semibold text-slate-700 text-xs">Messages</p>
                     </div>
@@ -518,8 +546,9 @@ export default function Home() {
                         </div>
                       )}
                     </div>
+                    {/* Home indicator */}
+                    <div className="bg-slate-800 rounded-full flex-shrink-0" style={{ margin: "6px auto 8px", width: "100px", height: "4px" }} />
                   </div>
-                  <div className="absolute bg-slate-400 rounded-full" style={{ bottom: "9px", left: "50%", transform: "translateX(-50%)", width: "56px", height: "4px" }} />
                 </div>
               </div>
 
@@ -539,7 +568,7 @@ export default function Home() {
           <div className="lg:col-span-3 space-y-4">
 
             {/* Form inputs — side by side */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4 pt-2 pb-1">
               <div>
                 <label htmlFor="patient-name" className="flex items-center gap-1.5 mb-1.5 cursor-pointer">
                   <User className="w-3 h-3 text-muted-foreground" />
