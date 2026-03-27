@@ -574,7 +574,8 @@ export default function Home() {
           <div className="lg:col-span-3 space-y-4">
 
             {/* Form inputs — side by side */}
-            <div className="grid grid-cols-2 gap-5 pt-1 pb-2">
+            <div className="rounded-xl border border-white/12 bg-background px-4 py-4">
+            <div className="grid grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3.5 h-3.5 text-muted-foreground" />
@@ -603,6 +604,7 @@ export default function Home() {
                   className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
                 />
               </div>
+            </div>
             </div>
 
             <div className="relative">
