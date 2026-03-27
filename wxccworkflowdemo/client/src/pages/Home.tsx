@@ -27,7 +27,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Appointment Scheduling",
     narrative: "A referral lands in the EMR and an HL7 message fires to Webex CC — no manual handoff. The patient receives an SMS with their appointment date and can confirm with a single reply, or talk to AI to reschedule.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi! We've received your referral and have an appointment ready for you. Reply YES to confirm, or tap below to reschedule at a time that suits you.",
+    phoneMessage: "Hi — your referral has come through and we have an appointment ready. Reply YES to confirm, or tap below to pick a different time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
   },
@@ -35,9 +35,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     id: "pre-admission",
     chapter: "02",
     label: "Pre-Admission",
-    narrative: "As the patient's status moves from scheduled to admitted in the EMR, a new workflow fires automatically — delivering a pre-enrolment form and appointment details via SMS. Completion triggers a confirmation message back to the patient.",
+    narrative: "The patient's status moves from scheduled to admitted in the EMR. A new workflow fires — sending a pre-enrolment form and appointment date via SMS. When they submit the form, a confirmation goes back to them automatically.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Your appointment is confirmed. Before your visit, please complete your pre-admission forms — it only takes a few minutes and keeps things moving on the day.",
+    phoneMessage: "Your appointment is confirmed. Before you come in, please complete your pre-admission forms — it takes a few minutes and saves time on the day.",
     phoneAction: "Complete Pre-Admission →",
     systemEvents: [],
   },
@@ -45,7 +45,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     id: "surgery-prep",
     chapter: "03",
     label: "Surgery Prep",
-    narrative: "When the EMR transitions the patient to the surgical stage, they automatically receive a preparation guide via SMS. An AI agent is available around the clock — patients can ask questions about their procedure by simply replying.",
+    narrative: "The EMR moves the patient to the surgical stage and the prep guide goes out via SMS. The AI agent is available 24/7 — patients can ask anything about their procedure by replying to the message.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Your procedure is coming up. We've sent you a preparation guide — please review it before your appointment. Have questions? Reply anytime and our care assistant will help.",
     phoneAction: "View Prep Guide →",
@@ -55,9 +55,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     id: "recovery",
     chapter: "04",
     label: "Recovery",
-    narrative: "24–48 hours post-procedure, an AI agent reaches out via SMS to check in on the patient — collecting pain levels, medication questions, and mental state. Data is collated for the clinical team. If any response crosses a threshold, a call is scheduled or urgent care is engaged automatically.",
+    narrative: "24–48 hours post-procedure, an AI agent checks in via SMS — asking about pain levels, medication, and mental state. Responses go straight to the clinical team. If anything crosses a threshold, a call gets scheduled or the patient is escalated to urgent care.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi! It's been a couple of days since your procedure. Your care team wants to check in. How are you feeling? Reply to share a quick update and we'll make sure you have everything you need.",
+    phoneMessage: "Hi — it's been a couple of days since your procedure. Your care team wants to check in. How are you feeling? Reply and let us know.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
   },
@@ -76,26 +76,26 @@ const IMPACT_STATS = [
     headline: "More cost-effective per interaction than a manual phone call.",
     body: "Routine patient communications cost $10–$30 each when handled by clinical staff. The same outcome delivered digitally costs",
     highlight: "$0.12–$0.20 per interaction",
-    tail: "— a gap that compounds across every touchpoint, at every facility size.",
+    tail: "Every touchpoint adds to it. So does every site.",
   },
   {
     hero: "80%",
-    headline: "Of manual effort eliminated on appointment confirmation workflows.",
-    body: "Multiple call attempts, voicemail handling, manual documentation, follow-up — all replaced by a single automated message.",
-    highlight: "Validated end-to-end during the Proof of Value.",
+    headline: "Of manual effort cut from appointment confirmation.",
+    body: "Multiple call attempts, voicemail, manual documentation, follow-up — replaced by a single automated message.",
+    highlight: "Confirmed in the Proof of Value.",
     tail: "No clinical judgment required. No staff time consumed.",
   },
   {
     hero: "~$84",
-    headline: "In staff cost recovered per patient episode — all five workflows.",
-    body: "Pre-admission, appointment confirmation, reschedule, cancellation, post-op notification. At 2,000 surgical cases that's $168K returned. At 10,000 cases,",
+    headline: "In staff cost recovered per patient episode across all four workflows.",
+    body: "Appointment scheduling, pre-admission, surgery prep, recovery check-in. At 2,000 surgical cases that returns $168K. At 10,000 cases,",
     highlight: "the saving exceeds $840K annually",
     tail: "The platform cost stays fixed as volume grows.",
   },
   {
     hero: "250hrs",
     headline: "Of clinical staff time recovered for every 1,000 interactions automated.",
-    body: "At a blended average of 15 minutes per manual call, each thousand touchpoints automated returns",
+    body: "At 15 minutes per manual call, every thousand interactions automated returns",
     highlight: "~$14,000 in clinical capacity",
     tail: "Small facility. Large network. The math scales either way.",
   },
@@ -104,12 +104,12 @@ const IMPACT_STATS = [
     headline: "Months to full break-even. Net positive every year after.",
     body: "Total first-year investment $71K–$96K including one-time setup. Annual return scales with patient volume —",
     highlight: "higher volume means faster break-even",
-    tail: "and a larger compounding return from year two onward.",
+    tail: "and more return every year after that.",
   },
 ];
 
 const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
-const TECH_STACK = ["Webex CC Flow Designer", "Webex Connect", "Calendar API", "EHR Integration", "Insurance Gateway"];
+const TECH_STACK = ["Webex CC Flow Designer", "Webex Connect", "Calendar API", "EHR Integration"];
 
 export default function Home() {
   const [statIndex, setStatIndex] = useState(0);
@@ -823,7 +823,7 @@ export default function Home() {
             <h2 id="modal-title" className="text-4xl font-black text-white mb-2">Journey Complete</h2>
             <p className="text-[#00A991] font-bold mb-5">Zero phone calls. 100% digital.</p>
             <p className="text-white/75 text-base leading-relaxed max-w-sm mx-auto mb-8">
-              Scheduling, pre-admission, and post-operative follow-up — all delivered to the patient's mobile automatically, end-to-end.
+              Appointment scheduling, pre-admission, surgery prep, recovery check-in — all delivered to the patient's phone. No calls. No staff required to initiate any of it.
             </p>
 
             <Button
