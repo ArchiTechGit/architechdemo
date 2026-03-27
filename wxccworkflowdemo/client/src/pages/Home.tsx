@@ -470,6 +470,13 @@ export default function Home() {
 
       {/* Main layout */}
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center gap-4 mb-6 px-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-1 h-5 bg-primary rounded-full" />
+            <span className="text-sm font-black text-white uppercase tracking-widest">Journey Demonstration</span>
+          </div>
+          <div className="flex-1 h-px bg-primary/20" />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
           {/* Left: Phone (2/5) */}
