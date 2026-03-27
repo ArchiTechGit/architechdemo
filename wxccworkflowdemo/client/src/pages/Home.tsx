@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { CalendarDays, Check, ChevronDown, ClipboardList, Loader2, Phone, Stethoscope, User } from "lucide-react";
+import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Loader2, Phone, Stethoscope, User } from "lucide-react";
 import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
@@ -22,41 +22,52 @@ interface JourneyStage {
 
 const JOURNEY_STAGES: JourneyStage[] = [
   {
-    id: "appointment-schedule",
+    id: "appointment-scheduling",
     chapter: "01",
-    label: "Scheduling the Visit",
-    narrative: "The patient receives a message to book or confirm their appointment — on their own time, from their phone. No hold music, no back-and-forth.",
+    label: "Appointment Scheduling",
+    narrative: "A referral lands in the EMR and an HL7 message fires to Webex CC — no manual handoff. The patient receives an SMS with their appointment date and can confirm with a single reply, or talk to AI to reschedule.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi! Your appointment request was received. Tap below to choose a time that works for you.",
-    phoneAction: "Choose a Time →",
+    phoneMessage: "Hi! We've received your referral and have an appointment ready for you. Reply YES to confirm, or tap below to reschedule at a time that suits you.",
+    phoneAction: "Confirm Appointment →",
     systemEvents: [],
   },
   {
     id: "pre-admission",
     chapter: "02",
-    label: "Preparing to Arrive",
-    narrative: "Before they set foot in the building, the patient completes their health history, verifies insurance, and handles all paperwork digitally.",
+    label: "Pre-Admission",
+    narrative: "As the patient's status moves from scheduled to admitted in the EMR, a new workflow fires automatically — delivering a pre-enrolment form and appointment details via SMS. Completion triggers a confirmation message back to the patient.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Before your visit, please take 5 minutes to complete your pre-admission details. Your information is secure.",
+    phoneMessage: "Your appointment is confirmed. Before your visit, please complete your pre-admission forms — it only takes a few minutes and keeps things moving on the day.",
     phoneAction: "Complete Pre-Admission →",
     systemEvents: [],
   },
   {
-    id: "post-operative",
+    id: "surgery-prep",
     chapter: "03",
-    label: "The Road to Recovery",
-    narrative: "After the procedure, automated check-ins guide the patient through recovery — wound care, pain management, and follow-up scheduling, all on mobile.",
+    label: "Surgery Prep",
+    narrative: "When the EMR transitions the patient to the surgical stage, they automatically receive a preparation guide via SMS. An AI agent is available around the clock — patients can ask questions about their procedure by simply replying.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi! Your care team is checking in. How are you feeling today? Your recovery is our priority.",
+    phoneMessage: "Your procedure is coming up. We've sent you a preparation guide — please review it before your appointment. Have questions? Reply anytime and our care assistant will help.",
+    phoneAction: "View Prep Guide →",
+    systemEvents: [],
+  },
+  {
+    id: "recovery",
+    chapter: "04",
+    label: "Recovery",
+    narrative: "24–48 hours post-procedure, an AI agent reaches out via SMS to check in on the patient — collecting pain levels, medication questions, and mental state. Data is collated for the clinical team. If any response crosses a threshold, a call is scheduled or urgent care is engaged automatically.",
+    webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
+    phoneMessage: "Hi! It's been a couple of days since your procedure. Your care team wants to check in. How are you feeling? Reply to share a quick update and we'll make sure you have everything you need.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
   },
 ];
 
 const STAGE_META = [
-  { icon: CalendarDays, shortDesc: "Patient receives a self-serve booking link via SMS — no hold music, no back-and-forth." },
-  { icon: ClipboardList, shortDesc: "Health history, insurance verification, and consent forms completed digitally before arrival." },
-  { icon: Stethoscope, shortDesc: "Automated check-ins guide recovery — wound care, pain management, and follow-up scheduling." },
+  { icon: CalendarDays, shortDesc: "HL7 referral from EMR triggers automated appointment SMS. Patient confirms with one reply or talks to AI to reschedule. Scheduling platform updated automatically." },
+  { icon: ClipboardList, shortDesc: "EMR admission event delivers pre-enrolment form and appointment details via SMS. Form completion triggers an automatic confirmation back to the patient." },
+  { icon: FileText, shortDesc: "EMR surgical stage triggers prep guide delivery via SMS. An AI agent is available 24/7 — patients ask questions about their procedure by replying to the message." },
+  { icon: Activity, shortDesc: "24–48 hrs post-procedure, AI checks in on recovery via SMS — pain, medication, mental state. Data goes to the clinical team. Thresholds trigger escalation automatically." },
 ];
 
 const IMPACT_STATS = [
@@ -364,81 +375,80 @@ export default function Home() {
               <span className="text-sm font-black text-white uppercase tracking-widest">Journey Overview</span>
             </div>
             <div className="flex-1 h-px bg-primary/20" />
-            <span className="text-xs text-muted-foreground font-mono">3 stages · end-to-end digital</span>
+            <span className="text-xs text-muted-foreground font-mono">4 stages · end-to-end digital</span>
           </div>
 
-          <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-            {/* Card 01 — Initiation: chapter watermark, cyan tech feel */}
-            <div className="flex flex-col md:flex-row items-stretch flex-1">
-              <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
-                <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>01</span>
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4 text-primary/60" />
-                  <span className="font-mono text-xs font-bold text-primary/50">01</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[0].label}</h3>
-                  <p className="text-sm text-white/70 leading-relaxed">{STAGE_META[0].shortDesc}</p>
-                </div>
-                <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
-                  <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-xs text-primary/40 font-mono">SMS to patient</span>
-                </div>
+            {/* Card 01 — Appointment Scheduling */}
+            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
+              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>01</span>
+              <div className="flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-primary/60" />
+                <span className="font-mono text-xs font-bold text-primary/50">01</span>
               </div>
-              <div className="hidden md:flex items-center flex-shrink-0 px-2">
-                <div className="flex items-center gap-0.5">
-                  <div className="w-8 h-px" style={{ background: "repeating-linear-gradient(to right, rgba(5,195,221,0.35) 0px, rgba(5,195,221,0.35) 4px, transparent 4px, transparent 8px)" }} />
-                  <svg width="6" height="9" viewBox="0 0 6 9" fill="none" className="flex-shrink-0" style={{ color: "rgba(5,195,221,0.4)" }}><path d="M0 0L6 4.5L0 9V0Z" fill="currentColor" /></svg>
-                </div>
+              <div className="flex-1">
+                <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[0].label}</h3>
+                <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[0].shortDesc}</p>
+              </div>
+              <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
+                <Phone className="w-3 h-3 text-primary/40" />
+                <span className="text-xs text-primary/40 font-mono">HL7 → WxCC → SMS</span>
               </div>
             </div>
 
-            {/* Card 02 — Process: checklist of what gets done digitally */}
-            <div className="flex flex-col md:flex-row items-stretch flex-1">
-              <div className="flex-1 rounded-xl border border-[#05C3DD]/12 bg-[#05C3DD]/[0.02] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/22 hover:bg-[#05C3DD]/[0.035] transition-colors duration-300">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4 text-primary/60" />
-                  <span className="font-mono text-xs font-bold text-primary/50">02</span>
-                </div>
-                <div>
-                  <h3 className="font-black text-white text-base leading-tight mb-3">{JOURNEY_STAGES[1].label}</h3>
-                  <div className="space-y-2">
-                    {["Health history", "Insurance verification", "Consent forms"].map((item) => (
-                      <div key={item} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
-                        <span className="text-xs text-white/55 font-mono">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-auto pt-3 border-t border-white/6">
-                  <span className="text-xs text-white/35 font-mono">All digital. Before arrival.</span>
+            {/* Card 02 — Pre-Admission */}
+            <div className="rounded-xl border border-[#05C3DD]/12 bg-[#05C3DD]/[0.02] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/22 hover:bg-[#05C3DD]/[0.035] transition-colors duration-300">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-primary/60" />
+                <span className="font-mono text-xs font-bold text-primary/50">02</span>
+              </div>
+              <div>
+                <h3 className="font-black text-white text-base leading-tight mb-3">{JOURNEY_STAGES[1].label}</h3>
+                <div className="space-y-2">
+                  {["Pre-enrolment form via SMS link", "Auto-confirmation on submission", "No reply required from patient"].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
+                      <span className="text-xs text-white/55 font-mono">{item}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="hidden md:flex items-center flex-shrink-0 px-2">
-                <div className="flex items-center gap-0.5">
-                  <div className="w-8 h-px" style={{ background: "repeating-linear-gradient(to right, rgba(5,195,221,0.35) 0px, rgba(5,195,221,0.35) 4px, transparent 4px, transparent 8px)" }} />
-                  <svg width="6" height="9" viewBox="0 0 6 9" fill="none" className="flex-shrink-0" style={{ color: "rgba(5,195,221,0.4)" }}><path d="M0 0L6 4.5L0 9V0Z" fill="currentColor" /></svg>
-                </div>
+              <div className="mt-auto pt-3 border-t border-white/6">
+                <span className="text-xs text-white/35 font-mono">All digital. Before arrival.</span>
               </div>
             </div>
 
-            {/* Card 03 — Outcome: green accent, stat callout */}
-            <div className="flex flex-col md:flex-row items-stretch flex-1">
-              <div className="flex-1 rounded-xl border border-[#00A991]/15 bg-[#00A991]/[0.02] p-5 flex flex-col gap-3 hover:border-[#00A991]/25 hover:bg-[#00A991]/[0.04] transition-colors duration-300">
-                <div className="flex items-center gap-2">
-                  <Stethoscope className="w-4 h-4 text-[#00A991]/60" />
-                  <span className="font-mono text-xs font-bold text-[#00A991]/50">03</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[2].label}</h3>
-                  <p className="text-sm text-white/70 leading-relaxed">{STAGE_META[2].shortDesc}</p>
-                </div>
-                <div className="flex items-center gap-3 pt-3 border-t border-[#00A991]/10">
-                  <span className="text-2xl font-black text-[#00A991] leading-none">68%</span>
-                  <span className="text-xs text-white/40 font-mono leading-tight">of patients prefer<br />digital over phone</span>
-                </div>
+            {/* Card 03 — Surgery Prep */}
+            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
+              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>03</span>
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary/60" />
+                <span className="font-mono text-xs font-bold text-primary/50">03</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[2].label}</h3>
+                <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[2].shortDesc}</p>
+              </div>
+              <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
+                <Phone className="w-3 h-3 text-primary/40" />
+                <span className="text-xs text-primary/40 font-mono">AI available 24/7 via SMS</span>
+              </div>
+            </div>
+
+            {/* Card 04 — Recovery */}
+            <div className="rounded-xl border border-[#00A991]/15 bg-[#00A991]/[0.02] p-5 flex flex-col gap-3 hover:border-[#00A991]/25 hover:bg-[#00A991]/[0.04] transition-colors duration-300">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#00A991]/60" />
+                <span className="font-mono text-xs font-bold text-[#00A991]/50">04</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[3].label}</h3>
+                <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[3].shortDesc}</p>
+              </div>
+              <div className="flex items-center gap-3 pt-3 border-t border-[#00A991]/10">
+                <span className="text-2xl font-black text-[#00A991] leading-none">24–48h</span>
+                <span className="text-xs text-white/40 font-mono leading-tight">post-procedure<br />AI-driven check-in</span>
               </div>
             </div>
 
