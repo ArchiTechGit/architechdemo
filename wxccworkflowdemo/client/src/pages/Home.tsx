@@ -461,9 +461,9 @@ export default function Home() {
                 <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[3].label}</h3>
                 <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[3].shortDesc}</p>
               </div>
-              <div className="flex items-center gap-3 pt-3 border-t border-white/6">
-                <span className="text-2xl font-black text-primary leading-none">24–48h</span>
-                <span className="text-xs text-white/40 font-mono leading-tight">post-procedure<br />AI-driven check-in</span>
+              <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
+                <Phone className="w-3 h-3 text-primary/40" />
+                <span className="text-xs text-primary/40 font-mono">AI-driven SMS check-in</span>
               </div>
             </div>
 
