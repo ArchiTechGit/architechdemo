@@ -4,6 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: 'Roboto', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -119,10 +120,10 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: 'Roboto', Arial, sans-serif;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Roboto', sans-serif;
   }
   h1, h2, h3 {
     font-family: 'Roboto', sans-serif;
@@ -133,6 +134,9 @@
     font-family: 'Roboto', sans-serif;
     font-weight: 700;
     letter-spacing: -0.01em;
+  }
+  code, kbd, samp, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace !important;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
