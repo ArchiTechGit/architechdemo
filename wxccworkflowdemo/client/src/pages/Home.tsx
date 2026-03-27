@@ -122,6 +122,7 @@ export default function Home() {
   const [phonePulse, setPhonePulse] = useState(false);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
+  const [overviewOpen, setOverviewOpen] = useState(true);
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   useEffect(() => {
@@ -369,16 +370,25 @@ export default function Home() {
       {/* Journey Overview Diagram */}
       <div className="border-b border-white/8" style={{ background: "linear-gradient(180deg, #0D1825 0%, #0B1520 100%)" }}>
         <div className="container mx-auto px-6 md:px-10 py-7">
-          <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => setOverviewOpen((o) => !o)}
+            className={`flex items-center gap-4 w-full text-left group focus-visible:outline-none ${overviewOpen ? "mb-6" : "mb-0"}`}
+            aria-expanded={overviewOpen}
+          >
             <div className="flex items-center gap-2.5">
               <div className="w-1 h-5 bg-primary rounded-full" />
               <span className="text-sm font-black text-white uppercase tracking-widest">Journey Overview</span>
             </div>
             <div className="flex-1 h-px bg-primary/20" />
-            <span className="text-xs text-muted-foreground font-mono">4 stages · end-to-end digital</span>
-          </div>
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              <span className="text-xs text-muted-foreground font-mono">4 stages · end-to-end digital</span>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
+            </div>
+          </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}
+            style={{ maxHeight: overviewOpen ? "1000px" : "0" }}
+          >
 
             {/* Card 01 — Appointment Scheduling */}
             <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
