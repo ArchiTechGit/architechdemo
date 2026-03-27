@@ -398,7 +398,7 @@ export default function Home() {
             </div>
 
             {/* Card 02 — Pre-Admission */}
-            <div className="rounded-xl border border-[#05C3DD]/12 bg-[#05C3DD]/[0.02] p-5 flex flex-col gap-3 hover:border-[#05C3DD]/22 hover:bg-[#05C3DD]/[0.035] transition-colors duration-300 relative overflow-hidden">
+            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
               <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>02</span>
               <div className="flex items-center gap-2">
                 <ClipboardList className="w-4 h-4 text-primary/60" />
@@ -438,18 +438,18 @@ export default function Home() {
             </div>
 
             {/* Card 04 — Recovery */}
-            <div className="rounded-xl border border-[#00A991]/15 bg-[#00A991]/[0.02] p-5 flex flex-col gap-3 hover:border-[#00A991]/25 hover:bg-[#00A991]/[0.04] transition-colors duration-300 relative overflow-hidden">
+            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
               <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>04</span>
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-[#00A991]/60" />
-                <span className="font-mono text-xs font-bold text-[#00A991]/50">04</span>
+                <Activity className="w-4 h-4 text-primary/60" />
+                <span className="font-mono text-xs font-bold text-primary/50">04</span>
               </div>
               <div className="flex-1">
                 <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[3].label}</h3>
                 <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[3].shortDesc}</p>
               </div>
-              <div className="flex items-center gap-3 pt-3 border-t border-[#00A991]/10">
-                <span className="text-2xl font-black text-[#00A991] leading-none">24–48h</span>
+              <div className="flex items-center gap-3 pt-3 border-t border-white/6">
+                <span className="text-2xl font-black text-primary leading-none">24–48h</span>
                 <span className="text-xs text-white/40 font-mono leading-tight">post-procedure<br />AI-driven check-in</span>
               </div>
             </div>
