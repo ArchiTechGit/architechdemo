@@ -382,8 +382,9 @@ export default function Home() {
             <div className="flex-1 h-px bg-primary/20" />
             <div className="flex items-center gap-3 flex-shrink-0">
               <span className="text-xs text-muted-foreground font-mono">4 stages · end-to-end digital</span>
-              <div className={`w-7 h-7 rounded-full border border-white/15 bg-white/5 flex items-center justify-center transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/10 ${overviewOpen ? "" : ""}`}>
-                <ChevronDown className={`w-4 h-4 text-white/60 transition-transform duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
+              <div className="flex items-center gap-1.5 border border-white/15 bg-white/5 rounded-full px-3 py-1 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/10">
+                <span className="text-xs text-white/50 group-hover:text-primary transition-colors duration-300">{overviewOpen ? "Collapse" : "Expand"}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-all duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
               </div>
             </div>
           </button>
