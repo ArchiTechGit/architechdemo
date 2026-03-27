@@ -593,7 +593,7 @@ export default function Home() {
                       </div>
 
                       <div
-                        className={`flex-1 rounded-xl border bg-card transition-all duration-500 ${
+                        className={`flex-1 rounded-xl border bg-background transition-all duration-500 ${
                           isTriggered ? "border-[#00A991]/30" :
                           isNext ? "border-white/12" :
                           "border-white/6"
