@@ -1,5 +1,5 @@
 # ArchiTech — Brand Guidelines
-*Last updated: 2026-03-26*
+*Last updated: 2026-03-31*
 *Source: Official ArchiTech Style Guide + architech.net.au*
 
 ---
