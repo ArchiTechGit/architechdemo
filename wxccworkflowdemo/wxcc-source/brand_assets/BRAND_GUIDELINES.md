@@ -1,109 +1,134 @@
 # ArchiTech — Brand Guidelines
 *Last updated: 2026-03-26*
-*Source: https://architech.net.au — values marked ⚠️ are inferred and should be confirmed with the ArchiTech team*
+*Source: Official ArchiTech Style Guide + architech.net.au*
 
 ---
 
 ## 1. Brand Identity
 
-**ArchiTech** is an Australian enterprise technology solutions company serving essential services and critical infrastructure organisations. They are not a generalist IT shop — they hold a deliberate positioning as a trusted partner in complex, high-stakes environments.
+**ArchiTech** is an Australian enterprise technology solutions company serving essential services and critical infrastructure organisations. They hold a deliberate positioning as a trusted partner in complex, high-stakes environments.
 
-The brand operates on a single, clear premise: technology decisions are risky and complex, and ArchiTech removes that burden.
+**Tagline:** *technology solved | business evolved*
 
-**Primary tagline:** *Your technology solved. Your business evolved.*
-
-**Supporting positioning statements:**
+**Positioning statements:**
 > *De-risking critical technology decisions*
 > *Simplifying complexity*
 > *Designing for resilience and care*
 
-**Identity fragments / Service Pillars** (the four brand pillars, used together):
+**Service Pillars:**
 > Simplify · De-risk · Care · Evolve
 
-**Core mission:** Driven by a genuine passion for creating positive community impact through innovative digital infrastructure for essential services.
-
-**CARE Framework** (values):
-- **C — Community** · Positive community outcomes drive every decision
-- **A — Agility** · Move quickly without compromise
-- **R — Relationships** · Trust is built at every interaction
-- **E — Excellence** · Success measured by client outcomes
+**Mission:** Driven by a genuine passion for creating positive community impact through innovative digital infrastructure for essential services.
 
 ---
 
 ## 2. Logo
 
-The ArchiTech wordmark is a clean, professional logotype with integrated tagline. Two primary variants are in use.
+The ArchiTech mark is a geometric triangular "A" icon paired with a clean wordmark. Three variations are in use.
 
-### Logo Files
+### Logo Variants
 
-| File | Use Case |
+| Variant | Use Case |
 |---|---|
-| `ArchiTech Logo_Tagline_Reversed - WEB.png` | Dark backgrounds — **primary use** |
-| `ArchiTech Logo_NO_Tagline_Reversed-Website.png` | Dark backgrounds, space-constrained contexts (nav, favicon strip) |
-| `ArchiTech Social Logo.png` | Social media profiles and square-format placements |
+| Icon + Wordmark (horizontal) | Primary use — headers, hero, email |
+| Icon + Wordmark (stacked) | Square contexts, print collateral |
+| Icon only | App icons, favicons, social avatars |
+| Reversed (white) | Dark and photographic backgrounds |
+
+### Tagline Treatment
+
+The tagline *"technology solved \| business evolved"* appears beneath the wordmark in the preferred logo application. Use the tagline version for all external marketing, communications, and digital contexts. Suppress it only when space is genuinely constrained.
 
 ### Usage Rules
 
 **Do:**
-- Use the reversed (white) variant on all dark page backgrounds
-- Maintain logo height at `101px` desktop / `90px` mobile
-- Give the logo clear space — at minimum equal to the cap-height of the wordmark on all sides
-- Use the tagline variant as the default; only suppress it when space is genuinely constrained
+- Use the reversed (white) variant on dark backgrounds
+- Use the standard (colour) variant on white/light backgrounds
+- Give the logo generous clear space — do not crowd it
+- Use the triangular background pattern with the reversed logo for hero treatments
 
 **Don't:**
-- Place the logo on light or white backgrounds (brand is dark-first)
-- Stretch, recolour, or apply effects to the logo
-- Use the social logo in web hero or header contexts
-- Stack the tagline version and the no-tagline version on the same page
+- Stretch, squeeze, rotate, outline, or apply effects to the logo
+- Place on busy photographic backgrounds without a dark overlay
+- Use the icon-only variant where the full wordmark fits
 
 ---
 
 ## 3. Color System
 
-ArchiTech uses a dark professional palette. The brand is built on deep backgrounds with light text — never the reverse. The accent palette is deliberately restrained: color earns its place by signalling meaning, not decoration.
+ArchiTech uses a modern, fresh, minimalist colour palette built on a cyan-to-navy range. The brand works in both light (print/document) and dark (web/digital) contexts. For the demo application, the dark/digital context applies.
 
-### Global Base ⚠️
+### Primary Colour Palette
 
-*Exact values not exposed in public CSS — these are matched to observed brand aesthetic and should be confirmed.*
+| Name | Hex | RGB | Pantone | Role |
+|---|---|---|---|---|
+| ArchiTech Cyan | `#05C3DD` | R5, G195, B221 | Pantone 311 C | Primary accent, CTAs, highlights |
+| ArchiTech Blue | `#0055B8` | R0, G85, B184 | Pantone 2935 C | Secondary accent, links, interactive |
+| ArchiTech Navy | `#13294B` | R19, G41, B75 | Pantone 2767 C | Deep background, dark surfaces |
+| ArchiTech Gray | `#54565B` | R84, G86, B90 | Pantone Cool Gray 11 | Body text (light mode), muted elements |
 
-| Token | Hex | Role |
+### Secondary Colour Palette
+
+For use in tables, diagrams, charts, and subheadings. Use HEX values for all screen/digital contexts.
+
+| Hex | RGB | Character |
 |---|---|---|
-| `--bg` | `#0D1117` | Page background (deep charcoal-navy) |
-| `--surface` | `#161B22` | Cards, elevated panels |
-| `--surface-2` | `#1C2330` | Nested surfaces |
-| `--border` | `rgba(255,255,255,0.08)` | Subtle dividers |
-| `--border-hi` | `rgba(255,255,255,0.18)` | Active/hover borders |
-| `--text-1` | `#F0F6FC` | Primary text |
-| `--text-2` | `#7D8590` | Secondary/muted text |
-| `--text-3` | `#3D444D` | Disabled/ghost text |
+| `#55CAFD` | R85, G218, B253 | Light cyan — highlights, tag backgrounds |
+| `#7F8FA9` | R127, G143, B169 | Blue-gray — secondary muted text |
+| `#16CECC` | R22, G206, B204 | Teal — data, status indicators |
+| `#517FE3` | R81, G127, B227 | Periwinkle blue — charts, secondary data |
+| `#1980BD` | R25, G128, B189 | Mid blue — supporting elements |
+| `#494B83` | R73, G75, B131 | Dark indigo — depth, chart series |
+| `#00A991` | R0, G169, B145 | Teal-green — success, positive states |
+| `#9594D2` | R149, G148, B210 | Lavender — accent variation, charts |
 
-### Brand Accent Colors ⚠️
+### CSS Token System (Demo App)
 
-ArchiTech's service pillar gradients are image-based assets, not CSS gradients. For the demo application, these functional accent colors are derived to align with each pillar's intent:
+```css
+:root {
+  /* Backgrounds — dark/digital context */
+  --bg:           #0D1825;  /* Deep navy, slightly deeper than #13294B */
+  --surface:      #13294B;  /* ArchiTech Navy — cards, panels */
+  --surface-2:    #1A3460;  /* Elevated surfaces */
+  --surface-3:    #1F3D72;  /* Highest elevation */
 
-| Pillar | Token | Hex | Character |
-|---|---|---|---|
-| Simplify | `--accent-simplify` | `#2EA8E0` | Technology clarity, trusted blue |
-| De-risk | `--accent-derisk` | `#1DB887` | Confidence, resolution, green |
-| Care / Resilience | `--accent-care` | `#8B5CF6` | Depth, considered, service |
-| Health 2025 | `--accent-health` | `#0EA5B0` | Clinical precision, teal |
-| Error / Alert | `--error` | `#C62828` | Validation, alerts — **confirmed** |
+  /* Borders */
+  --border:       rgba(5, 195, 221, 0.12);   /* Cyan-tinted, subtle */
+  --border-hi:    rgba(5, 195, 221, 0.30);   /* Active/hover */
 
-**Primary interactive accent** (buttons, links, focus states): `--accent-simplify` `#2EA8E0`
+  /* Text */
+  --text-1:       #FFFFFF;   /* Primary — white on dark */
+  --text-2:       #7F8FA9;   /* Secondary/muted — ArchiTech blue-gray */
+  --text-3:       #3D4F65;   /* Ghost/disabled */
+
+  /* Brand Accents */
+  --cyan:         #05C3DD;   /* Primary accent */
+  --cyan-dim:     rgba(5, 195, 221, 0.07);
+  --cyan-glow:    rgba(5, 195, 221, 0.18);
+  --blue:         #0055B8;   /* Secondary accent */
+  --blue-dim:     rgba(0, 85, 184, 0.07);
+
+  /* Semantic */
+  --success:      #00A991;   /* Teal-green */
+  --warning:      #1980BD;   /* Mid blue */
+  --error:        #C62828;   /* Error/alert — confirmed */
+}
+```
 
 ### Rules
 
-- Never use white or light backgrounds in any application context
-- Red (`#C62828`) is reserved for error/validation states only — not used decoratively
-- Service pillar accents are used in context of that pillar's content — not interchangeably
-- Avoid saturated neon colours; enterprise credibility requires restraint
+- Primary CTA buttons: `--cyan` `#05C3DD`
+- Secondary/ghost buttons: `--blue` `#0055B8` border with white text
+- Success states: `--success` `#00A991`
+- Error/validation: `--error` `#C62828`
+- Never use white or light backgrounds in the demo app
+- Do not substitute generic Tailwind palette colors (indigo-500, blue-600, etc.)
 
-### Atmospheric Treatment
+### Background Pattern
 
-- No grain overlay or canvas effects — ArchiTech is clean and precise, not textural
-- Header: `backdrop-filter: blur(12px)` on scroll
-- Text blocks on photography: `blur(15px)` backdrop treatment
-- No ambient orbs or atmospheric gradients — use subtle surface layering instead
+A signature ArchiTech brand element is a **triangular geometric pattern** derived from the "A" icon, applied as a hero background. It uses a gradient from Navy (`#13294B`) to Cyan (`#05C3DD`). The reversed (white) logo sits over this pattern.
+
+Use for: hero sections, section dividers, loading screens, and feature headers.
 
 ---
 
@@ -111,32 +136,33 @@ ArchiTech's service pillar gradients are image-based assets, not CSS gradients. 
 
 ### Font Stack
 
-| Role | Family | Source |
-|---|---|---|
-| **Display / Headings** | Roboto | Google Fonts (Bold 700–900) |
-| **Body / UI** | Roboto | Google Fonts (Regular 400–500) |
-| **Labels / Mono / Technical** | JetBrains Mono | Google Fonts |
+| Role | Family | Weights | Source |
+|---|---|---|---|
+| **Primary / Body / UI** | Roboto | Thin (100) → Black (900) | Google Fonts |
+| **System fallback** | Arial | — | System |
+| **Technical / Mono** | JetBrains Mono | 400, 700 | Google Fonts |
 
-### Heading Style
-- Weight: 700–800
-- Case: Title case (not all-caps — ArchiTech is professional, not heavy metal)
-- Tracking: `0` to `-0.02em` on large headings
-- Size scale: `4.5rem` (hero) → `2.5rem` (section) → `1.5rem` (card title) → `1rem` (label)
+Roboto is used for all print and web applications. Arial is the system fallback only — never specify Arial as primary. JetBrains Mono is used for webhook URLs, technical data, JSON, and status codes.
 
-### Body Style
-- Weight: 400 (body) / 500 (UI labels)
-- Line height: `1.6–1.7` on paragraph text
-- Case: Sentence case
+### Type Scale
 
-### Mono / Technical
-- Used for: webhook URLs, technical data, status codes, JSON previews
-- Weight: 400
-- Size: `0.8125rem` (13px) for inline technical strings; `0.75rem` (12px) for metadata
+| Level | Size | Weight | Case | Use |
+|---|---|---|---|---|
+| Hero | `3rem–4.5rem` | 700–900 | Title case | Page hero headings |
+| Section heading | `2rem–2.5rem` | 700 | Title case | Section titles |
+| Card title | `1.25rem–1.5rem` | 600 | Title case | Card and panel headings |
+| Body | `1rem` | 400 | Sentence case | Body copy |
+| Label | `0.875rem` | 500 | All-caps or title | UI labels, tags |
+| Mono / technical | `0.8125rem` | 400 | As-is | URLs, codes, JSON |
+| Micro | `0.75rem` | 400 | Sentence case | Timestamps, metadata |
 
 ### Hierarchy Rules
-- Headings: title case, tight but not compressed
-- Never use system fonts, Arial, or generic fallbacks as the primary face
-- Pair a large bold heading with a muted small-caps or mono label beneath it for section eyebrows
+
+- Headings: title case, Roboto Bold/Black
+- Body: sentence case, Roboto Regular
+- Never use the same weight for two adjacent levels
+- Mono data always uses JetBrains Mono — never Roboto for technical strings
+- Tracking: `-0.01em` on large headings; `0.06em` on all-caps labels
 
 ---
 
@@ -153,96 +179,89 @@ ArchiTech's service pillar gradients are image-based assets, not CSS gradients. 
 | Responsive breakpoint | `768px` |
 | Nav logo height (desktop) | `101px` |
 | Nav logo height (mobile) | `90px` |
-| Nav vertical padding (desktop) | `0.6vw` |
-| Nav vertical padding (mobile) | `6vw` |
+| Header backdrop blur | `blur(12px)` |
+| Text-on-photo blur | `blur(15px)` |
 
 ### Layout Principles
-- Full-bleed hero sections with photographic backgrounds + dark overlay
-- Cards and grids stack to single column at `768px`
-- Nav collapses to hamburger at mobile breakpoint
-- Image-text balanced layouts (photography is the primary differentiator, not color)
-- Asymmetric two-column patterns for content-heavy sections
+
+- Full-bleed hero with triangular gradient pattern or dark photographic background
+- Cards and grids stack single column at `768px`
+- Nav collapses to hamburger at mobile
+- Image-text balanced layouts — photography differentiates, color signals function
+- Asymmetric two-column patterns for content sections (60/40 or 65/35)
 
 ---
 
 ## 6. Motion & Animation
 
-ArchiTech's site has global animations **disabled** (`tweak-global-animations-enabled: false`). The brand does not use motion as a feature — interaction should be clear and immediate, not theatrical.
+ArchiTech's site has global animations disabled. The brand does not use motion as a feature — interaction should be immediate and purposeful.
 
-**For the demo app context:**
-- **Entry:** Fade only (`opacity 0 → 1`) — no translate, no bounce
-- **Duration:** `0.2s ease` for hover/focus; `0.3s ease` for panel reveal
-- **Hover:** Subtle border colour transition + box-shadow elevation lift
-- **Button press:** `scale(0.97)` at `100ms ease-out` — tactile, not dramatic
-- **Status indicators:** `2s` continuous subtle opacity pulse for live states
-- **Loading:** Spinner with transparency overlay — never block the full UI
+**For the demo app:**
+- **Entry:** `opacity 0 → 1` at `0.25s ease` — no translate, no bounce
+- **Hover:** border color transition + subtle box-shadow lift at `0.2s ease`
+- **Button press:** `scale(0.97)` at `100ms ease-out`
+- **Status pulse:** `2s` continuous opacity animation for live/active states
+- **Loading:** spinner with `opacity: 0.4` overlay — never block full UI
+- **Toast/notification:** `0.3s ease` fade-in + `4px` slide-up
 
 **Rules:**
-- Only animate `transform` and `opacity`
-- Never use `transition-all`
-- No parallax, no scroll effects, no canvas animations
+- Only animate `transform` and `opacity` — never `transition-all`
 - Every interactive element needs hover, focus-visible, and active states
+- No parallax, no canvas effects, no scroll-triggered theatrics
+- Button active state: `translateY(1px)` + `scale(0.98)`
 
 ---
 
-## 7. Page / Section Character
-
-For the demo application, sections map to functional purposes rather than aesthetic themes:
-
-| Section | Purpose | Accent |
-|---|---|---|
-| Dashboard / Overview | Status at a glance | `--accent-simplify` (blue) |
-| Workflow Triggers | Action panel | `--accent-simplify` (blue) primary CTA |
-| Activity Log / History | Webhook event stream | `--text-2` muted, mono typography |
-| Settings / Configuration | Technical setup | `--surface-2` recessed treatment |
-| Error / Alert States | Validation, failures | `--error` `#C62828` |
-
----
-
-## 8. Voice & Tone
+## 7. Voice & Tone
 
 - **Outcome-focused.** Lead with what gets solved, not what is offered.
-- **Professional but human.** Not corporate jargon — earned, direct language.
-- **Partner-level confidence.** Speak as a trusted advisor, not a vendor.
+- **Professional but accessible.** Trusted partner language, not vendor speak.
 - **Concise.** Short sentences. No fluff.
+- **Confident.** Declarative statements, not hedged invitations.
 
 **Examples of correct voice:**
+> *Technology solved. Business evolved.*
 > *De-risking critical technology decisions.*
-> *Your technology solved. Your business evolved.*
 > *Built on decades of experience supporting unique IT needs.*
 > *The best outcomes are achieved when we reach trusted partner status.*
 
 **Avoid:**
-- "Passionate about technology" — trite
-- "Leveraging solutions to drive synergies" — corporate emptiness
+- "Passionate about technology"
+- "Leveraging solutions to drive synergies"
 - Exclamation marks
-- First-person plural overuse ("We, we, we") — lead with outcomes, not ArchiTech
+- Overly casual or overly corporate tone
 
 ---
 
-## 9. Demo App Context
+## 8. Demo App Context
 
-This brand is being applied to a **Webex Contact Center pre-sales demonstration dashboard** — a tool built by ArchiTech or for ArchiTech presentations. It must feel like an ArchiTech-built enterprise product.
+This brand is applied to a **Webex Contact Center pre-sales demonstration dashboard** built by ArchiTech. It must look like an ArchiTech-built enterprise product — something they would confidently demo to a C-suite buyer in a critical infrastructure organisation.
 
-**Key requirements:**
-- Looks like something ArchiTech would proudly demo to a C-suite buyer
-- Professional, clean, opinionated dark UI — not a generic React admin panel
-- ArchiTech branding visible but not intrusive (logo in nav, accent colors in CTAs)
-- Technical credibility: webhook URLs, status pulses, JSON payloads look real and legible
-- No toy aesthetics — this is for critical infrastructure customers
+**Requirements:**
+- ArchiTech branding visible but not intrusive (logo in nav, cyan on primary CTAs)
+- Dark digital theme — navy surface layering system, cyan accent
+- Technical credibility — webhook URLs, status pulses, JSON payloads rendered in mono
+- No toy aesthetics — this serves critical infrastructure customers
+- The triangular brand pattern may be used as a hero or section background element
 
-**Navigation context:** Single-page demo tool — standard app shell with:
-- Top nav: ArchiTech logo (left), demo context label (right)
-- Main content: trigger panel + status/activity log
-- Dark surface throughout, consistent with ArchiTech's reversed-logo design system
+**Section accent mapping:**
+
+| Section | Accent | Treatment |
+|---|---|---|
+| Dashboard / Overview | `--cyan` | Status at a glance |
+| Workflow Triggers | `--cyan` | Primary CTA — solid cyan button |
+| Activity Log | `--text-2` muted | Mono typography, recessed surface |
+| Settings / Config | `--surface-2` | Technical, recessed |
+| Success states | `--success` `#00A991` | Confirmation, webhook delivered |
+| Error / Alert | `--error` `#C62828` | Validation, failures |
 
 ---
 
-## 10. What This Brand Is Not
+## 9. What This Brand Is Not
 
-- Not a startup — no gradients-everywhere, no bright color explosions
-- Not a government agency — clear, modern, not bureaucratic
-- Not a telco — no blue-on-white consumer telecom aesthetic
-- Not The Senate — no death metal aesthetics, no grain overlays, no horn-logo weight
-- Not generic SaaS — no indigo-600, no white card grids on light gray, no "sign up free" energy
-- Not decorative — every visual element serves enterprise credibility or functional clarity
+- Not The Senate — no grain overlays, no death metal aesthetics, no navy-black darkness
+- Not generic SaaS — no indigo-600, no white card grids on light gray
+- Not a telco consumer brand — no bright blue-on-white consumer aesthetics
+- Not startup-flashy — no gradient-everywhere, no neon glow effects
+- Not decorative — every element serves enterprise credibility or functional clarity
+- Not print-only — dark/digital treatment is primary for web and app contexts
