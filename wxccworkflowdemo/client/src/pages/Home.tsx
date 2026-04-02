@@ -632,7 +632,7 @@ export default function Home() {
 
             <div className="relative">
               <div className="absolute left-[13px] top-6 bottom-6 w-px bg-white/8" />
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {JOURNEY_STAGES.map((stage, stageIndex) => {
                   const isTriggered = triggeredStages.has(stage.id);
                   const isLoading = loadingStage === stage.id;
@@ -668,7 +668,7 @@ export default function Home() {
                         }`}
                       >
                         {/* Always-visible header row */}
-                        <div className="flex items-center gap-2 px-4 pt-3 pb-3">
+                        <div className="flex items-center gap-2 px-4 pt-4 pb-3">
                           <span className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded border transition-all duration-500 flex-shrink-0 ${
                             isTriggered ? "text-[#00A991] border-[#00A991]/30 bg-[#00A991]/10" :
                             isNext ? "text-[#05C3DD] border-primary/30 bg-primary/8" :
@@ -689,7 +689,7 @@ export default function Home() {
                         </div>
 
                         {/* Action button row */}
-                        <div className="px-4 pb-3">
+                        <div className="px-4 pt-1 pb-4">
                           {isTriggered ? (
                             <div className="flex items-center justify-center gap-2 py-2 bg-[#00A991]/10 border border-[#00A991]/25 rounded-lg">
                               <span className="text-sm font-semibold text-[#00A991]">Sent to patient</span>
@@ -724,7 +724,7 @@ export default function Home() {
                           onClick={() => toggleExpanded(stage.id)}
                           aria-expanded={isExpanded}
                           aria-controls={`stage-details-${stage.id}`}
-                          className={`w-full flex items-center gap-1.5 px-4 py-2 border-t transition-colors ${
+                          className={`w-full flex items-center gap-1.5 px-4 py-3 border-t transition-colors ${
                             isExpanded ? "border-white/8 text-white/40 hover:text-white/60" : "border-white/6 text-white/20 hover:text-white/40"
                           }`}
                         >
