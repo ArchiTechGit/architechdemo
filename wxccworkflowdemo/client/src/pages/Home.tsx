@@ -149,6 +149,7 @@ export default function Home() {
   const [statVisible, setStatVisible] = useState(true);
   const [patientName, setPatientName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [demoMobile, setDemoMobile] = useState("");
   const [triggeredStages, setTriggeredStages] = useState<Set<string>>(new Set());
   const [loadingStage, setLoadingStage] = useState<string | null>(null);
   const [lastTriggeredStage, setLastTriggeredStage] = useState<string | null>(null);
@@ -247,6 +248,7 @@ export default function Home() {
       workflowId,
       patientName: patientName.trim(),
       mobileNumber: mobileNumber.replace(/\s/g, ""),
+      demoMobile: demoMobile.replace(/\s/g, ""),
       timestamp: formatHumanDate(now),
       appointmentDate: formatHumanDate(appointmentDate),
     };
@@ -290,6 +292,7 @@ export default function Home() {
     setExpandedStages(new Set());
     setPatientName("");
     setMobileNumber("");
+    setDemoMobile("");
     toast.success("Journey reset — ready for next demo");
   };
 
@@ -598,7 +601,7 @@ export default function Home() {
 
             {/* Form inputs — side by side */}
             <div className="rounded-xl border border-white/12 bg-background px-4 py-4">
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-3 gap-5">
               <div className="space-y-2">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3.5 h-3.5 text-muted-foreground" />
@@ -624,6 +627,20 @@ export default function Home() {
                   placeholder="+61 2 1234 5678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
+                  className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
+                  <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Demo Mobile</span>
+                </label>
+                <Input
+                  id="demo-mobile"
+                  type="tel"
+                  placeholder="+61 4 1234 5678"
+                  value={demoMobile}
+                  onChange={(e) => setDemoMobile(e.target.value)}
                   className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
                 />
               </div>
