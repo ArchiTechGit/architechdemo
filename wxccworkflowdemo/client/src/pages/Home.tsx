@@ -689,29 +689,30 @@ export default function Home() {
                         </div>
 
                         {/* Action button row */}
-                        <div className="px-4 pt-1 pb-4">
+                        <div className="px-4 pt-1 pb-3 flex justify-end">
                           {isTriggered ? (
-                            <div className="flex items-center justify-center gap-2 py-2 bg-[#00A991]/10 border border-[#00A991]/25 rounded-lg">
-                              <span className="text-sm font-semibold text-[#00A991]">Sent to patient</span>
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00A991]/10 border border-[#00A991]/25 rounded-md">
+                              <Check className="w-3 h-3 text-[#00A991]" />
+                              <span className="text-xs font-medium text-[#00A991]">Sent</span>
                             </div>
                           ) : isLocked ? (
                             <button
                               onClick={(e) => e.shiftKey && triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
                               title="Hold Shift to override sequence"
-                              className="w-full py-2.5 flex items-center justify-center gap-2 border border-white/8 rounded-lg hover:border-white/15 transition-colors group"
+                              className="flex items-center gap-1.5 px-3 py-1 border border-white/8 rounded-md hover:border-white/15 transition-colors group"
                             >
-                              <span className="text-xs text-white/20">Complete stage {prevChapter} first</span>
+                              <span className="text-xs text-white/20">Stage {prevChapter} first</span>
                               <span className="text-xs text-white/10 font-mono group-hover:text-white/20 transition-colors">⇧ skip</span>
                             </button>
                           ) : (
                             <Button
                               onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
                               disabled={!!loadingStage}
-                              className="w-full bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-sm h-10 border border-primary/35 hover:border-primary/60 shadow-none transition-all duration-200"
+                              className="bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-xs h-8 px-4 border border-primary/35 hover:border-primary/60 shadow-none transition-all duration-200"
                             >
                               {isLoading ? (
                               <>
-                                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                                 <span className="sr-only">Sending workflow...</span>
                               </>
                             ) : "Send to Patient →"}
