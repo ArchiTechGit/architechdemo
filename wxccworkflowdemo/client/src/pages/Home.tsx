@@ -729,6 +729,13 @@ export default function Home() {
                                   <p className="text-[10px] font-bold text-primary/50 uppercase tracking-widest font-mono mb-1">Automation Opportunity</p>
                                   <p className="text-xs leading-relaxed text-white/75">{stage.automationOpportunity}</p>
                                 </div>
+                                <div className="rounded-md overflow-hidden border border-white/8">
+                                  <img
+                                    src={`https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`}
+                                    alt={`Workflow diagram for ${stage.label}`}
+                                    className="w-full h-auto block"
+                                  />
+                                </div>
                                 {isTriggered && revealedSteps > 0 && (
                                   <div className="flex gap-1.5 flex-wrap pt-1">
                                     {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
