@@ -24,7 +24,7 @@ interface JourneyStage {
 
 const JOURNEY_STAGES: JourneyStage[] = [
   {
-    id: "pre-admission-enrolment",
+    id: "PATIENT_PRE_ADMISSION_ENROL",
     chapter: "01",
     sectionHeader: "Pre Admission",
     label: "Pre Admission Enrolment",
@@ -36,7 +36,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
   },
   {
-    id: "appointment-scheduling",
+    id: "PATIENT_APPOINTMENT_CONFIRM",
     chapter: "02",
     label: "Appointment Scheduling and Reminders",
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
@@ -47,7 +47,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
   },
   {
-    id: "arrival-coordination",
+    id: "PATIENT_ARRIVAL_WAYFINDING",
     chapter: "03",
     sectionHeader: "Day-of-Surgery Coordination",
     label: "Arrival Coordination",
@@ -59,7 +59,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
   },
   {
-    id: "family-updates",
+    id: "PATIENT_FAMILY_SURGERY_UPDATE",
     chapter: "04",
     label: "Family Updates During Surgery",
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
@@ -70,7 +70,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
   },
   {
-    id: "discharge-instructions",
+    id: "PATIENT_DISCHARGE_INSTRUCTIONS",
     chapter: "05",
     sectionHeader: "Discharge and Recovery",
     label: "Take-Home Instruction Delivery",
@@ -82,7 +82,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
   },
   {
-    id: "post-discharge-checkup",
+    id: "PATIENT_POST_DISCHARGE_SURVEY",
     chapter: "06",
     label: "Post Discharge Check-Up",
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
