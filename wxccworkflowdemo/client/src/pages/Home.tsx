@@ -708,6 +708,8 @@ export default function Home() {
                             <div className="flex items-center gap-2">
                               {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
                                 <Button
+                                  onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
+                                  disabled={!!loadingStage}
                                   className="bg-transparent hover:bg-white/5 text-white/40 hover:text-white/70 font-medium text-xs h-8 px-4 border border-white/12 hover:border-white/25 shadow-none transition-all duration-200"
                                 >
                                   Start Meeting
