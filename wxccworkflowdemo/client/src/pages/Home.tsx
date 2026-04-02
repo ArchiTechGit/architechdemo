@@ -707,7 +707,7 @@ export default function Home() {
                             <Button
                               onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
                               disabled={!!loadingStage}
-                              className="w-full bg-primary hover:bg-[#55CAFD] active:bg-[#0055B8] text-primary-foreground font-bold text-sm h-10 border-0 shadow-[0_4px_20px_rgba(5,195,221,0.3)]"
+                              className="w-full bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-sm h-10 border border-primary/35 hover:border-primary/60 shadow-none transition-all duration-200"
                             >
                               {isLoading ? (
                               <>
