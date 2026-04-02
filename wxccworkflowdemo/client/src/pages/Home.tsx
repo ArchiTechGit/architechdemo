@@ -16,6 +16,7 @@ interface JourneyStage {
   label: string;
   currentState: string;
   automationOpportunity: string;
+  image: string;
   webhookUrl: string;
   phoneMessage: string;
   phoneAction: string;
@@ -28,6 +29,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "01",
     sectionHeader: "Pre Admission",
     label: "Pre Admission Enrolment",
+    image: "/wxccworkflowdemo/dist/workflow-images/pre-admission-enrolment.png",
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
     automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Completed forms route to nurse dashboard with color-coded priority. Nurse reviews flagged items only. Simple cases require no callback. Reduces pre-admission appointment from 45 minutes to 10-15 minutes at most.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
@@ -39,6 +41,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     id: "PATIENT_APPOINTMENT_CONFIRM",
     chapter: "02",
     label: "Appointment Scheduling and Reminders",
+    image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
     automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
@@ -51,6 +54,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "03",
     sectionHeader: "Day-of-Surgery Coordination",
     label: "Arrival Coordination",
+    image: "/wxccworkflowdemo/dist/workflow-images/arrival-coordination.png",
     currentState: "Patient arrives, joins queue at admissions desk.",
     automationOpportunity: "Day of surgery SMS before patient enters hospital carpark. \"When you arrive please proceed to Level 2, Bay 4. For assistance locating, please use this wayfinder URL\".",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
@@ -62,6 +66,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     id: "PATIENT_FAMILY_SURGERY_UPDATE",
     chapter: "04",
     label: "Family Updates During Surgery",
+    image: "/wxccworkflowdemo/dist/workflow-images/family-surgery-update.png",
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
     automationOpportunity: "Automated status updates sent to nominated contact. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
@@ -74,6 +79,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "05",
     sectionHeader: "Discharge and Recovery",
     label: "Take-Home Instruction Delivery",
+    image: "/wxccworkflowdemo/dist/workflow-images/discharge-instructions.png",
     currentState: "Nurse hands patient printed sheets. Patient loses them.",
     automationOpportunity: "Personalised discharge instructions (wound care, activity restrictions, red flags) sent via SMS with embedded video links. \"Here's how to change your dressing\" with 90-second demo video specific to their surgical site.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
@@ -85,6 +91,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     id: "PATIENT_POST_DISCHARGE_SURVEY",
     chapter: "06",
     label: "Post Discharge Check-Up",
+    image: "/wxccworkflowdemo/dist/workflow-images/post-discharge-survey.png",
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
     automationOpportunity: "AI agent sends SMS 48-72 hours post-discharge initiating conversational survey. Asks about pain levels, wound condition, medication adherence, mobility, and red flag symptoms. Routine responses auto-documented in EMR. Concerning responses trigger immediate escalation to nurse with pre-populated context. Critical flags generate emergency protocol alert.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
@@ -157,6 +164,7 @@ export default function Home() {
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string } | null>(null);
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   useEffect(() => {
@@ -729,13 +737,20 @@ export default function Home() {
                                   <p className="text-[10px] font-bold text-primary/50 uppercase tracking-widest font-mono mb-1">Automation Opportunity</p>
                                   <p className="text-xs leading-relaxed text-white/75">{stage.automationOpportunity}</p>
                                 </div>
-                                <div className="rounded-md overflow-hidden border border-white/8">
+                                <button
+                                  onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
+                                  className="w-full rounded-md overflow-hidden border border-white/8 hover:border-primary/30 transition-colors duration-200 block group relative"
+                                >
                                   <img
-                                    src={`https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`}
+                                    src={stage.image}
                                     alt={`Workflow diagram for ${stage.label}`}
                                     className="w-full h-auto block"
+                                    onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`; }}
                                   />
-                                </div>
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
+                                    <span className="text-white/0 group-hover:text-white/80 text-xs font-mono transition-colors duration-200">Click to expand</span>
+                                  </div>
+                                </button>
                                 {isTriggered && revealedSteps > 0 && (
                                   <div className="flex gap-1.5 flex-wrap pt-1">
                                     {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
@@ -840,6 +855,32 @@ export default function Home() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Lightbox */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative max-w-5xl w-full mx-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">{lightboxImage.label}</span>
+              <button
+                onClick={() => setLightboxImage(null)}
+                className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <img
+              src={lightboxImage.src}
+              alt={lightboxImage.label}
+              className="w-full h-auto rounded-lg border border-white/10"
+              onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/1200x560/13294B/1A3460?text=${encodeURIComponent(lightboxImage.label)}`; }}
+            />
+          </div>
+        </div>
+      )}
 
     </div>
   );
