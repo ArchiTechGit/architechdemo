@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Loader2, Phone, Stethoscope, User } from "lucide-react";
+import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Loader2, MapPin, Phone, User, Users } from "lucide-react";
 import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
@@ -12,8 +12,10 @@ import { toast } from "sonner";
 interface JourneyStage {
   id: string;
   chapter: string;
+  sectionHeader?: string;
   label: string;
-  narrative: string;
+  currentState: string;
+  automationOpportunity: string;
   webhookUrl: string;
   phoneMessage: string;
   phoneAction: string;
@@ -22,52 +24,83 @@ interface JourneyStage {
 
 const JOURNEY_STAGES: JourneyStage[] = [
   {
-    id: "appointment-scheduling",
+    id: "pre-admission-enrolment",
     chapter: "01",
-    label: "Appointment Scheduling",
-    narrative: "A referral lands in the EMR and an HL7 message fires to Webex CC — no manual handoff. The patient receives an SMS with their appointment date and can confirm with a single reply, or talk to AI to reschedule.",
+    sectionHeader: "Pre Admission",
+    label: "Pre Admission Enrolment",
+    currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
+    automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Completed forms route to nurse dashboard with color-coded priority. Nurse reviews flagged items only. Simple cases require no callback. Reduces pre-admission appointment from 45 minutes to 10-15 minutes at most.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi — your referral has come through and we have an appointment ready. Reply YES to confirm, or tap below to pick a different time.",
+    phoneMessage: "Hi — your surgery is coming up. To save time on the day, please complete your pre-admission form now. It takes about 10 minutes at your own pace.",
+    phoneAction: "Complete Pre-Admission Form →",
+    systemEvents: [],
+  },
+  {
+    id: "appointment-scheduling",
+    chapter: "02",
+    label: "Appointment Scheduling and Reminders",
+    currentState: "Manual phone calls from booking clerks, voicemail tag.",
+    automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
+    webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
+    phoneMessage: "Your surgery is scheduled. Tap below to confirm your appointment time, or reply to choose a different slot.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
   },
   {
-    id: "pre-admission",
-    chapter: "02",
-    label: "Pre-Admission",
-    narrative: "The patient's status moves from scheduled to admitted in the EMR. A new workflow fires — sending a pre-enrolment form and appointment date via SMS. When they submit the form, a confirmation goes back to them automatically.",
-    webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Your appointment is confirmed. Before you come in, please complete your pre-admission forms — it takes a few minutes and saves time on the day.",
-    phoneAction: "Complete Pre-Admission →",
-    systemEvents: [],
-  },
-  {
-    id: "surgery-prep",
+    id: "arrival-coordination",
     chapter: "03",
-    label: "Surgery Prep",
-    narrative: "The EMR moves the patient to the surgical stage and the prep guide goes out via SMS. The AI agent is available 24/7 — patients can ask anything about their procedure by replying to the message.",
+    sectionHeader: "Day-of-Surgery Coordination",
+    label: "Arrival Coordination",
+    currentState: "Patient arrives, joins queue at admissions desk.",
+    automationOpportunity: "Day of surgery SMS before patient enters hospital carpark. \"When you arrive please proceed to Level 2, Bay 4. For assistance locating, please use this wayfinder URL\".",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Your procedure is coming up. We've sent you a preparation guide — please review it before your appointment. Have questions? Reply anytime and our care assistant will help.",
-    phoneAction: "View Prep Guide →",
+    phoneMessage: "Good morning — your surgery is today. When you arrive, please proceed to Level 2, Bay 4. Tap below for directions.",
+    phoneAction: "Open Wayfinder →",
     systemEvents: [],
   },
   {
-    id: "recovery",
+    id: "family-updates",
     chapter: "04",
-    label: "Recovery",
-    narrative: "24–48 hours post-procedure, an AI agent checks in via SMS — asking about pain levels, medication, and mental state. Responses go straight to the clinical team. If anything crosses a threshold, a call gets scheduled or the patient is escalated to urgent care.",
+    label: "Family Updates During Surgery",
+    currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
+    automationOpportunity: "Automated status updates sent to nominated contact. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi — it's been a couple of days since your procedure. Your care team wants to check in. How are you feeling? Reply and let us know.",
+    phoneMessage: "Update from the care team: your family member is now in recovery as of 12:35pm. We'll message you again when they're ready for a visit.",
+    phoneAction: "Acknowledge →",
+    systemEvents: [],
+  },
+  {
+    id: "discharge-instructions",
+    chapter: "05",
+    sectionHeader: "Discharge and Recovery",
+    label: "Take-Home Instruction Delivery",
+    currentState: "Nurse hands patient printed sheets. Patient loses them.",
+    automationOpportunity: "Personalised discharge instructions (wound care, activity restrictions, red flags) sent via SMS with embedded video links. \"Here's how to change your dressing\" with 90-second demo video specific to their surgical site.",
+    webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
+    phoneMessage: "You're on your way home — here are your personalised discharge instructions including wound care and activity guidelines. Tap to view your video guide.",
+    phoneAction: "View Discharge Instructions →",
+    systemEvents: [],
+  },
+  {
+    id: "post-discharge-checkup",
+    chapter: "06",
+    label: "Post Discharge Check-Up",
+    currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
+    automationOpportunity: "AI agent sends SMS 48-72 hours post-discharge initiating conversational survey. Asks about pain levels, wound condition, medication adherence, mobility, and red flag symptoms. Routine responses auto-documented in EMR. Concerning responses trigger immediate escalation to nurse with pre-populated context. Critical flags generate emergency protocol alert.",
+    webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
+    phoneMessage: "Hi — it's been a couple of days since your surgery. Your care team wants to check in. How are you feeling? Reply and let us know.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
   },
 ];
 
 const STAGE_META = [
-  { icon: CalendarDays, shortDesc: "HL7 referral from EMR triggers automated appointment SMS. Patient confirms with one reply or talks to AI to reschedule. Scheduling platform updated automatically." },
-  { icon: ClipboardList, shortDesc: "EMR admission event delivers pre-enrolment form and appointment details via SMS. Form completion triggers an automatic confirmation back to the patient." },
-  { icon: FileText, shortDesc: "EMR surgical stage triggers prep guide delivery via SMS. An AI agent is available 24/7 — patients ask questions about their procedure by replying to the message." },
-  { icon: Activity, shortDesc: "24–48 hrs post-procedure, AI checks in on recovery via SMS — pain, medication, mental state. Data goes to the clinical team. Thresholds trigger escalation automatically." },
+  { icon: ClipboardList, shortDesc: "AI agent distributes pre-admission form via SMS 2-3 weeks before surgery. Results route to nurse dashboard with color-coded priority. Simple cases require no callback." },
+  { icon: CalendarDays, shortDesc: "AI agent handles appointment booking via SMS. Patient selects from available slots. Automated reminders at 7 days, 3 days, and 1 day before surgery." },
+  { icon: MapPin, shortDesc: "Day-of-surgery SMS directs patient to the correct bay before they enter the carpark. Includes wayfinder link for navigation assistance." },
+  { icon: Users, shortDesc: "Automated status updates sent to nominated family contact throughout surgery. Real-time notifications for recovery and ward readiness." },
+  { icon: FileText, shortDesc: "Personalised discharge instructions sent via SMS with embedded video links specific to the patient's surgical site and wound type." },
+  { icon: Activity, shortDesc: "AI agent initiates conversational check-in 48-72 hours post-discharge. Concerning responses trigger immediate nurse escalation. Critical flags generate emergency protocol alert." },
 ];
 
 const IMPACT_STATS = [
@@ -381,7 +414,7 @@ export default function Home() {
             </div>
             <div className="flex-1 h-px bg-primary/20" />
             <div className="flex items-center gap-3 flex-shrink-0">
-              <span className="text-xs text-muted-foreground font-mono">4 stages · end-to-end digital</span>
+              <span className="text-xs text-muted-foreground font-mono">6 stages · end-to-end digital</span>
               <div className="flex items-center gap-1.5 border border-white/15 bg-white/5 rounded-full px-3 py-1 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/10">
                 <span className="text-xs text-white/50 group-hover:text-primary transition-colors duration-300">{overviewOpen ? "Collapse" : "Expand"}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-all duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
@@ -389,84 +422,42 @@ export default function Home() {
             </div>
           </button>
 
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}
-            style={{ maxHeight: overviewOpen ? "1000px" : "0" }}
+          <div className={`space-y-4 overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}
+            style={{ maxHeight: overviewOpen ? "2000px" : "0" }}
           >
-
-            {/* Card 01 — Appointment Scheduling */}
-            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
-              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>01</span>
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-primary/60" />
-                <span className="font-mono text-xs font-bold text-primary/50">01</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[0].label}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[0].shortDesc}</p>
-              </div>
-              <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
-                <Phone className="w-3 h-3 text-primary/40" />
-                <span className="text-xs text-primary/40 font-mono">HL7 → WxCC → SMS</span>
-              </div>
-            </div>
-
-            {/* Card 02 — Pre-Admission */}
-            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
-              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>02</span>
-              <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-primary/60" />
-                <span className="font-mono text-xs font-bold text-primary/50">02</span>
-              </div>
-              <div>
-                <h3 className="font-black text-white text-base leading-tight mb-3">{JOURNEY_STAGES[1].label}</h3>
-                <div className="space-y-2">
-                  {["Pre-enrolment form via SMS link", "Auto-confirmation on submission", "No reply required from patient"].map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
-                      <span className="text-xs text-white/55 font-mono">{item}</span>
-                    </div>
-                  ))}
+            {(["Pre Admission", "Day-of-Surgery Coordination", "Discharge and Recovery"] as const).map((header) => {
+              const headerIdx = JOURNEY_STAGES.findIndex((s) => s.sectionHeader === header);
+              const nextHeaderIdx = JOURNEY_STAGES.findIndex((s, idx) => idx > headerIdx && s.sectionHeader);
+              const groupStages = JOURNEY_STAGES.slice(headerIdx, nextHeaderIdx === -1 ? undefined : nextHeaderIdx);
+              return (
+                <div key={header}>
+                  <p className="text-xs font-bold text-primary/50 uppercase tracking-widest mb-2 font-mono">{header}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {groupStages.map((stage) => {
+                      const globalIdx = JOURNEY_STAGES.indexOf(stage);
+                      const Icon = STAGE_META[globalIdx].icon;
+                      return (
+                        <div key={stage.id} className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
+                          <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>{stage.chapter}</span>
+                          <div className="flex items-center gap-2">
+                            <Icon className="w-4 h-4 text-primary/60" />
+                            <span className="font-mono text-xs font-bold text-primary/50">{stage.chapter}</span>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-black text-white text-base leading-tight mb-1.5">{stage.label}</h3>
+                            <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[globalIdx].shortDesc}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
+                            <Phone className="w-3 h-3 text-primary/40" />
+                            <span className="text-xs text-primary/40 font-mono">WxCC → SMS</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-              <div className="mt-auto pt-3 border-t border-white/6">
-                <span className="text-xs text-white/35 font-mono">All digital. Before arrival.</span>
-              </div>
-            </div>
-
-            {/* Card 03 — Surgery Prep */}
-            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
-              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>03</span>
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary/60" />
-                <span className="font-mono text-xs font-bold text-primary/50">03</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[2].label}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[2].shortDesc}</p>
-              </div>
-              <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
-                <Phone className="w-3 h-3 text-primary/40" />
-                <span className="text-xs text-primary/40 font-mono">AI available 24/7 via SMS</span>
-              </div>
-            </div>
-
-            {/* Card 04 — Recovery */}
-            <div className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
-              <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>04</span>
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-primary/60" />
-                <span className="font-mono text-xs font-bold text-primary/50">04</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-black text-white text-base leading-tight mb-1.5">{JOURNEY_STAGES[3].label}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[3].shortDesc}</p>
-              </div>
-              <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
-                <Phone className="w-3 h-3 text-primary/40" />
-                <span className="text-xs text-primary/40 font-mono">AI-driven SMS check-in</span>
-              </div>
-            </div>
-
+              );
+            })}
           </div>
         </div>
       </div>
@@ -653,7 +644,14 @@ export default function Home() {
                   const isExpanded = expandedStages.has(stage.id);
 
                   return (
-                    <div key={stage.id} className={`flex gap-3 transition-all duration-500 ${isLocked ? "opacity-25" : "opacity-100"}`}>
+                    <div key={stage.id}>
+                    {stage.sectionHeader && (
+                      <div className="flex items-center gap-3 mb-3 mt-2 pl-6">
+                        <span className="text-xs font-bold text-primary/50 uppercase tracking-widest font-mono">{stage.sectionHeader}</span>
+                        <div className="flex-1 h-px bg-primary/10" />
+                      </div>
+                    )}
+                    <div className={`flex gap-3 transition-all duration-500 ${isLocked ? "opacity-25" : "opacity-100"}`}>
                       <div className="flex-shrink-0 flex items-start pt-[14px] z-10">
                         <div className={`w-[10px] h-[10px] rounded-full border-2 transition-all duration-500 ${
                           isTriggered ? "border-[#00A991] bg-[#00A991] shadow-[0_0_8px_rgba(0,169,145,0.6)]" :
@@ -740,9 +738,16 @@ export default function Home() {
                         {/* Expandable details */}
                         {isExpanded && (
                           <div id={`stage-details-${stage.id}`} className="px-4 pb-4 pt-3 border-t border-white/6 space-y-4">
-                            <p className="text-base leading-relaxed text-white/80">
-                              {stage.narrative}
-                            </p>
+                            <div className="space-y-3">
+                              <div>
+                                <p className="text-xs font-bold text-white/30 uppercase tracking-widest font-mono mb-1">Current State</p>
+                                <p className="text-sm leading-relaxed text-white/70">{stage.currentState}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-primary/50 uppercase tracking-widest font-mono mb-1">Automation Opportunity</p>
+                                <p className="text-sm leading-relaxed text-white/80">{stage.automationOpportunity}</p>
+                              </div>
+                            </div>
                             {/* Workflow diagram placeholder */}
                             <div className="rounded-lg overflow-hidden border border-white/8">
                               <img
@@ -764,6 +769,7 @@ export default function Home() {
                           </div>
                         )}
                       </div>
+                    </div>
                     </div>
                   );
                 })}
