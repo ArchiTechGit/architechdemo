@@ -647,162 +647,107 @@ export default function Home() {
             </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute left-[13px] top-6 bottom-6 w-px bg-white/8" />
-              <div className="space-y-4">
-                {JOURNEY_STAGES.map((stage, stageIndex) => {
-                  const isTriggered = triggeredStages.has(stage.id);
-                  const isLoading = loadingStage === stage.id;
-                  const isLocked = false;
-                  const isNext = !isTriggered;
-                  const prevChapter = stageIndex > 0 ? JOURNEY_STAGES[stageIndex - 1].chapter : null;
-                  const revealedSteps = stageStepReveal[stage.id] || 0;
-
-                  const isExpanded = expandedStages.has(stage.id);
-
-                  return (
-                    <div key={stage.id}>
-                    {stage.sectionHeader && (
-                      <div className="flex items-center gap-3 mb-3 mt-2 pl-6">
-                        <span className="text-xs font-bold text-primary/50 uppercase tracking-widest font-mono">{stage.sectionHeader}</span>
-                        <div className="flex-1 h-px bg-primary/10" />
-                      </div>
-                    )}
-                    <div className={`flex gap-3 transition-all duration-500 ${isLocked ? "opacity-25" : "opacity-100"}`}>
-                      <div className="flex-shrink-0 flex items-start pt-[14px] z-10">
-                        <div className={`w-[10px] h-[10px] rounded-full border-2 transition-all duration-500 ${
-                          isTriggered ? "border-[#00A991] bg-[#00A991] shadow-[0_0_8px_rgba(0,169,145,0.6)]" :
-                          isNext ? "border-[#05C3DD] bg-primary/20 shadow-[0_0_8px_rgba(5,195,221,0.4)]" :
-                          "border-white/15 bg-transparent"
-                        }`} />
-                      </div>
-
-                      <div
-                        className={`flex-1 rounded-xl border bg-background transition-all duration-500 ${
-                          isTriggered ? "border-[#00A991]/30" :
-                          isNext ? "border-white/12" :
-                          "border-white/6"
-                        }`}
-                      >
-                        {/* Always-visible header row */}
-                        <div className="flex items-center gap-2 px-4 pt-4 pb-3">
-                          <span className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded border transition-all duration-500 flex-shrink-0 ${
-                            isTriggered ? "text-[#00A991] border-[#00A991]/30 bg-[#00A991]/10" :
-                            isNext ? "text-[#05C3DD] border-primary/30 bg-primary/8" :
-                            "text-white/20 border-white/8"
-                          }`}>
-                            {stage.chapter}
-                          </span>
-                          <h3 className={`font-black transition-colors duration-500 flex-1 ${
-                            isTriggered ? "text-[#00A991] text-base" :
-                            isNext ? "text-white text-lg" :
-                            "text-white/40 text-base"
-                          }`}>
-                            {stage.label}
-                          </h3>
-                          {isTriggered && (
-                            <Check className="w-4 h-4 text-[#00A991] flex-shrink-0" />
-                          )}
-                        </div>
-
-                        {/* Action button row */}
-                        <div className="px-4 pt-1 pb-3 flex justify-end">
-                          {isTriggered ? (
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00A991]/10 border border-[#00A991]/25 rounded-md">
-                              <Check className="w-3 h-3 text-[#00A991]" />
-                              <span className="text-xs font-medium text-[#00A991]">Sent</span>
+            <div className="space-y-5">
+              {(["Pre Admission", "Day-of-Surgery Coordination", "Discharge and Recovery"] as const).map((header) => {
+                const headerIdx = JOURNEY_STAGES.findIndex((s) => s.sectionHeader === header);
+                const nextHeaderIdx = JOURNEY_STAGES.findIndex((s, idx) => idx > headerIdx && s.sectionHeader);
+                const groupStages = JOURNEY_STAGES.slice(headerIdx, nextHeaderIdx === -1 ? undefined : nextHeaderIdx);
+                return (
+                  <div key={header}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xs font-bold text-primary/50 uppercase tracking-widest font-mono">{header}</span>
+                      <div className="flex-1 h-px bg-primary/10" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {groupStages.map((stage) => {
+                        const isTriggered = triggeredStages.has(stage.id);
+                        const isLoading = loadingStage === stage.id;
+                        const isExpanded = expandedStages.has(stage.id);
+                        const revealedSteps = stageStepReveal[stage.id] || 0;
+                        return (
+                          <div key={stage.id} className={`rounded-lg border bg-background transition-all duration-500 ${isTriggered ? "border-[#00A991]/30" : "border-white/10"}`}>
+                            {/* Header row */}
+                            <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+                              <span className={`font-mono text-[10px] font-bold px-1 py-0.5 rounded border flex-shrink-0 transition-all duration-500 ${
+                                isTriggered ? "text-[#00A991] border-[#00A991]/30 bg-[#00A991]/10" : "text-primary/50 border-primary/20 bg-primary/5"
+                              }`}>{stage.chapter}</span>
+                              <h3 className={`text-xs font-bold flex-1 leading-tight transition-colors duration-500 ${isTriggered ? "text-[#00A991]" : "text-white/80"}`}>
+                                {stage.label}
+                              </h3>
+                              {isTriggered && <Check className="w-3 h-3 text-[#00A991] flex-shrink-0" />}
                             </div>
-                          ) : isLocked ? (
-                            <button
-                              onClick={(e) => e.shiftKey && triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
-                              title="Hold Shift to override sequence"
-                              className="flex items-center gap-1.5 px-3 py-1 border border-white/8 rounded-md hover:border-white/15 transition-colors group"
-                            >
-                              <span className="text-xs text-white/20">Stage {prevChapter} first</span>
-                              <span className="text-xs text-white/10 font-mono group-hover:text-white/20 transition-colors">⇧ skip</span>
-                            </button>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
-                                <Button
-                                  onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
-                                  disabled={!!loadingStage}
-                                  className="bg-transparent hover:bg-white/5 text-white/40 hover:text-white/70 font-medium text-xs h-8 px-4 border border-white/12 hover:border-white/25 shadow-none transition-all duration-200"
-                                >
-                                  Start Meeting
-                                </Button>
-                              )}
-                              <Button
-                                onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
-                                disabled={!!loadingStage}
-                                className="bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-xs h-8 px-4 border border-primary/35 hover:border-primary/60 shadow-none transition-all duration-200"
-                              >
-                                {isLoading ? (
+
+                            {/* Buttons row */}
+                            <div className="px-3 pb-2 flex items-center justify-end gap-1.5">
+                              {isTriggered ? (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-[#00A991]/10 border border-[#00A991]/25 rounded">
+                                  <Check className="w-2.5 h-2.5 text-[#00A991]" />
+                                  <span className="text-[10px] font-medium text-[#00A991]">Sent</span>
+                                </div>
+                              ) : (
                                 <>
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-                                  <span className="sr-only">Sending workflow...</span>
+                                  {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
+                                    <Button
+                                      onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
+                                      disabled={!!loadingStage}
+                                      className="bg-transparent hover:bg-white/5 text-white/35 hover:text-white/60 font-medium text-[10px] h-7 px-2.5 border border-white/10 hover:border-white/20 shadow-none transition-all duration-200"
+                                    >
+                                      Start Meeting
+                                    </Button>
+                                  )}
+                                  <Button
+                                    onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
+                                    disabled={!!loadingStage}
+                                    className="bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-[10px] h-7 px-2.5 border border-primary/30 hover:border-primary/55 shadow-none transition-all duration-200"
+                                  >
+                                    {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
+                                  </Button>
                                 </>
-                              ) : "Send to Patient →"}
-                              </Button>
+                              )}
                             </div>
-                          )}
-                        </div>
 
-                        {/* Expand toggle */}
-                        <button
-                          onClick={() => toggleExpanded(stage.id)}
-                          aria-expanded={isExpanded}
-                          aria-controls={`stage-details-${stage.id}`}
-                          className={`w-full flex items-center gap-1.5 px-4 py-3 border-t transition-colors ${
-                            isExpanded ? "border-white/8 text-white/40 hover:text-white/60" : "border-white/6 text-white/20 hover:text-white/40"
-                          }`}
-                        >
-                          <ChevronDown
-                            className="w-3 h-3 transition-transform duration-300 flex-shrink-0"
-                            style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
-                          />
-                          <span className="text-xs font-mono">{isExpanded ? "Hide details" : "Show details"}</span>
-                        </button>
+                            {/* Expand toggle */}
+                            <button
+                              onClick={() => toggleExpanded(stage.id)}
+                              aria-expanded={isExpanded}
+                              className={`w-full flex items-center gap-1 px-3 py-1.5 border-t transition-colors ${
+                                isExpanded ? "border-white/8 text-white/40 hover:text-white/60" : "border-white/6 text-white/20 hover:text-white/40"
+                              }`}
+                            >
+                              <ChevronDown className="w-2.5 h-2.5 flex-shrink-0 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
+                              <span className="text-[10px] font-mono">{isExpanded ? "Hide" : "Details"}</span>
+                            </button>
 
-                        {/* Expandable details */}
-                        {isExpanded && (
-                          <div id={`stage-details-${stage.id}`} className="px-4 pb-4 pt-3 border-t border-white/6 space-y-4">
-                            <div className="space-y-3">
-                              <div>
-                                <p className="text-xs font-bold text-white/30 uppercase tracking-widest font-mono mb-1">Current State</p>
-                                <p className="text-sm leading-relaxed text-white/70">{stage.currentState}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs font-bold text-primary/50 uppercase tracking-widest font-mono mb-1">Automation Opportunity</p>
-                                <p className="text-sm leading-relaxed text-white/80">{stage.automationOpportunity}</p>
-                              </div>
-                            </div>
-                            {/* Workflow diagram placeholder */}
-                            <div className="rounded-lg overflow-hidden border border-white/8">
-                              <img
-                                src={`https://placehold.co/600x280/13294B/1A3460?text=Workflow+Diagram+—+${encodeURIComponent(stage.label)}`}
-                                alt={`Workflow diagram for ${stage.label}`}
-                                className="w-full h-auto block"
-                              />
-                            </div>
-                            {isTriggered && revealedSteps > 0 && (
-                              <div className="flex gap-2 flex-wrap">
-                                {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
-                                  <div key={step} className="flex items-center gap-1.5 px-2 py-1 bg-[#00A991]/8 border border-[#00A991]/15 rounded-md">
-                                    <span className="w-1 h-1 rounded-full bg-[#00A991] flex-shrink-0" />
-                                    <span className="text-xs text-[#00A991]/60 font-mono">{step}</span>
+                            {/* Expandable details */}
+                            {isExpanded && (
+                              <div className="px-3 pb-3 pt-2 border-t border-white/6 space-y-3">
+                                <div>
+                                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest font-mono mb-1">Current State</p>
+                                  <p className="text-xs leading-relaxed text-white/65">{stage.currentState}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-primary/50 uppercase tracking-widest font-mono mb-1">Automation Opportunity</p>
+                                  <p className="text-xs leading-relaxed text-white/75">{stage.automationOpportunity}</p>
+                                </div>
+                                {isTriggered && revealedSteps > 0 && (
+                                  <div className="flex gap-1.5 flex-wrap pt-1">
+                                    {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
+                                      <div key={step} className="flex items-center gap-1 px-2 py-0.5 bg-[#00A991]/8 border border-[#00A991]/15 rounded">
+                                        <span className="w-1 h-1 rounded-full bg-[#00A991] flex-shrink-0" />
+                                        <span className="text-[10px] text-[#00A991]/60 font-mono">{step}</span>
+                                      </div>
+                                    ))}
                                   </div>
-                                ))}
+                                )}
                               </div>
                             )}
                           </div>
-                        )}
-                      </div>
+                        );
+                      })}
                     </div>
-                    </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Presenter control — shown when all stages complete */}
