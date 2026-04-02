@@ -705,18 +705,27 @@ export default function Home() {
                               <span className="text-xs text-white/10 font-mono group-hover:text-white/20 transition-colors">⇧ skip</span>
                             </button>
                           ) : (
-                            <Button
-                              onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
-                              disabled={!!loadingStage}
-                              className="bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-xs h-8 px-4 border border-primary/35 hover:border-primary/60 shadow-none transition-all duration-200"
-                            >
-                              {isLoading ? (
-                              <>
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-                                <span className="sr-only">Sending workflow...</span>
-                              </>
-                            ) : "Send to Patient →"}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
+                                <Button
+                                  className="bg-transparent hover:bg-white/5 text-white/40 hover:text-white/70 font-medium text-xs h-8 px-4 border border-white/12 hover:border-white/25 shadow-none transition-all duration-200"
+                                >
+                                  Start Meeting
+                                </Button>
+                              )}
+                              <Button
+                                onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
+                                disabled={!!loadingStage}
+                                className="bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-xs h-8 px-4 border border-primary/35 hover:border-primary/60 shadow-none transition-all duration-200"
+                              >
+                                {isLoading ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                                  <span className="sr-only">Sending workflow...</span>
+                                </>
+                              ) : "Send to Patient →"}
+                              </Button>
+                            </div>
                           )}
                         </div>
 
