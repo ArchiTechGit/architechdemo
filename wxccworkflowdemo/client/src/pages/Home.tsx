@@ -312,8 +312,8 @@ export default function Home() {
     <div className="min-h-screen bg-background">
 
       {/* Header */}
-      <div className="h-14 bg-[#0B1520] border-b border-primary/10 flex items-center px-6 md:px-10 justify-between">
-        <div className="flex items-center gap-3">
+      <div className="h-16 bg-[#080f19] border-b border-white/[0.06] flex items-center px-6 md:px-10 justify-between" style={{ boxShadow: "0 1px 0 rgba(5,195,221,0.08), 0 4px 24px rgba(0,0,0,0.4)" }}>
+        <div className="flex items-center gap-4">
           {/* ArchiTech logo — screen blend makes black bg transparent on dark surfaces */}
           <img
             src={logoUrl}
@@ -326,57 +326,73 @@ export default function Home() {
               flexShrink: 0,
             }}
           />
-          <div className="border-l border-white/10 pl-3">
-            <h1 className="text-[13px] font-bold text-white uppercase tracking-wide leading-tight">
+          <div className="border-l border-white/[0.08] pl-4">
+            <h1 className="text-[13px] font-bold text-white/90 uppercase tracking-widest leading-tight">
               The Digital Front Door — Patient Experience Journey
             </h1>
-            <p className="text-[10px] font-bold text-primary tracking-[0.18em] uppercase mt-0.5">
+            <p className="text-[10px] font-bold text-primary tracking-[0.22em] uppercase mt-0.5" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
               [ Live Demonstration ]
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 border border-[#00A991]/40 rounded-full px-3 py-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse-subtle flex-shrink-0" />
+        <div className="flex items-center gap-2 border border-[#00A991]/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+          <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
           <span className="text-xs font-bold text-[#00A991] tracking-wider uppercase">Live</span>
         </div>
       </div>
 
       {/* Impact banner */}
       <div
-        className="relative border-b border-white/8 overflow-hidden"
-        style={{ background: "#0B1520", minHeight: "200px" }}
+        className="relative border-b border-white/[0.06] overflow-hidden"
+        style={{ background: "#070d15", minHeight: "220px" }}
       >
         <img
           src={bgImage}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ opacity: 0.18, mixBlendMode: "luminosity" }}
+          style={{ opacity: 0.14, mixBlendMode: "luminosity" }}
+        />
+        {/* Layered dramatic gradients */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(135deg, rgba(7,13,21,0.95) 0%, rgba(13,24,37,0.75) 50%, rgba(19,41,75,0.92) 100%)" }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(135deg, rgba(11,21,32,0.85) 0%, rgba(13,24,37,0.7) 50%, rgba(19,41,75,0.85) 100%)" }}
+          style={{ background: "radial-gradient(ellipse 55% 120% at 0% 50%, rgba(5,195,221,0.13) 0%, transparent 55%)" }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 60% 100% at 0% 50%, rgba(5,195,221,0.08) 0%, transparent 60%)" }}
+          style={{ background: "radial-gradient(ellipse 40% 80% at 100% 50%, rgba(19,41,75,0.6) 0%, transparent 60%)" }}
         />
+        {/* Subtle top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.3) 30%, rgba(5,195,221,0.15) 70%, transparent 100%)" }} />
         <div
-          className="container mx-auto px-6 md:px-10 py-8 flex items-center gap-8 md:gap-12 relative"
-          style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(6px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
+          className="container mx-auto px-6 md:px-10 py-10 flex items-center gap-8 md:gap-14 relative"
+          style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
         >
           {/* Hero number */}
-          <div className="flex-shrink-0 flex items-end gap-3">
-            <span className="font-black text-primary leading-none" style={{ fontSize: "clamp(56px, 7vw, 88px)" }}>{IMPACT_STATS[statIndex].hero}</span>
-            <div className="pb-2">
-              <div className="w-8 h-0.5 bg-primary mb-2" />
+          <div className="flex-shrink-0 flex items-end gap-4">
+            <span
+              className="font-black text-primary leading-none"
+              style={{
+                fontSize: "clamp(64px, 8vw, 100px)",
+                textShadow: "0 0 40px rgba(5,195,221,0.35), 0 0 80px rgba(5,195,221,0.15)",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {IMPACT_STATS[statIndex].hero}
+            </span>
+            <div className="pb-3">
+              <div className="w-10 h-px mb-3" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.8), rgba(5,195,221,0.2))" }} />
               {/* Dot indicators + prev/next controls */}
               <div className="flex gap-1.5 items-center">
                 <button
                   onClick={() => advanceStat(-1)}
                   aria-label="Previous stat"
-                  className="w-4 h-4 flex items-center justify-center text-white/30 hover:text-primary transition-colors"
-                  style={{ fontSize: "10px" }}
+                  className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors"
+                  style={{ fontSize: "12px" }}
                 >‹</button>
                 {IMPACT_STATS.map((_, i) => (
                   <button
@@ -384,56 +400,61 @@ export default function Home() {
                     onClick={() => goToStat(i)}
                     aria-label={`Show stat ${i + 1}`}
                     className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                    style={{ width: i === statIndex ? "16px" : "5px", height: "5px", background: i === statIndex ? "rgba(5,195,221,0.8)" : "rgba(255,255,255,0.2)" }}
+                    style={{
+                      width: i === statIndex ? "18px" : "5px",
+                      height: "5px",
+                      background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
+                      boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
+                    }}
                   />
                 ))}
                 <button
                   onClick={() => advanceStat(1)}
                   aria-label="Next stat"
-                  className="w-4 h-4 flex items-center justify-center text-white/30 hover:text-primary transition-colors"
-                  style={{ fontSize: "10px" }}
+                  className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors"
+                  style={{ fontSize: "12px" }}
                 >›</button>
               </div>
             </div>
           </div>
-          <div className="hidden md:block w-px self-stretch bg-white/10" />
+          <div className="hidden md:block w-px self-stretch" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)" }} />
           {/* Story */}
           <div className="flex-1">
-            <p className="text-lg md:text-xl font-black text-white mb-2 leading-snug">
+            <p className="text-xl md:text-2xl font-black text-white mb-3 leading-snug tracking-tight">
               {IMPACT_STATS[statIndex].headline}
             </p>
-            <p className="text-base text-white/75 leading-relaxed">
+            <p className="text-base text-white/65 leading-relaxed">
               {IMPACT_STATS[statIndex].body}{" "}
-              <span className="text-white font-bold">{IMPACT_STATS[statIndex].highlight}</span>
-              {" "}{IMPACT_STATS[statIndex].tail}
+              <span className="text-white font-bold" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>{IMPACT_STATS[statIndex].highlight}</span>
+              {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* Journey Overview Diagram */}
-      <div className="border-b border-white/8" style={{ background: "linear-gradient(180deg, #0D1825 0%, #0B1520 100%)" }}>
-        <div className="container mx-auto px-6 md:px-10 py-7">
+      <div className="border-b border-white/[0.06]" style={{ background: "linear-gradient(180deg, #0c1623 0%, #080f19 100%)" }}>
+        <div className="container mx-auto px-6 md:px-10 py-6">
           <button
             onClick={() => setOverviewOpen((o) => !o)}
-            className={`flex items-center gap-4 w-full text-left group focus-visible:outline-none ${overviewOpen ? "mb-6" : "mb-0"}`}
+            className={`flex items-center gap-4 w-full text-left group focus-visible:outline-none ${overviewOpen ? "mb-7" : "mb-0"}`}
             aria-expanded={overviewOpen}
           >
-            <div className="flex items-center gap-2.5">
-              <div className="w-1 h-5 bg-primary rounded-full" />
-              <span className="text-base font-black text-white uppercase tracking-widest">Journey Overview</span>
+            <div className="flex items-center gap-3">
+              <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+              <span className="text-[15px] font-black text-white uppercase tracking-widest">Journey Overview</span>
             </div>
-            <div className="flex-1 h-px bg-primary/20" />
+            <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25), transparent)" }} />
             <div className="flex items-center gap-3 flex-shrink-0">
-              <span className="text-xs text-muted-foreground font-mono">6 stages · end-to-end digital</span>
-              <div className="flex items-center gap-1.5 border border-white/15 bg-white/5 rounded-full px-3 py-1 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/10">
-                <span className="text-xs text-white/50 group-hover:text-primary transition-colors duration-300">{overviewOpen ? "Collapse" : "Expand"}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-all duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
+              <span className="text-xs text-white/30 font-mono">6 stages · end-to-end digital</span>
+              <div className="flex items-center gap-1.5 border border-white/10 rounded-full px-3 py-1.5 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/8" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <span className="text-xs text-white/40 group-hover:text-primary transition-colors duration-300">{overviewOpen ? "Collapse" : "Expand"}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-all duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
               </div>
             </div>
           </button>
 
-          <div className={`space-y-4 overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}
+          <div className={`space-y-5 overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}
             style={{ maxHeight: overviewOpen ? "2000px" : "0" }}
           >
             {(["Pre Admission", "Day-of-Surgery Coordination", "Discharge and Recovery"] as const).map((header) => {
@@ -442,25 +463,37 @@ export default function Home() {
               const groupStages = JOURNEY_STAGES.slice(headerIdx, nextHeaderIdx === -1 ? undefined : nextHeaderIdx);
               return (
                 <div key={header}>
-                  <p className="text-xs font-bold text-primary/50 uppercase tracking-widest mb-2 font-mono">{header}</p>
+                  <p className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em] mb-3 font-mono">{header}</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {groupStages.map((stage) => {
                       const globalIdx = JOURNEY_STAGES.indexOf(stage);
                       const Icon = STAGE_META[globalIdx].icon;
                       return (
-                        <div key={stage.id} className="rounded-xl border border-white/8 bg-white/[0.025] p-5 flex flex-col gap-3 hover:border-primary/20 hover:bg-white/[0.04] transition-colors duration-300 relative overflow-hidden">
-                          <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.03] select-none pointer-events-none" style={{ fontSize: "72px" }}>{stage.chapter}</span>
-                          <div className="flex items-center gap-2">
-                            <Icon className="w-4 h-4 text-primary/60" />
-                            <span className="font-mono text-xs font-bold text-primary/50">{stage.chapter}</span>
+                        <div
+                          key={stage.id}
+                          className="rounded-xl p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-300 hover:border-primary/25 group/card"
+                          style={{
+                            border: "1px solid rgba(255,255,255,0.07)",
+                            background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)",
+                            boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
+                          }}
+                        >
+                          {/* Hover glow top edge */}
+                          <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(5,195,221,0.3), transparent)" }} />
+                          <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.025] select-none pointer-events-none" style={{ fontSize: "80px" }}>{stage.chapter}</span>
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0" style={{ background: "rgba(5,195,221,0.08)", border: "1px solid rgba(5,195,221,0.15)" }}>
+                              <Icon className="w-3.5 h-3.5 text-primary/70" />
+                            </div>
+                            <span className="font-mono text-[10px] font-bold text-primary/40 tracking-wider">{stage.chapter}</span>
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-black text-white text-base leading-tight mb-1.5">{stage.label}</h3>
-                            <p className="text-sm text-white/60 leading-relaxed">{STAGE_META[globalIdx].shortDesc}</p>
+                            <h3 className="font-black text-white text-[15px] leading-tight mb-2">{stage.label}</h3>
+                            <p className="text-sm text-white/55 leading-relaxed">{STAGE_META[globalIdx].shortDesc}</p>
                           </div>
-                          <div className="flex items-center gap-1.5 pt-3 border-t border-white/6">
-                            <Phone className="w-3 h-3 text-primary/40" />
-                            <span className="text-xs text-primary/40 font-mono">WxCC → SMS</span>
+                          <div className="flex items-center gap-1.5 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                            <Phone className="w-3 h-3 text-primary/35" />
+                            <span className="text-[10px] text-primary/35 font-mono tracking-wider">WxCC → SMS</span>
                           </div>
                         </div>
                       );
@@ -474,22 +507,33 @@ export default function Home() {
       </div>
 
       {/* Main layout */}
-      <div className="container mx-auto px-6 md:px-10 py-8">
-        <div className="flex items-center gap-4 mb-6 px-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-1 h-5 bg-primary rounded-full" />
-            <span className="text-base font-black text-white uppercase tracking-widest">Journey Demonstration</span>
+      <div className="container mx-auto px-6 md:px-10 py-10">
+        <div className="flex items-center gap-4 mb-8 px-0">
+          <div className="flex items-center gap-3">
+            <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+            <span className="text-[15px] font-black text-white uppercase tracking-widest">Journey Demonstration</span>
           </div>
-          <div className="flex-1 h-px bg-primary/20" />
+          <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25), transparent)" }} />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
           {/* Left: Phone (2/5) */}
           <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start">
-            <Card className="border border-white/12 bg-background overflow-hidden" style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
-              <div className="relative flex justify-center items-center py-10 px-4">
-                <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(5,195,221,0.05) 0%, transparent 70%)" }} />
-                <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${phonePulse ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(ellipse 90% 80% at 50% 50%, rgba(5,195,221,0.18) 0%, transparent 65%)" }} />
+            <Card
+              className="border overflow-hidden"
+              style={{
+                borderColor: "rgba(255,255,255,0.08)",
+                background: "linear-gradient(160deg, #0e1a28 0%, #080f19 100%)",
+                boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(5,195,221,0.06), inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
+            >
+              <div className="relative flex justify-center items-center py-12 px-4">
+                {/* Ambient glow base */}
+                <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 75% 65% at 50% 55%, rgba(5,195,221,0.07) 0%, transparent 70%)" }} />
+                {/* Pulse glow on trigger */}
+                <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${phonePulse ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(ellipse 85% 75% at 50% 55%, rgba(5,195,221,0.22) 0%, transparent 60%)" }} />
+                {/* Corner accent */}
+                <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(5,195,221,0.2) 50%, transparent 90%)" }} />
                 <div
                   className="relative z-10"
                   style={{
@@ -592,11 +636,17 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="px-4 pb-4">
+              <div className="px-5 pb-5">
                 <Button
                   variant="ghost"
                   onClick={resetJourney}
-                  className="w-full text-xs font-semibold text-white/40 hover:text-white h-9 border border-white/15 hover:border-white/35 hover:bg-white/5"
+                  className="w-full text-xs font-semibold text-white/35 hover:text-white/80 h-9 transition-all duration-200"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(255,255,255,0.02)",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.02)"; }}
                 >
                   ↺ Reset & Replay
                 </Button>
@@ -608,12 +658,19 @@ export default function Home() {
           <div className="lg:col-span-3 space-y-4">
 
             {/* Form inputs — side by side */}
-            <div className="rounded-xl border border-white/12 bg-background px-4 py-4">
+            <div
+              className="rounded-2xl px-5 py-5"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
+            >
             <div className="grid grid-cols-3 gap-5">
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
-                  <User className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Name</span>
+                  <User className="w-3 h-3 text-primary/40" />
+                  <span className="text-[10px] font-bold text-white/35 uppercase tracking-[0.15em]">Patient Name</span>
                 </label>
                 <Input
                   id="patient-name"
@@ -621,13 +678,22 @@ export default function Home() {
                   placeholder="Sarah Johnson"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: "10px",
+                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
-                  <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Patient Mobile</span>
+                  <Phone className="w-3 h-3 text-primary/40" />
+                  <span className="text-[10px] font-bold text-white/35 uppercase tracking-[0.15em]">Patient Mobile</span>
                 </label>
                 <Input
                   id="patient-mobile"
@@ -635,13 +701,22 @@ export default function Home() {
                   placeholder="+61 2 1234 5678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: "10px",
+                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
-                  <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Demo Mobile</span>
+                  <Phone className="w-3 h-3 text-primary/40" />
+                  <span className="text-[10px] font-bold text-white/35 uppercase tracking-[0.15em]">Demo Mobile</span>
                 </label>
                 <Input
                   id="demo-mobile"
@@ -649,7 +724,16 @@ export default function Home() {
                   placeholder="+61 4 1234 5678"
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
-                  className="h-11 text-sm border border-white/15 focus:border-primary/70 bg-input text-foreground placeholder:text-white/20"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: "10px",
+                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
                 />
               </div>
             </div>
@@ -662,35 +746,59 @@ export default function Home() {
                 const groupStages = JOURNEY_STAGES.slice(headerIdx, nextHeaderIdx === -1 ? undefined : nextHeaderIdx);
                 return (
                   <div key={header}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-xs font-bold text-primary/50 uppercase tracking-widest font-mono">{header}</span>
-                      <div className="flex-1 h-px bg-primary/10" />
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-[10px] font-bold text-primary/45 uppercase tracking-[0.2em] font-mono">{header}</span>
+                      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.2), transparent)" }} />
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                       {groupStages.map((stage) => {
                         const isTriggered = triggeredStages.has(stage.id);
                         const isLoading = loadingStage === stage.id;
                         const isExpanded = expandedStages.has(stage.id);
                         const revealedSteps = stageStepReveal[stage.id] || 0;
                         return (
-                          <div key={stage.id} className={`rounded-lg border bg-background transition-all duration-500 ${isTriggered ? "border-[#00A991]/30" : "border-white/10"}`}>
+                          <div
+                            key={stage.id}
+                            className="rounded-xl transition-all duration-500"
+                            style={{
+                              border: isTriggered ? "1px solid rgba(0,169,145,0.35)" : "1px solid rgba(255,255,255,0.08)",
+                              background: isTriggered
+                                ? "linear-gradient(135deg, rgba(0,169,145,0.06) 0%, rgba(0,169,145,0.02) 100%)"
+                                : "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
+                              boxShadow: isTriggered
+                                ? "0 6px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,169,145,0.1), inset 0 1px 0 rgba(0,169,145,0.08)"
+                                : "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)",
+                            }}
+                          >
                             {/* Header row */}
-                            <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-                              <span className={`font-mono text-[10px] font-bold px-1 py-0.5 rounded border flex-shrink-0 transition-all duration-500 ${
-                                isTriggered ? "text-[#00A991] border-[#00A991]/30 bg-[#00A991]/10" : "text-primary/50 border-primary/20 bg-primary/5"
-                              }`}>{stage.chapter}</span>
-                              <h3 className={`text-xs font-bold flex-1 leading-tight transition-colors duration-500 ${isTriggered ? "text-[#00A991]" : "text-white/80"}`}>
+                            <div className="flex items-center gap-2.5 px-4 pt-4 pb-2.5">
+                              <span
+                                className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 transition-all duration-500"
+                                style={{
+                                  border: isTriggered ? "1px solid rgba(0,169,145,0.4)" : "1px solid rgba(5,195,221,0.2)",
+                                  background: isTriggered ? "rgba(0,169,145,0.12)" : "rgba(5,195,221,0.06)",
+                                  color: isTriggered ? "#00A991" : "rgba(5,195,221,0.6)",
+                                }}
+                              >{stage.chapter}</span>
+                              <h3
+                                className="text-xs font-bold flex-1 leading-tight transition-colors duration-500"
+                                style={{ color: isTriggered ? "#00A991" : "rgba(255,255,255,0.85)" }}
+                              >
                                 {stage.label}
                               </h3>
-                              {isTriggered && <Check className="w-3 h-3 text-[#00A991] flex-shrink-0" />}
+                              {isTriggered && (
+                                <div className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.3)" }}>
+                                  <Check className="w-2.5 h-2.5 text-[#00A991]" />
+                                </div>
+                              )}
                             </div>
 
                             {/* Buttons row */}
-                            <div className="px-3 pb-2 flex items-center justify-end gap-1.5">
+                            <div className="px-4 pb-3 flex items-center justify-end gap-1.5">
                               {isTriggered ? (
-                                <div className="flex items-center gap-1 px-2 py-0.5 bg-[#00A991]/10 border border-[#00A991]/25 rounded">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,169,145,0.1)", border: "1px solid rgba(0,169,145,0.2)" }}>
                                   <Check className="w-2.5 h-2.5 text-[#00A991]" />
-                                  <span className="text-[10px] font-medium text-[#00A991]">Sent</span>
+                                  <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
                                 </div>
                               ) : (
                                 <>
@@ -698,7 +806,8 @@ export default function Home() {
                                     <Button
                                       onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
                                       disabled={!!loadingStage}
-                                      className="bg-transparent hover:bg-white/5 text-white/35 hover:text-white/60 font-medium text-[10px] h-7 px-2.5 border border-white/10 hover:border-white/20 shadow-none transition-all duration-200"
+                                      className="font-medium text-[10px] h-7 px-2.5 shadow-none transition-all duration-200"
+                                      style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
                                     >
                                       Start Meeting
                                     </Button>
@@ -706,7 +815,13 @@ export default function Home() {
                                   <Button
                                     onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
                                     disabled={!!loadingStage}
-                                    className="bg-transparent hover:bg-primary/10 active:bg-primary/20 text-primary font-medium text-[10px] h-7 px-2.5 border border-primary/30 hover:border-primary/55 shadow-none transition-all duration-200"
+                                    className="font-semibold text-[10px] h-7 px-3 shadow-none transition-all duration-200"
+                                    style={{
+                                      background: "rgba(5,195,221,0.08)",
+                                      border: "1px solid rgba(5,195,221,0.35)",
+                                      color: "#05C3DD",
+                                      boxShadow: "0 0 12px rgba(5,195,221,0.1)",
+                                    }}
                                   >
                                     {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
                                   </Button>
@@ -718,9 +833,11 @@ export default function Home() {
                             <button
                               onClick={() => toggleExpanded(stage.id)}
                               aria-expanded={isExpanded}
-                              className={`w-full flex items-center gap-1 px-3 py-1.5 border-t transition-colors ${
-                                isExpanded ? "border-white/8 text-white/40 hover:text-white/60" : "border-white/6 text-white/20 hover:text-white/40"
-                              }`}
+                              className="w-full flex items-center gap-1.5 px-4 py-2 transition-colors"
+                              style={{
+                                borderTop: isExpanded ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(255,255,255,0.05)",
+                                color: isExpanded ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.2)",
+                              }}
                             >
                               <ChevronDown className="w-2.5 h-2.5 flex-shrink-0 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
                               <span className="text-[10px] font-mono">{isExpanded ? "Hide" : "Details"}</span>
@@ -728,18 +845,19 @@ export default function Home() {
 
                             {/* Expandable details */}
                             {isExpanded && (
-                              <div className="px-3 pb-3 pt-2 border-t border-white/6 space-y-3">
+                              <div className="px-4 pb-4 pt-3 space-y-3.5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                                 <div>
-                                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest font-mono mb-1">Current State</p>
-                                  <p className="text-xs leading-relaxed text-white/65">{stage.currentState}</p>
+                                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1.5">Current State</p>
+                                  <p className="text-xs leading-relaxed text-white/60">{stage.currentState}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-bold text-primary/50 uppercase tracking-widest font-mono mb-1">Automation Opportunity</p>
+                                  <p className="text-[10px] font-bold text-primary/45 uppercase tracking-[0.18em] font-mono mb-1.5">Automation Opportunity</p>
                                   <p className="text-xs leading-relaxed text-white/75">{stage.automationOpportunity}</p>
                                 </div>
                                 <button
                                   onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
-                                  className="w-full rounded-md overflow-hidden border border-white/8 hover:border-primary/30 transition-colors duration-200 block group relative"
+                                  className="w-full overflow-hidden block group relative transition-all duration-200"
+                                  style={{ borderRadius: "10px", border: "1px solid rgba(255,255,255,0.07)" }}
                                 >
                                   <img
                                     src={stage.image}
@@ -747,16 +865,16 @@ export default function Home() {
                                     className="w-full h-auto block"
                                     onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`; }}
                                   />
-                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
                                     <span className="text-white/0 group-hover:text-white/80 text-xs font-mono transition-colors duration-200">Click to expand</span>
                                   </div>
                                 </button>
                                 {isTriggered && revealedSteps > 0 && (
-                                  <div className="flex gap-1.5 flex-wrap pt-1">
+                                  <div className="flex gap-1.5 flex-wrap pt-0.5">
                                     {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
-                                      <div key={step} className="flex items-center gap-1 px-2 py-0.5 bg-[#00A991]/8 border border-[#00A991]/15 rounded">
-                                        <span className="w-1 h-1 rounded-full bg-[#00A991] flex-shrink-0" />
-                                        <span className="text-[10px] text-[#00A991]/60 font-mono">{step}</span>
+                                      <div key={step} className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.15)" }}>
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#00A991] flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
+                                        <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
                                       </div>
                                     ))}
                                   </div>
@@ -774,14 +892,26 @@ export default function Home() {
 
             {/* Presenter control — shown when all stages complete */}
             {allComplete && (
-              <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[#00A991]/40 bg-[#00A991]/8">
+              <div
+                className="flex items-center justify-between gap-4 p-5 rounded-2xl"
+                style={{
+                  border: "1px solid rgba(0,169,145,0.4)",
+                  background: "linear-gradient(135deg, rgba(0,169,145,0.08) 0%, rgba(0,169,145,0.04) 100%)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(0,169,145,0.1), inset 0 1px 0 rgba(0,169,145,0.1)",
+                }}
+              >
                 <div>
-                  <p className="text-sm font-black text-[#00A991]">All stages complete.</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Ready to show your impact summary.</p>
+                  <p className="text-sm font-black text-[#00A991]" style={{ textShadow: "0 0 16px rgba(0,169,145,0.4)" }}>All stages complete.</p>
+                  <p className="text-xs text-white/40 mt-0.5">Ready to show your impact summary.</p>
                 </div>
                 <Button
                   onClick={() => setShowCompleteModal(true)}
-                  className="flex-shrink-0 bg-[#00A991] hover:bg-[#16CECC] active:bg-[#00A991] text-primary-foreground font-bold text-sm border-0 shadow-[0_4px_20px_rgba(0,169,145,0.3)]"
+                  className="flex-shrink-0 font-bold text-sm border-0"
+                  style={{
+                    background: "linear-gradient(135deg, #00A991, #00c4aa)",
+                    color: "#fff",
+                    boxShadow: "0 4px 20px rgba(0,169,145,0.4), 0 0 40px rgba(0,169,145,0.15)",
+                  }}
                 >
                   View Summary →
                 </Button>
@@ -789,10 +919,20 @@ export default function Home() {
             )}
 
             {/* Tech stack */}
-            <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap pt-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-widest">Powered by</span>
+            <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap pt-2">
+              <span className="text-[10px] text-white/25 uppercase tracking-[0.18em]">Powered by</span>
               {TECH_STACK.map((tech) => (
-                <span key={tech} className="text-xs text-muted-foreground border border-primary/15 px-2 py-0.5 rounded-md font-mono">{tech}</span>
+                <span
+                  key={tech}
+                  className="text-[10px] font-mono"
+                  style={{
+                    color: "rgba(255,255,255,0.3)",
+                    border: "1px solid rgba(5,195,221,0.12)",
+                    background: "rgba(5,195,221,0.04)",
+                    padding: "2px 8px",
+                    borderRadius: "6px",
+                  }}
+                >{tech}</span>
               ))}
             </div>
 
