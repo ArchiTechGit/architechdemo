@@ -119,8 +119,8 @@ const STAGE_COLORS = [
   { bg: "linear-gradient(145deg, #081c2e 0%, #0c2842 55%, #071820 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
   // 04 — ArchiTech Blue (secondary accent)
   { bg: "linear-gradient(145deg, #081428 0%, #0c1e3e 55%, #061020 100%)", accent: "#1980BD", accentBg: "rgba(25,128,189,0.12)", accentBorder: "rgba(25,128,189,0.38)", accentGlow: "rgba(25,128,189,0.18)", iconTint: "rgba(25,128,189,0.06)" },
-  // 05 — Light Cyan (ArchiTech secondary palette #55CAFD)
-  { bg: "linear-gradient(145deg, #071c2e 0%, #0b2a44 55%, #061824 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
+  // 05 — Blue-gray (ArchiTech secondary palette #7F8FA9)
+  { bg: "linear-gradient(145deg, #0d1828 0%, #131e30 55%, #0b1422 100%)", accent: "#7F8FA9", accentBg: "rgba(127,143,169,0.14)", accentBorder: "rgba(127,143,169,0.42)", accentGlow: "rgba(127,143,169,0.16)", iconTint: "rgba(127,143,169,0.06)" },
   // 06 — ArchiTech Blue (primary secondary)
   { bg: "linear-gradient(145deg, #081030 0%, #0c1848 55%, #061028 100%)", accent: "#0055B8", accentBg: "rgba(0,85,184,0.14)", accentBorder: "rgba(0,85,184,0.42)", accentGlow: "rgba(0,85,184,0.2)", iconTint: "rgba(0,85,184,0.07)" },
 ];

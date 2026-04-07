@@ -1,6 +1,6 @@
 # ArchiTech — Brand Guidelines
-*Last updated: 2026-03-31*
-*Source: Official ArchiTech Style Guide + architech.net.au*
+*Last updated: 2026-04-08*
+*Source: Official ArchiTech Style Guide + architech.net.au + Webex CC Demo App (live)*
 
 ---
 
@@ -24,7 +24,7 @@
 
 ## 2. Logo
 
-The ArchiTech mark is a geometric triangular "A" icon paired with a clean wordmark. Three variations are in use.
+The ArchiTech mark is a geometric triangular "A" icon paired with a clean wordmark.
 
 ### Logo Variants
 
@@ -37,7 +37,7 @@ The ArchiTech mark is a geometric triangular "A" icon paired with a clean wordma
 
 ### Tagline Treatment
 
-The tagline *"technology solved \| business evolved"* appears beneath the wordmark in the preferred logo application. Use the tagline version for all external marketing, communications, and digital contexts. Suppress it only when space is genuinely constrained.
+The tagline *"technology solved \| business evolved"* appears beneath the wordmark in the preferred logo application. Use the tagline version for all external marketing, communications, and digital contexts. Suppress only when space is genuinely constrained.
 
 ### Usage Rules
 
@@ -56,7 +56,7 @@ The tagline *"technology solved \| business evolved"* appears beneath the wordma
 
 ## 3. Color System
 
-ArchiTech uses a modern, fresh, minimalist colour palette built on a cyan-to-navy range. The brand works in both light (print/document) and dark (web/digital) contexts. For the demo application, the dark/digital context applies.
+ArchiTech uses a modern, minimalist palette built on a cyan-to-navy range. All digital/web contexts use the **dark theme** exclusively. Light backgrounds are never used in the demo app.
 
 ### Primary Colour Palette
 
@@ -65,29 +65,31 @@ ArchiTech uses a modern, fresh, minimalist colour palette built on a cyan-to-nav
 | ArchiTech Cyan | `#05C3DD` | R5, G195, B221 | Pantone 311 C | Primary accent, CTAs, highlights |
 | ArchiTech Blue | `#0055B8` | R0, G85, B184 | Pantone 2935 C | Secondary accent, links, interactive |
 | ArchiTech Navy | `#13294B` | R19, G41, B75 | Pantone 2767 C | Deep background, dark surfaces |
-| ArchiTech Gray | `#54565B` | R84, G86, B90 | Pantone Cool Gray 11 | Body text (light mode), muted elements |
+| ArchiTech Gray | `#54565B` | R84, G86, B90 | Pantone Cool Gray 11 | Icons and UI elements on light backgrounds |
 
 ### Secondary Colour Palette
 
-For use in tables, diagrams, charts, and subheadings. Use HEX values for all screen/digital contexts.
+For use in multi-stage UI, charts, diagrams, and data visualisation. Use HEX values for all screen/digital contexts.
 
-| Hex | RGB | Character |
-|---|---|---|
-| `#55CAFD` | R85, G218, B253 | Light cyan — highlights, tag backgrounds |
-| `#7F8FA9` | R127, G143, B169 | Blue-gray — secondary muted text |
-| `#16CECC` | R22, G206, B204 | Teal — data, status indicators |
-| `#517FE3` | R81, G127, B227 | Periwinkle blue — charts, secondary data |
-| `#1980BD` | R25, G128, B189 | Mid blue — supporting elements |
-| `#494B83` | R73, G75, B131 | Dark indigo — depth, chart series |
-| `#00A991` | R0, G169, B145 | Teal-green — success, positive states |
-| `#9594D2` | R149, G148, B210 | Lavender — accent variation, charts |
+| Hex | RGB | Character | Status |
+|---|---|---|---|
+| `#55CAFD` | R85, G218, B253 | Light cyan — highlights, tag backgrounds | ✅ Active |
+| `#7F8FA9` | R127, G143, B169 | Blue-gray — stage accents, muted UI | ✅ Active |
+| `#16CECC` | R22, G206, B204 | Teal — gradients, button highlights | ✅ Active |
+| `#517FE3` | R81, G127, B227 | Periwinkle blue — stage accents, charts | ✅ Active |
+| `#1980BD` | R25, G128, B189 | Mid blue — supporting elements | ✅ Active |
+| `#494B83` | R73, G75, B131 | Dark indigo — depth, chart series | ✅ Available |
+| `#00A991` | R0, G169, B145 | Teal-green — success, positive states | ✅ Active |
+| `#9594D2` | R149, G148, B210 | Lavender — charts only | ⚠️ Charts/data only — do not use as UI accent |
 
-### CSS Token System (Demo App)
+> **Rule:** `#9594D2` lavender reads as off-brand in UI contexts. Reserve it for chart series only. Never use it as a card accent, button, or badge color.
+
+### CSS Token System
 
 ```css
 :root {
-  /* Backgrounds — dark/digital context */
-  --bg:           #0D1825;  /* Deep navy, slightly deeper than #13294B */
+  /* Backgrounds — dark/digital context only */
+  --bg:           #0D1825;  /* Page background — deepest layer */
   --surface:      #13294B;  /* ArchiTech Navy — cards, panels */
   --surface-2:    #1A3460;  /* Elevated surfaces */
   --surface-3:    #1F3D72;  /* Highest elevation */
@@ -102,33 +104,52 @@ For use in tables, diagrams, charts, and subheadings. Use HEX values for all scr
   --text-3:       #3D4F65;   /* Ghost/disabled */
 
   /* Brand Accents */
-  --cyan:         #05C3DD;   /* Primary accent */
+  --cyan:         #05C3DD;
   --cyan-dim:     rgba(5, 195, 221, 0.07);
   --cyan-glow:    rgba(5, 195, 221, 0.18);
-  --blue:         #0055B8;   /* Secondary accent */
+  --blue:         #0055B8;
   --blue-dim:     rgba(0, 85, 184, 0.07);
 
   /* Semantic */
-  --success:      #00A991;   /* Teal-green */
+  --success:      #00A991;   /* Teal-green — confirmed/delivered */
   --warning:      #1980BD;   /* Mid blue */
-  --error:        #C62828;   /* Error/alert — confirmed */
+  --error:        #C62828;   /* Error/alert */
 }
 ```
 
-### Rules
+### Color Application Rules
 
-- Primary CTA buttons: `--cyan` `#05C3DD`
-- Secondary/ghost buttons: `--blue` `#0055B8` border with white text
-- Success states: `--success` `#00A991`
-- Error/validation: `--error` `#C62828`
-- Never use white or light backgrounds in the demo app
-- Do not substitute generic Tailwind palette colors (indigo-500, blue-600, etc.)
+- Primary CTA buttons: `#05C3DD` with `rgba(5,195,221,0.08)` background
+- Secondary/ghost buttons: `#0055B8` border with white text
+- Success states: `#00A991`
+- Error/validation: `#C62828`
+- **Never use white or light backgrounds** in the demo app
+- **Never use generic Tailwind palette colors** — no `slate-700`, `indigo-500`, `blue-600`, etc.
+- **Never use off-brand grays** (`#2e2e30`, `#1a1a1c`, `#374151`, etc.) — use navy surfaces instead
+- Card backgrounds must use dark navy gradients derived from `#0D1825` / `#13294B`
 
-### Background Pattern
+### Stage Accent Color System
 
-A signature ArchiTech brand element is a **triangular geometric pattern** derived from the "A" icon, applied as a hero background. It uses a gradient from Navy (`#13294B`) to Cyan (`#05C3DD`). The reversed (white) logo sits over this pattern.
+When building multi-stage or journey interfaces, assign one brand color per stage. The order below is the established sequence used in the Webex CC demo — replicate it for consistency across pages.
 
-Use for: hero sections, section dividers, loading screens, and feature headers.
+| Stage | Accent | Hex | accentBg | accentBorder |
+|---|---|---|---|---|
+| 01 | ArchiTech Cyan | `#05C3DD` | `rgba(5,195,221,0.12)` | `rgba(5,195,221,0.38)` |
+| 02 | Periwinkle | `#517FE3` | `rgba(81,127,227,0.12)` | `rgba(81,127,227,0.38)` |
+| 03 | Light Cyan | `#55CAFD` | `rgba(85,202,253,0.12)` | `rgba(85,202,253,0.38)` |
+| 04 | Mid Blue | `#1980BD` | `rgba(25,128,189,0.12)` | `rgba(25,128,189,0.38)` |
+| 05 | Blue-Gray | `#7F8FA9` | `rgba(127,143,169,0.14)` | `rgba(127,143,169,0.42)` |
+| 06 | ArchiTech Blue | `#0055B8` | `rgba(0,85,184,0.14)` | `rgba(0,85,184,0.42)` |
+
+**Card background gradients** (dark navy tinted with stage accent):
+```
+Stage 01: linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)
+Stage 02: linear-gradient(145deg, #0c1630 0%, #111e48 55%, #0a1228 100%)
+Stage 03: linear-gradient(145deg, #081c2e 0%, #0c2842 55%, #071820 100%)
+Stage 04: linear-gradient(145deg, #081428 0%, #0c1e3e 55%, #061020 100%)
+Stage 05: linear-gradient(145deg, #0d1828 0%, #131e30 55%, #0b1422 100%)
+Stage 06: linear-gradient(145deg, #081030 0%, #0c1848 55%, #061028 100%)
+```
 
 ---
 
@@ -142,7 +163,7 @@ Use for: hero sections, section dividers, loading screens, and feature headers.
 | **System fallback** | Arial | — | System |
 | **Technical / Mono** | JetBrains Mono | 400, 700 | Google Fonts |
 
-Roboto is used for all print and web applications. Arial is the system fallback only — never specify Arial as primary. JetBrains Mono is used for webhook URLs, technical data, JSON, and status codes.
+Roboto is used for all print and web applications. Arial is the system fallback only — never specify it as primary. JetBrains Mono is used for webhook URLs, technical data, JSON, status codes, and chapter/stage badges.
 
 ### Type Scale
 
@@ -150,10 +171,10 @@ Roboto is used for all print and web applications. Arial is the system fallback 
 |---|---|---|---|---|
 | Hero | `3rem–4.5rem` | 700–900 | Title case | Page hero headings |
 | Section heading | `2rem–2.5rem` | 700 | Title case | Section titles |
-| Card title | `1.25rem–1.5rem` | 600 | Title case | Card and panel headings |
+| Card title | `1.25rem–1.5rem` (large card) / `0.875rem` (compact) | 700–900 | Title case | Card and panel headings |
 | Body | `1rem` | 400 | Sentence case | Body copy |
-| Label | `0.875rem` | 500 | All-caps or title | UI labels, tags |
-| Mono / technical | `0.8125rem` | 400 | As-is | URLs, codes, JSON |
+| Label | `0.875rem` | 500–700 | All-caps or title | UI labels, tags, section group headers |
+| Mono / technical | `0.8125rem` | 400–700 | As-is | URLs, codes, JSON, chapter badges |
 | Micro | `0.75rem` | 400 | Sentence case | Timestamps, metadata |
 
 ### Hierarchy Rules
@@ -162,7 +183,7 @@ Roboto is used for all print and web applications. Arial is the system fallback 
 - Body: sentence case, Roboto Regular
 - Never use the same weight for two adjacent levels
 - Mono data always uses JetBrains Mono — never Roboto for technical strings
-- Tracking: `-0.01em` on large headings; `0.06em` on all-caps labels
+- Tracking: `-0.01em` on large headings; `0.06em` on all-caps labels; `0.15–0.2em` on section group headers
 
 ---
 
@@ -177,8 +198,6 @@ Roboto is used for all print and web applications. Arial is the system fallback 
 | Desktop gutter | `4vw` |
 | Mobile gutter | `6vw` |
 | Responsive breakpoint | `768px` |
-| Nav logo height (desktop) | `101px` |
-| Nav logo height (mobile) | `90px` |
 | Header backdrop blur | `blur(12px)` |
 | Text-on-photo blur | `blur(15px)` |
 
@@ -187,14 +206,14 @@ Roboto is used for all print and web applications. Arial is the system fallback 
 - Full-bleed hero with triangular gradient pattern or dark photographic background
 - Cards and grids stack single column at `768px`
 - Nav collapses to hamburger at mobile
-- Image-text balanced layouts — photography differentiates, color signals function
 - Asymmetric two-column patterns for content sections (60/40 or 65/35)
+- Collapsible sections default to **closed** — expand on interaction
 
 ---
 
 ## 6. Motion & Animation
 
-ArchiTech's site has global animations disabled. The brand does not use motion as a feature — interaction should be immediate and purposeful.
+ArchiTech's brand does not use motion as a feature — interaction should be immediate and purposeful.
 
 **For the demo app:**
 - **Entry:** `opacity 0 → 1` at `0.25s ease` — no translate, no bounce
@@ -203,9 +222,10 @@ ArchiTech's site has global animations disabled. The brand does not use motion a
 - **Status pulse:** `2s` continuous opacity animation for live/active states
 - **Loading:** spinner with `opacity: 0.4` overlay — never block full UI
 - **Toast/notification:** `0.3s ease` fade-in + `4px` slide-up
+- **Stepper progress:** `0.7s` width transition on filled track line
 
 **Rules:**
-- Only animate `transform` and `opacity` — never `transition-all`
+- Prefer animating `opacity` and `transform` only
 - Every interactive element needs hover, focus-visible, and active states
 - No parallax, no canvas effects, no scroll-triggered theatrics
 - Button active state: `translateY(1px)` + `scale(0.98)`
@@ -223,7 +243,6 @@ ArchiTech's site has global animations disabled. The brand does not use motion a
 > *Technology solved. Business evolved.*
 > *De-risking critical technology decisions.*
 > *Built on decades of experience supporting unique IT needs.*
-> *The best outcomes are achieved when we reach trusted partner status.*
 
 **Avoid:**
 - "Passionate about technology"
@@ -240,28 +259,148 @@ This brand is applied to a **Webex Contact Center pre-sales demonstration dashbo
 **Requirements:**
 - ArchiTech branding visible but not intrusive (logo in nav, cyan on primary CTAs)
 - Dark digital theme — navy surface layering system, cyan accent
-- Technical credibility — webhook URLs, status pulses, JSON payloads rendered in mono
+- Technical credibility — webhook URLs, status pulses, flow steps rendered in mono
 - No toy aesthetics — this serves critical infrastructure customers
-- The triangular brand pattern may be used as a hero or section background element
 
 **Section accent mapping:**
 
 | Section | Accent | Treatment |
 |---|---|---|
-| Dashboard / Overview | `--cyan` | Status at a glance |
-| Workflow Triggers | `--cyan` | Primary CTA — solid cyan button |
-| Activity Log | `--text-2` muted | Mono typography, recessed surface |
-| Settings / Config | `--surface-2` | Technical, recessed |
-| Success states | `--success` `#00A991` | Confirmation, webhook delivered |
-| Error / Alert | `--error` `#C62828` | Validation, failures |
+| Journey Overview | Stage color sequence (01–06) | Timeline nodes + cinematic cards |
+| Journey Demonstration | Stage color sequence (01–06) | Stepper + spotlight detail panel |
+| Phone SMS mockup | `#05C3DD` | Cyan send button; navy phone body |
+| Impact stats | `#05C3DD` | Cycling stat cards |
+| Success / Sent states | `#00A991` | Confirmation badges, check marks |
+| Error / Alert | `#C62828` | Validation, failures |
+| All-stages-complete | `#00A991` gradient to `#16CECC` | "View Summary" CTA |
 
 ---
 
-## 9. What This Brand Is Not
+## 9. UI Component Patterns
 
-- Not The Senate — no grain overlays, no death metal aesthetics, no navy-black darkness
-- Not generic SaaS — no indigo-600, no white card grids on light gray
+These are the established component patterns used in the Webex CC demo app. Replicate these patterns on other pages for consistency.
+
+### 9.1 Section Header
+
+A collapsible section header with a left accent bar, title, and collapse toggle.
+
+```
+[3px cyan gradient bar] SECTION TITLE ─────────────── 6 stages · subtitle  [Expand ˅]
+```
+
+- Left bar: `linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))` with `box-shadow: 0 0 8px rgba(5,195,221,0.5)`
+- Title: `15px`, `font-black`, `uppercase`, `tracking-widest`
+- Divider line: `linear-gradient(90deg, rgba(5,195,221,0.25), transparent)`
+- Toggle pill: `rounded-full`, `border: rgba(255,255,255,0.1)`, hover to `rgba(5,195,221,0.4)`
+- **Default state: collapsed** (`max-h-0`, `opacity-0`)
+
+### 9.2 Horizontal Timeline / Stepper
+
+Used for multi-stage journey navigation. 6 nodes on a single track line with section group labels above.
+
+**Structure:**
+1. Group labels row — 3 labels (each spanning 2 stages), text only, no divider lines, `font-mono uppercase tracking-[0.2em]`
+2. Track line — `rgba(5,195,221,0.12)` — quiet guide, not a feature
+3. Node row — circular buttons with stage icon; active node glows with stage accent color
+4. Filled progress track — `linear-gradient(90deg, #00A991, #05C3DD)` — advances as stages are triggered
+5. Stage labels — small mono text below each node
+
+**Node states:**
+- Default: `rgba(255,255,255,0.04)` background, `rgba(255,255,255,0.1)` border
+- Active (selected): stage `accentBg` background, stage `accent` border + glow
+- Triggered (sent): `rgba(0,169,145,0.15)` background, `#00A991` border + check icon
+
+**Behaviour:** clicking a node selects it and shows its detail panel below. After triggering a stage, auto-advance to the next node after 600ms.
+
+### 9.3 Cinematic Banner Card
+
+Used in the Journey Overview (expanded overview section). Each stage is a fixed-height card with a full-bleed gradient background.
+
+**Structure:**
+```
+┌─────────────────────────────────────┐
+│ [chapter badge]          [sent ✓]   │  ← dark gradient bg (stage color)
+│                                     │
+│ [large faded icon — bottom right]   │
+│                                     │
+│ Stage Title                         │
+│ [Send → button]         [Details ˅] │  ← bottom fade overlay
+└─────────────────────────────────────┘
+[Expanded details panel below — dark bg with stage accent border]
+```
+
+- Height: `162px` fixed
+- Background: stage gradient (see Section 3 — Stage Accent Color System)
+- Large background icon: `120×120px`, `iconTint` opacity (`rgba(..., 0.06)`) — positioned bottom-right
+- Bottom overlay: `linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.7))`
+- Chapter badge: `font-mono`, stage `accentBg` + `accentBorder`
+- Send button: stage `accent` color, `accentBg` background, `accentBorder` border
+- Triggered wash: `linear-gradient(145deg, accentBg 0%, transparent 65%)`
+- Expanded details panel: `rgba(8,14,24,0.97)` background, `accentBorder` top border
+
+### 9.4 Stepper Detail Panel (Spotlight Card)
+
+The large card shown below the stepper when a stage is selected. Combines the cinematic banner with a full content body.
+
+**Structure:**
+```
+┌─────────────────────────────────────────────┐
+│ [chapter] [section label]     [Sent ✓ pill] │  ← stage gradient bg, 140px
+│                                             │
+│ [large faded icon — bottom right, 160px]    │
+│                                             │
+│ Stage Title                  [Send → btn]   │
+└─────────────────────────────────────────────┘
+│ Automation opportunity text                 │  ← rgba(8,14,24,0.97)
+│ Current State (always visible)              │
+│ [Flow steps — appear after trigger]         │
+│ [View Workflow ˅ button — full width cyan]  │
+│   └─ [Workflow diagram image]               │
+└─────────────────────────────────────────────┘
+```
+
+- Banner height: `140px`
+- "View Workflow" button: full-width, `rounded-lg`, `#05C3DD` border + background tint, bold text
+- Flow steps: appear sequentially after webhook confirms (450ms, 950ms, 1500ms delays)
+- Current State text is always visible — not hidden behind a toggle
+
+### 9.5 Phone SMS Mockup
+
+A portrait phone device used to preview the SMS content of each triggered stage.
+
+**Device:**
+- Body: `linear-gradient(160deg, #1A3460, #13294B, #0D1825)` — ArchiTech navy, not generic gray
+- Side buttons: `linear-gradient(180deg, #1F3D72, #13294B)`
+- Border radius: `50px`
+- Screen inset: `10px` all sides, `borderRadius: 42px`, white background
+
+**Status bar (on white screen):**
+- Clock text: `#13294B`
+- Signal bars, WiFi, battery: `#54565B` (ArchiTech Gray)
+
+**SMS bubble:**
+- Sender avatar: `#05C3DD` background, "AT" initials
+- Message bubble: `bg-slate-100` rounded, `text-slate-800`, `white-space: pre-line` (supports multi-line)
+- CTA pill: `#05C3DD` background, white bold text
+
+**Pulse effect on trigger:** `radial-gradient` cyan glow animation, `box-shadow` intensifies for 2s
+
+### 9.6 Impact Stat Card
+
+Cycling statistic display used in the demo summary section.
+
+- Background: `rgba(5,195,221,0.03)` with cyan border
+- Hero number: large, `font-black`, white
+- Highlight text: `#05C3DD`
+- Cycles every 12 seconds, fade transition `0.35s`
+
+---
+
+## 10. What This Brand Is Not
+
+- Not generic SaaS — no `indigo-600`, no white card grids on light gray
 - Not a telco consumer brand — no bright blue-on-white consumer aesthetics
-- Not startup-flashy — no gradient-everywhere, no neon glow effects
+- Not startup-flashy — no gradient-everywhere, no excessive glow effects
 - Not decorative — every element serves enterprise credibility or functional clarity
-- Not print-only — dark/digital treatment is primary for web and app contexts
+- Not print-only — dark/digital treatment is primary for all web and app contexts
+- Not gray — never use generic system grays (`#374151`, `slate-700`, `#2e2e30`, etc.) — replace with navy surfaces
