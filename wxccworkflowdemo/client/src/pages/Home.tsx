@@ -475,31 +475,29 @@ export default function Home() {
           <div className={`overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
             style={{ maxHeight: overviewOpen ? "800px" : "0" }}
           >
-            {/* Section labels spanning pairs of stages */}
-            <div className="flex mb-2">
+            {/* Section labels — text only, no divider lines */}
+            <div className="flex mb-3">
               {[
-                { label: "Pre Admission", color: "rgba(5,195,221,0.45)" },
-                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.45)" },
-                { label: "Discharge & Recovery", color: "rgba(149,148,210,0.45)" },
+                { label: "Pre Admission", color: "rgba(5,195,221,0.5)" },
+                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.5)" },
+                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.5)" },
               ].map(({ label, color }) => (
-                <div key={label} className="flex items-center gap-2 px-1" style={{ flex: 2 }}>
-                  <div className="h-px flex-1" style={{ background: color, opacity: 0.4 }} />
-                  <span className="text-[11px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
-                  <div className="h-px flex-1" style={{ background: color, opacity: 0.4 }} />
+                <div key={label} className="flex items-center justify-center px-1" style={{ flex: 2 }}>
+                  <span className="text-[10px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
                 </div>
               ))}
             </div>
 
             {/* Timeline */}
             <div className="relative flex">
-              {/* Track line through node centres */}
-              <div className="absolute top-5 left-5 right-5 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25) 0%, rgba(85,202,253,0.15) 50%, rgba(149,148,210,0.25) 100%)" }} />
+              {/* Single subtle track line */}
+              <div className="absolute top-5 left-5 right-5 h-px pointer-events-none" style={{ background: "rgba(5,195,221,0.12)" }} />
 
               {JOURNEY_STAGES.map((stage, idx) => {
                 const sc = STAGE_COLORS[idx];
                 const Icon = STAGE_META[idx].icon;
                 return (
-                  <div key={stage.id} className="flex flex-col items-center" style={{ flex: 1, padding: "0 4px" }}>
+                  <div key={stage.id} className="flex flex-col items-center gap-3" style={{ flex: 1, padding: "0 4px" }}>
                     {/* Node */}
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-200"
@@ -511,9 +509,6 @@ export default function Home() {
                     >
                       <Icon className="w-4 h-4" style={{ color: sc.accent }} />
                     </div>
-
-                    {/* Connector to card */}
-                    <div className="w-px h-3 flex-shrink-0" style={{ background: sc.accentBorder }} />
 
                     {/* Card */}
                     <div
@@ -532,9 +527,9 @@ export default function Home() {
                       </div>
                       <h3 className="text-sm font-black text-white leading-tight">{stage.label}</h3>
                       <p className="text-xs text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
-                      <div className="flex items-center gap-1 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                        <Phone className="w-3 h-3" style={{ color: `${sc.accent}55` }} />
-                        <span className="text-[10px] font-mono tracking-wider" style={{ color: `${sc.accent}55` }}>WxCC → SMS</span>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Phone className="w-3 h-3" style={{ color: `${sc.accent}45` }} />
+                        <span className="text-[10px] font-mono tracking-wider" style={{ color: `${sc.accent}45` }}>WxCC → SMS</span>
                       </div>
                     </div>
                   </div>
