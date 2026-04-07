@@ -33,7 +33,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
     automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Completed forms route to nurse dashboard with color-coded priority. Nurse reviews flagged items only. Simple cases require no callback. Reduces pre-admission appointment from 45 minutes to 10-15 minutes at most.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi — your surgery is coming up. To save time on the day, please complete your pre-admission form now. It takes about 10 minutes at your own pace.",
+    phoneMessage: "Hi John Smith, this is ArchiTech contacting you ahead of your surgery on 15 April 2026. We need to collect some health information beforehand. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
   },
@@ -45,7 +45,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
     automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Your surgery is scheduled. Tap below to confirm your appointment time, or reply to choose a different slot.",
+    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
   },
@@ -58,7 +58,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Patient arrives, joins queue at admissions desk.",
     automationOpportunity: "Day of surgery SMS before patient enters hospital carpark. \"When you arrive please proceed to Level 2, Bay 4. For assistance locating, please use this wayfinder URL\".",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Good morning — your surgery is today. When you arrive, please proceed to Level 2, Bay 4. Tap below for directions.",
+    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Open Wayfinder →",
     systemEvents: [],
   },
@@ -70,7 +70,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
     automationOpportunity: "Automated status updates sent to nominated contact. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Update from the care team: your family member is now in recovery as of 12:35pm. We'll message you again when they're ready for a visit.",
+    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Acknowledge →",
     systemEvents: [],
   },
@@ -83,7 +83,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurse hands patient printed sheets. Patient loses them.",
     automationOpportunity: "Personalised discharge instructions (wound care, activity restrictions, red flags) sent via SMS with embedded video links. \"Here's how to change your dressing\" with 90-second demo video specific to their surgical site.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "You're on your way home — here are your personalised discharge instructions including wound care and activity guidelines. Tap to view your video guide.",
+    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.\n\nWound care: https://google.com\nActivity: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. We will follow up in 2 days time.",
     phoneAction: "View Discharge Instructions →",
     systemEvents: [],
   },
@@ -95,7 +95,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
     automationOpportunity: "AI agent sends SMS 48-72 hours post-discharge initiating conversational survey. Asks about pain levels, wound condition, medication adherence, mobility, and red flag symptoms. Routine responses auto-documented in EMR. Concerning responses trigger immediate escalation to nurse with pre-populated context. Critical flags generate emergency protocol alert.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi — it's been a couple of days since your surgery. Your care team wants to check in. How are you feeling? Reply and let us know.",
+    phoneMessage: "Hi John Smith, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
   },
@@ -622,7 +622,7 @@ export default function Home() {
                             <span className="text-slate-500 text-xs">ArchiTech · now</span>
                           </div>
                           <div className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                            <p className="text-slate-800 leading-snug text-xs">{activePhoneStage.phoneMessage}</p>
+                            <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{activePhoneStage.phoneMessage}</p>
                           </div>
                           <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
                             <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
