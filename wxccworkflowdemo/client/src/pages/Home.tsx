@@ -110,6 +110,15 @@ const STAGE_META = [
   { icon: Activity, shortDesc: "AI agent initiates conversational check-in 48-72 hours post-discharge. Concerning responses trigger immediate nurse escalation. Critical flags generate emergency protocol alert." },
 ];
 
+const STAGE_COLORS = [
+  { bg: "linear-gradient(145deg, #051824 0%, #0a2e44 55%, #061a2c 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.18)", accentBorder: "rgba(5,195,221,0.45)", accentGlow: "rgba(5,195,221,0.25)", iconTint: "rgba(5,195,221,0.07)" },
+  { bg: "linear-gradient(145deg, #110d2a 0%, #1e1450 55%, #0e0b22 100%)", accent: "#a78bfa", accentBg: "rgba(124,58,237,0.18)", accentBorder: "rgba(124,58,237,0.45)", accentGlow: "rgba(124,58,237,0.25)", iconTint: "rgba(124,58,237,0.07)" },
+  { bg: "linear-gradient(145deg, #1a1000 0%, #2e1c00 55%, #150e00 100%)", accent: "#fbbf24", accentBg: "rgba(245,158,11,0.18)", accentBorder: "rgba(245,158,11,0.45)", accentGlow: "rgba(245,158,11,0.25)", iconTint: "rgba(245,158,11,0.07)" },
+  { bg: "linear-gradient(145deg, #1a0610 0%, #300d22 55%, #150510 100%)", accent: "#f472b6", accentBg: "rgba(236,72,153,0.18)", accentBorder: "rgba(236,72,153,0.45)", accentGlow: "rgba(236,72,153,0.25)", iconTint: "rgba(236,72,153,0.07)" },
+  { bg: "linear-gradient(145deg, #041a10 0%, #092e1e 55%, #041410 100%)", accent: "#00A991", accentBg: "rgba(0,169,145,0.18)", accentBorder: "rgba(0,169,145,0.45)", accentGlow: "rgba(0,169,145,0.25)", iconTint: "rgba(0,169,145,0.07)" },
+  { bg: "linear-gradient(145deg, #060c1c 0%, #0c1840 55%, #060c18 100%)", accent: "#60a5fa", accentBg: "rgba(59,130,246,0.18)", accentBorder: "rgba(59,130,246,0.45)", accentGlow: "rgba(59,130,246,0.25)", iconTint: "rgba(59,130,246,0.07)" },
+];
+
 const IMPACT_STATS = [
   {
     hero: "20x",
@@ -756,108 +765,123 @@ export default function Home() {
                         const isLoading = loadingStage === stage.id;
                         const isExpanded = expandedStages.has(stage.id);
                         const revealedSteps = stageStepReveal[stage.id] || 0;
+                        const stageIdx = JOURNEY_STAGES.findIndex((s) => s.id === stage.id);
+                        const stageColor = STAGE_COLORS[stageIdx] ?? STAGE_COLORS[0];
+                        const StageIcon = STAGE_META[stageIdx]?.icon;
                         return (
                           <div
                             key={stage.id}
-                            className="rounded-xl transition-all duration-500"
+                            className="rounded-xl overflow-hidden transition-all duration-500"
                             style={{
-                              border: isTriggered ? "1px solid rgba(0,169,145,0.35)" : "1px solid rgba(255,255,255,0.08)",
-                              background: isTriggered
-                                ? "linear-gradient(135deg, rgba(0,169,145,0.06) 0%, rgba(0,169,145,0.02) 100%)"
-                                : "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
                               boxShadow: isTriggered
-                                ? "0 6px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,169,145,0.1), inset 0 1px 0 rgba(0,169,145,0.08)"
-                                : "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)",
+                                ? `0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px ${stageColor.accentBorder}`
+                                : "0 4px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05)",
                             }}
                           >
-                            {/* Header row */}
-                            <div className="flex items-center gap-2.5 px-4 pt-4 pb-2.5">
-                              <span
-                                className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 transition-all duration-500"
-                                style={{
-                                  border: isTriggered ? "1px solid rgba(0,169,145,0.4)" : "1px solid rgba(5,195,221,0.2)",
-                                  background: isTriggered ? "rgba(0,169,145,0.12)" : "rgba(5,195,221,0.06)",
-                                  color: isTriggered ? "#00A991" : "rgba(5,195,221,0.6)",
-                                }}
-                              >{stage.chapter}</span>
-                              <h3
-                                className="text-xs font-bold flex-1 leading-tight transition-colors duration-500"
-                                style={{ color: isTriggered ? "#00A991" : "rgba(255,255,255,0.85)" }}
-                              >
-                                {stage.label}
-                              </h3>
+                            {/* Cinematic banner */}
+                            <div className="relative overflow-hidden" style={{ height: "162px", background: stageColor.bg }}>
+
+                              {/* Giant faded icon */}
+                              {StageIcon && (
+                                <div className="absolute -right-4 -bottom-5 pointer-events-none">
+                                  <StageIcon style={{ width: "120px", height: "120px", color: stageColor.iconTint }} />
+                                </div>
+                              )}
+
+                              {/* Triggered colour wash */}
                               {isTriggered && (
-                                <div className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.3)" }}>
-                                  <Check className="w-2.5 h-2.5 text-[#00A991]" />
-                                </div>
+                                <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: `linear-gradient(145deg, ${stageColor.accentBg} 0%, transparent 65%)` }} />
                               )}
-                            </div>
 
-                            {/* Buttons row */}
-                            <div className="px-4 pb-3 flex items-center justify-end gap-1.5">
-                              {isTriggered ? (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,169,145,0.1)", border: "1px solid rgba(0,169,145,0.2)" }}>
-                                  <Check className="w-2.5 h-2.5 text-[#00A991]" />
-                                  <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
-                                </div>
-                              ) : (
-                                <>
-                                  {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
-                                    <Button
-                                      onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
-                                      disabled={!!loadingStage}
-                                      className="font-medium text-[10px] h-7 px-2.5 shadow-none transition-all duration-200"
-                                      style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
-                                    >
-                                      Start Meeting
-                                    </Button>
-                                  )}
-                                  <Button
-                                    onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
-                                    disabled={!!loadingStage}
-                                    className="font-semibold text-[10px] h-7 px-3 shadow-none transition-all duration-200"
+                              {/* Bottom fade for legibility */}
+                              <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%)" }} />
+
+                              {/* Content layer */}
+                              <div className="absolute inset-0 flex flex-col justify-between p-3.5">
+                                {/* Top row */}
+                                <div className="flex items-start justify-between">
+                                  <span
+                                    className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded transition-all duration-500"
                                     style={{
-                                      background: "rgba(5,195,221,0.08)",
-                                      border: "1px solid rgba(5,195,221,0.35)",
-                                      color: "#05C3DD",
-                                      boxShadow: "0 0 12px rgba(5,195,221,0.1)",
+                                      background: isTriggered ? stageColor.accentBg : "rgba(255,255,255,0.1)",
+                                      border: `1px solid ${isTriggered ? stageColor.accentBorder : "rgba(255,255,255,0.12)"}`,
+                                      color: isTriggered ? stageColor.accent : "rgba(255,255,255,0.65)",
                                     }}
-                                  >
-                                    {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
-                                  </Button>
-                                </>
-                              )}
+                                  >{stage.chapter}</span>
+                                  {isTriggered && (
+                                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.2)", border: "1px solid rgba(0,169,145,0.45)" }}>
+                                      <Check className="w-2.5 h-2.5 text-[#00A991]" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Bottom row */}
+                                <div>
+                                  <h3 className="text-xs font-bold text-white leading-tight mb-2.5" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.7)" }}>{stage.label}</h3>
+                                  <div className="flex items-center gap-1.5">
+                                    {isTriggered ? (
+                                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.35)" }}>
+                                        <Check className="w-2.5 h-2.5 text-[#00A991]" />
+                                        <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
+                                          <Button
+                                            onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
+                                            disabled={!!loadingStage}
+                                            className="font-medium text-[10px] h-6 px-2 shadow-none"
+                                            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}
+                                          >
+                                            Start Meeting
+                                          </Button>
+                                        )}
+                                        <Button
+                                          onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
+                                          disabled={!!loadingStage}
+                                          className="font-semibold text-[10px] h-6 px-2.5 shadow-none"
+                                          style={{
+                                            background: stageColor.accentBg,
+                                            border: `1px solid ${stageColor.accentBorder}`,
+                                            color: stageColor.accent,
+                                            boxShadow: `0 0 14px ${stageColor.accentGlow}`,
+                                          }}
+                                        >
+                                          {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Expand toggle — pinned bottom-right inside banner */}
+                              <button
+                                onClick={() => toggleExpanded(stage.id)}
+                                aria-expanded={isExpanded}
+                                className="absolute bottom-2.5 right-3 flex items-center gap-1 transition-colors z-10"
+                                style={{ color: isExpanded ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.28)" }}
+                              >
+                                <span className="text-[9px] font-mono tracking-wide">{isExpanded ? "Hide" : "Details"}</span>
+                                <ChevronDown className="w-2.5 h-2.5 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
+                              </button>
                             </div>
 
-                            {/* Expand toggle */}
-                            <button
-                              onClick={() => toggleExpanded(stage.id)}
-                              aria-expanded={isExpanded}
-                              className="w-full flex items-center gap-1.5 px-4 py-2 transition-colors"
-                              style={{
-                                borderTop: isExpanded ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(255,255,255,0.05)",
-                                color: isExpanded ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.2)",
-                              }}
-                            >
-                              <ChevronDown className="w-2.5 h-2.5 flex-shrink-0 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
-                              <span className="text-[10px] font-mono">{isExpanded ? "Hide" : "Details"}</span>
-                            </button>
-
-                            {/* Expandable details */}
+                            {/* Expandable details panel */}
                             {isExpanded && (
-                              <div className="px-4 pb-4 pt-3 space-y-3.5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                              <div className="px-4 pb-4 pt-3 space-y-3.5" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
                                 <div>
                                   <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1.5">Current State</p>
                                   <p className="text-xs leading-relaxed text-white/60">{stage.currentState}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-bold text-primary/45 uppercase tracking-[0.18em] font-mono mb-1.5">Automation Opportunity</p>
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] font-mono mb-1.5" style={{ color: stageColor.accent, opacity: 0.7 }}>Automation Opportunity</p>
                                   <p className="text-xs leading-relaxed text-white/75">{stage.automationOpportunity}</p>
                                 </div>
                                 <button
                                   onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
                                   className="w-full overflow-hidden block group relative transition-all duration-200"
-                                  style={{ borderRadius: "10px", border: "1px solid rgba(255,255,255,0.07)" }}
+                                  style={{ borderRadius: "10px", border: `1px solid ${stageColor.accentBorder}` }}
                                 >
                                   <img
                                     src={stage.image}
