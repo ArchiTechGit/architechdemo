@@ -472,54 +472,75 @@ export default function Home() {
             </div>
           </button>
 
-          <div className={`space-y-5 overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}
-            style={{ maxHeight: overviewOpen ? "2000px" : "0" }}
+          <div className={`overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
+            style={{ maxHeight: overviewOpen ? "800px" : "0" }}
           >
-            {(["Pre Admission", "Day-of-Surgery Coordination", "Discharge and Recovery"] as const).map((header) => {
-              const headerIdx = JOURNEY_STAGES.findIndex((s) => s.sectionHeader === header);
-              const nextHeaderIdx = JOURNEY_STAGES.findIndex((s, idx) => idx > headerIdx && s.sectionHeader);
-              const groupStages = JOURNEY_STAGES.slice(headerIdx, nextHeaderIdx === -1 ? undefined : nextHeaderIdx);
-              return (
-                <div key={header}>
-                  <p className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em] mb-3 font-mono">{header}</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {groupStages.map((stage) => {
-                      const globalIdx = JOURNEY_STAGES.indexOf(stage);
-                      const Icon = STAGE_META[globalIdx].icon;
-                      return (
-                        <div
-                          key={stage.id}
-                          className="rounded-xl p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-300 hover:border-primary/25 group/card"
-                          style={{
-                            border: "1px solid rgba(255,255,255,0.07)",
-                            background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)",
-                            boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
-                          }}
-                        >
-                          {/* Hover glow top edge */}
-                          <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(5,195,221,0.3), transparent)" }} />
-                          <span className="absolute right-3 bottom-2 font-black leading-none text-white/[0.025] select-none pointer-events-none" style={{ fontSize: "80px" }}>{stage.chapter}</span>
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0" style={{ background: "rgba(5,195,221,0.08)", border: "1px solid rgba(5,195,221,0.15)" }}>
-                              <Icon className="w-3.5 h-3.5 text-primary/70" />
-                            </div>
-                            <span className="font-mono text-[10px] font-bold text-primary/40 tracking-wider">{stage.chapter}</span>
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-black text-white text-[15px] leading-tight mb-2">{stage.label}</h3>
-                            <p className="text-sm text-white/55 leading-relaxed">{STAGE_META[globalIdx].shortDesc}</p>
-                          </div>
-                          <div className="flex items-center gap-1.5 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                            <Phone className="w-3 h-3 text-primary/35" />
-                            <span className="text-[10px] text-primary/35 font-mono tracking-wider">WxCC → SMS</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+            {/* Section labels spanning pairs of stages */}
+            <div className="flex mb-2">
+              {[
+                { label: "Pre Admission", color: "rgba(5,195,221,0.45)" },
+                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.45)" },
+                { label: "Discharge & Recovery", color: "rgba(149,148,210,0.45)" },
+              ].map(({ label, color }) => (
+                <div key={label} className="flex items-center gap-2 px-1" style={{ flex: 2 }}>
+                  <div className="h-px flex-1" style={{ background: color, opacity: 0.4 }} />
+                  <span className="text-[9px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
+                  <div className="h-px flex-1" style={{ background: color, opacity: 0.4 }} />
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            {/* Timeline */}
+            <div className="relative flex">
+              {/* Track line through node centres */}
+              <div className="absolute top-5 left-5 right-5 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25) 0%, rgba(85,202,253,0.15) 50%, rgba(149,148,210,0.25) 100%)" }} />
+
+              {JOURNEY_STAGES.map((stage, idx) => {
+                const sc = STAGE_COLORS[idx];
+                const Icon = STAGE_META[idx].icon;
+                return (
+                  <div key={stage.id} className="flex flex-col items-center" style={{ flex: 1, padding: "0 4px" }}>
+                    {/* Node */}
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-200"
+                      style={{
+                        background: sc.accentBg,
+                        border: `1.5px solid ${sc.accentBorder}`,
+                        boxShadow: `0 0 14px ${sc.accentGlow}`,
+                      }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: sc.accent }} />
+                    </div>
+
+                    {/* Connector to card */}
+                    <div className="w-px h-3 flex-shrink-0" style={{ background: sc.accentBorder }} />
+
+                    {/* Card */}
+                    <div
+                      className="w-full rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden transition-all duration-200 group/oc"
+                      style={{
+                        border: `1px solid ${sc.accentBorder}`,
+                        background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.8) 100%)`,
+                        boxShadow: `0 4px 20px rgba(0,0,0,0.35), 0 0 0 0 ${sc.accentGlow}`,
+                      }}
+                    >
+                      {/* Top edge glow on hover */}
+                      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
+
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
+                      </div>
+                      <h3 className="text-[11px] font-black text-white leading-tight">{stage.label}</h3>
+                      <p className="text-[10px] text-white/50 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                      <div className="flex items-center gap-1 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                        <Phone className="w-2.5 h-2.5" style={{ color: `${sc.accent}55` }} />
+                        <span className="text-[9px] font-mono tracking-wider" style={{ color: `${sc.accent}55` }}>WxCC → SMS</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -878,7 +899,11 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
-                    <p className="text-xs leading-relaxed text-white/60">{stage.automationOpportunity}</p>
+                    <p className="text-xs leading-relaxed text-white/60 mb-2">{stage.automationOpportunity}</p>
+                    <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                      <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
+                      <p className="text-xs leading-relaxed text-white/50">{stage.currentState}</p>
+                    </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
                         {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
@@ -889,17 +914,13 @@ export default function Home() {
                         ))}
                       </div>
                     )}
-                    {/* Expand toggle */}
+                    {/* Expand toggle — image only */}
                     <button onClick={() => toggleExpanded(stage.id)} aria-expanded={isExpanded} className="flex items-center gap-1.5 mt-2.5 mb-1 transition-colors" style={{ color: isExpanded ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.2)" }}>
                       <ChevronDown className="w-3 h-3 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
-                      <span className="text-[10px] font-mono">{isExpanded ? "Hide details" : "More details"}</span>
+                      <span className="text-[10px] font-mono">{isExpanded ? "Hide workflow" : "View workflow"}</span>
                     </button>
                     {isExpanded && (
-                      <div className="pt-2 pb-2 space-y-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                        <div>
-                          <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
-                          <p className="text-xs leading-relaxed text-white/55">{stage.currentState}</p>
-                        </div>
+                      <div className="pb-2">
                         <button onClick={() => setLightboxImage({ src: stage.image, label: stage.label })} className="w-full overflow-hidden block group relative transition-all duration-200" style={{ borderRadius: "10px", border: `1px solid ${stageColor.accentBorder}` }}>
                           <img src={stage.image} alt={`Workflow diagram for ${stage.label}`} className="w-full h-auto block" onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`; }} />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
