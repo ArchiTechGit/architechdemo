@@ -483,7 +483,7 @@ export default function Home() {
                 { label: "Discharge & Recovery", color: "rgba(85,202,253,0.5)" },
               ].map(({ label, color }) => (
                 <div key={label} className="flex items-center justify-center px-1" style={{ flex: 2 }}>
-                  <span className="text-[10px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
+                  <span className="text-xs font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -527,10 +527,6 @@ export default function Home() {
                       </div>
                       <h3 className="text-sm font-black text-white leading-tight">{stage.label}</h3>
                       <p className="text-xs text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Phone className="w-3 h-3" style={{ color: `${sc.accent}45` }} />
-                        <span className="text-[10px] font-mono tracking-wider" style={{ color: `${sc.accent}45` }}>WxCC → SMS</span>
-                      </div>
                     </div>
                   </div>
                 );
