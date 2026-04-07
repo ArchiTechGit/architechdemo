@@ -906,9 +906,18 @@ export default function Home() {
                       </div>
                     )}
                     {/* Expand toggle — image only */}
-                    <button onClick={() => toggleExpanded(stage.id)} aria-expanded={isExpanded} className="flex items-center gap-1.5 mt-2.5 mb-1 transition-colors" style={{ color: isExpanded ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.2)" }}>
-                      <ChevronDown className="w-3 h-3 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
-                      <span className="text-[10px] font-mono">{isExpanded ? "Hide workflow" : "View workflow"}</span>
+                    <button
+                      onClick={() => toggleExpanded(stage.id)}
+                      aria-expanded={isExpanded}
+                      className="flex items-center justify-center gap-2 mt-3 mb-1 w-full rounded-lg py-2 transition-all duration-200"
+                      style={{
+                        background: isExpanded ? "rgba(5,195,221,0.06)" : "rgba(5,195,221,0.08)",
+                        border: `1px solid ${isExpanded ? "rgba(5,195,221,0.2)" : "rgba(5,195,221,0.3)"}`,
+                        color: isExpanded ? "rgba(5,195,221,0.6)" : "#05C3DD",
+                      }}
+                    >
+                      <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
+                      <span className="text-xs font-bold tracking-wide">{isExpanded ? "Hide Workflow" : "View Workflow"}</span>
                     </button>
                     {isExpanded && (
                       <div className="pb-2">
