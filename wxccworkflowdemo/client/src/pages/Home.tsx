@@ -111,12 +111,18 @@ const STAGE_META = [
 ];
 
 const STAGE_COLORS = [
-  { bg: "linear-gradient(145deg, #051824 0%, #0a2e44 55%, #061a2c 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.18)", accentBorder: "rgba(5,195,221,0.45)", accentGlow: "rgba(5,195,221,0.25)", iconTint: "rgba(5,195,221,0.07)" },
-  { bg: "linear-gradient(145deg, #110d2a 0%, #1e1450 55%, #0e0b22 100%)", accent: "#a78bfa", accentBg: "rgba(124,58,237,0.18)", accentBorder: "rgba(124,58,237,0.45)", accentGlow: "rgba(124,58,237,0.25)", iconTint: "rgba(124,58,237,0.07)" },
-  { bg: "linear-gradient(145deg, #1a1000 0%, #2e1c00 55%, #150e00 100%)", accent: "#fbbf24", accentBg: "rgba(245,158,11,0.18)", accentBorder: "rgba(245,158,11,0.45)", accentGlow: "rgba(245,158,11,0.25)", iconTint: "rgba(245,158,11,0.07)" },
-  { bg: "linear-gradient(145deg, #1a0610 0%, #300d22 55%, #150510 100%)", accent: "#f472b6", accentBg: "rgba(236,72,153,0.18)", accentBorder: "rgba(236,72,153,0.45)", accentGlow: "rgba(236,72,153,0.25)", iconTint: "rgba(236,72,153,0.07)" },
-  { bg: "linear-gradient(145deg, #041a10 0%, #092e1e 55%, #041410 100%)", accent: "#00A991", accentBg: "rgba(0,169,145,0.18)", accentBorder: "rgba(0,169,145,0.45)", accentGlow: "rgba(0,169,145,0.25)", iconTint: "rgba(0,169,145,0.07)" },
-  { bg: "linear-gradient(145deg, #060c1c 0%, #0c1840 55%, #060c18 100%)", accent: "#60a5fa", accentBg: "rgba(59,130,246,0.18)", accentBorder: "rgba(59,130,246,0.45)", accentGlow: "rgba(59,130,246,0.25)", iconTint: "rgba(59,130,246,0.07)" },
+  // 01 — ArchiTech Cyan (primary)
+  { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" },
+  // 02 — Periwinkle blue (secondary palette)
+  { bg: "linear-gradient(145deg, #0c1630 0%, #111e48 55%, #0a1228 100%)", accent: "#517FE3", accentBg: "rgba(81,127,227,0.12)", accentBorder: "rgba(81,127,227,0.38)", accentGlow: "rgba(81,127,227,0.18)", iconTint: "rgba(81,127,227,0.06)" },
+  // 03 — Light cyan (secondary palette)
+  { bg: "linear-gradient(145deg, #081c2e 0%, #0c2842 55%, #071820 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
+  // 04 — ArchiTech Blue (secondary accent)
+  { bg: "linear-gradient(145deg, #081428 0%, #0c1e3e 55%, #061020 100%)", accent: "#1980BD", accentBg: "rgba(25,128,189,0.12)", accentBorder: "rgba(25,128,189,0.38)", accentGlow: "rgba(25,128,189,0.18)", iconTint: "rgba(25,128,189,0.06)" },
+  // 05 — Teal-green / success
+  { bg: "linear-gradient(145deg, #071e18 0%, #0b2c24 55%, #061814 100%)", accent: "#00A991", accentBg: "rgba(0,169,145,0.12)", accentBorder: "rgba(0,169,145,0.38)", accentGlow: "rgba(0,169,145,0.18)", iconTint: "rgba(0,169,145,0.06)" },
+  // 06 — Teal (secondary palette)
+  { bg: "linear-gradient(145deg, #071e24 0%, #0b2c38 55%, #061820 100%)", accent: "#16CECC", accentBg: "rgba(22,206,204,0.12)", accentBorder: "rgba(22,206,204,0.38)", accentGlow: "rgba(22,206,204,0.18)", iconTint: "rgba(22,206,204,0.06)" },
 ];
 
 const IMPACT_STATS = [
@@ -173,6 +179,7 @@ export default function Home() {
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
+  const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string } | null>(null);
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
@@ -285,6 +292,8 @@ export default function Home() {
       setLastTriggeredStage(workflowId);
       setPhonePulse(true);
       setTimeout(() => setPhonePulse(false), 2000);
+      const nextIdx = JOURNEY_STAGES.findIndex((s) => s.id === workflowId) + 1;
+      if (nextIdx < JOURNEY_STAGES.length) setTimeout(() => setActiveStepperStage(JOURNEY_STAGES[nextIdx].id), 600);
       const revealTimeouts = [450, 950, 1500].map((delay, idx) =>
         setTimeout(() => {
           setStageStepReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
@@ -748,171 +757,161 @@ export default function Home() {
             </div>
             </div>
 
-            <div className="space-y-5">
-              {(["Pre Admission", "Day-of-Surgery Coordination", "Discharge and Recovery"] as const).map((header) => {
-                const headerIdx = JOURNEY_STAGES.findIndex((s) => s.sectionHeader === header);
-                const nextHeaderIdx = JOURNEY_STAGES.findIndex((s, idx) => idx > headerIdx && s.sectionHeader);
-                const groupStages = JOURNEY_STAGES.slice(headerIdx, nextHeaderIdx === -1 ? undefined : nextHeaderIdx);
-                return (
-                  <div key={header}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-[10px] font-bold text-primary/45 uppercase tracking-[0.2em] font-mono">{header}</span>
-                      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.2), transparent)" }} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {groupStages.map((stage) => {
-                        const isTriggered = triggeredStages.has(stage.id);
-                        const isLoading = loadingStage === stage.id;
-                        const isExpanded = expandedStages.has(stage.id);
-                        const revealedSteps = stageStepReveal[stage.id] || 0;
-                        const stageIdx = JOURNEY_STAGES.findIndex((s) => s.id === stage.id);
-                        const stageColor = STAGE_COLORS[stageIdx] ?? STAGE_COLORS[0];
-                        const StageIcon = STAGE_META[stageIdx]?.icon;
-                        return (
-                          <div
-                            key={stage.id}
-                            className="rounded-xl overflow-hidden transition-all duration-500"
-                            style={{
-                              boxShadow: isTriggered
-                                ? `0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px ${stageColor.accentBorder}`
-                                : "0 4px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05)",
-                            }}
-                          >
-                            {/* Cinematic banner */}
-                            <div className="relative overflow-hidden" style={{ height: "162px", background: stageColor.bg }}>
+            {/* Stepper */}
+            <div className="relative">
+              {/* Connecting track */}
+              <div className="absolute top-6 left-6 right-6 h-px pointer-events-none" style={{ background: "rgba(255,255,255,0.07)" }} />
+              {/* Filled progress track */}
+              <div
+                className="absolute top-6 left-6 h-px pointer-events-none transition-all duration-700"
+                style={{
+                  background: "linear-gradient(90deg, #00A991, #05C3DD)",
+                  boxShadow: "0 0 8px rgba(5,195,221,0.4)",
+                  width: triggeredStages.size === 0 ? "0%" : `${((JOURNEY_STAGES.findIndex((s) => s.id === [...triggeredStages].at(-1)) + 1) / JOURNEY_STAGES.length) * (100 - (100 / JOURNEY_STAGES.length))}%`,
+                  right: "auto",
+                }}
+              />
+              {/* Nodes */}
+              <div className="flex justify-between relative">
+                {JOURNEY_STAGES.map((stage, idx) => {
+                  const isActive = activeStepperStage === stage.id;
+                  const isTriggered = triggeredStages.has(stage.id);
+                  const sc = STAGE_COLORS[idx];
+                  const SIcon = STAGE_META[idx]?.icon;
+                  return (
+                    <button
+                      key={stage.id}
+                      onClick={() => setActiveStepperStage(stage.id)}
+                      className="flex flex-col items-center gap-2 group"
+                      style={{ flex: 1 }}
+                    >
+                      {/* Node circle */}
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 relative z-10"
+                        style={{
+                          background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
+                          border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.1)",
+                          boxShadow: isTriggered ? "0 0 18px rgba(0,169,145,0.35)" : isActive ? `0 0 18px ${sc.accentGlow}` : "none",
+                        }}
+                      >
+                        {isTriggered
+                          ? <Check className="w-5 h-5 text-[#00A991]" />
+                          : SIcon && <SIcon className="w-5 h-5 transition-colors duration-300" style={{ color: isActive ? sc.accent : "rgba(255,255,255,0.25)" }} />
+                        }
+                      </div>
+                      {/* Label */}
+                      <span
+                        className="text-[9px] font-bold text-center leading-tight transition-colors duration-300 px-1"
+                        style={{ color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.3)", maxWidth: "72px" }}
+                      >
+                        {stage.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                              {/* Giant faded icon */}
-                              {StageIcon && (
-                                <div className="absolute -right-4 -bottom-5 pointer-events-none">
-                                  <StageIcon style={{ width: "120px", height: "120px", color: stageColor.iconTint }} />
-                                </div>
-                              )}
-
-                              {/* Triggered colour wash */}
-                              {isTriggered && (
-                                <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: `linear-gradient(145deg, ${stageColor.accentBg} 0%, transparent 65%)` }} />
-                              )}
-
-                              {/* Bottom fade for legibility */}
-                              <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%)" }} />
-
-                              {/* Content layer */}
-                              <div className="absolute inset-0 flex flex-col justify-between p-3.5">
-                                {/* Top row */}
-                                <div className="flex items-start justify-between">
-                                  <span
-                                    className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded transition-all duration-500"
-                                    style={{
-                                      background: isTriggered ? stageColor.accentBg : "rgba(255,255,255,0.1)",
-                                      border: `1px solid ${isTriggered ? stageColor.accentBorder : "rgba(255,255,255,0.12)"}`,
-                                      color: isTriggered ? stageColor.accent : "rgba(255,255,255,0.65)",
-                                    }}
-                                  >{stage.chapter}</span>
-                                  {isTriggered && (
-                                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.2)", border: "1px solid rgba(0,169,145,0.45)" }}>
-                                      <Check className="w-2.5 h-2.5 text-[#00A991]" />
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Bottom row */}
-                                <div>
-                                  <h3 className="text-xs font-bold text-white leading-tight mb-2.5" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.7)" }}>{stage.label}</h3>
-                                  <div className="flex items-center gap-1.5">
-                                    {isTriggered ? (
-                                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.35)" }}>
-                                        <Check className="w-2.5 h-2.5 text-[#00A991]" />
-                                        <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
-                                      </div>
-                                    ) : (
-                                      <>
-                                        {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
-                                          <Button
-                                            onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)}
-                                            disabled={!!loadingStage}
-                                            className="font-medium text-[10px] h-6 px-2 shadow-none"
-                                            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}
-                                          >
-                                            Start Meeting
-                                          </Button>
-                                        )}
-                                        <Button
-                                          onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)}
-                                          disabled={!!loadingStage}
-                                          className="font-semibold text-[10px] h-6 px-2.5 shadow-none"
-                                          style={{
-                                            background: stageColor.accentBg,
-                                            border: `1px solid ${stageColor.accentBorder}`,
-                                            color: stageColor.accent,
-                                            boxShadow: `0 0 14px ${stageColor.accentGlow}`,
-                                          }}
-                                        >
-                                          {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
-                                        </Button>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Expand toggle — pinned bottom-right inside banner */}
-                              <button
-                                onClick={() => toggleExpanded(stage.id)}
-                                aria-expanded={isExpanded}
-                                className="absolute bottom-2.5 right-3 flex items-center gap-1 transition-colors z-10"
-                                style={{ color: isExpanded ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.28)" }}
-                              >
-                                <span className="text-[9px] font-mono tracking-wide">{isExpanded ? "Hide" : "Details"}</span>
-                                <ChevronDown className="w-2.5 h-2.5 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
-                              </button>
-                            </div>
-
-                            {/* Expandable details panel */}
-                            {isExpanded && (
-                              <div className="px-4 pb-4 pt-3 space-y-3.5" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
-                                <div>
-                                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1.5">Current State</p>
-                                  <p className="text-xs leading-relaxed text-white/60">{stage.currentState}</p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] font-mono mb-1.5" style={{ color: stageColor.accent, opacity: 0.7 }}>Automation Opportunity</p>
-                                  <p className="text-xs leading-relaxed text-white/75">{stage.automationOpportunity}</p>
-                                </div>
-                                <button
-                                  onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
-                                  className="w-full overflow-hidden block group relative transition-all duration-200"
-                                  style={{ borderRadius: "10px", border: `1px solid ${stageColor.accentBorder}` }}
-                                >
-                                  <img
-                                    src={stage.image}
-                                    alt={`Workflow diagram for ${stage.label}`}
-                                    className="w-full h-auto block"
-                                    onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`; }}
-                                  />
-                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
-                                    <span className="text-white/0 group-hover:text-white/80 text-xs font-mono transition-colors duration-200">Click to expand</span>
-                                  </div>
-                                </button>
-                                {isTriggered && revealedSteps > 0 && (
-                                  <div className="flex gap-1.5 flex-wrap pt-0.5">
-                                    {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
-                                      <div key={step} className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.15)" }}>
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#00A991] flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
-                                        <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )}
+            {/* Detail panel */}
+            {(() => {
+              const stage = JOURNEY_STAGES.find((s) => s.id === activeStepperStage);
+              if (!stage) return null;
+              const stageIdx = JOURNEY_STAGES.findIndex((s) => s.id === stage.id);
+              const stageColor = STAGE_COLORS[stageIdx] ?? STAGE_COLORS[0];
+              const StageIcon = STAGE_META[stageIdx]?.icon;
+              const isTriggered = triggeredStages.has(stage.id);
+              const isLoading = loadingStage === stage.id;
+              const isExpanded = expandedStages.has(stage.id);
+              const revealedSteps = stageStepReveal[stage.id] || 0;
+              return (
+                <div
+                  className="rounded-2xl overflow-hidden transition-all duration-500"
+                  style={{
+                    boxShadow: isTriggered
+                      ? `0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px ${stageColor.accentBorder}`
+                      : `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)`,
+                  }}
+                >
+                  {/* Banner */}
+                  <div className="relative overflow-hidden" style={{ height: "140px", background: stageColor.bg }}>
+                    {StageIcon && (
+                      <div className="absolute -right-6 -bottom-6 pointer-events-none">
+                        <StageIcon style={{ width: "160px", height: "160px", color: stageColor.iconTint }} />
+                      </div>
+                    )}
+                    {isTriggered && (
+                      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(145deg, ${stageColor.accentBg} 0%, transparent 60%)` }} />
+                    )}
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.65) 100%)" }} />
+                    <div className="absolute inset-0 flex flex-col justify-between p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>{stage.chapter}</span>
+                          {stage.sectionHeader && (
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{stage.sectionHeader}</span>
+                          )}
+                        </div>
+                        {isTriggered && (
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
+                            <Check className="w-3 h-3 text-[#00A991]" />
+                            <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
+                      <div className="flex items-end justify-between gap-3">
+                        <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                        {!isTriggered && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
+                              <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[10px] h-7 px-2.5 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                                Start Meeting
+                              </Button>
+                            )}
+                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-xs h-7 px-3 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                              {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Body */}
+                  <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
+                    <p className="text-xs leading-relaxed text-white/60">{stage.automationOpportunity}</p>
+                    {isTriggered && revealedSteps > 0 && (
+                      <div className="flex gap-1.5 flex-wrap mt-2.5">
+                        {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
+                          <div key={step} className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.15)" }}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#00A991] flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
+                            <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Expand toggle */}
+                    <button onClick={() => toggleExpanded(stage.id)} aria-expanded={isExpanded} className="flex items-center gap-1.5 mt-2.5 mb-1 transition-colors" style={{ color: isExpanded ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.2)" }}>
+                      <ChevronDown className="w-3 h-3 transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
+                      <span className="text-[10px] font-mono">{isExpanded ? "Hide details" : "More details"}</span>
+                    </button>
+                    {isExpanded && (
+                      <div className="pt-2 pb-2 space-y-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                        <div>
+                          <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
+                          <p className="text-xs leading-relaxed text-white/55">{stage.currentState}</p>
+                        </div>
+                        <button onClick={() => setLightboxImage({ src: stage.image, label: stage.label })} className="w-full overflow-hidden block group relative transition-all duration-200" style={{ borderRadius: "10px", border: `1px solid ${stageColor.accentBorder}` }}>
+                          <img src={stage.image} alt={`Workflow diagram for ${stage.label}`} className="w-full h-auto block" onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x280/13294B/1A3460?text=${encodeURIComponent(stage.label)}`; }} />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
+                            <span className="text-white/0 group-hover:text-white/80 text-xs font-mono transition-colors duration-200">Click to expand</span>
+                          </div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Presenter control — shown when all stages complete */}
             {allComplete && (
