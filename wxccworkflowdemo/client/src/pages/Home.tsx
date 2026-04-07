@@ -580,7 +580,7 @@ export default function Home() {
                     maxWidth: "300px",
                     aspectRatio: "230 / 470",
                     borderRadius: "50px",
-                    background: "linear-gradient(160deg, #2e2e30 0%, #1a1a1c 40%, #111113 100%)",
+                    background: "linear-gradient(160deg, #1A3460 0%, #13294B 40%, #0D1825 100%)",
                     boxShadow: phonePulse
                       ? "0 30px 70px rgba(0,0,0,0.8), 0 0 80px rgba(5,195,221,0.28), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.12)"
                       : "0 30px 70px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.10)",
@@ -590,38 +590,38 @@ export default function Home() {
                 >
                   {/* Left buttons: mute + vol up + vol down */}
                   <div style={{ position: "absolute", left: "-4px", top: "90px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <div style={{ width: "3px", height: "22px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
-                    <div style={{ width: "3px", height: "34px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
-                    <div style={{ width: "3px", height: "34px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
+                    <div style={{ width: "3px", height: "22px", background: "linear-gradient(180deg,#1F3D72,#13294B)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
+                    <div style={{ width: "3px", height: "34px", background: "linear-gradient(180deg,#1F3D72,#13294B)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
+                    <div style={{ width: "3px", height: "34px", background: "linear-gradient(180deg,#1F3D72,#13294B)", borderRadius: "2px 0 0 2px", boxShadow: "-1px 0 2px rgba(0,0,0,0.5)" }} />
                   </div>
                   {/* Right button: power */}
-                  <div style={{ position: "absolute", right: "-4px", top: "120px", width: "3px", height: "52px", background: "linear-gradient(180deg,#3a3a3c,#2a2a2c)", borderRadius: "0 2px 2px 0", boxShadow: "1px 0 2px rgba(0,0,0,0.5)" }} />
+                  <div style={{ position: "absolute", right: "-4px", top: "120px", width: "3px", height: "52px", background: "linear-gradient(180deg,#1F3D72,#13294B)", borderRadius: "0 2px 2px 0", boxShadow: "1px 0 2px rgba(0,0,0,0.5)" }} />
 
                   {/* Screen */}
                   <div className="absolute bg-white flex flex-col overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
                     {/* Status bar */}
                     <div className="flex justify-between items-center px-5 bg-white flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
-                      <span className="font-bold text-slate-800" style={{ fontSize: "11px" }}>{clockTime}</span>
+                      <span className="font-bold" style={{ fontSize: "11px", color: "#13294B" }}>{clockTime}</span>
                       <div className="flex items-center gap-1.5">
                         {/* Signal bars */}
                         <div className="flex items-end gap-px">
-                          <div className="w-1 h-1.5 bg-slate-700 rounded-sm" />
-                          <div className="w-1 h-2 bg-slate-700 rounded-sm" />
-                          <div className="w-1 h-2.5 bg-slate-700 rounded-sm" />
-                          <div className="w-1 h-3 bg-slate-700 rounded-sm" />
+                          <div className="w-1 h-1.5 rounded-sm" style={{ background: "#54565B" }} />
+                          <div className="w-1 h-2 rounded-sm" style={{ background: "#54565B" }} />
+                          <div className="w-1 h-2.5 rounded-sm" style={{ background: "#54565B" }} />
+                          <div className="w-1 h-3 rounded-sm" style={{ background: "#54565B" }} />
                         </div>
                         {/* WiFi */}
                         <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-                          <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#374151"/>
-                          <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                          <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                          <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#54565B"/>
+                          <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                          <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
                         </svg>
                         {/* Battery */}
                         <div className="flex items-center gap-px">
-                          <div className="border border-slate-700 rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px" }}>
-                            <div className="absolute left-0 top-0 bottom-0 bg-slate-700" style={{ width: "75%" }} />
+                          <div className="rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px", border: "1px solid #54565B" }}>
+                            <div className="absolute left-0 top-0 bottom-0" style={{ width: "75%", background: "#54565B" }} />
                           </div>
-                          <div className="bg-slate-700 rounded-sm" style={{ width: "2px", height: "5px" }} />
+                          <div className="rounded-sm" style={{ width: "2px", height: "5px", background: "#54565B" }} />
                         </div>
                       </div>
                     </div>
@@ -952,7 +952,7 @@ export default function Home() {
                   onClick={() => setShowCompleteModal(true)}
                   className="flex-shrink-0 font-bold text-sm border-0"
                   style={{
-                    background: "linear-gradient(135deg, #00A991, #00c4aa)",
+                    background: "linear-gradient(135deg, #00A991, #16CECC)",
                     color: "#fff",
                     boxShadow: "0 4px 20px rgba(0,169,145,0.4), 0 0 40px rgba(0,169,145,0.15)",
                   }}
@@ -990,7 +990,7 @@ export default function Home() {
           className="max-w-lg border-2 border-[#00A991]/50 p-0 overflow-hidden rounded-3xl"
           aria-labelledby="modal-title"
           style={{
-            background: "linear-gradient(160deg, #0D2A24 0%, #0D1825 60%)",
+            background: "linear-gradient(160deg, #13294B 0%, #0D1825 60%)",
             boxShadow: "0 0 0 1px rgba(0,169,145,0.2), 0 40px 80px rgba(0,0,0,0.8), 0 0 120px rgba(0,169,145,0.08)",
           }}
         >
