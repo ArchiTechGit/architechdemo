@@ -119,10 +119,10 @@ const STAGE_COLORS = [
   { bg: "linear-gradient(145deg, #081c2e 0%, #0c2842 55%, #071820 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
   // 04 — ArchiTech Blue (secondary accent)
   { bg: "linear-gradient(145deg, #081428 0%, #0c1e3e 55%, #061020 100%)", accent: "#1980BD", accentBg: "rgba(25,128,189,0.12)", accentBorder: "rgba(25,128,189,0.38)", accentGlow: "rgba(25,128,189,0.18)", iconTint: "rgba(25,128,189,0.06)" },
-  // 05 — Teal-green / success
-  { bg: "linear-gradient(145deg, #071e18 0%, #0b2c24 55%, #061814 100%)", accent: "#00A991", accentBg: "rgba(0,169,145,0.12)", accentBorder: "rgba(0,169,145,0.38)", accentGlow: "rgba(0,169,145,0.18)", iconTint: "rgba(0,169,145,0.06)" },
-  // 06 — Teal (secondary palette)
-  { bg: "linear-gradient(145deg, #071e24 0%, #0b2c38 55%, #061820 100%)", accent: "#16CECC", accentBg: "rgba(22,206,204,0.12)", accentBorder: "rgba(22,206,204,0.38)", accentGlow: "rgba(22,206,204,0.18)", iconTint: "rgba(22,206,204,0.06)" },
+  // 05 — Lavender (secondary palette)
+  { bg: "linear-gradient(145deg, #10102a 0%, #181840 55%, #0e0e24 100%)", accent: "#9594D2", accentBg: "rgba(149,148,210,0.12)", accentBorder: "rgba(149,148,210,0.38)", accentGlow: "rgba(149,148,210,0.18)", iconTint: "rgba(149,148,210,0.06)" },
+  // 06 — ArchiTech Blue (primary secondary)
+  { bg: "linear-gradient(145deg, #081030 0%, #0c1848 55%, #061028 100%)", accent: "#0055B8", accentBg: "rgba(0,85,184,0.14)", accentBorder: "rgba(0,85,184,0.42)", accentGlow: "rgba(0,85,184,0.2)", iconTint: "rgba(0,85,184,0.07)" },
 ];
 
 const IMPACT_STATS = [
