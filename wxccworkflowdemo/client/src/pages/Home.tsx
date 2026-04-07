@@ -119,8 +119,8 @@ const STAGE_COLORS = [
   { bg: "linear-gradient(145deg, #081c2e 0%, #0c2842 55%, #071820 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
   // 04 — ArchiTech Blue (secondary accent)
   { bg: "linear-gradient(145deg, #081428 0%, #0c1e3e 55%, #061020 100%)", accent: "#1980BD", accentBg: "rgba(25,128,189,0.12)", accentBorder: "rgba(25,128,189,0.38)", accentGlow: "rgba(25,128,189,0.18)", iconTint: "rgba(25,128,189,0.06)" },
-  // 05 — Lavender (secondary palette)
-  { bg: "linear-gradient(145deg, #10102a 0%, #181840 55%, #0e0e24 100%)", accent: "#9594D2", accentBg: "rgba(149,148,210,0.12)", accentBorder: "rgba(149,148,210,0.38)", accentGlow: "rgba(149,148,210,0.18)", iconTint: "rgba(149,148,210,0.06)" },
+  // 05 — Light Cyan (ArchiTech secondary palette #55CAFD)
+  { bg: "linear-gradient(145deg, #071c2e 0%, #0b2a44 55%, #061824 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
   // 06 — ArchiTech Blue (primary secondary)
   { bg: "linear-gradient(145deg, #081030 0%, #0c1848 55%, #061028 100%)", accent: "#0055B8", accentBg: "rgba(0,85,184,0.14)", accentBorder: "rgba(0,85,184,0.42)", accentGlow: "rgba(0,85,184,0.2)", iconTint: "rgba(0,85,184,0.07)" },
 ];
@@ -484,7 +484,7 @@ export default function Home() {
               ].map(({ label, color }) => (
                 <div key={label} className="flex items-center gap-2 px-1" style={{ flex: 2 }}>
                   <div className="h-px flex-1" style={{ background: color, opacity: 0.4 }} />
-                  <span className="text-[9px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
+                  <span className="text-[11px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
                   <div className="h-px flex-1" style={{ background: color, opacity: 0.4 }} />
                 </div>
               ))}
@@ -528,13 +528,13 @@ export default function Home() {
                       <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
 
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
                       </div>
-                      <h3 className="text-[11px] font-black text-white leading-tight">{stage.label}</h3>
-                      <p className="text-[10px] text-white/50 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                      <h3 className="text-sm font-black text-white leading-tight">{stage.label}</h3>
+                      <p className="text-xs text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
                       <div className="flex items-center gap-1 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                        <Phone className="w-2.5 h-2.5" style={{ color: `${sc.accent}55` }} />
-                        <span className="text-[9px] font-mono tracking-wider" style={{ color: `${sc.accent}55` }}>WxCC → SMS</span>
+                        <Phone className="w-3 h-3" style={{ color: `${sc.accent}55` }} />
+                        <span className="text-[10px] font-mono tracking-wider" style={{ color: `${sc.accent}55` }}>WxCC → SMS</span>
                       </div>
                     </div>
                   </div>
