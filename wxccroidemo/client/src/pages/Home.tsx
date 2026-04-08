@@ -1,957 +1,837 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useId } from "react";
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
-import {
-  PhoneCall,
-  TrendingUp,
-  Users,
-  DollarSign,
-  Clock,
+  Server,
   Zap,
-  ChevronDown,
+  Workflow,
   BarChart3,
+  Plus,
+  Trash2,
+  ChevronDown,
+  Users,
+  Clock,
+  TrendingUp,
   ArrowRight,
+  Presentation,
 } from "lucide-react";
 
 // ─── BRAND ───────────────────────────────────────────────────────────────────
 const C = {
-  bg:       "#0D1825",
-  s1:       "#13294B",
-  s2:       "#1A3460",
-  s3:       "#1F3D72",
-  cyan:     "#05C3DD",
-  blue:     "#0055B8",
-  gray:     "#54565B",
-  muted:    "#7F8FA9",
-  light:    "#F0F6FC",
-  // chart accent colors (brand palette only)
-  periwinkle: "#517FE3",
-  lightCyan:  "#55CAFD",
-  midBlue:    "#1980BD",
-  blueGray:   "#7F8FA9",
+  bg:    "#0D1825",
+  s1:    "#13294B",
+  s2:    "#1A3460",
+  s3:    "#1F3D72",
+  cyan:  "#05C3DD",
+  blue:  "#0055B8",
+  gray:  "#54565B",
+  muted: "#7F8FA9",
+  light: "#F0F6FC",
 };
 
-// ─── PRESETS ─────────────────────────────────────────────────────────────────
-interface Preset {
-  label: string;
-  icon: React.ReactNode;
-  values: {
-    monthlyContacts: number;
-    avgHandleTime: number;
-    agentCount: number;
-    avgAgentCost: number;
-    currentDigitalRate: number;
-    targetDigitalRate: number;
-  };
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+let _uid = 0;
+function uid() { return `wf-${++_uid}`; }
+
+function fmtMoney(n: number, decimals = 2): string {
+  return n.toLocaleString("en-AU", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function fmtCurrency(n: number): string {
+  return `$${fmtMoney(n)}`;
 }
 
-const PRESETS: Preset[] = [
-  {
-    label: "Healthcare",
-    icon: <span style={{ fontSize: 18 }}>🏥</span>,
-    values: {
-      monthlyContacts: 8000,
-      avgHandleTime: 9,
-      agentCount: 40,
-      avgAgentCost: 62000,
-      currentDigitalRate: 15,
-      targetDigitalRate: 65,
-    },
-  },
-  {
-    label: "Financial Services",
-    icon: <span style={{ fontSize: 18 }}>🏦</span>,
-    values: {
-      monthlyContacts: 15000,
-      avgHandleTime: 7,
-      agentCount: 75,
-      avgAgentCost: 72000,
-      currentDigitalRate: 25,
-      targetDigitalRate: 70,
-    },
-  },
-  {
-    label: "Retail",
-    icon: <span style={{ fontSize: 18 }}>🛒</span>,
-    values: {
-      monthlyContacts: 25000,
-      avgHandleTime: 5,
-      agentCount: 100,
-      avgAgentCost: 55000,
-      currentDigitalRate: 30,
-      targetDigitalRate: 75,
-    },
-  },
-  {
-    label: "Telecom",
-    icon: <span style={{ fontSize: 18 }}>📡</span>,
-    values: {
-      monthlyContacts: 20000,
-      avgHandleTime: 8,
-      agentCount: 80,
-      avgAgentCost: 60000,
-      currentDigitalRate: 20,
-      targetDigitalRate: 65,
-    },
-  },
+// ─── TYPES ───────────────────────────────────────────────────────────────────
+interface ThirdPartyService { id: string; name: string; monthlyCost: number; }
+interface AiCosts { agentUnitsPerMonth: number; agentUnitPrice: number; assistantUnitsPerMonth: number; assistantUnitPrice: number; }
+interface PlatformCosts {
+  platformCostPerMonth: number;
+  phoneLineMonthly: number;
+  smsServiceMonthly: number;
+  thirdPartyServices: ThirdPartyService[];
+  aiCosts: AiCosts;
+  periodMonths: number;
+}
+interface UnitCosts { smsPerSegmentCost: number; wxConnectRemoteRunCost: number; emailSendCost: number; }
+interface Workflow {
+  id: string;
+  name: string;
+  minutesRemoved: number;
+  smsPerFlow: number;
+  emailsPerFlow: number;
+  wxConnectRunsPerFlow: number;
+  lettersPerFlow: number;
+  annualVolume: number | null;
+}
+
+// ─── DEFAULTS ────────────────────────────────────────────────────────────────
+const DEFAULT_PLATFORM: PlatformCosts = {
+  platformCostPerMonth: 1238.15,
+  phoneLineMonthly: 0,
+  smsServiceMonthly: 0,
+  thirdPartyServices: [],
+  aiCosts: { agentUnitsPerMonth: 0, agentUnitPrice: 109.77, assistantUnitsPerMonth: 0, assistantUnitPrice: 32.93 },
+  periodMonths: 12,
+};
+const DEFAULT_UNIT_COSTS: UnitCosts = { smsPerSegmentCost: 0.04, wxConnectRemoteRunCost: 0.08, emailSendCost: 0 };
+const EXAMPLE_WORKFLOWS: Omit<Workflow, "id">[] = [
+  { name: "Pre-Admission",             minutesRemoved: 30, smsPerFlow: 2, emailsPerFlow: 1, wxConnectRunsPerFlow: 1, lettersPerFlow: 1, annualVolume: 5000 },
+  { name: "Appointment Confirmation",  minutesRemoved: 20, smsPerFlow: 1, emailsPerFlow: 1, wxConnectRunsPerFlow: 1, lettersPerFlow: 0, annualVolume: 12000 },
+  { name: "Appointment Reschedule",    minutesRemoved: 15, smsPerFlow: 2, emailsPerFlow: 1, wxConnectRunsPerFlow: 1, lettersPerFlow: 0, annualVolume: 3000 },
+  { name: "Appointment Cancellation",  minutesRemoved: 10, smsPerFlow: 1, emailsPerFlow: 1, wxConnectRunsPerFlow: 1, lettersPerFlow: 0, annualVolume: 2000 },
+  { name: "Post-Operative Notification", minutesRemoved: 10, smsPerFlow: 1, emailsPerFlow: 2, wxConnectRunsPerFlow: 1, lettersPerFlow: 1, annualVolume: 4000 },
 ];
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function fmt(n: number, decimals = 0): string {
-  return n.toLocaleString("en-AU", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-}
+// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
 
-function fmtCurrency(n: number): string {
-  if (n >= 1_000_000)
-    return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000)
-    return `$${Math.round(n / 1_000)}K`;
-  return `$${Math.round(n)}`;
-}
-
-// ─── SLIDER INPUT ─────────────────────────────────────────────────────────────
-interface SliderInputProps {
+interface NumInputProps {
+  id?: string;
   label: string;
+  description?: string;
   value: number;
-  min: number;
-  max: number;
-  step: number;
-  format?: (v: number) => string;
+  step?: string | number;
+  min?: number;
+  prefix?: string;
+  suffix?: string;
+  placeholder?: string;
   onChange: (v: number) => void;
 }
-
-function SliderInput({ label, value, min, max, step, format, onChange }: SliderInputProps) {
-  const display = format ? format(value) : fmt(value);
-  const pct = ((value - min) / (max - min)) * 100;
-
+function NumInput({ id, label, description, value, step = 1, min = 0, prefix, onChange }: NumInputProps) {
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: C.bg,
+    border: `1px solid ${C.s3}`,
+    borderRadius: 6,
+    padding: prefix ? "8px 12px 8px 28px" : "8px 12px",
+    color: C.light,
+    fontSize: 14,
+    fontFamily: "'Roboto', sans-serif",
+    outline: "none",
+  };
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: C.muted }}>
-          {label}
-        </span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: C.cyan, fontFamily: "'JetBrains Mono', monospace" }}>
-          {display}
-        </span>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <label htmlFor={id} style={{ fontSize: 14, fontWeight: 500, color: C.light }}>{label}</label>
       <div style={{ position: "relative" }}>
+        {prefix && (
+          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 14, color: C.muted, pointerEvents: "none" }}>
+            {prefix}
+          </span>
+        )}
         <input
-          type="range"
-          min={min}
-          max={max}
+          id={id}
+          type="number"
           step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          style={{
-            background: `linear-gradient(to right, ${C.cyan} ${pct}%, ${C.s3} ${pct}%)`,
-          }}
+          min={min}
+          value={value || ""}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          style={inputStyle}
         />
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 10, color: C.gray }}>{format ? format(min) : fmt(min)}</span>
-        <span style={{ fontSize: 10, color: C.gray }}>{format ? format(max) : fmt(max)}</span>
-      </div>
+      {description && <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>{description}</p>}
     </div>
   );
 }
 
-// ─── STAT CARD ────────────────────────────────────────────────────────────────
-interface StatCardProps {
-  label: string;
-  value: string;
-  sub?: string;
-  accent: string;
-  icon: React.ReactNode;
-  highlight?: boolean;
+interface AccordionProps {
+  open: boolean;
+  onToggle: () => void;
+  header: React.ReactNode;
+  children: React.ReactNode;
+  headerRight?: React.ReactNode;
 }
-
-function StatCard({ label, value, sub, accent, icon, highlight }: StatCardProps) {
+function Accordion({ open, onToggle, header, children, headerRight }: AccordionProps) {
   return (
-    <div
-      style={{
-        background: highlight
-          ? `linear-gradient(135deg, ${accent}22, ${C.s1})`
-          : C.s1,
-        border: `1px solid ${highlight ? accent + "55" : C.s2}`,
-        borderRadius: 12,
-        padding: "20px 24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {highlight && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 2,
-            background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
-          }}
-        />
-      )}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: accent + "22",
-            border: `1px solid ${accent}44`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: accent,
-            flexShrink: 0,
-          }}
-        >
-          {icon}
+    <div style={{ background: C.s1, border: `1px solid ${C.s2}`, borderRadius: 8, overflow: "hidden" }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: "100%",
+          padding: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          color: C.light,
+          textAlign: "left",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+          {header}
         </div>
-        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted }}>
-          {label}
-        </span>
-      </div>
-      <div style={{ fontSize: 28, fontWeight: 700, color: highlight ? accent : C.light, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>
-        {value}
-      </div>
-      {sub && (
-        <div style={{ fontSize: 11, color: C.muted }}>{sub}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          {headerRight}
+          <ChevronDown
+            size={16}
+            color={C.muted}
+            style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "none", flexShrink: 0 }}
+          />
+        </div>
+      </button>
+      {open && (
+        <div style={{ padding: "0 24px 24px", borderTop: `1px solid ${C.s2}` }}>
+          {children}
+        </div>
       )}
     </div>
   );
 }
 
-// ─── CUSTOM TOOLTIP ──────────────────────────────────────────────────────────
-function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
+function SectionIcon({ icon, color = C.cyan }: { icon: React.ReactNode; color?: string }) {
   return (
-    <div
-      style={{
-        background: C.s2,
-        border: `1px solid ${C.cyan}33`,
-        borderRadius: 8,
-        padding: "10px 14px",
-        fontSize: 12,
-        color: C.light,
-      }}
-    >
-      <div style={{ color: C.muted, marginBottom: 4 }}>Year {label}</div>
-      {payload.map((p: any) => (
-        <div key={p.name} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, display: "inline-block" }} />
-          <span style={{ color: C.muted }}>{p.name}:</span>
-          <span style={{ fontWeight: 700, color: C.light }}>{fmtCurrency(p.value)}</span>
-        </div>
-      ))}
+    <div style={{
+      width: 40, height: 40, borderRadius: 8, flexShrink: 0,
+      background: `${color}18`, border: `1px solid ${color}30`,
+      display: "flex", alignItems: "center", justifyContent: "center", color,
+    }}>
+      {icon}
     </div>
   );
+}
+
+function Divider() {
+  return <div style={{ height: 1, background: C.s2, margin: "20px 0" }} />;
 }
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 export default function Home() {
-  // ── Inputs ──
-  const [monthlyContacts, setMonthlyContacts] = useState(10000);
-  const [avgHandleTime, setAvgHandleTime] = useState(8);
-  const [agentCount, setAgentCount] = useState(50);
-  const [avgAgentCost, setAvgAgentCost] = useState(65000);
-  const [currentDigitalRate, setCurrentDigitalRate] = useState(20);
-  const [targetDigitalRate, setTargetDigitalRate] = useState(60);
-  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [platformCosts, setPlatformCosts] = useState<PlatformCosts>(DEFAULT_PLATFORM);
+  const [unitCosts, setUnitCosts] = useState<UnitCosts>(DEFAULT_UNIT_COSTS);
+  const [staffHourlyCost, setStaffHourlyCost] = useState(60);
+  const [postagePaperCost, setPostagePaperCost] = useState(2);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
-  // ── Apply preset ──
-  function applyPreset(preset: Preset) {
-    const v = preset.values;
-    setMonthlyContacts(v.monthlyContacts);
-    setAvgHandleTime(v.avgHandleTime);
-    setAgentCount(v.agentCount);
-    setAvgAgentCost(v.avgAgentCost);
-    setCurrentDigitalRate(v.currentDigitalRate);
-    setTargetDigitalRate(v.targetDigitalRate);
-    setActivePreset(preset.label);
-  }
+  const [platformOpen, setPlatformOpen] = useState(false);
+  const [interactionOpen, setInteractionOpen] = useState(true);
+  const [ratesOpen, setRatesOpen] = useState(false);
+  const [aiPricingOpen, setAiPricingOpen] = useState(false);
+  const [isPresentMode, setIsPresentMode] = useState(false);
 
-  // ── ROI Calculations ──
-  const calc = useMemo(() => {
-    // Digital deflection improvement
-    const deflectionGain = Math.max(0, targetDigitalRate - currentDigitalRate) / 100;
-    const monthlyDeflectedContacts = monthlyContacts * deflectionGain;
-    const annualDeflectedContacts = monthlyDeflectedContacts * 12;
+  // ── Platform cost total ──
+  const annualPlatformCost = useMemo(() => {
+    const thirdPartyTotal = platformCosts.thirdPartyServices.reduce((s, t) => s + t.monthlyCost, 0);
+    const aiTotal = platformCosts.aiCosts.agentUnitsPerMonth * platformCosts.aiCosts.agentUnitPrice
+      + platformCosts.aiCosts.assistantUnitsPerMonth * platformCosts.aiCosts.assistantUnitPrice;
+    return (platformCosts.platformCostPerMonth + platformCosts.phoneLineMonthly + platformCosts.smsServiceMonthly + thirdPartyTotal + aiTotal) * platformCosts.periodMonths;
+  }, [platformCosts]);
 
-    // Labour savings
-    const annualHoursSaved = (annualDeflectedContacts * avgHandleTime) / 60;
-    const fteEquivalent = annualHoursSaved / 1_920; // 1920 working hrs/year
-    const annualLabourSaving = fteEquivalent * avgAgentCost;
+  const monthlyPlatformCost = annualPlatformCost / (platformCosts.periodMonths || 1);
 
-    // Platform cost estimate (Webex CC digital channel ~$0.35/contact)
-    const digitalCostPerContact = 0.35;
-    const annualPlatformCost = annualDeflectedContacts * digitalCostPerContact;
+  // ── Per-workflow digital cost ──
+  const digitalCostPerFlow = useCallback((wf: Workflow) =>
+    wf.smsPerFlow * unitCosts.smsPerSegmentCost
+    + wf.emailsPerFlow * unitCosts.emailSendCost
+    + wf.wxConnectRunsPerFlow * unitCosts.wxConnectRemoteRunCost,
+  [unitCosts]);
 
-    // Net benefit & ROI
-    const annualNetBenefit = annualLabourSaving - annualPlatformCost;
-    const roiPercent = annualPlatformCost > 0 ? (annualNetBenefit / annualPlatformCost) * 100 : 0;
-
-    // Payback (months)
-    const paybackMonths = annualNetBenefit > 0 ? (annualPlatformCost / (annualNetBenefit / 12)) : 0;
-
-    // 5-year projection
-    const projectionData = Array.from({ length: 5 }, (_, i) => {
-      const yr = i + 1;
-      const cumulativeBenefit = annualNetBenefit * yr;
-      const cumulativeCost = annualPlatformCost * yr;
-      return {
-        year: yr,
-        "Net Benefit": Math.round(cumulativeBenefit),
-        "Platform Cost": Math.round(cumulativeCost),
-        "Labour Saving": Math.round(annualLabourSaving * yr),
-      };
+  // ── Workflow results ──
+  const workflowResults = useMemo(() => {
+    const valid = workflows.filter(w => w.name.trim() && w.minutesRemoved > 0);
+    return valid.map(w => {
+      const labourSaving = (w.minutesRemoved / 60) * staffHourlyCost + w.lettersPerFlow * postagePaperCost;
+      const digitalCost = digitalCostPerFlow(w);
+      const netValuePerInteraction = labourSaving - digitalCost;
+      const breakEvenInteractions = netValuePerInteraction > 0 ? Math.ceil(annualPlatformCost / netValuePerInteraction) : Infinity;
+      const annualBenefit = w.annualVolume !== null ? netValuePerInteraction * w.annualVolume : null;
+      const annualHoursSaved = w.annualVolume !== null ? (w.minutesRemoved * w.annualVolume) / 60 : null;
+      return { ...w, labourSaving, digitalCost, netValuePerInteraction, breakEvenInteractions, annualBenefit, annualHoursSaved };
     });
+  }, [workflows, staffHourlyCost, postagePaperCost, digitalCostPerFlow, annualPlatformCost]);
 
-    return {
-      monthlyDeflectedContacts: Math.round(monthlyDeflectedContacts),
-      annualDeflectedContacts: Math.round(annualDeflectedContacts),
-      annualHoursSaved: Math.round(annualHoursSaved),
-      fteEquivalent: Math.round(fteEquivalent * 10) / 10,
-      annualLabourSaving: Math.round(annualLabourSaving),
-      annualPlatformCost: Math.round(annualPlatformCost),
-      annualNetBenefit: Math.round(annualNetBenefit),
-      roiPercent: Math.round(roiPercent),
-      paybackMonths: Math.round(paybackMonths * 10) / 10,
-      projectionData,
-    };
-  }, [monthlyContacts, avgHandleTime, agentCount, avgAgentCost, currentDigitalRate, targetDigitalRate]);
+  // ── Combined results ──
+  const combinedResults = useMemo(() => {
+    const withVolumes = workflowResults.filter(w => w.annualBenefit !== null);
+    if (!withVolumes.length) return null;
+    const totalAnnualBenefit = withVolumes.reduce((s, w) => s + (w.annualBenefit ?? 0), 0);
+    const totalHoursSaved = withVolumes.reduce((s, w) => s + (w.annualHoursSaved ?? 0), 0);
+    const fteEquivalent = totalHoursSaved / 1920;
+    const roi = annualPlatformCost > 0 ? totalAnnualBenefit / annualPlatformCost : 0;
+    const paybackMonths = totalAnnualBenefit > 0 ? (annualPlatformCost / (totalAnnualBenefit / 12)) : Infinity;
+    const monthlyBreakEven = workflowResults.reduce((s, w) => s + (w.netValuePerInteraction > 0 && w.annualVolume ? w.annualVolume / 12 : 0), 0);
+    const annualBreakEven = workflowResults.reduce((s, w) => w.breakEvenInteractions < Infinity ? s + w.breakEvenInteractions : s, 0);
+    return { totalAnnualBenefit, totalHoursSaved, fteEquivalent, roi, paybackMonths, monthlyBreakEven, annualBreakEven };
+  }, [workflowResults, annualPlatformCost]);
+
+  const hasVolumes = workflowResults.some(w => w.annualBenefit !== null);
+
+  // ── Workflow CRUD ──
+  const addWorkflow = () => setWorkflows(ws => [...ws, { id: uid(), name: "", minutesRemoved: 0, smsPerFlow: 0, emailsPerFlow: 0, wxConnectRunsPerFlow: 0, lettersPerFlow: 0, annualVolume: null }]);
+  const removeWorkflow = (id: string) => setWorkflows(ws => ws.filter(w => w.id !== id));
+  const updateWorkflow = (id: string, field: keyof Workflow, value: unknown) => setWorkflows(ws => ws.map(w => w.id === id ? { ...w, [field]: value } : w));
+  const loadDefaults = () => setWorkflows(EXAMPLE_WORKFLOWS.map(w => ({ ...w, id: uid() })));
+
+  // ── Platform helpers ──
+  const updatePlatform = (field: keyof PlatformCosts, value: unknown) => setPlatformCosts(p => ({ ...p, [field]: value }));
+  const updateAiCosts = (field: keyof AiCosts, value: number) => setPlatformCosts(p => ({ ...p, aiCosts: { ...p.aiCosts, [field]: value } }));
+  const addService = () => setPlatformCosts(p => ({ ...p, thirdPartyServices: [...p.thirdPartyServices, { id: `svc-${Date.now()}`, name: "", monthlyCost: 0 }] }));
+  const updateService = (id: string, field: keyof ThirdPartyService, value: unknown) => setPlatformCosts(p => ({ ...p, thirdPartyServices: p.thirdPartyServices.map(s => s.id === id ? { ...s, [field]: value } : s) }));
+  const removeService = (id: string) => setPlatformCosts(p => ({ ...p, thirdPartyServices: p.thirdPartyServices.filter(s => s.id !== id) }));
+
+  // ─── RENDER ───────────────────────────────────────────────────────────────
+  const inputBase: React.CSSProperties = {
+    background: C.bg, border: `1px solid ${C.s3}`, borderRadius: 6,
+    padding: "8px 12px", color: C.light, fontSize: 13, width: "100%",
+    fontFamily: "'Roboto', sans-serif", outline: "none",
+  };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: C.bg,
-        color: C.light,
-        fontFamily: "'Roboto', Arial, sans-serif",
-      }}
-    >
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.light, fontFamily: "'Roboto', sans-serif" }}>
+
       {/* ── HEADER ── */}
-      <header
-        style={{
-          borderBottom: `1px solid ${C.s2}`,
-          padding: "0 32px",
-          height: 64,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          background: C.bg,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <a href="/" style={{ display: "flex", alignItems: "center" }}>
-            <img
-              src="/brand_assets/logo_darkbackground.png"
-              alt="ArchiTech"
-              style={{ height: 28, mixBlendMode: "screen", opacity: 0.9 }}
-            />
+      <header style={{
+        height: 56, background: "#0B1520", borderBottom: `1px solid ${C.cyan}1A`,
+        display: "flex", alignItems: "center", padding: "0 24px",
+        justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <a href="/">
+            <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech"
+              style={{ height: 36, width: "auto", maxWidth: "none", mixBlendMode: "screen", flexShrink: 0 }} />
           </a>
-          <div style={{ width: 1, height: 24, background: C.s3 }} />
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.light, letterSpacing: "0.02em" }}>
-              Webex CC ROI Calculator
-            </span>
-            <span style={{ fontSize: 10, color: C.muted, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              Digital Transformation Value Model
-            </span>
+          <div style={{ borderLeft: `1px solid rgba(255,255,255,0.1)`, paddingLeft: 12 }}>
+            <h1 style={{ fontSize: 13, fontWeight: 700, color: C.light, textTransform: "uppercase", letterSpacing: "0.06em", margin: 0, lineHeight: 1.2 }}>
+              ROI Calculator — Webex Contact Center
+            </h1>
+            <p style={{ fontSize: 10, fontWeight: 700, color: C.cyan, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0 }}>
+              [ Pre-Sales Tool ]
+            </p>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div
-            style={{
-              padding: "6px 14px",
-              borderRadius: 6,
-              background: `${C.cyan}15`,
-              border: `1px solid ${C.cyan}44`,
-              fontSize: 11,
-              color: C.cyan,
-              fontWeight: 600,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            title={isPresentMode ? "Exit presentation mode" : "Enter presentation mode"}
+            onClick={() => setIsPresentMode(v => !v)}
+            style={{ background: "transparent", border: "none", cursor: "pointer", padding: 6, color: isPresentMode ? C.cyan : C.muted, borderRadius: 4 }}
           >
-            <Zap size={12} />
-            Live Calculation
+            <Presentation size={14} />
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${C.cyan}66`, borderRadius: 999, padding: "6px 12px" }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.cyan, display: "inline-block", animation: "pulse 2s infinite" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.cyan, letterSpacing: "0.1em", textTransform: "uppercase" }}>Live</span>
           </div>
         </div>
       </header>
 
-      {/* ── HERO STRIP ── */}
-      <div
-        style={{
-          background: `linear-gradient(90deg, ${C.s1}, ${C.s2})`,
-          borderBottom: `1px solid ${C.s3}`,
-          padding: "28px 32px",
-        }}
-      >
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <h1
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-              margin: 0,
-              color: C.light,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            What's your{" "}
-            <span style={{ color: C.cyan }}>contact centre</span> truly worth?
-          </h1>
-          <p style={{ margin: "8px 0 20px", fontSize: 14, color: C.muted, maxWidth: 560 }}>
-            Configure your organisation below and see the projected ROI of deploying
-            Webex Contact Center with AI-powered digital deflection.
-          </p>
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
 
-          {/* Preset buttons */}
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {PRESETS.map((p) => (
-              <button
-                key={p.label}
-                onClick={() => applyPreset(p)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: `1px solid ${activePreset === p.label ? C.cyan + "88" : C.s3}`,
-                  background: activePreset === p.label ? `${C.cyan}18` : C.s1,
-                  color: activePreset === p.label ? C.cyan : C.muted,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                {p.icon}
-                {p.label}
-              </button>
-            ))}
-            <button
-              onClick={() => {
-                setMonthlyContacts(10000);
-                setAvgHandleTime(8);
-                setAgentCount(50);
-                setAvgAgentCost(65000);
-                setCurrentDigitalRate(20);
-                setTargetDigitalRate(60);
-                setActivePreset(null);
-              }}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 8,
-                border: `1px solid ${C.s3}`,
-                background: "transparent",
-                color: C.gray,
-                fontSize: 12,
-                cursor: "pointer",
-                letterSpacing: "0.04em",
-              }}
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* ── MAIN ── */}
+      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px", display: "grid", gridTemplateColumns: "1fr 400px", gap: 32, alignItems: "start" }}>
 
-      {/* ── MAIN CONTENT ── */}
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 32px 64px" }}>
+        {/* ── LEFT COLUMN ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-        {/* ── TOP STATS ROW ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: 16,
-            marginBottom: 32,
-          }}
-        >
-          <StatCard
-            label="Annual Net Benefit"
-            value={fmtCurrency(calc.annualNetBenefit)}
-            sub="After platform costs"
-            accent={C.cyan}
-            icon={<TrendingUp size={16} />}
-            highlight
-          />
-          <StatCard
-            label="ROI"
-            value={`${fmt(calc.roiPercent)}%`}
-            sub="Return on platform investment"
-            accent={C.lightCyan}
-            icon={<BarChart3 size={16} />}
-            highlight
-          />
-          <StatCard
-            label="Payback Period"
-            value={`${calc.paybackMonths}mo`}
-            sub="Time to recover costs"
-            accent={C.periwinkle}
-            icon={<Clock size={16} />}
-          />
-          <StatCard
-            label="FTE Equivalent"
-            value={`${calc.fteEquivalent}`}
-            sub="Agent capacity freed"
-            accent={C.midBlue}
-            icon={<Users size={16} />}
-          />
-          <StatCard
-            label="Labour Saving"
-            value={fmtCurrency(calc.annualLabourSaving)}
-            sub="Annual staff cost avoided"
-            accent={C.blue}
-            icon={<DollarSign size={16} />}
-          />
-          <StatCard
-            label="Contacts Deflected"
-            value={fmt(calc.monthlyDeflectedContacts)}
-            sub="Per month via digital channels"
-            accent={C.blueGray}
-            icon={<PhoneCall size={16} />}
-          />
-        </div>
-
-        {/* ── TWO-COLUMN LAYOUT: CONFIG + CHART ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1.4fr",
-            gap: 24,
-            alignItems: "start",
-          }}
-        >
-          {/* ── LEFT: CONFIGURATION ── */}
-          <div
-            style={{
-              background: C.s1,
-              border: `1px solid ${C.s2}`,
-              borderRadius: 14,
-              padding: 28,
-              display: "flex",
-              flexDirection: "column",
-              gap: 28,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: C.cyan,
-                  marginBottom: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <PhoneCall size={12} />
-                Contact Volume
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                <SliderInput
-                  label="Monthly Contacts"
-                  value={monthlyContacts}
-                  min={1000}
-                  max={100000}
-                  step={500}
-                  format={(v) => fmt(v)}
-                  onChange={setMonthlyContacts}
-                />
-                <SliderInput
-                  label="Avg Handle Time (minutes)"
-                  value={avgHandleTime}
-                  min={1}
-                  max={30}
-                  step={1}
-                  format={(v) => `${v} min`}
-                  onChange={setAvgHandleTime}
-                />
-              </div>
-            </div>
-
-            <div style={{ height: 1, background: C.s2 }} />
-
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: C.periwinkle,
-                  marginBottom: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <Users size={12} />
-                Workforce
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                <SliderInput
-                  label="Number of Agents"
-                  value={agentCount}
-                  min={5}
-                  max={500}
-                  step={5}
-                  onChange={setAgentCount}
-                />
-                <SliderInput
-                  label="Avg Annual Agent Cost"
-                  value={avgAgentCost}
-                  min={30000}
-                  max={150000}
-                  step={1000}
-                  format={(v) => `$${fmt(v)}`}
-                  onChange={setAvgAgentCost}
-                />
-              </div>
-            </div>
-
-            <div style={{ height: 1, background: C.s2 }} />
-
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: C.midBlue,
-                  marginBottom: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <Zap size={12} />
-                Digital Deflection
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                <SliderInput
-                  label="Current Digital Rate"
-                  value={currentDigitalRate}
-                  min={0}
-                  max={90}
-                  step={1}
-                  format={(v) => `${v}%`}
-                  onChange={(v) => {
-                    setCurrentDigitalRate(v);
-                    if (v >= targetDigitalRate) setTargetDigitalRate(Math.min(95, v + 5));
-                  }}
-                />
-                <SliderInput
-                  label="Target Digital Rate"
-                  value={targetDigitalRate}
-                  min={0}
-                  max={95}
-                  step={1}
-                  format={(v) => `${v}%`}
-                  onChange={(v) => {
-                    setTargetDigitalRate(v);
-                    if (v <= currentDigitalRate) setCurrentDigitalRate(Math.max(0, v - 5));
-                  }}
-                />
-                {/* Deflection gain callout */}
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    borderRadius: 8,
-                    background: `${C.cyan}12`,
-                    border: `1px solid ${C.cyan}33`,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span style={{ fontSize: 11, color: C.muted }}>Deflection gain</span>
-                  <span
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: C.cyan,
-                      fontFamily: "'JetBrains Mono', monospace",
-                    }}
-                  >
-                    +{targetDigitalRate - currentDigitalRate}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── RIGHT: CHART + BREAKDOWN ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-            {/* 5-year projection chart */}
-            <div
-              style={{
-                background: C.s1,
-                border: `1px solid ${C.s2}`,
-                borderRadius: 14,
-                padding: 28,
-              }}
-            >
-              <div style={{ marginBottom: 20 }}>
-                <div
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: C.cyan,
-                    marginBottom: 4,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <TrendingUp size={12} />
-                  5-Year Cumulative Projection
-                </div>
-                <div style={{ fontSize: 12, color: C.muted }}>
-                  Cumulative net benefit vs. platform investment over time
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={calc.projectionData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gradBenefit" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.cyan} stopOpacity={0.25} />
-                      <stop offset="95%" stopColor={C.cyan} stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="gradLabour" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.periwinkle} stopOpacity={0.2} />
-                      <stop offset="95%" stopColor={C.periwinkle} stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="gradCost" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.blueGray} stopOpacity={0.2} />
-                      <stop offset="95%" stopColor={C.blueGray} stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke={C.s3} strokeDasharray="3 3" strokeOpacity={0.5} />
-                  <XAxis
-                    dataKey="year"
-                    tick={{ fill: C.muted, fontSize: 11 }}
-                    axisLine={{ stroke: C.s3 }}
-                    tickLine={false}
-                    tickFormatter={(v) => `Yr ${v}`}
-                  />
-                  <YAxis
-                    tick={{ fill: C.muted, fontSize: 10 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) => fmtCurrency(v)}
-                    width={60}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="Labour Saving"
-                    stroke={C.periwinkle}
-                    strokeWidth={1.5}
-                    fill="url(#gradLabour)"
-                    strokeDasharray="4 2"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="Platform Cost"
-                    stroke={C.blueGray}
-                    strokeWidth={1.5}
-                    fill="url(#gradCost)"
-                    strokeDasharray="4 2"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="Net Benefit"
-                    stroke={C.cyan}
-                    strokeWidth={2.5}
-                    fill="url(#gradBenefit)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-              {/* Chart legend */}
-              <div style={{ display: "flex", gap: 20, marginTop: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                {[
-                  { color: C.cyan, label: "Net Benefit", solid: true },
-                  { color: C.periwinkle, label: "Labour Saving", solid: false },
-                  { color: C.blueGray, label: "Platform Cost", solid: false },
-                ].map(({ color, label, solid }) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div
-                      style={{
-                        width: 20,
-                        height: 2,
-                        background: solid ? color : "transparent",
-                        borderTop: solid ? "none" : `2px dashed ${color}`,
-                        borderRadius: 1,
-                      }}
-                    />
-                    <span style={{ fontSize: 10, color: C.muted }}>{label}</span>
+          {/* Platform Costs */}
+          <Accordion
+            open={platformOpen}
+            onToggle={() => setPlatformOpen(v => !v)}
+            header={
+              <>
+                <SectionIcon icon={<Server size={20} />} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 18, color: C.light }}>Platform Costs</div>
+                  <div style={{ fontSize: 14, color: C.muted }}>
+                    {fmtCurrency(monthlyPlatformCost)}/mo · {platformCosts.periodMonths} month period
                   </div>
-                ))}
+                </div>
+              </>
+            }
+            headerRight={
+              <div style={{ textAlign: "right" }}>
+                <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Total investment</p>
+                <p style={{ fontSize: 20, fontWeight: 700, color: C.light, margin: 0, fontFamily: "'JetBrains Mono', monospace" }}>
+                  {fmtCurrency(annualPlatformCost)}
+                </p>
+              </div>
+            }
+          >
+            <div style={{ paddingTop: 20, display: "flex", flexDirection: "column", gap: 20 }}>
+              {/* Core costs */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 6, background: `${C.cyan}18`, display: "flex", alignItems: "center", justifyContent: "center", color: C.cyan, flexShrink: 0 }}>
+                  <Server size={16} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Flex 3 / Month</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Cisco Flex 3, telephony, AI and third-party services</p>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+                <NumInput
+                  label="Flex 3 / Month" prefix="$" step="0.01"
+                  value={platformCosts.platformCostPerMonth}
+                  description="Monthly cost for Agents and IVR"
+                  onChange={v => updatePlatform("platformCostPerMonth", v)}
+                />
+                <NumInput
+                  label="Phone Line Monthly" prefix="$" step="0.01"
+                  value={platformCosts.phoneLineMonthly}
+                  description="Telephony line rental / usage"
+                  onChange={v => updatePlatform("phoneLineMonthly", v)}
+                />
+                <NumInput
+                  label="SMS Service Monthly" prefix="$" step="0.01"
+                  value={platformCosts.smsServiceMonthly}
+                  description="Monthly SMS service subscription"
+                  onChange={v => updatePlatform("smsServiceMonthly", v)}
+                />
+              </div>
+
+              <Divider />
+
+              {/* AI Costs */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 6, background: `${C.cyan}18`, display: "flex", alignItems: "center", justifyContent: "center", color: C.cyan, flexShrink: 0 }}>
+                  <Zap size={16} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>AI Costs</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Cisco AI Agent and Assistant monthly consumption</p>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <NumInput label="AI Agent Units / Month" value={platformCosts.aiCosts.agentUnitsPerMonth} step={1}
+                  description="Number of Cisco AI Agent units consumed monthly"
+                  onChange={v => updateAiCosts("agentUnitsPerMonth", v)} />
+                <NumInput label="AI Assistant Units / Month" value={platformCosts.aiCosts.assistantUnitsPerMonth} step={1}
+                  description="Number of Cisco AI Assistant units consumed monthly"
+                  onChange={v => updateAiCosts("assistantUnitsPerMonth", v)} />
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setAiPricingOpen(v => !v)}
+                  style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, display: "flex", alignItems: "center", gap: 6, padding: 0 }}
+                >
+                  <ChevronDown size={14} style={{ transform: aiPricingOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                  {aiPricingOpen ? "Hide" : "Show"} per-unit pricing
+                </button>
+                {aiPricingOpen && (
+                  <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: 16, background: C.bg, borderRadius: 8, border: `1px solid ${C.s3}` }}>
+                    <NumInput label="AI Agent Unit Price" prefix="$" step="0.001"
+                      value={platformCosts.aiCosts.agentUnitPrice}
+                      description="Cost per AI Agent unit"
+                      onChange={v => updateAiCosts("agentUnitPrice", v)} />
+                    <NumInput label="AI Assistant Unit Price" prefix="$" step="0.001"
+                      value={platformCosts.aiCosts.assistantUnitPrice}
+                      description="Cost per AI Assistant unit"
+                      onChange={v => updateAiCosts("assistantUnitPrice", v)} />
+                  </div>
+                )}
+                <p style={{ marginTop: 8, fontSize: 12, color: C.muted, textAlign: "right" }}>
+                  AI total: <span style={{ color: C.light, fontWeight: 500 }}>
+                    {fmtCurrency(platformCosts.aiCosts.agentUnitsPerMonth * platformCosts.aiCosts.agentUnitPrice + platformCosts.aiCosts.assistantUnitsPerMonth * platformCosts.aiCosts.assistantUnitPrice)}
+                  </span> / month
+                </p>
+              </div>
+
+              <Divider />
+
+              {/* Third Party Services */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Monthly 3rd Party Services</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Add any additional monthly service costs</p>
+                </div>
+                <button type="button" onClick={addService} style={{
+                  display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 6,
+                  border: `1px solid ${C.s3}`, background: "transparent", color: C.light, fontSize: 12, cursor: "pointer",
+                }}>
+                  <Plus size={14} /> Add Service
+                </button>
+              </div>
+              {platformCosts.thirdPartyServices.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {platformCosts.thirdPartyServices.map(svc => (
+                    <div key={svc.id} style={{ display: "grid", gridTemplateColumns: "1fr 160px 36px", gap: 10, alignItems: "end" }}>
+                      <div>
+                        <label style={{ fontSize: 12, color: C.muted, display: "block", marginBottom: 4 }}>Service Name</label>
+                        <input placeholder="e.g. Twilio, SendGrid" value={svc.name}
+                          onChange={e => updateService(svc.id, "name", e.target.value)}
+                          style={inputBase} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, color: C.muted, display: "block", marginBottom: 4 }}>Monthly Cost</label>
+                        <div style={{ position: "relative" }}>
+                          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: C.muted, fontSize: 13 }}>$</span>
+                          <input type="number" step="0.01" min="0" value={svc.monthlyCost || ""}
+                            onChange={e => updateService(svc.id, "monthlyCost", parseFloat(e.target.value) || 0)}
+                            style={{ ...inputBase, paddingLeft: 24 }} />
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => removeService(svc.id)}
+                        style={{ height: 36, width: 36, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: `1px solid ${C.s3}`, borderRadius: 6, cursor: "pointer", color: C.muted }}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Divider />
+
+              {/* Period */}
+              <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 16, alignItems: "end" }}>
+                <NumInput label="Period (months)" value={platformCosts.periodMonths} step={1} min={1}
+                  description="Evaluation period for total cost"
+                  onChange={v => updatePlatform("periodMonths", Math.max(1, Math.round(v)))} />
+                <p style={{ fontSize: 12, color: C.muted }}>
+                  Total Platform Cost ({platformCosts.periodMonths} months):{" "}
+                  <span style={{ color: C.light, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{fmtCurrency(annualPlatformCost)}</span>
+                </p>
+              </div>
+            </div>
+          </Accordion>
+
+          {/* Interaction Costs */}
+          <Accordion
+            open={interactionOpen}
+            onToggle={() => setInteractionOpen(v => !v)}
+            header={
+              <>
+                <SectionIcon icon={<Zap size={20} />} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 18, color: C.light }}>Interaction Costs</div>
+                  <div style={{ fontSize: 14, color: C.muted }}>Labour and digital channel unit rates per workflow</div>
+                </div>
+              </>
+            }
+          >
+            <div style={{ paddingTop: 20, display: "flex", flexDirection: "column", gap: 20 }}>
+              {/* Manual Process Costs */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 6, background: `${C.cyan}18`, display: "flex", alignItems: "center", justifyContent: "center", color: C.cyan, flexShrink: 0 }}>
+                  <Users size={16} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Manual Process Costs (Removed)</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Labour and material costs eliminated by automation</p>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <NumInput id="staff-hourly" label="Staff Hourly Rate" prefix="$" step="0.01"
+                  value={staffHourlyCost}
+                  description="Average fully-loaded labour cost per hour"
+                  onChange={setStaffHourlyCost} />
+                <NumInput id="postage-cost" label="Postage & Paper Cost" prefix="$" step="0.01"
+                  value={postagePaperCost}
+                  description="Cost of physical mail/printing per manual workflow"
+                  onChange={setPostagePaperCost} />
+              </div>
+
+              <Divider />
+
+              {/* Digital Channel Unit Rates */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 6, background: `${C.cyan}18`, display: "flex", alignItems: "center", justifyContent: "center", color: C.cyan, flexShrink: 0 }}>
+                    <Zap size={16} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Digital Channel Unit Rates</p>
+                    <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+                      Combined rate: {fmtCurrency(unitCosts.smsPerSegmentCost + unitCosts.emailSendCost + unitCosts.wxConnectRemoteRunCost)} / interaction
+                    </p>
+                  </div>
+                </div>
+                <button type="button" onClick={() => setRatesOpen(v => !v)}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12 }}>
+                  <ChevronDown size={14} style={{ transform: ratesOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                  {ratesOpen ? "Hide rates" : "Edit rates"}
+                </button>
+              </div>
+              {ratesOpen && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: 16, background: C.bg, borderRadius: 8, border: `1px solid ${C.s3}` }}>
+                  <NumInput label="Cost per SMS segment" prefix="$" step="0.001"
+                    value={unitCosts.smsPerSegmentCost}
+                    description="Multiplied by each workflow's channel usage"
+                    onChange={v => setUnitCosts(c => ({ ...c, smsPerSegmentCost: v }))} />
+                  <NumInput label="Cost per email sent" prefix="$" step="0.001"
+                    value={unitCosts.emailSendCost}
+                    onChange={v => setUnitCosts(c => ({ ...c, emailSendCost: v }))} />
+                  <NumInput label="WX Connect run cost" prefix="$" step="0.001"
+                    value={unitCosts.wxConnectRemoteRunCost}
+                    description="Cisco WX Connect per-run execution cost"
+                    onChange={v => setUnitCosts(c => ({ ...c, wxConnectRemoteRunCost: v }))} />
+                </div>
+              )}
+            </div>
+          </Accordion>
+
+          {/* Workflows */}
+          <div style={{ background: C.s1, border: `1px solid ${C.s2}`, borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <SectionIcon icon={<Workflow size={20} />} />
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 18, color: C.light }}>Workflows</div>
+                    <div style={{ fontSize: 14, color: C.muted }}>Add the workflows you want to evaluate</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <button title={isPresentMode ? "Exit presentation mode" : "Enter presentation mode"}
+                    onClick={() => setIsPresentMode(v => !v)}
+                    style={{ background: "transparent", border: "none", cursor: "pointer", padding: 6, color: isPresentMode ? C.cyan : `${C.muted}66`, borderRadius: 4 }}>
+                    <Presentation size={14} />
+                  </button>
+                  <button type="button" onClick={loadDefaults} style={{
+                    padding: "8px 14px", borderRadius: 6, border: `1px solid ${C.s3}`,
+                    background: "transparent", color: C.light, fontSize: 13, cursor: "pointer",
+                  }}>
+                    Load Examples
+                  </button>
+                  <button type="button" onClick={addWorkflow} style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 6,
+                    border: "none", background: C.cyan, color: C.bg, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                  }}>
+                    <Plus size={16} /> Add
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Breakdown table */}
-            <div
-              style={{
-                background: C.s1,
-                border: `1px solid ${C.s2}`,
-                borderRadius: 14,
-                padding: 28,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: C.blue,
-                  marginBottom: 18,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <BarChart3 size={12} />
-                Annual Breakdown
+            {workflows.length === 0 ? (
+              <div style={{ padding: "0 24px 24px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRadius: 8, border: `1px dashed ${C.s3}`, padding: 48 }}>
+                  <Workflow size={32} color={C.muted} style={{ marginBottom: 12 }} />
+                  <p style={{ fontSize: 14, fontWeight: 500, color: C.muted, margin: 0 }}>No workflows added yet</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: "4px 0 0" }}>Add a workflow or load example defaults to get started</p>
+                </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                {[
-                  { label: "Monthly contacts deflected", value: fmt(calc.monthlyDeflectedContacts), color: C.muted },
-                  { label: "Annual contacts deflected", value: fmt(calc.annualDeflectedContacts), color: C.muted },
-                  { label: "Agent hours saved / year", value: `${fmt(calc.annualHoursSaved)} hrs`, color: C.muted },
-                  { label: "FTE equivalent freed", value: `${calc.fteEquivalent} FTE`, color: C.lightCyan },
-                  null, // divider
-                  { label: "Annual labour saving", value: fmtCurrency(calc.annualLabourSaving), color: C.periwinkle },
-                  { label: "Annual platform cost", value: fmtCurrency(calc.annualPlatformCost), color: C.blueGray },
-                  null, // divider
-                  { label: "Net annual benefit", value: fmtCurrency(calc.annualNetBenefit), color: C.cyan, bold: true },
-                  { label: "ROI", value: `${fmt(calc.roiPercent)}%`, color: C.cyan, bold: true },
-                  { label: "Payback period", value: `${calc.paybackMonths} months`, color: C.lightCyan, bold: true },
-                ].map((row, i) => {
-                  if (row === null) {
-                    return <div key={`div-${i}`} style={{ height: 1, background: C.s2, margin: "8px 0" }} />;
-                  }
-                  return (
-                    <div
-                      key={row.label}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "9px 0",
-                        borderBottom: `1px solid ${C.s2}44`,
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: C.muted }}>{row.label}</span>
-                      <span
-                        style={{
-                          fontSize: 13,
-                          fontWeight: (row as any).bold ? 700 : 500,
-                          color: row.color,
-                          fontFamily: "'JetBrains Mono', monospace",
-                        }}
-                      >
-                        {row.value}
-                      </span>
-                    </div>
-                  );
-                })}
+            ) : (
+              <div style={{ padding: "0 24px 24px", overflowX: "auto" }}>
+                {/* Header row */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 70px 70px 80px 70px 110px 100px 100px 36px", gap: 8, marginBottom: 8 }}>
+                  {["Workflow Name", "Min. Removed", "SMS", "Emails", "WX Runs", "Letters", "Annual Vol.", "Cost / Flow", "Net Value", ""].map((h, i) => (
+                    <span key={i} style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: C.muted }}>{h}</span>
+                  ))}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {workflows.map(wf => {
+                    const result = workflowResults.find(r => r.id === wf.id);
+                    const cost = result ? result.digitalCost : 0;
+                    const net = result ? result.netValuePerInteraction : 0;
+                    const netColor = net > 0 ? C.cyan : net < 0 ? "#E05C5C" : C.muted;
+                    return (
+                      <div key={wf.id} style={{
+                        display: "grid", gridTemplateColumns: "1fr 90px 70px 70px 80px 70px 110px 100px 100px 36px",
+                        gap: 8, alignItems: "center",
+                        padding: "12px 16px", background: C.bg, borderRadius: 8, border: `1px solid ${C.s2}`,
+                      }}>
+                        <input value={wf.name} placeholder="Workflow Name"
+                          onChange={e => updateWorkflow(wf.id, "name", e.target.value)}
+                          style={{ ...inputBase, fontSize: 13 }} />
+                        {(["minutesRemoved", "smsPerFlow", "emailsPerFlow", "wxConnectRunsPerFlow", "lettersPerFlow"] as const).map(field => (
+                          <input key={field} type="number" min="0" step="1"
+                            value={wf[field] || ""}
+                            onChange={e => updateWorkflow(wf.id, field, parseInt(e.target.value) || 0)}
+                            style={{ ...inputBase, fontSize: 13, textAlign: "center" }} />
+                        ))}
+                        <input type="number" min="0" step="100" placeholder="Optional"
+                          value={wf.annualVolume ?? ""}
+                          onChange={e => updateWorkflow(wf.id, "annualVolume", e.target.value ? parseInt(e.target.value) || 0 : null)}
+                          style={{ ...inputBase, fontSize: 13 }} />
+                        {/* Cost/flow (computed) */}
+                        <div style={{ fontSize: 12, color: C.muted, textAlign: "right", fontFamily: "'JetBrains Mono', monospace" }}>
+                          {result ? fmtCurrency(cost) : "—"}
+                        </div>
+                        {/* Net value (computed) */}
+                        <div style={{ fontSize: 13, fontWeight: 700, textAlign: "right", color: netColor, fontFamily: "'JetBrains Mono', monospace" }}>
+                          {result ? fmtCurrency(net) : "—"}
+                        </div>
+                        <button type="button" onClick={() => removeWorkflow(wf.id)}
+                          style={{ width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: `1px solid ${C.s3}`, borderRadius: 6, cursor: "pointer", color: C.muted }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* ── DISCLAIMER ── */}
-        <div
-          style={{
-            marginTop: 32,
-            padding: "16px 24px",
-            borderRadius: 10,
-            background: C.s1,
-            border: `1px solid ${C.s2}`,
-            fontSize: 11,
-            color: C.gray,
-            lineHeight: 1.6,
-          }}
-        >
-          <strong style={{ color: C.muted }}>Assumptions:</strong>{" "}
-          Platform cost estimated at $0.35 per deflected contact (Webex CC digital channel blended rate).
-          Labour saving based on FTE equivalent at 1,920 working hours per year.
-          Results are indicative and will vary based on your organisation's specific configuration,
-          contract pricing, and deployment model. Contact ArchiTech for a tailored assessment.
+        {/* ── RIGHT COLUMN: RESULTS ── */}
+        <div style={{ position: "sticky", top: 80 }}>
+          <div style={{ background: C.s1, border: `1px solid ${C.s2}`, borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <SectionIcon icon={<BarChart3 size={20} />} />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 18, color: C.light }}>Results</div>
+                  <div style={{ fontSize: 14, color: C.muted }}>
+                    {workflowResults.length === 0 ? "Add workflows above to see your ROI analysis" : "Based on your projected annual volumes"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {workflowResults.length === 0 ? (
+              <div style={{ padding: "0 24px 24px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 48 }}>
+                  <BarChart3 size={32} color={C.muted} style={{ marginBottom: 12 }} />
+                  <p style={{ fontSize: 14, color: C.muted, margin: 0 }}>Results will appear here once you add workflows</p>
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+
+                {/* Per-Workflow Breakdown */}
+                {!isPresentMode && (
+                  <>
+                    <div style={{ borderTop: `1px solid ${C.s2}`, paddingTop: 20 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, margin: "0 0 14px" }}>
+                        Per-Workflow Breakdown
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {workflowResults.map(r => (
+                          <div key={r.id} style={{ padding: 14, background: C.bg, borderRadius: 8, border: `1px solid ${C.s2}` }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: C.light }}>{r.name || "Unnamed"}</span>
+                              <span style={{ fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: r.netValuePerInteraction >= 0 ? C.cyan : "#E05C5C" }}>
+                                {fmtCurrency(r.netValuePerInteraction)} / interaction
+                              </span>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                              {[
+                                ["Labour saving", fmtCurrency(r.labourSaving)],
+                                ["Digital cost", fmtCurrency(r.digitalCost)],
+                                r.annualBenefit !== null ? ["Annual benefit", fmtCurrency(r.annualBenefit)] : null,
+                                r.annualHoursSaved !== null ? ["Hours saved/yr", `${Math.round(r.annualHoursSaved)} hrs`] : null,
+                              ].filter(Boolean).map(([label, value], i) => (
+                                <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                                  <span style={{ color: C.muted }}>{label}</span>
+                                  <span style={{ color: C.light, fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}>{value as string}</span>
+                                </div>
+                              ))}
+                            </div>
+                            {r.breakEvenInteractions < Infinity && (
+                              <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.s2}`, fontSize: 11, color: C.muted }}>
+                                Break-even: <span style={{ color: C.lightCyan ?? C.cyan, fontFamily: "'JetBrains Mono', monospace" }}>{r.breakEvenInteractions.toLocaleString()}</span> interactions
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ height: 1, background: C.s2 }} />
+                  </>
+                )}
+
+                {/* Totals / Organizational Impact */}
+                {combinedResults && (
+                  <>
+                    <div>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, margin: "0 0 14px" }}>
+                        Organizational Impact
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+                        {/* Net Annual Savings */}
+                        <div style={{ padding: 16, background: `${C.cyan}12`, border: `1px solid ${C.cyan}33`, borderRadius: 10, position: "relative", overflow: "hidden" }}>
+                          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${C.cyan}, transparent)` }} />
+                          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Net Annual Savings</p>
+                          <p style={{ fontSize: 28, fontWeight: 700, color: C.cyan, margin: 0, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>
+                            {fmtCurrency(combinedResults.totalAnnualBenefit)}
+                          </p>
+                          <p style={{ fontSize: 11, color: C.muted, margin: "4px 0 0" }}>After platform investment</p>
+                        </div>
+
+                        {/* Stats grid */}
+                        {[
+                          { label: "Annual Hours Saved", value: `${Math.round(combinedResults.totalHoursSaved).toLocaleString()} hrs`, sub: `${combinedResults.fteEquivalent.toFixed(1)} FTE equivalent`, icon: <Clock size={14} />, accent: "#517FE3" },
+                          { label: "Return on Investment", value: `${(combinedResults.roi * 100).toFixed(0)}%`, sub: `$${combinedResults.roi.toFixed(2)} returned per $1.00 invested`, icon: <TrendingUp size={14} />, accent: "#55CAFD" },
+                          { label: "Payback Period", value: combinedResults.paybackMonths < 1 ? "< 1 month" : `${combinedResults.paybackMonths.toFixed(1)} months`, sub: "Time to recover platform investment", icon: <BarChart3 size={14} />, accent: "#1980BD" },
+                        ].map(({ label, value, sub, icon, accent }) => (
+                          <div key={label} style={{ padding: "14px 16px", background: C.bg, borderRadius: 8, border: `1px solid ${C.s2}` }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                              <div style={{ width: 24, height: 24, borderRadius: 6, background: `${accent}22`, display: "flex", alignItems: "center", justifyContent: "center", color: accent }}>
+                                {icon}
+                              </div>
+                              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted }}>{label}</span>
+                            </div>
+                            <p style={{ fontSize: 22, fontWeight: 700, color: accent, margin: 0, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>{value}</p>
+                            <p style={{ fontSize: 11, color: C.muted, margin: "4px 0 0" }}>{sub}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Break-Even Analysis */}
+                    {!isPresentMode && (
+                      <>
+                        <div style={{ height: 1, background: C.s2 }} />
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, margin: "0 0 14px" }}>
+                            Break-Even Analysis
+                          </p>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {[
+                              { label: "Monthly Break-Even", value: `${Math.ceil(combinedResults.monthlyBreakEven).toLocaleString()} interactions/mo`, desc: "The average number of interactions needed each month to reach break-even." },
+                              { label: "Annual Break-Even", value: `${combinedResults.annualBreakEven.toLocaleString()} interactions/yr`, desc: "The total number of automated interactions required per year to cover platform costs." },
+                            ].map(({ label, value, desc }) => (
+                              <div key={label} style={{ padding: 14, background: C.bg, borderRadius: 8, border: `1px solid ${C.s2}` }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                                  <span style={{ fontSize: 12, fontWeight: 600, color: C.light }}>{label}</span>
+                                  <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: C.cyan }}>{value}</span>
+                                </div>
+                                <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>{desc}</p>
+                              </div>
+                            ))}
+                            {combinedResults.roi > 0 && (
+                              <div style={{ padding: 14, background: `${C.cyan}0A`, borderRadius: 8, border: `1px solid ${C.cyan}22` }}>
+                                <p style={{ fontSize: 12, fontWeight: 600, color: C.cyan, margin: "0 0 4px" }}>
+                                  {combinedResults.paybackMonths < 3 ? "Break-even in just " + combinedResults.paybackMonths.toFixed(1) + " months" : "Immediate positive return from day one post break-even"}
+                                </p>
+                                <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>Every interaction after that is pure operational gain</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+
+                {/* How the math works */}
+                {!isPresentMode && (
+                  <>
+                    <div style={{ height: 1, background: C.s2 }} />
+                    <details style={{ fontSize: 11, color: C.muted }}>
+                      <summary style={{ cursor: "pointer", fontWeight: 600, color: C.muted, letterSpacing: "0.06em" }}>How the math works</summary>
+                      <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+                        <p style={{ margin: 0 }}>
+                          We calculate the cost of human labor (e.g., $60/hr = $1.00/min) and add physical material costs (postage/paper).
+                          If a workflow saves 30 minutes, that's ${(staffHourlyCost / 2).toFixed(2)} in labour reclaimed.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          We calculate the cost of automation (SMS, Email, and WX Connect runs).
+                          These typically cost {fmtCurrency(unitCosts.smsPerSegmentCost + unitCosts.emailSendCost + unitCosts.wxConnectRemoteRunCost)} per interaction at current rates.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          The net value is the direct operational benefit realized every time a workflow runs: (Labour Saved + Material Savings) − (Digital Channel Costs).
+                        </p>
+                      </div>
+                    </details>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
       {/* ── FOOTER ── */}
-      <footer
-        style={{
-          borderTop: `1px solid ${C.s2}`,
-          padding: "20px 32px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <img
-            src="/brand_assets/logo_darkbackground.png"
-            alt="ArchiTech"
-            style={{ height: 20, mixBlendMode: "screen", opacity: 0.7 }}
-          />
-          <span style={{ fontSize: 11, color: C.gray }}>
-            Webex CC ROI Calculator
-          </span>
+      <footer style={{ borderTop: `1px solid ${C.s2}`, background: C.s1, marginTop: 32 }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+          <p style={{ fontSize: 12, color: C.muted, margin: 0, lineHeight: 1.6, maxWidth: 600 }}>
+            All calculations are formula-based and transparent. Break-even figures are rounded up to the nearest whole interaction. No volumes are assumed unless explicitly provided.
+          </p>
+          <a href="/wxccworkflowdemo/dist/" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.muted, textDecoration: "none", letterSpacing: "0.06em", textTransform: "uppercase", flexShrink: 0 }}>
+            Workflow Demo <ArrowRight size={12} />
+          </a>
         </div>
-        <a
-          href="/wxccworkflowdemo/dist/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 11,
-            color: C.muted,
-            textDecoration: "none",
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-          }}
-        >
-          View Workflow Demo
-          <ArrowRight size={12} />
-        </a>
       </footer>
     </div>
   );
