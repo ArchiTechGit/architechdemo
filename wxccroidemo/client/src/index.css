@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─── ARCHITECH BRAND PALETTE ─── */
+:root {
+  --background:   #0D1825;
+  --foreground:   #F0F6FC;
+  --surface-1:    #13294B;
+  --surface-2:    #1A3460;
+  --surface-3:    #1F3D72;
+  --cyan:         #05C3DD;
+  --blue:         #0055B8;
+  --gray:         #54565B;
+  --light:        #F0F6FC;
+  --muted:        #7F8FA9;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0D1825;
+  color: #F0F6FC;
+  font-family: 'Roboto', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #1F3D72;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #05C3DD;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(5, 195, 221, 0.5);
+  transition: box-shadow 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(5, 195, 221, 0.8);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #05C3DD;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 8px rgba(5, 195, 221, 0.5);
+}
+
+/* Number input styling */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
