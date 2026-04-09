@@ -1,8 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Left dark navy half of A -->
-  <polygon points="16,3 3,29 16,29" fill="#0D2645"/>
-  <!-- Right medium blue half of A -->
-  <polygon points="16,3 29,29 16,29" fill="#1960A8"/>
-  <!-- Cyan accent at base -->
-  <polygon points="16,23 22,29 16,29" fill="#05C3DD"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Dark brand background -->
+  <rect width="64" height="64" fill="#0D1825" rx="10"/>
+
+  <!-- Left dark navy piece -->
+  <polygon points="32,9 10,55 22,55 32,30" fill="#0D2A4A"/>
+
+  <!-- Right cobalt blue piece -->
+  <polygon points="32,9 54,55 42,55 32,30" fill="#1762AA"/>
+
+  <!-- Teal/cyan accent at base -->
+  <polygon points="22,55 34,55 28,45" fill="#05C3DD"/>
 </svg>
