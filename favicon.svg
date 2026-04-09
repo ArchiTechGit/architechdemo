@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Left dark navy half of A -->
+  <polygon points="16,3 3,29 16,29" fill="#0D2645"/>
+  <!-- Right medium blue half of A -->
+  <polygon points="16,3 29,29 16,29" fill="#1960A8"/>
+  <!-- Cyan accent at base -->
+  <polygon points="16,23 22,29 16,29" fill="#05C3DD"/>
+</svg>
