@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Dark brand background -->
-  <rect width="64" height="64" fill="#0D1825" rx="10"/>
+  <!-- Background matching brand dark navy -->
+  <rect width="64" height="64" fill="#112235" rx="12"/>
 
   <!-- Left dark navy piece -->
-  <polygon points="32,9 10,55 22,55 32,30" fill="#0D2A4A"/>
+  <polygon points="32,11 9,53 22,53 32,27" fill="#0D2444"/>
 
   <!-- Right cobalt blue piece -->
-  <polygon points="32,9 54,55 42,55 32,30" fill="#1762AA"/>
+  <polygon points="32,11 55,53 44,53 32,27" fill="#1A63B0"/>
 
-  <!-- Teal/cyan accent at base -->
-  <polygon points="22,55 34,55 28,45" fill="#05C3DD"/>
+  <!-- Cyan accent - horizontal parallelogram at base -->
+  <polygon points="22,53 38,53 41,46 25,46" fill="#05C3DD"/>
 </svg>
