@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROI Calculator — ArchiTech Digital Front Door</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --bg:        #0D1825;
+      --surface-1: #13294B;
+      --surface-2: #1A3460;
+      --surface-3: #1F3D72;
+      --cyan:      #05C3DD;
+      --cyan-dim:  rgba(5,195,221,0.10);
+      --cyan-mid:  rgba(5,195,221,0.25);
+      --text:      #F0F6FC;
+      --muted:     #8FA3BA;
+      --faint:     #4A607A;
+      --border:    rgba(255,255,255,0.07);
+      --negative:  #E05C5C;
+      --font:      'Roboto', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
+
+    /* ─── Screen system ─── */
+    .screen { display: none; min-height: 100vh; padding: 48px 24px 80px; }
+    .screen.active { display: block; animation: fadeUp 0.35s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page { max-width: 800px; margin: 0 auto; }
+
+    /* ─── Header ─── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 44px;
+    }
+    .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
+    .header-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--cyan);
+    }
+
+    /* ─── Step dots ─── */
+    .step-track { display: flex; align-items: center; gap: 8px; margin-bottom: 36px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-2); transition: background 0.3s; }
+    .dot.active { background: var(--cyan); }
+    .dot.done   { background: rgba(5,195,221,0.35); }
+    .step-line  { flex: 1; height: 1px; background: var(--border); }
+
+    /* ─── Typography ─── */
+    .step-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+    .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; color: var(--text); margin-bottom: 10px; letter-spacing: -0.01em; }
+    .page-desc  { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 36px; max-width: 560px; }
+
+    /* ─── Buttons ─── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--cyan); color: #0D1825; font-size: 14px; font-weight: 700;
+      padding: 14px 28px; border: none; border-radius: 8px; cursor: pointer;
+      letter-spacing: 0.02em; transition: opacity 0.2s, transform 0.1s; font-family: var(--font);
+    }
+    .btn-primary:hover  { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.28; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--muted); font-size: 13px;
+      padding: 13px 20px; border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; transition: color 0.2s, border-color 0.2s; font-family: var(--font);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+    /* ─── Footer ─── */
+    .footer {
+      margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 14px;
+    }
+    .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
+    .footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 500px; }
+    .footer-note a { color: var(--cyan); text-decoration: none; }
+
+    /* ─── Screen 1: Scenario cards ─── */
+    .scenario-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    @media (max-width: 560px) { .scenario-grid { grid-template-columns: 1fr; } }
+
+    .scenario-card {
+      position: relative; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 22px 20px 18px; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s; user-select: none;
+    }
+    .scenario-card:hover { border-color: rgba(5,195,221,0.22); background: rgba(5,195,221,0.03); }
+    .scenario-card.selected { border-color: var(--cyan); background: var(--cyan-dim); }
+
+    .check-badge {
+      position: absolute; top: 14px; right: 14px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--border); border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent; font-weight: 700;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .scenario-card.selected .check-badge {
+      background: var(--cyan); color: #0D1825; border-color: var(--cyan);
+    }
+
+    .scenario-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; padding-right: 30px; }
+    .scenario-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+    .scenario-stat { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--cyan); text-transform: uppercase; }
+
+    /* ─── Screen 2: Inputs ─── */
+    .input-card { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 12px; padding: 28px 24px; }
+    .input-group { margin-bottom: 32px; }
+    .input-group:last-child { margin-bottom: 0; }
+    .input-label    { display: block; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .input-sublabel { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+
+    .slider-row { display: flex; align-items: center; gap: 14px; }
+    input[type=range] {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 4px; border-radius: 2px; outline: none; cursor: pointer;
+      background: linear-gradient(to right, var(--cyan) var(--fill, 0%), var(--surface-2) var(--fill, 0%));
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 20px; height: 20px;
+      border-radius: 50%; background: var(--cyan); cursor: pointer;
+      border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--cyan);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--cyan); cursor: pointer; border: 3px solid var(--bg);
+    }
+    input[type=number] {
+      width: 110px; background: var(--surface-1); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 15px; font-weight: 600;
+      padding: 10px 12px; text-align: right; font-family: var(--font);
+    }
+    input[type=number]:focus { outline: none; border-color: var(--cyan); }
+    .input-unit { font-size: 14px; color: var(--muted); white-space: nowrap; }
+
+    .screen2-summary {
+      background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
+      border-radius: 8px; padding: 13px 18px; margin-bottom: 28px;
+      font-size: 13px; color: var(--cyan); line-height: 1.6;
+    }
+    .screen2-summary strong { color: var(--text); }
+
+    /* ─── Screen 3: Results ─── */
+    .results-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+    .hero-number {
+      font-size: clamp(52px, 12vw, 88px); font-weight: 700;
+      color: var(--cyan); letter-spacing: -0.02em; line-height: 1;
+      margin-bottom: 10px;
+    }
+    .hero-number.negative { color: var(--negative); }
+    .hero-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
+
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px;
+    }
+    @media (max-width: 540px) { .stats-row { grid-template-columns: 1fr; } }
+
+    .stat-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+    .stat-val   { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 5px; letter-spacing: -0.01em; }
+    .stat-lbl   { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* Breakdown */
+    .section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }
+    .breakdown-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+    .breakdown-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.025); border: 1px solid var(--border);
+      border-radius: 8px; padding: 13px 16px; gap: 12px; flex-wrap: wrap;
+    }
+    .breakdown-name { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; min-width: 140px; }
+    .breakdown-mins { font-size: 12px; color: var(--faint); white-space: nowrap; }
+    .breakdown-val  { font-size: 15px; font-weight: 700; color: var(--cyan); white-space: nowrap; }
+
+    /* Assumptions */
+    .assume-toggle {
+      width: 100%; background: none; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); font-size: 13px; padding: 13px 18px; cursor: pointer;
+      text-align: left; display: flex; align-items: center; justify-content: space-between;
+      transition: color 0.2s, border-color 0.2s; font-family: var(--font); margin-bottom: 0;
+    }
+    .assume-toggle:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+    .assume-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .assume-body.open { max-height: 1400px; }
+    .assume-inner { padding: 22px 4px 4px; }
+
+    table.at { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+    table.at th {
+      text-align: left; color: var(--faint); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 6px 10px 10px; border-bottom: 1px solid var(--border);
+    }
+    table.at td {
+      padding: 9px 10px; color: var(--muted); border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    table.at td:first-child { color: var(--text); font-weight: 500; }
+    table.at tr:last-child td { border-bottom: none; }
+
+    .assume-note {
+      font-size: 12px; color: var(--faint); line-height: 1.7;
+      padding: 14px 16px; background: rgba(255,255,255,0.02);
+      border-radius: 6px; border: 1px solid var(--border); margin-bottom: 4px;
+    }
+    .assume-note a { color: var(--cyan); text-decoration: none; }
+
+    /* Share confirm */
+    .share-confirm { display: none; margin-top: 10px; font-size: 13px; color: var(--cyan); }
+
+    /* ─── Mobile ─── */
+    @media (max-width: 480px) {
+      .screen { padding: 28px 16px 60px; }
+      .header { margin-bottom: 28px; }
+      .footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — Scenario Picker
+══════════════════════════════════════════ -->
+<div id="screen-1" class="screen active">
+  <div class="page">
+    <div class="header">
+      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
+      <span class="header-badge">Digital Front Door · ROI Calculator</span>
+    </div>
+
+    <div class="step-track">
+      <div class="dot active" id="s1-d1"></div>
+      <div class="step-line"></div>
+      <div class="dot" id="s1-d2"></div>
+      <div class="step-line"></div>
+      <div class="dot" id="s1-d3"></div>
+    </div>
+
+    <div class="step-label">Step 1 of 3</div>
+    <h1 class="page-title">What does your patient journey include?</h1>
+    <p class="page-desc">Select the workflows you want to automate as part of a separation. Each selected workflow will be included in your ROI calculation.</p>
+
+    <div class="scenario-grid" id="scenario-grid"></div>
+
+    <div style="margin-top: 36px;">
+      <button class="btn-primary" id="btn-next-1" disabled onclick="goTo2()">
+        Calculate my ROI &rarr;
+      </button>
+    </div>
+
+    <div class="footer">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <p class="footer-note">Benchmark figures sourced from ArchiTech healthcare implementations. Actual results will vary.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — Your Numbers
+══════════════════════════════════════════ -->
+<div id="screen-2" class="screen">
+  <div class="page">
+    <div class="header">
+      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
+      <span class="header-badge">Digital Front Door · ROI Calculator</span>
+    </div>
+
+    <div class="step-track">
+      <div class="dot done"></div>
+      <div class="step-line"></div>
+      <div class="dot active"></div>
+      <div class="step-line"></div>
+      <div class="dot"></div>
+    </div>
+
+    <div class="step-label">Step 2 of 3</div>
+    <h1 class="page-title">Tell us about your organisation</h1>
+    <div class="screen2-summary" id="s2-summary"></div>
+
+    <div class="input-card">
+      <!-- Agents -->
+      <div class="input-group">
+        <label class="input-label">Number of contact centre agents</label>
+        <div class="input-sublabel">Scales the platform licensing cost in your calculation</div>
+        <div class="slider-row">
+          <input type="range" id="sl-agents" min="5" max="500" step="5" value="30"
+            oninput="syncSlider('agents', this)" />
+          <input type="number" id="nb-agents" min="5" max="500" value="30"
+            oninput="syncNumber('agents', this)" />
+        </div>
+      </div>
+
+      <!-- Separations -->
+      <div class="input-group">
+        <label class="input-label">Annual separations</label>
+        <div class="input-sublabel">A separation is the formal end of an admitted patient's hospital stay — used to scale your annual automation volume</div>
+        <div class="slider-row">
+          <input type="range" id="sl-seps" min="500" max="100000" step="500" value="15000"
+            oninput="syncSlider('separations', this)" />
+          <input type="number" id="nb-seps" min="500" max="100000" value="15000"
+            oninput="syncNumber('separations', this)" />
+        </div>
+      </div>
+
+      <!-- Staff rate -->
+      <div class="input-group">
+        <label class="input-label">Average staff hourly cost</label>
+        <div class="input-sublabel">Fully-loaded labour rate — industry benchmark is $60/hr</div>
+        <div class="slider-row">
+          <span class="input-unit">$</span>
+          <input type="number" id="nb-rate" min="20" max="300" value="60"
+            style="width:120px;"
+            oninput="state.rate = Math.max(20, Number(this.value) || 60)" />
+          <span class="input-unit">/ hr</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 32px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+      <button class="btn-primary" onclick="goTo3()">Show my ROI &rarr;</button>
+      <button class="btn-ghost" onclick="goTo(1)">← Back</button>
+    </div>
+
+    <div class="footer">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <p class="footer-note">Benchmark figures sourced from ArchiTech healthcare implementations. Actual results will vary.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3 — Results
+══════════════════════════════════════════ -->
+<div id="screen-3" class="screen">
+  <div class="page">
+    <div class="header">
+      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
+      <span class="header-badge">Digital Front Door · ROI Calculator</span>
+    </div>
+
+    <div class="step-track">
+      <div class="dot done"></div>
+      <div class="step-line"></div>
+      <div class="dot done"></div>
+      <div class="step-line"></div>
+      <div class="dot active"></div>
+    </div>
+
+    <div id="results-output"></div>
+
+    <div style="margin-top: 36px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+      <button class="btn-ghost" onclick="goTo(2)">← Recalculate</button>
+      <button class="btn-primary" onclick="shareResult()">Share this result ↗</button>
+    </div>
+    <div class="share-confirm" id="share-confirm">Link copied to clipboard ✓</div>
+
+    <div class="footer">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <p class="footer-note">
+        Benchmark figures sourced from ArchiTech healthcare implementations. Actual results will vary.
+        <a href="https://www.architech.net.au">architech.net.au</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+
+const WORKFLOWS = [
+  {
+    id: 1, name: 'Appointment Management',
+    desc: 'Book, reschedule and cancel 24/7 — no staff involved',
+    stat: '60% reduction in no-shows',
+    sms: 2, wx: 2, email: 1, mins: 25,
+    replaced: 'Booking, reminder, reschedule and cancel calls',
+  },
+  {
+    id: 2, name: 'Pre-Visit Preparation',
+    desc: 'Intake forms, consent and instructions — replaces manual outbound calls',
+    stat: '80% of manual effort removed',
+    sms: 1, wx: 1, email: 1, mins: 20,
+    replaced: 'Structured intake call with staff member',
+  },
+  {
+    id: 3, name: 'Care Navigation & Triage',
+    desc: 'Symptom check, service routing, wait time management — deflects tier-1 volume',
+    stat: '70% cost reduction via self-service',
+    sms: 1, wx: 2, email: 1, mins: 12,
+    replaced: 'Routing and triage calls',
+  },
+  {
+    id: 4, name: 'Proactive Outreach',
+    desc: 'Screening reminders, medication refills, care-plan check-ins — replaces manual campaigns',
+    stat: '20× more cost-effective than manual outbound',
+    sms: 1, wx: 1, email: 1, mins: 22,
+    replaced: 'Manual outbound campaign calls',
+  },
+  {
+    id: 5, name: 'Post-Visit Follow-Up',
+    desc: 'Discharge instructions, medication adherence, outcome surveys — currently manual or not happening',
+    stat: '50–80% reduction in staff time',
+    sms: 3, wx: 4, email: 3, mins: 18,
+    replaced: 'Discharge calls, follow-ups and outcome surveys',
+  },
+  {
+    id: 6, name: 'Other Workflows',
+    desc: 'Have workflows outside healthcare? Add a general estimate to see how automation compounds.',
+    stat: null,
+    sms: 2, wx: 2, email: 2, mins: 15,
+    replaced: 'General administrative and coordination tasks',
+  },
+];
+
+const COSTS = { sms: 0.04, wx: 0.08, email: 0.00, platformMonthly: 1238.15 };
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+
+const state = {
+  selected: new Set(),
+  agents: 30,
+  separations: 15000,
+  rate: 60,
+};
+
+// ══════════════════════════════════════════
+// CALCULATION ENGINE
+// ══════════════════════════════════════════
+
+function calcWorkflow(w, rate) {
+  const digitalCost = (w.sms * COSTS.sms) + (w.wx * COSTS.wx) + (w.email * COSTS.email);
+  const labourSaved = (w.mins / 60) * rate;
+  return { digitalCost, labourSaved, netPerSep: labourSaved - digitalCost };
+}
+
+function calcAll() {
+  const selected = WORKFLOWS.filter(w => state.selected.has(w.id));
+  const platformAnnual = COSTS.platformMonthly * 12;
+
+  const rows = selected.map(w => {
+    const { digitalCost, labourSaved, netPerSep } = calcWorkflow(w, state.rate);
+    return {
+      w,
+      digitalCost,
+      labourSaved,
+      netPerSep,
+      annualSaving: netPerSep * state.separations,
+      annualHours:  (w.mins / 60) * state.separations,
+    };
+  });
+
+  const totalSaving = rows.reduce((s, r) => s + r.annualSaving, 0);
+  const totalHours  = rows.reduce((s, r) => s + r.annualHours,  0);
+  return {
+    rows,
+    totalSaving,
+    netSaving:    totalSaving - platformAnnual,
+    totalHours,
+    fte:          totalHours / 1920,
+    roi:          totalSaving / platformAnnual,
+    platformAnnual,
+  };
+}
+
+// ══════════════════════════════════════════
+// ANIMATION
+// ══════════════════════════════════════════
+
+function countUp(el, target, { prefix = '', suffix = '', decimals = 0, ms = 1600 } = {}) {
+  const t0 = Date.now();
+  (function tick() {
+    const p = Math.min((Date.now() - t0) / ms, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    const v = target * e;
+    el.textContent = prefix + (decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString('en-AU')) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  })();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+
+let current = 1;
+
+function goTo(n) {
+  document.getElementById('screen-' + current).classList.remove('active');
+  document.getElementById('screen-' + n).classList.add('active');
+  current = n;
+  window.scrollTo(0, 0);
+}
+
+function goTo2() {
+  renderScreen2();
+  goTo(2);
+}
+
+function goTo3() {
+  renderResults();
+  goTo(3);
+}
+
+// ══════════════════════════════════════════
+// SCREEN 1 — Scenario grid
+// ══════════════════════════════════════════
+
+function renderGrid() {
+  document.getElementById('scenario-grid').innerHTML = WORKFLOWS.map(w => `
+    <div class="scenario-card${state.selected.has(w.id) ? ' selected' : ''}"
+         id="card-${w.id}" onclick="toggleCard(${w.id})">
+      <div class="check-badge">✓</div>
+      <div class="scenario-name">${w.name}</div>
+      <div class="scenario-desc">${w.desc}</div>
+      ${w.stat ? `<div class="scenario-stat">${w.stat}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function toggleCard(id) {
+  if (state.selected.has(id)) state.selected.delete(id);
+  else state.selected.add(id);
+  document.getElementById('card-' + id).classList.toggle('selected', state.selected.has(id));
+  document.getElementById('btn-next-1').disabled = state.selected.size === 0;
+}
+
+// ══════════════════════════════════════════
+// SCREEN 2 — Inputs
+// ══════════════════════════════════════════
+
+function renderScreen2() {
+  const names = WORKFLOWS.filter(w => state.selected.has(w.id)).map(w => w.name).join(', ');
+  const n = state.selected.size;
+  document.getElementById('s2-summary').innerHTML =
+    `Calculating ROI across <strong>${n} workflow${n !== 1 ? 's' : ''}</strong>: ${names}`;
+
+  // Sync slider fills
+  setFill('sl-agents',     state.agents,      5,   500);
+  setFill('sl-seps',       state.separations, 500, 100000);
+  document.getElementById('nb-agents').value = state.agents;
+  document.getElementById('nb-seps').value   = state.separations;
+  document.getElementById('nb-rate').value   = state.rate;
+}
+
+function setFill(id, val, min, max) {
+  const pct = ((val - min) / (max - min)) * 100;
+  document.getElementById(id).style.setProperty('--fill', pct + '%');
+  document.getElementById(id).value = val;
+}
+
+function syncSlider(key, el) {
+  state[key] = Number(el.value);
+  const nbId = key === 'agents' ? 'nb-agents' : 'nb-seps';
+  document.getElementById(nbId).value = el.value;
+  const pct = ((Number(el.value) - Number(el.min)) / (Number(el.max) - Number(el.min))) * 100;
+  el.style.setProperty('--fill', pct + '%');
+}
+
+function syncNumber(key, el) {
+  state[key] = Number(el.value);
+  const slId = key === 'agents' ? 'sl-agents' : 'sl-seps';
+  const sl = document.getElementById(slId);
+  sl.value = el.value;
+  const pct = ((Number(el.value) - Number(sl.min)) / (Number(sl.max) - Number(sl.min))) * 100;
+  sl.style.setProperty('--fill', pct + '%');
+}
+
+// ══════════════════════════════════════════
+// SCREEN 3 — Results
+// ══════════════════════════════════════════
+
+function renderResults() {
+  const R = calcAll();
+  window._R = R; // for assumptions panel reference
+
+  document.getElementById('results-output').innerHTML = `
+    <div class="results-eyebrow">Your estimated annual saving</div>
+    <div class="hero-number${R.netSaving < 0 ? ' negative' : ''}" id="hero">$0</div>
+    <div class="hero-sub">
+      Based on ${state.separations.toLocaleString('en-AU')} annual separations
+      across ${R.rows.length} workflow${R.rows.length !== 1 ? 's' : ''}
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="st-hours">0</div>
+        <div class="stat-lbl">Annual hours returned to clinical staff</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="st-fte">0.0</div>
+        <div class="stat-lbl">Full-time equivalent staff</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="st-roi">0×</div>
+        <div class="stat-lbl">Return on investment</div>
+      </div>
+    </div>
+
+    <div class="section-label">Per-workflow contribution</div>
+    <div class="breakdown-list">
+      ${R.rows.map(r => `
+        <div class="breakdown-row">
+          <div class="breakdown-name">${r.w.name}</div>
+          <div class="breakdown-mins">${r.w.mins} min saved / separation</div>
+          <div class="breakdown-val">$${Math.round(r.annualSaving).toLocaleString('en-AU')} / yr</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <button class="assume-toggle" onclick="toggleAssume()" id="assume-btn">
+      <span>How this is calculated</span><span id="assume-chevron">▼</span>
+    </button>
+    <div class="assume-body" id="assume-body">
+      <div class="assume-inner">
+
+        <div class="section-label">Channel mix per workflow (per separation)</div>
+        <table class="at">
+          <thead><tr><th>Workflow</th><th>SMS</th><th>WX Connect</th><th>Email</th><th>Mins saved</th></tr></thead>
+          <tbody>
+            ${R.rows.map(r => `
+              <tr>
+                <td>${r.w.name}</td>
+                <td>${r.w.sms}</td><td>${r.w.wx}</td><td>${r.w.email}</td>
+                <td>${r.w.mins}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="section-label">Unit costs</div>
+        <table class="at">
+          <thead><tr><th>Item</th><th>Rate</th></tr></thead>
+          <tbody>
+            <tr><td>SMS per segment</td><td>$0.04</td></tr>
+            <tr><td>WX Connect remote run</td><td>$0.08</td></tr>
+            <tr><td>Email send</td><td>$0.00</td></tr>
+            <tr><td>Staff hourly rate</td><td>$${state.rate.toFixed(2)} / hr</td></tr>
+            <tr><td>Platform base cost</td><td>$${COSTS.platformMonthly.toFixed(2)} / month</td></tr>
+          </tbody>
+        </table>
+
+        <div class="assume-note">
+          Annual saving = (labour saved − digital cost per separation) × annual separations,
+          summed across selected workflows, minus annual platform cost ($${R.platformAnnual.toLocaleString('en-AU')}).
+          FTE calculated at 1,920 hours per year.
+          Figures based on ArchiTech implementation benchmarks from real-world healthcare deployments.
+          <br /><br />
+          For a detailed analysis specific to your organisation, visit
+          <a href="https://www.architech.net.au">architech.net.au</a>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  // Animate after paint
+  requestAnimationFrame(() => {
+    countUp(document.getElementById('hero'), R.netSaving, { prefix: '$', ms: 1800 });
+    countUp(document.getElementById('st-hours'), R.totalHours, { ms: 1500 });
+    countUp(document.getElementById('st-fte'),   R.fte,        { decimals: 1, suffix: '', ms: 1500 });
+    countUp(document.getElementById('st-roi'),   R.roi,        { decimals: 1, suffix: '×', ms: 1500 });
+  });
+}
+
+function toggleAssume() {
+  const body    = document.getElementById('assume-body');
+  const chevron = document.getElementById('assume-chevron');
+  body.classList.toggle('open');
+  chevron.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+// ══════════════════════════════════════════
+// SHARE / DEEP LINK
+// ══════════════════════════════════════════
+
+function shareResult() {
+  const url = buildUrl();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(flashShare);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    flashShare();
+  }
+}
+
+function buildUrl() {
+  const p = new URLSearchParams({
+    scenarios:   Array.from(state.selected).join(','),
+    agents:      state.agents,
+    separations: state.separations,
+    rate:        state.rate,
+  });
+  return `${location.origin}${location.pathname}?${p}`;
+}
+
+function flashShare() {
+  const el = document.getElementById('share-confirm');
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function initFromUrl() {
+  const p = new URLSearchParams(location.search);
+  if (!p.get('scenarios')) return;
+
+  const ids = p.get('scenarios').split(',').map(Number).filter(n => n >= 1 && n <= 6);
+  if (!ids.length) return;
+
+  ids.forEach(id => state.selected.add(id));
+  state.agents      = Number(p.get('agents'))      || 30;
+  state.separations = Number(p.get('separations')) || 15000;
+  state.rate        = Number(p.get('rate'))        || 60;
+
+  renderResults();
+  goTo(3);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+renderGrid();
+initFromUrl();
+</script>
+</body>
+</html>
