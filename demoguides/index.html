@@ -11,67 +11,245 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: #0D1825; color: #F0F6FC; font-family: 'Roboto', sans-serif; min-height: 100vh; padding: 48px 24px 80px; }
+    body {
+      background: #0D1825;
+      color: #F0F6FC;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      padding: 48px 24px 100px;
+    }
 
-    .page { max-width: 720px; margin: 0 auto; }
+    .page { max-width: 760px; margin: 0 auto; }
 
-    /* Header */
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 52px;
+    }
     .header img { width: 140px; mix-blend-mode: screen; opacity: 0.9; }
-    .back { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #3D4F65; text-decoration: none; transition: color 0.2s; }
+    .back {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4A607A;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
     .back:hover { color: #F0F6FC; }
 
-    /* Intro */
-    .intro { margin-bottom: 48px; }
-    .page-label { font-size: 9px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: #05C3DD; margin-bottom: 12px; }
-    .page-title { font-size: 26px; font-weight: 700; color: #F0F6FC; margin-bottom: 12px; }
-    .page-desc { font-size: 13px; color: #7F8FA9; line-height: 1.7; max-width: 540px; }
+    /* ── Intro ── */
+    .intro { margin-bottom: 52px; }
+    .page-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #05C3DD;
+      margin-bottom: 14px;
+    }
+    .page-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #F0F6FC;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .page-desc {
+      font-size: 15px;
+      color: #8FA3BA;
+      line-height: 1.75;
+      max-width: 560px;
+    }
 
-    /* Tier */
-    .tier { margin-bottom: 40px; }
-    .tier-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .tier-badge { font-size: 8px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; }
+    /* ── Tier section ── */
+    .tier { margin-bottom: 48px; }
+    .tier-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .tier-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
     .tier-1 .tier-badge { background: rgba(5,195,221,0.12); color: #05C3DD; }
-    .tier-2 .tier-badge { background: rgba(23,98,170,0.18); color: #5A9FD4; }
-    .tier-3 .tier-badge { background: rgba(61,79,101,0.3); color: #7F8FA9; }
-    .tier-line { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+    .tier-2 .tier-badge { background: rgba(90,159,212,0.12); color: #6AAAD6; }
+    .tier-3 .tier-badge { background: rgba(100,120,150,0.15); color: #8FA3BA; }
+    .tier-line { flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
 
-    /* Card */
-    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s; }
-    .card:hover { border-color: rgba(5,195,221,0.2); }
-    .card.open { border-color: rgba(5,195,221,0.25); }
+    /* ── Card ── */
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(5,195,221,0.22); }
+    .card.open { border-color: rgba(5,195,221,0.3); background: rgba(5,195,221,0.02); }
 
-    .card-trigger { width: 100%; background: none; border: none; cursor: pointer; padding: 18px 20px; display: flex; align-items: center; gap: 16px; text-align: left; }
-    .card-num { font-size: 9px; color: #3D4F65; min-width: 20px; font-weight: 500; }
-    .card-title { flex: 1; font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #C0CDD E; transition: color 0.2s; }
-    .card.open .card-title, .card-trigger:hover .card-title { color: #F0F6FC; }
-    .card-tag { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #3D4F65; background: rgba(61,79,101,0.25); padding: 2px 7px; border-radius: 3px; }
-    .tier-1 .card-tag { color: #05C3DD; background: rgba(5,195,221,0.08); }
-    .card-chevron { color: #3D4F65; font-size: 10px; transition: transform 0.25s, color 0.2s; }
+    /* ── Card trigger ── */
+    .card-trigger {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      text-align: left;
+    }
+    .card-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: #3D5268;
+      min-width: 24px;
+      letter-spacing: 0.05em;
+    }
+    .card-title {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 500;
+      color: #C0CDDE;
+      transition: color 0.2s;
+      letter-spacing: 0.01em;
+    }
+    .card.open .card-title,
+    .card-trigger:hover .card-title { color: #F0F6FC; }
+    .card-tag {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4A607A;
+      background: rgba(74,96,122,0.2);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .tier-1 .card-tag { color: #05C3DD; background: rgba(5,195,221,0.1); }
+    .card-chevron {
+      color: #3D5268;
+      font-size: 11px;
+      transition: transform 0.3s ease, color 0.2s;
+      flex-shrink: 0;
+    }
     .card.open .card-chevron { transform: rotate(180deg); color: #05C3DD; }
 
-    /* Body */
-    .card-body { display: none; padding: 0 20px 24px 56px; }
-    .card.open .card-body { display: block; }
+    /* ── Card body (animated) ── */
+    .card-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .card.open .card-body { max-height: 2000px; }
+    .card-body-inner { padding: 4px 28px 32px 28px; }
 
-    .card-desc { font-size: 12px; color: #7F8FA9; line-height: 1.7; margin-bottom: 20px; }
+    /* ── Description ── */
+    .card-desc {
+      font-size: 14px;
+      color: #8FA3BA;
+      line-height: 1.75;
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
 
-    .section-label { font-size: 8px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #3D4F65; margin-bottom: 10px; }
+    /* ── Objective ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #4A607A;
+      margin-bottom: 12px;
+    }
+    .objective {
+      background: rgba(5,195,221,0.06);
+      border-left: 3px solid #05C3DD;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin-bottom: 32px;
+      font-size: 14px;
+      font-weight: 400;
+      color: #B8CDE0;
+      line-height: 1.7;
+    }
 
-    /* Objective */
-    .objective { background: rgba(5,195,221,0.06); border-left: 2px solid #05C3DD; border-radius: 0 4px 4px 0; padding: 10px 14px; margin-bottom: 20px; font-size: 12px; color: #A0B4C8; line-height: 1.6; }
+    /* ── Steps ── */
+    .steps-block { margin-bottom: 32px; }
+    .steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .step { display: flex; gap: 18px; align-items: flex-start; }
+    .step-num {
+      min-width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(5,195,221,0.12);
+      border: 1px solid rgba(5,195,221,0.25);
+      color: #05C3DD;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #C8DAE8;
+      line-height: 1.7;
+      padding-top: 5px;
+    }
+    .step-text strong {
+      color: #F0F6FC;
+      font-weight: 500;
+    }
 
-    /* Steps */
-    .steps { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .step { display: flex; gap: 14px; align-items: flex-start; }
-    .step-num { min-width: 20px; height: 20px; border-radius: 50%; background: rgba(5,195,221,0.1); color: #05C3DD; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; flex-shrink: 0; }
-    .step-text { font-size: 12px; color: #A0B4C8; line-height: 1.6; }
-    .step-text strong { color: #C8D8E8; font-weight: 500; }
-
-    /* Tips */
-    .tips { display: flex; flex-direction: column; gap: 6px; }
-    .tip { display: flex; gap: 10px; align-items: flex-start; font-size: 11px; color: #7F8FA9; line-height: 1.5; }
-    .tip::before { content: '→'; color: #3D4F65; flex-shrink: 0; margin-top: 1px; }
+    /* ── Talk Track ── */
+    .talk-track {
+      background: rgba(240, 160, 40, 0.05);
+      border: 1px solid rgba(240, 160, 40, 0.15);
+      border-radius: 8px;
+      padding: 18px 20px 20px;
+    }
+    .talk-track .section-label {
+      color: #C88A30;
+      margin-bottom: 14px;
+    }
+    .tips {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tip {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: #B09060;
+      line-height: 1.65;
+    }
+    .tip-icon {
+      color: #C88A30;
+      flex-shrink: 0;
+      font-size: 12px;
+      margin-top: 2px;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -104,22 +282,28 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Demonstrate Webex AI Agent handling a patient inquiry end-to-end without a live agent, then handing off seamlessly with full context intact.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Show that routine interactions — appointment lookups, prescription refill requests, billing questions — can be fully resolved by AI, freeing agents for complex cases.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Place a call into the demo number. Let the <strong>AI Agent greet the caller</strong> and present self-service options.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Choose a common use case (e.g. <strong>"Check my appointment"</strong>). Walk through the natural language conversation — no menu presses.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Show the AI Agent <strong>confirming and resolving</strong> the request without agent involvement. Pause here — let it land.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Place a second call and request something the bot can't resolve. Show the <strong>escalation to a live agent</strong>, with full conversation transcript pre-loaded on the agent desktop.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Highlight the <strong>zero repeat context</strong> — the agent already knows why the patient called.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Lead with the stat: healthcare contact centers handle 60–70% repeat, routine calls. AI Agents handle those.</div>
-            <div class="tip">Emphasise no-code flow building — clinical or ops staff can update the bot without IT.</div>
-            <div class="tip">If the audience includes IT, show the webhook/API integration point where the bot pulls live patient data.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Demonstrate Webex AI Agent handling a patient inquiry end-to-end without a live agent, then handing off seamlessly with full context intact.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Show that routine interactions — appointment lookups, prescription refill requests, billing questions — can be fully resolved by AI, freeing agents for complex cases.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Place a call into the demo number. Let the <strong>AI Agent greet the caller</strong> and present self-service options.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Choose a common use case (e.g. <strong>"Check my appointment"</strong>). Walk through the natural language conversation — no menu presses.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Show the AI Agent <strong>confirming and resolving</strong> the request without agent involvement. Pause here — let it land.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Place a second call and request something the bot can't resolve. Show the <strong>escalation to a live agent</strong>, with full conversation transcript pre-loaded on the agent desktop.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Highlight the <strong>zero repeat context</strong> — the agent already knows why the patient called.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Lead with the stat: healthcare contact centers handle 60–70% repeat, routine calls. AI Agents handle those.</div>
+                <div class="tip"><span class="tip-icon">→</span>Emphasise no-code flow building — clinical or ops staff can update the bot without IT.</div>
+                <div class="tip"><span class="tip-icon">→</span>If the audience includes IT, show the webhook/API integration point where the bot pulls live patient data.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -133,22 +317,28 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Show how Webex AI surfaces real-time suggestions, transcribes the call live, and generates a post-call summary automatically — reducing handle time and after-call work.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Prove that AI makes every agent perform like your best agent, and eliminates the manual burden of note-taking and wrap-up.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Connect a call to the agent desktop. Draw attention to the <strong>live transcription panel</strong> — show it updating word-by-word in real time.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">As the caller mentions a topic (e.g. billing dispute), point out <strong>Agent Answers surfacing</strong> relevant KB articles and suggested responses automatically.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Have the agent use a suggested response. Show how it <strong>reduces dead air</strong> and keeps the conversation moving.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">End the call and immediately show the <strong>auto-generated call summary</strong> — sentiment, key topics, action items — populated before the agent touches wrap-up.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Show the summary <strong>written to the CRM/patient record</strong> with one click.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Quantify it: average after-call work runs 60–90 seconds per call. Auto-summary eliminates most of it.</div>
-            <div class="tip">For healthcare audiences, stress that the transcript is the compliance record — no more manual note disputes.</div>
-            <div class="tip">If the audience pushes back on accuracy, show the agent can edit the summary before saving — AI assists, agent confirms.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Show how Webex AI surfaces real-time suggestions, transcribes the call live, and generates a post-call summary automatically — reducing handle time and after-call work.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Prove that AI makes every agent perform like your best agent, and eliminates the manual burden of note-taking and wrap-up.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Connect a call to the agent desktop. Draw attention to the <strong>live transcription panel</strong> — show it updating word-by-word in real time.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">As the caller mentions a topic (e.g. billing dispute), point out <strong>Agent Answers surfacing</strong> relevant KB articles and suggested responses automatically.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Have the agent use a suggested response. Show how it <strong>reduces dead air</strong> and keeps the conversation moving.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">End the call and immediately show the <strong>auto-generated call summary</strong> — sentiment, key topics, action items — populated before the agent touches wrap-up.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Show the summary <strong>written to the CRM/patient record</strong> with one click.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Quantify it: average after-call work runs 60–90 seconds per call. Auto-summary eliminates most of it.</div>
+                <div class="tip"><span class="tip-icon">→</span>For healthcare audiences, stress that the transcript is the compliance record — no more manual note disputes.</div>
+                <div class="tip"><span class="tip-icon">→</span>If the audience pushes back on accuracy, show the agent can edit the summary before saving — AI assists, agent confirms.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -162,22 +352,28 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Walk through the full agent desktop experience — from logging in and going available, to handling a call, transferring, and wrapping up.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Show how intuitive and unified the agent desktop is, and how it reduces the tool-switching and screen chaos that agents deal with today.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Webex CC Agent Desktop</strong>. Show the single-browser experience — no separate softphone, no multiple apps.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Set status to <strong>Available</strong>. Accept an inbound call and show the <strong>screen pop</strong> pulling patient/caller data immediately.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Show the <strong>interaction controls</strong> — hold, mute, transfer, conference — and execute a warm transfer to a specialist queue.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Show handling a <strong>second channel simultaneously</strong> (chat or email) in the same desktop without dropping the call.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Complete wrap-up: select <strong>disposition code</strong>, add notes, close. Show how fast the cycle is.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Ask the audience how many applications their agents use today. Then show how many you just replaced.</div>
-            <div class="tip">Highlight the desktop is fully customisable — widgets, layouts, and integrations can be tailored per team.</div>
-            <div class="tip">If they're on Finesse today, draw the direct contrast — same concept, radically simpler.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Walk through the full agent desktop experience — from logging in and going available, to handling a call, transferring, and wrapping up.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Show how intuitive and unified the agent desktop is, and how it reduces the tool-switching and screen chaos that agents deal with today.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Webex CC Agent Desktop</strong>. Show the single-browser experience — no separate softphone, no multiple apps.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Set status to <strong>Available</strong>. Accept an inbound call and show the <strong>screen pop</strong> pulling patient/caller data immediately.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Show the <strong>interaction controls</strong> — hold, mute, transfer, conference — and execute a warm transfer to a specialist queue.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Show handling a <strong>second channel simultaneously</strong> (chat or email) in the same desktop without dropping the call.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Complete wrap-up: select <strong>disposition code</strong>, add notes, close. Show how fast the cycle is.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Ask the audience how many applications their agents use today. Then show how many you just replaced.</div>
+                <div class="tip"><span class="tip-icon">→</span>Highlight the desktop is fully customisable — widgets, layouts, and integrations can be tailored per team.</div>
+                <div class="tip"><span class="tip-icon">→</span>If they're on Finesse today, draw the direct contrast — same concept, radically simpler.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -191,22 +387,28 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Show supervisors their real-time command centre — live queue stats, agent states, and the ability to intervene in calls directly from the browser.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Give supervisors confidence they can manage their floor without leaving their desk or relying on lagged reports.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Supervisor Desktop</strong>. Show the live queue panel — calls waiting, average wait time, agents available — all updating in real time.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Click into an <strong>active agent</strong>. Show their current call duration, channel, and state.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Demonstrate <strong>silent monitoring</strong> — join the call without the agent or caller knowing. Then switch to <strong>whisper coaching</strong> — speak only to the agent.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Show <strong>barge-in</strong> — join the call as a full participant when needed.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Pull up the <strong>team performance panel</strong> — show which agents are in after-call work too long, and reassign or message them directly.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Ask supervisors: "How do you currently know if a call is going badly?" — then show barge/whisper as the answer.</div>
-            <div class="tip">Highlight that all of this works for remote and hybrid teams — no physical floor required.</div>
-            <div class="tip">For larger orgs, show multi-team or multi-site views in the same dashboard.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Show supervisors their real-time command centre — live queue stats, agent states, and the ability to intervene in calls directly from the browser.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Give supervisors confidence they can manage their floor without leaving their desk or relying on lagged reports.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Supervisor Desktop</strong>. Show the live queue panel — calls waiting, average wait time, agents available — all updating in real time.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Click into an <strong>active agent</strong>. Show their current call duration, channel, and state.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Demonstrate <strong>silent monitoring</strong> — join the call without the agent or caller knowing. Then switch to <strong>whisper coaching</strong> — speak only to the agent.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Show <strong>barge-in</strong> — join the call as a full participant when needed.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Pull up the <strong>team performance panel</strong> — show which agents are in after-call work too long, and reassign or message them directly.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Ask supervisors: "How do you currently know if a call is going badly?" — then show barge/whisper as the answer.</div>
+                <div class="tip"><span class="tip-icon">→</span>Highlight that all of this works for remote and hybrid teams — no physical floor required.</div>
+                <div class="tip"><span class="tip-icon">→</span>For larger orgs, show multi-team or multi-site views in the same dashboard.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -228,22 +430,28 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Demonstrate the visual drag-and-drop flow designer — showing how routing logic, IVR menus, and call treatments are built and changed without coding or vendor tickets.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Replace the fear of "it takes 6 weeks and a change request to update our IVR" with a live demonstration of a change made in minutes.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Webex CC Flow Designer</strong>. Show an existing flow — highlight how readable it is visually.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Make a live change: <strong>add a new menu option</strong> (e.g. "Press 4 for pharmacy") by dragging a node and wiring it up.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Show a <strong>business hours condition</strong> — open hours route to queue, after-hours route to voicemail or callback.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Publish the flow and <strong>call in immediately</strong> to prove the change is live. This moment always lands.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Show a <strong>HTTP Request node</strong> — explain this is how the flow talks to Epic, Salesforce, or any API in real time.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">The live publish-and-call moment is the demo's best surprise. Build to it.</div>
-            <div class="tip">Ask: "Who owns your IVR changes today?" — then show they could own it themselves.</div>
-            <div class="tip">For technical audiences, open the HTTP node and show the JSON request/response to an external API.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Demonstrate the visual drag-and-drop flow designer — showing how routing logic, IVR menus, and call treatments are built and changed without coding or vendor tickets.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Replace the fear of "it takes 6 weeks and a change request to update our IVR" with a live demonstration of a change made in minutes.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Webex CC Flow Designer</strong>. Show an existing flow — highlight how readable it is visually.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Make a live change: <strong>add a new menu option</strong> (e.g. "Press 4 for pharmacy") by dragging a node and wiring it up.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Show a <strong>business hours condition</strong> — open hours route to queue, after-hours route to voicemail or callback.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Publish the flow and <strong>call in immediately</strong> to prove the change is live. This moment always lands.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Show a <strong>HTTP Request node</strong> — explain this is how the flow talks to Epic, Salesforce, or any API in real time.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>The live publish-and-call moment is the demo's best surprise. Build to it.</div>
+                <div class="tip"><span class="tip-icon">→</span>Ask: "Who owns your IVR changes today?" — then show they could own it themselves.</div>
+                <div class="tip"><span class="tip-icon">→</span>For technical audiences, open the HTTP node and show the JSON request/response to an external API.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -257,21 +465,27 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Show how voice, chat, and email interactions all route through the same engine and land in a unified agent desktop — no channel silos.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Address the "our patients want to chat and text, not just call" objection with a live demonstration of channels working together.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Show the <strong>chat widget</strong> embedded on a sample patient portal page. Initiate a chat as the patient.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">On the agent desktop, show the <strong>chat interaction arriving</strong> in the same queue view as voice — same routing rules, same agent pool.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Accept the chat. Show the agent handling it while <strong>simultaneously on a voice call</strong> — demonstrate concurrent interaction capacity.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Escalate the chat to a <strong>voice call</strong> — show the transition is seamless and the chat history carries over.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Pull up the supervisor view and show <strong>all channels represented</strong> in the same real-time dashboard.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Many healthcare orgs are voice-only today. Frame this as where their patients already are.</div>
-            <div class="tip">Emphasise that routing rules are shared — one place to manage skills, priority, and overflow across all channels.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Show how voice, chat, and email interactions all route through the same engine and land in a unified agent desktop — no channel silos.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Address the "our patients want to chat and text, not just call" objection with a live demonstration of channels working together.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Show the <strong>chat widget</strong> embedded on a sample patient portal page. Initiate a chat as the patient.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">On the agent desktop, show the <strong>chat interaction arriving</strong> in the same queue view as voice — same routing rules, same agent pool.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Accept the chat. Show the agent handling it while <strong>simultaneously on a voice call</strong> — demonstrate concurrent interaction capacity.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Escalate the chat to a <strong>voice call</strong> — show the transition is seamless and the chat history carries over.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Pull up the supervisor view and show <strong>all channels represented</strong> in the same real-time dashboard.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Many healthcare orgs are voice-only today. Frame this as where their patients already are.</div>
+                <div class="tip"><span class="tip-icon">→</span>Emphasise that routing rules are shared — one place to manage skills, priority, and overflow across all channels.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -285,21 +499,27 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Show how patients are offered a callback instead of waiting on hold, and how the system manages that promise reliably.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Directly address one of healthcare's biggest patient satisfaction pain points — hold time — with a concrete, working solution.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Call in during a simulated busy period. Have the IVR announce the <strong>estimated wait time</strong> and offer a callback option.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Accept the callback. Show the <strong>caller's position held in queue</strong> — they hang up but don't lose their place.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">On the supervisor dashboard, show the <strong>callback request in the queue</strong> alongside live calls.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">When the agent becomes available, show the <strong>system dialling the patient back</strong> automatically and the call connecting.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Show the agent desktop pre-populated with the <strong>original callback reason</strong> so the patient doesn't have to repeat themselves.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Ask the room: "What's your current HCAHPS score for wait time?" — callback directly moves that metric.</div>
-            <div class="tip">Mention scheduled callbacks — patients can pick a specific time slot, not just "as soon as possible."</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Show how patients are offered a callback instead of waiting on hold, and how the system manages that promise reliably.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Directly address one of healthcare's biggest patient satisfaction pain points — hold time — with a concrete, working solution.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Call in during a simulated busy period. Have the IVR announce the <strong>estimated wait time</strong> and offer a callback option.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Accept the callback. Show the <strong>caller's position held in queue</strong> — they hang up but don't lose their place.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">On the supervisor dashboard, show the <strong>callback request in the queue</strong> alongside live calls.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">When the agent becomes available, show the <strong>system dialling the patient back</strong> automatically and the call connecting.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Show the agent desktop pre-populated with the <strong>original callback reason</strong> so the patient doesn't have to repeat themselves.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Ask the room: "What's your current HCAHPS score for wait time?" — callback directly moves that metric.</div>
+                <div class="tip"><span class="tip-icon">→</span>Mention scheduled callbacks — patients can pick a specific time slot, not just "as soon as possible."</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -321,21 +541,27 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Walk through Cisco Analyzer — real-time dashboards and historical reports — showing the depth of data available out of the box.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Give ops and data buyers confidence that they'll have the visibility they need without needing a custom BI tool from day one.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Cisco Analyzer</strong>. Start with a real-time dashboard — show live call volume, SLA, and agent state widgets.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Switch to historical. Pull a <strong>queue performance report</strong> for the last 30 days — show abandonment rate, AHT, and FCR trends.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Show how to <strong>filter by team, queue, or time range</strong> — demonstrate the self-service nature of the tool.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Create a <strong>custom visualisation</strong> by dragging a new metric onto a dashboard. Save and share it.</span></li>
-            <li class="step"><span class="step-num">5</span><span class="step-text">Show <strong>scheduled report delivery</strong> — a report emailed to leadership every Monday morning, automatically.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Ask: "How do you get your contact centre reports today?" — manual exports and spreadsheets is the usual answer.</div>
-            <div class="tip">Mention the API — data can be pushed to Power BI, Tableau, or any existing BI tool if needed.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Walk through Cisco Analyzer — real-time dashboards and historical reports — showing the depth of data available out of the box.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Give ops and data buyers confidence that they'll have the visibility they need without needing a custom BI tool from day one.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Cisco Analyzer</strong>. Start with a real-time dashboard — show live call volume, SLA, and agent state widgets.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Switch to historical. Pull a <strong>queue performance report</strong> for the last 30 days — show abandonment rate, AHT, and FCR trends.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Show how to <strong>filter by team, queue, or time range</strong> — demonstrate the self-service nature of the tool.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Create a <strong>custom visualisation</strong> by dragging a new metric onto a dashboard. Save and share it.</span></li>
+                <li class="step"><span class="step-num">5</span><span class="step-text">Show <strong>scheduled report delivery</strong> — a report emailed to leadership every Monday morning, automatically.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Ask: "How do you get your contact centre reports today?" — manual exports and spreadsheets is the usual answer.</div>
+                <div class="tip"><span class="tip-icon">→</span>Mention the API — data can be pushed to Power BI, Tableau, or any existing BI tool if needed.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -349,21 +575,27 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Demonstrate how Webex CC connects to the tools healthcare organisations already run — Epic, Salesforce Health Cloud, and Microsoft Teams.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Remove the "but will it work with our systems?" objection by showing live integrations with the platforms they already own.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Inbound call arrives. Show the <strong>Epic screen pop</strong> — patient name, MRN, last appointment, and open cases — surfaced automatically from caller ID.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Show the agent updating a <strong>Salesforce case</strong> directly from the agent desktop widget — no tab switching.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Show <strong>Teams presence integration</strong> — the agent can see if a specialist is available in Teams and transfer the call to them directly.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Open the <strong>Flow Designer HTTP node</strong> — briefly show how any REST API integration is configured (for IT audiences).</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">Ask before the demo which systems they use — tailor this section to show exactly their stack.</div>
-            <div class="tip">Epic screen pop is almost always the biggest reaction from healthcare audiences. Lead with it.</div>
-            <div class="tip">For Teams-heavy orgs, the presence and transfer integration removes a key objection to moving off UCCE.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Demonstrate how Webex CC connects to the tools healthcare organisations already run — Epic, Salesforce Health Cloud, and Microsoft Teams.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Remove the "but will it work with our systems?" objection by showing live integrations with the platforms they already own.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Inbound call arrives. Show the <strong>Epic screen pop</strong> — patient name, MRN, last appointment, and open cases — surfaced automatically from caller ID.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Show the agent updating a <strong>Salesforce case</strong> directly from the agent desktop widget — no tab switching.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Show <strong>Teams presence integration</strong> — the agent can see if a specialist is available in Teams and transfer the call to them directly.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Open the <strong>Flow Designer HTTP node</strong> — briefly show how any REST API integration is configured (for IT audiences).</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>Ask before the demo which systems they use — tailor this section to show exactly their stack.</div>
+                <div class="tip"><span class="tip-icon">→</span>Epic screen pop is almost always the biggest reaction from healthcare audiences. Lead with it.</div>
+                <div class="tip"><span class="tip-icon">→</span>For Teams-heavy orgs, the presence and transfer integration removes a key objection to moving off UCCE.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -377,21 +609,27 @@
           <span class="card-chevron">▼</span>
         </button>
         <div class="card-body">
-          <p class="card-desc">Show call recording, quality scoring workflows, and how supervisors use recordings to coach agents — all within the Webex CC platform.</p>
-          <div class="section-label">Objective</div>
-          <div class="objective">Address compliance requirements and agent development needs in a single platform, eliminating the need for a separate QM tool.</div>
-          <div class="section-label">Steps</div>
-          <ol class="steps">
-            <li class="step"><span class="step-num">1</span><span class="step-text">Navigate to the <strong>recording library</strong>. Find a recent call and play it back — show the waveform, transcript, and metadata side by side.</span></li>
-            <li class="step"><span class="step-num">2</span><span class="step-text">Open a <strong>quality scorecard</strong>. Walk through scoring a call — compliance checklist, soft skills, resolution quality.</span></li>
-            <li class="step"><span class="step-num">3</span><span class="step-text">Show the <strong>agent coaching workflow</strong> — supervisor attaches a note and a specific clip timestamp, agent receives it in their desktop.</span></li>
-            <li class="step"><span class="step-num">4</span><span class="step-text">Show <strong>retention and access controls</strong> — recordings stored per policy, accessible only to authorised roles. Key for HIPAA conversations.</span></li>
-          </ol>
-          <div class="section-label">Talk Track Tips</div>
-          <div class="tips">
-            <div class="tip">For healthcare, frame recording retention as a compliance requirement, not just a nice-to-have.</div>
-            <div class="tip">Ask if they currently have a separate QM platform — if yes, position this as a consolidation opportunity.</div>
-            <div class="tip">The AI-generated transcript on the recording playback is a natural bridge back to the AI Assist story.</div>
+          <div class="card-body-inner">
+            <p class="card-desc">Show call recording, quality scoring workflows, and how supervisors use recordings to coach agents — all within the Webex CC platform.</p>
+            <div class="section-label">Objective</div>
+            <div class="objective">Address compliance requirements and agent development needs in a single platform, eliminating the need for a separate QM tool.</div>
+            <div class="steps-block">
+              <div class="section-label">Steps</div>
+              <ol class="steps">
+                <li class="step"><span class="step-num">1</span><span class="step-text">Navigate to the <strong>recording library</strong>. Find a recent call and play it back — show the waveform, transcript, and metadata side by side.</span></li>
+                <li class="step"><span class="step-num">2</span><span class="step-text">Open a <strong>quality scorecard</strong>. Walk through scoring a call — compliance checklist, soft skills, resolution quality.</span></li>
+                <li class="step"><span class="step-num">3</span><span class="step-text">Show the <strong>agent coaching workflow</strong> — supervisor attaches a note and a specific clip timestamp, agent receives it in their desktop.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Show <strong>retention and access controls</strong> — recordings stored per policy, accessible only to authorised roles. Key for HIPAA conversations.</span></li>
+              </ol>
+            </div>
+            <div class="talk-track">
+              <div class="section-label">Talk Track Tips</div>
+              <div class="tips">
+                <div class="tip"><span class="tip-icon">→</span>For healthcare, frame recording retention as a compliance requirement, not just a nice-to-have.</div>
+                <div class="tip"><span class="tip-icon">→</span>Ask if they currently have a separate QM platform — if yes, position this as a consolidation opportunity.</div>
+                <div class="tip"><span class="tip-icon">→</span>The AI-generated transcript on the recording playback is a natural bridge back to the AI Assist story.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
