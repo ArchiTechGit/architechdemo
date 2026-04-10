@@ -9,573 +9,233 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <style>
-    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body {
-      background: #0D1825;
-      color: #F0F6FC;
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-    }
+    body { background: #0D1825; color: #F0F6FC; font-family: 'Roboto', sans-serif; min-height: 100vh; }
 
-    /* ── Screen system ── */
     .screen { display: none; min-height: 100vh; }
     .screen.active { display: flex; }
 
-    /* ══════════════════════════════════════
-       WELCOME SCREEN
-    ══════════════════════════════════════ */
+    /* ── Animations ── */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scoreRingDraw {
+      from { stroke-dashoffset: var(--ring-full); }
+      to   { stroke-dashoffset: var(--ring-offset); }
+    }
+    @keyframes scorePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .animate-in {
+      opacity: 0;
+      animation: fadeSlideIn 0.55s ease forwards;
+    }
+
+    /* ══════════════════════════════════════ WELCOME ══ */
     #screen-welcome {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 24px;
-      text-align: center;
+      flex-direction: column; align-items: center;
+      justify-content: center; padding: 48px 24px; text-align: center;
     }
     #screen-welcome img { width: 160px; mix-blend-mode: screen; opacity: 0.9; margin-bottom: 48px; }
-    .welcome-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #05C3DD;
-      margin-bottom: 16px;
-    }
-    .welcome-title {
-      font-size: 32px;
-      font-weight: 700;
-      color: #F0F6FC;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-      max-width: 520px;
-    }
-    .welcome-desc {
-      font-size: 15px;
-      color: #8FA3BA;
-      line-height: 1.75;
-      max-width: 480px;
-      margin-bottom: 12px;
-    }
-    .welcome-meta {
-      font-size: 12px;
-      color: #3D5268;
-      margin-bottom: 40px;
-    }
+    .welcome-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: #05C3DD; margin-bottom: 16px; }
+    .welcome-title { font-size: 32px; font-weight: 700; color: #F0F6FC; letter-spacing: -0.02em; margin-bottom: 16px; max-width: 520px; }
+    .welcome-desc { font-size: 15px; color: #8FA3BA; line-height: 1.75; max-width: 480px; margin-bottom: 12px; }
+    .welcome-meta { font-size: 12px; color: #3D5268; margin-bottom: 40px; }
     .welcome-meta span { color: #4A607A; }
-    .btn-primary {
-      background: #05C3DD;
-      color: #0D1825;
-      border: none;
-      border-radius: 6px;
-      padding: 14px 32px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
+    .btn-primary { background: #05C3DD; color: #0D1825; border: none; border-radius: 6px; padding: 14px 32px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; }
     .btn-primary:hover { background: #04AFCA; }
     .btn-primary:active { transform: scale(0.98); }
-    .back-link {
-      display: block;
-      margin-top: 24px;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #3D5268;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
+    .back-link { display: block; margin-top: 24px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #3D5268; text-decoration: none; transition: color 0.2s; }
     .back-link:hover { color: #8FA3BA; }
 
-    /* ══════════════════════════════════════
-       QUESTION SCREEN
-    ══════════════════════════════════════ */
-    #screen-question {
-      flex-direction: column;
-    }
-
-    /* Progress bar */
-    .progress-bar-wrap {
-      height: 3px;
-      background: rgba(255,255,255,0.05);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: #05C3DD;
-      transition: width 0.4s ease;
-    }
-
-    /* Top nav */
-    .q-topnav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 32px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
+    /* ══════════════════════════════════════ QUESTION ══ */
+    #screen-question { flex-direction: column; }
+    .progress-bar-wrap { height: 3px; background: rgba(255,255,255,0.05); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .progress-bar-fill { height: 100%; background: #05C3DD; transition: width 0.4s ease; }
+    .q-topnav { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .q-topnav img { width: 100px; mix-blend-mode: screen; opacity: 0.8; }
-    .q-progress-text {
-      font-size: 11px;
-      color: #3D5268;
-      letter-spacing: 0.08em;
-    }
+    .q-progress-text { font-size: 11px; color: #3D5268; letter-spacing: 0.08em; }
     .q-progress-text strong { color: #4A607A; }
-
-    /* Section label */
-    .q-section-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: #05C3DD;
-      margin-bottom: 12px;
-    }
-
-    /* Question area */
-    .q-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 24px 20px;
-      max-width: 640px;
-      margin: 0 auto;
-      width: 100%;
-    }
+    .q-section-label { font-size: 9px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: #05C3DD; margin-bottom: 12px; }
+    .q-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px 20px; max-width: 640px; margin: 0 auto; width: 100%; }
     .q-content { width: 100%; }
-    .q-text {
-      font-size: 22px;
-      font-weight: 500;
-      color: #F0F6FC;
-      line-height: 1.45;
-      margin-bottom: 8px;
-      letter-spacing: -0.01em;
-    }
-    .q-hint {
-      font-size: 13px;
-      color: #4A607A;
-      margin-bottom: 32px;
-      line-height: 1.5;
-    }
-
-    /* Single select options */
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
-      margin-bottom: 32px;
-    }
-    .option-btn {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #A0B4C8;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.15s;
-      font-family: 'Roboto', sans-serif;
-      line-height: 1.4;
-    }
-    .option-btn:hover {
-      border-color: rgba(5,195,221,0.35);
-      color: #F0F6FC;
-      background: rgba(5,195,221,0.05);
-    }
-    .option-btn.selected {
-      border-color: #05C3DD;
-      background: rgba(5,195,221,0.1);
-      color: #F0F6FC;
-    }
-
-    /* Multi select */
-    .multi-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-    .multi-btn {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 13px;
-      color: #8FA3BA;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: 'Roboto', sans-serif;
-    }
-    .multi-btn:hover {
-      border-color: rgba(5,195,221,0.35);
-      color: #F0F6FC;
-    }
-    .multi-btn.selected {
-      border-color: #05C3DD;
-      background: rgba(5,195,221,0.12);
-      color: #05C3DD;
-    }
-
-    /* Text / number input */
-    .q-input {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: 16px 18px;
-      font-size: 16px;
-      font-family: 'Roboto', sans-serif;
-      color: #F0F6FC;
-      outline: none;
-      transition: border-color 0.2s;
-      margin-bottom: 32px;
-    }
+    .q-text { font-size: 22px; font-weight: 500; color: #F0F6FC; line-height: 1.45; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .q-hint { font-size: 13px; color: #4A607A; margin-bottom: 32px; line-height: 1.5; }
+    .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 32px; }
+    .option-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #A0B4C8; cursor: pointer; text-align: left; transition: all 0.15s; font-family: 'Roboto', sans-serif; line-height: 1.4; }
+    .option-btn:hover { border-color: rgba(5,195,221,0.35); color: #F0F6FC; background: rgba(5,195,221,0.05); }
+    .option-btn.selected { border-color: #05C3DD; background: rgba(5,195,221,0.1); color: #F0F6FC; }
+    .multi-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+    .multi-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 20px; padding: 8px 16px; font-size: 13px; color: #8FA3BA; cursor: pointer; transition: all 0.15s; font-family: 'Roboto', sans-serif; }
+    .multi-btn:hover { border-color: rgba(5,195,221,0.35); color: #F0F6FC; }
+    .multi-btn.selected { border-color: #05C3DD; background: rgba(5,195,221,0.12); color: #05C3DD; }
+    .q-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px 18px; font-size: 16px; font-family: 'Roboto', sans-serif; color: #F0F6FC; outline: none; transition: border-color 0.2s; margin-bottom: 32px; }
     .q-input::placeholder { color: #3D5268; }
     .q-input:focus { border-color: rgba(5,195,221,0.5); }
-
-    /* Bottom nav */
-    .q-footnav {
-      padding: 20px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      max-width: 640px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    .btn-back {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 6px;
-      padding: 11px 20px;
-      font-size: 12px;
-      color: #4A607A;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'Roboto', sans-serif;
-    }
+    .q-footnav { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); max-width: 640px; margin: 0 auto; width: 100%; }
+    .btn-back { background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 11px 20px; font-size: 12px; color: #4A607A; cursor: pointer; transition: all 0.2s; font-family: 'Roboto', sans-serif; }
     .btn-back:hover { border-color: rgba(255,255,255,0.2); color: #8FA3BA; }
     .btn-back:disabled { opacity: 0.3; cursor: default; }
-    .btn-next {
-      background: #05C3DD;
-      color: #0D1825;
-      border: none;
-      border-radius: 6px;
-      padding: 12px 28px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: 'Roboto', sans-serif;
-    }
+    .btn-next { background: #05C3DD; color: #0D1825; border: none; border-radius: 6px; padding: 12px 28px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; transition: background 0.2s; font-family: 'Roboto', sans-serif; }
     .btn-next:hover { background: #04AFCA; }
     .btn-next:disabled { background: rgba(5,195,221,0.3); cursor: default; }
-    .btn-skip {
-      font-size: 11px;
-      color: #3D5268;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: 'Roboto', sans-serif;
-      transition: color 0.2s;
-      padding: 0 8px;
-    }
+    .btn-skip { font-size: 11px; color: #3D5268; background: none; border: none; cursor: pointer; font-family: 'Roboto', sans-serif; transition: color 0.2s; padding: 0 8px; }
     .btn-skip:hover { color: #4A607A; }
 
-    /* ══════════════════════════════════════
-       SUBMITTING SCREEN
-    ══════════════════════════════════════ */
-    #screen-submitting {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      text-align: center;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(5,195,221,0.2);
-      border-top-color: #05C3DD;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
+    /* ══════════════════════════════════════ SUBMITTING ══ */
+    #screen-submitting { flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(5,195,221,0.2); border-top-color: #05C3DD; border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ══════════════════════════════════════
-       RESULTS SCREEN
-    ══════════════════════════════════════ */
-    #screen-results {
-      flex-direction: column;
-      padding: 0;
-    }
-
-    .results-topnav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 40px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      position: sticky;
-      top: 0;
-      background: #0D1825;
-      z-index: 10;
-    }
+    /* ══════════════════════════════════════ RESULTS ══ */
+    #screen-results { flex-direction: column; }
+    .results-topnav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; background: #0D1825; z-index: 10; }
     .results-topnav img { width: 100px; mix-blend-mode: screen; opacity: 0.8; }
     .results-actions { display: flex; gap: 12px; align-items: center; }
-    .btn-print {
-      background: rgba(5,195,221,0.1);
-      border: 1px solid rgba(5,195,221,0.3);
-      border-radius: 6px;
-      padding: 9px 18px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #05C3DD;
-      cursor: pointer;
-      font-family: 'Roboto', sans-serif;
-      transition: all 0.2s;
-    }
+    .btn-print { background: rgba(5,195,221,0.1); border: 1px solid rgba(5,195,221,0.3); border-radius: 6px; padding: 9px 18px; font-size: 12px; font-weight: 600; color: #05C3DD; cursor: pointer; font-family: 'Roboto', sans-serif; transition: all 0.2s; }
     .btn-print:hover { background: rgba(5,195,221,0.18); }
-    .btn-restart {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 6px;
-      padding: 9px 18px;
-      font-size: 12px;
-      color: #4A607A;
-      cursor: pointer;
-      font-family: 'Roboto', sans-serif;
-      transition: all 0.2s;
-    }
+    .btn-restart { background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 9px 18px; font-size: 12px; color: #4A607A; cursor: pointer; font-family: 'Roboto', sans-serif; transition: all 0.2s; }
     .btn-restart:hover { border-color: rgba(255,255,255,0.2); color: #8FA3BA; }
+    .results-body { max-width: 900px; margin: 0 auto; padding: 48px 40px 100px; width: 100%; }
 
-    .results-body {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 48px 40px 80px;
-      width: 100%;
-    }
-
-    /* Results header */
-    .results-header { margin-bottom: 48px; }
-    .results-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #05C3DD;
-      margin-bottom: 10px;
-    }
-    .results-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #F0F6FC;
-      margin-bottom: 6px;
-      letter-spacing: -0.01em;
-    }
-    .results-subtitle { font-size: 14px; color: #4A607A; }
-
-    /* Section blocks */
-    .r-section { margin-bottom: 40px; }
-    .r-section-title {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: #4A607A;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    /* Data grid */
-    .r-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-    .r-field { display: flex; flex-direction: column; gap: 4px; }
-    .r-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #3D5268;
-    }
-    .r-value { font-size: 14px; color: #D0DFF0; line-height: 1.5; }
-    .r-value.empty { color: #3D5268; font-style: italic; }
-
-    /* Tags */
-    .r-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .r-tag {
-      font-size: 12px;
-      color: #8FA3BA;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 4px;
-      padding: 3px 10px;
-    }
-
-    /* Recommendations */
-    .rec-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 12px;
-    }
-    .rec-card {
-      background: rgba(5,195,221,0.05);
+    /* ── Hero band ── */
+    .results-hero {
+      background: linear-gradient(135deg, rgba(5,195,221,0.08) 0%, rgba(23,98,170,0.06) 100%);
       border: 1px solid rgba(5,195,221,0.15);
+      border-radius: 14px;
+      padding: 36px 40px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+    .hero-text { flex: 1; }
+    .hero-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: #05C3DD; margin-bottom: 10px; }
+    .hero-org { font-size: 26px; font-weight: 700; color: #F0F6FC; letter-spacing: -0.01em; margin-bottom: 6px; }
+    .hero-meta { font-size: 13px; color: #4A607A; margin-bottom: 20px; }
+    .hero-narrative { font-size: 15px; color: #B8CDE0; line-height: 1.75; }
+
+    /* ── Readiness score ── */
+    .score-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+    .score-ring-svg { width: 110px; height: 110px; }
+    .score-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+    .score-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transform-origin: center; transform: rotate(-90deg); animation: scoreRingDraw 1.2s 0.4s ease forwards; }
+    .score-num { font-size: 28px; font-weight: 700; }
+    .score-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; line-height: 1.3; }
+    .score-desc { font-size: 10px; color: #4A607A; text-align: center; }
+
+    /* ── Next steps ── */
+    .next-steps-grid { display: flex; flex-direction: column; gap: 10px; }
+    .next-step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 8px;
       padding: 16px 18px;
     }
-    .rec-card.tier-1 { border-color: rgba(5,195,221,0.3); background: rgba(5,195,221,0.08); }
-    .rec-card.tier-2 { border-color: rgba(90,159,212,0.2); background: rgba(90,159,212,0.05); }
-    .rec-tier {
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #05C3DD;
-      margin-bottom: 6px;
+    .next-step-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(5,195,221,0.12); border: 1px solid rgba(5,195,221,0.25);
+      color: #05C3DD; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
+    .next-step-text { font-size: 14px; color: #C8DAE8; line-height: 1.6; padding-top: 3px; }
+
+    /* ── Rec cards ── */
+    .rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+    .rec-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 18px 20px; }
+    .rec-card.tier-1 { border-color: rgba(5,195,221,0.25); background: rgba(5,195,221,0.05); }
+    .rec-card.tier-2 { border-color: rgba(90,159,212,0.18); background: rgba(90,159,212,0.03); }
+    .rec-tier { font-size: 8px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #3D5268; margin-bottom: 5px; }
+    .rec-card.tier-1 .rec-tier { color: #05C3DD; }
     .rec-card.tier-2 .rec-tier { color: #6AAAD6; }
-    .rec-name { font-size: 14px; font-weight: 500; color: #F0F6FC; margin-bottom: 4px; }
-    .rec-reason { font-size: 12px; color: #6A8099; line-height: 1.5; }
+    .rec-name { font-size: 14px; font-weight: 600; color: #F0F6FC; margin-bottom: 8px; }
+    .rec-reasons { display: flex; flex-direction: column; gap: 4px; }
+    .rec-reason { font-size: 11px; color: #4A607A; line-height: 1.4; display: flex; gap: 6px; }
+    .rec-reason::before { content: '↳'; color: #3D5268; flex-shrink: 0; }
 
-    /* Pain point callout */
-    .pain-callout {
-      background: rgba(240,80,80,0.05);
-      border-left: 3px solid rgba(240,80,80,0.4);
-      border-radius: 0 6px 6px 0;
-      padding: 14px 18px;
-      margin-bottom: 32px;
-    }
-    .pain-callout-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(240,120,120,0.8);
-      margin-bottom: 10px;
-    }
-    .pain-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .pain-tag {
-      font-size: 12px;
-      color: rgba(240,160,160,0.9);
-      background: rgba(240,80,80,0.08);
-      border: 1px solid rgba(240,80,80,0.15);
-      border-radius: 4px;
-      padding: 3px 10px;
-    }
+    /* ── Section blocks ── */
+    .r-section { margin-bottom: 40px; }
+    .r-section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: #4A607A; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .r-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .r-field { display: flex; flex-direction: column; gap: 4px; }
+    .r-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #3D5268; }
+    .r-value { font-size: 14px; color: #D0DFF0; line-height: 1.5; }
+    .r-value.empty { color: #3D5268; font-style: italic; }
+    .r-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+    .r-tag { font-size: 12px; color: #8FA3BA; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 3px 10px; }
+    .summary-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 24px 28px; margin-bottom: 16px; }
 
-    /* Summary box */
-    .summary-box {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 10px;
-      padding: 24px 28px;
-      margin-bottom: 16px;
-    }
+    /* ── Pain callout ── */
+    .pain-callout { background: rgba(240,80,80,0.05); border-left: 3px solid rgba(240,80,80,0.35); border-radius: 0 6px 6px 0; padding: 14px 18px; margin-bottom: 16px; }
+    .pain-callout-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(240,120,120,0.7); margin-bottom: 10px; }
+    .pain-tag { font-size: 12px; color: rgba(240,160,160,0.85); background: rgba(240,80,80,0.08); border: 1px solid rgba(240,80,80,0.12); border-radius: 4px; padding: 3px 10px; }
 
-    /* JSON output */
-    .json-block {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 8px;
-      padding: 20px;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 11px;
-      color: #5A8A6A;
-      overflow-x: auto;
-      white-space: pre;
-      max-height: 300px;
-      overflow-y: auto;
-      margin-top: 12px;
-    }
-    .json-toggle {
-      font-size: 11px;
-      color: #3D5268;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: 'Roboto', sans-serif;
-      text-decoration: underline;
-      margin-top: 8px;
-    }
+    /* ── Webhook status ── */
+    .webhook-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 12px; border-radius: 4px; margin-bottom: 20px; }
+    .webhook-status.success { background: rgba(16,185,129,0.1); color: #34D399; border: 1px solid rgba(16,185,129,0.2); }
+    .webhook-status.error   { background: rgba(240,80,80,0.08); color: #F87171; border: 1px solid rgba(240,80,80,0.15); }
+    .webhook-status.skipped { background: rgba(61,82,104,0.2); color: #4A607A; border: 1px solid rgba(61,82,104,0.2); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ── JSON ── */
+    .json-block { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 20px; font-family: 'Roboto Mono', monospace; font-size: 11px; color: #5A8A6A; overflow-x: auto; white-space: pre; max-height: 300px; overflow-y: auto; margin-top: 12px; }
+    .json-toggle { font-size: 11px; color: #3D5268; background: none; border: none; cursor: pointer; font-family: 'Roboto', sans-serif; text-decoration: underline; margin-top: 8px; }
     .json-toggle:hover { color: #4A607A; }
 
-    /* Webhook status */
-    .webhook-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      padding: 6px 12px;
-      border-radius: 4px;
-      margin-bottom: 16px;
-    }
-    .webhook-status.success { background: rgba(16,185,129,0.1); color: #34D399; border: 1px solid rgba(16,185,129,0.2); }
-    .webhook-status.error { background: rgba(240,80,80,0.08); color: #F87171; border: 1px solid rgba(240,80,80,0.15); }
-    .webhook-status.skipped { background: rgba(61,82,104,0.2); color: #4A607A; border: 1px solid rgba(61,82,104,0.2); }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-    /* ══════════════════════════════════════
-       PRINT STYLES
-    ══════════════════════════════════════ */
+    /* ══════════════════════════════════════ PRINT ══ */
     @media print {
       body { background: #fff; color: #111; }
-      .results-topnav, .btn-print, .btn-restart, .btn-back-results,
-      .json-block, .json-toggle, #json-section { display: none !important; }
+      .results-topnav, .btn-print, .btn-restart, #json-section { display: none !important; }
       #screen-results { display: flex !important; }
       .screen:not(#screen-results) { display: none !important; }
       .results-body { padding: 20px; max-width: 100%; }
-      .results-label { color: #0077AA; }
-      .results-title { color: #111; }
+      .results-hero { background: #f0f8ff; border-color: #cce4f0; }
+      .hero-label { color: #0077AA; }
+      .hero-org { color: #111; }
+      .hero-meta, .score-desc { color: #555; }
+      .hero-narrative { color: #333; }
+      .score-num { color: #0077AA !important; }
+      .score-label { color: #0077AA !important; }
+      .score-ring-fill { stroke: #0077AA !important; }
       .r-section-title { color: #555; border-color: #ddd; }
       .r-label { color: #777; }
       .r-value { color: #111; }
       .r-tag { background: #f0f0f0; border-color: #ddd; color: #333; }
       .rec-card { border-color: #ccc; background: #f9f9f9; break-inside: avoid; }
       .rec-tier { color: #0077AA; }
+      .rec-card.tier-2 .rec-tier { color: #1762AA; }
       .rec-name { color: #111; }
       .rec-reason { color: #444; }
+      .next-step { border-color: #ddd; background: #fafafa; break-inside: avoid; }
+      .next-step-num { background: #e8f4fb; border-color: #b8d8ec; color: #0077AA; }
+      .next-step-text { color: #222; }
+      .summary-box { border-color: #ddd; background: #fafafa; }
       .pain-callout { border-color: #cc4444; background: #fff5f5; }
       .pain-callout-label { color: #cc4444; }
       .pain-tag { background: #fff0f0; border-color: #ffcccc; color: #cc4444; }
-      .summary-box { border-color: #ddd; background: #fafafa; }
       .webhook-status { display: none !important; }
+      .animate-in { opacity: 1 !important; animation: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ══ WELCOME SCREEN ══ -->
+  <!-- ══ WELCOME ══ -->
   <div id="screen-welcome" class="screen active">
     <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
     <div class="welcome-label">WxCC Discovery Assessment</div>
     <h1 class="welcome-title">Let's understand your contact centre</h1>
-    <p class="welcome-desc">
-      Answer a few detailed questions about your environment, challenges, and goals.
-      We'll generate a tailored summary and recommended demo focus areas on the spot.
-    </p>
+    <p class="welcome-desc">Answer a few detailed questions about your environment, challenges, and goals. We'll generate a tailored summary and recommended demo focus areas on the spot.</p>
     <p class="welcome-meta"><span>~25 questions</span> &nbsp;·&nbsp; <span>10–15 minutes</span> &nbsp;·&nbsp; <span>Printable output</span></p>
     <button class="btn-primary" onclick="startAssessment()">Start Assessment</button>
     <a href="/" class="back-link">← Back to demos</a>
   </div>
 
-  <!-- ══ QUESTION SCREEN ══ -->
+  <!-- ══ QUESTION ══ -->
   <div id="screen-question" class="screen">
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
     <div class="q-topnav">
@@ -597,13 +257,13 @@
     </div>
   </div>
 
-  <!-- ══ SUBMITTING SCREEN ══ -->
+  <!-- ══ SUBMITTING ══ -->
   <div id="screen-submitting" class="screen">
     <div class="spinner"></div>
     <div style="font-size:15px;color:#8FA3BA;">Submitting your assessment…</div>
   </div>
 
-  <!-- ══ RESULTS SCREEN ══ -->
+  <!-- ══ RESULTS ══ -->
   <div id="screen-results" class="screen">
     <div class="results-topnav">
       <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
@@ -617,261 +277,164 @@
 
   <script>
     // ─────────────────────────────────────────────────────────────────
-    // CONFIGURATION — set your Webex Connect webhook URL here
+    // CONFIG
     // ─────────────────────────────────────────────────────────────────
-    const WEBHOOK_URL = ''; // e.g. https://your-org.eu1.connect.webex.com/apiv2/...
+    const WEBHOOK_URL = ''; // Webex Connect webhook URL
 
     // ─────────────────────────────────────────────────────────────────
     // QUESTIONS
     // ─────────────────────────────────────────────────────────────────
     const QUESTIONS = [
-      // ── Section 1: Your Organization ──
-      {
-        id: 'orgName', section: 'Your Organisation', required: true,
-        text: "What is the name of your organisation?",
-        type: 'text', placeholder: 'e.g. Mercy Health System'
-      },
-      {
-        id: 'industry', section: 'Your Organisation', required: true,
-        text: "What industry are you in?",
-        type: 'single',
-        options: ['Healthcare', 'Health Insurance', 'Government', 'Financial Services', 'Retail / eCommerce', 'Education', 'Utilities', 'Other']
-      },
-      {
-        id: 'orgSize', section: 'Your Organisation', required: true,
-        text: "Approximately how many employees does your organisation have?",
-        type: 'single',
-        options: ['Under 100', '100 – 500', '500 – 2,000', '2,000 – 10,000', 'Over 10,000']
-      },
-      {
-        id: 'numSites', section: 'Your Organisation',
-        text: "How many sites or locations does your contact centre span?",
-        type: 'single',
-        options: ['Single site', '2 – 5 sites', '6 – 20 sites', 'More than 20 sites', 'Fully remote / no fixed sites']
-      },
-
-      // ── Section 2: Contact Centre Today ──
-      {
-        id: 'currentPlatform', section: 'Contact Centre Today', required: true,
-        text: "What contact centre platform are you currently running?",
-        type: 'single',
-        options: ['Cisco UCCE / CVP', 'Cisco UCCX', 'Avaya', 'Genesys', 'Amazon Connect', 'Five9', 'NICE CXone', 'Microsoft (Teams CC)', 'Mitel', 'No platform yet (new deployment)', 'Other']
-      },
-      {
-        id: 'numAgents', section: 'Contact Centre Today', required: true,
-        text: "How many contact centre agents do you have?",
-        type: 'single',
-        options: ['Fewer than 25', '25 – 100', '100 – 500', '500 – 1,000', 'More than 1,000']
-      },
-      {
-        id: 'numSupervisors', section: 'Contact Centre Today',
-        text: "How many supervisors or team leads?",
-        type: 'single',
-        options: ['Fewer than 5', '5 – 20', '20 – 50', 'More than 50']
-      },
-      {
-        id: 'dailyVolume', section: 'Contact Centre Today',
-        text: "What is your average daily interaction volume (calls, chats, emails combined)?",
-        type: 'single',
-        options: ['Under 500', '500 – 2,000', '2,000 – 10,000', '10,000 – 50,000', 'Over 50,000']
-      },
-      {
-        id: 'contractExpiry', section: 'Contact Centre Today',
-        text: "When does your current platform contract expire?",
-        type: 'single',
-        options: ['Already expired', 'Within 6 months', '6 – 12 months', '1 – 2 years', 'More than 2 years', 'No contract / perpetual license', 'Not sure']
-      },
-
-      // ── Section 3: Channels ──
-      {
-        id: 'currentChannels', section: 'Channels', required: true,
-        text: "Which channels are you currently handling?",
-        hint: 'Select all that apply.',
-        type: 'multi',
-        options: ['Voice / Phone', 'Email', 'Live Chat', 'SMS / Text', 'Social Media', 'Video', 'WhatsApp', 'None yet']
-      },
-      {
-        id: 'desiredChannels', section: 'Channels',
-        text: "Which channels do you want to support going forward?",
-        hint: 'Select all that apply.',
-        type: 'multi',
-        options: ['Voice / Phone', 'Email', 'Live Chat', 'SMS / Text', 'Social Media', 'Video', 'WhatsApp', 'AI Self-Service / Virtual Agent', 'Outbound Campaigns']
-      },
-
-      // ── Section 4: Pain Points ──
-      {
-        id: 'painPoints', section: 'Pain Points', required: true,
-        text: "What are your biggest contact centre challenges today?",
-        hint: 'Select all that apply. Be honest — this shapes everything.',
-        type: 'multi',
-        options: [
-          'Long hold times & poor patient/customer experience',
-          'Agents using too many different tools / screens',
-          'IVR or routing changes take too long',
-          'Limited visibility into real-time performance',
-          'No AI or automation capabilities',
-          'Struggling with remote or hybrid agents',
-          'Compliance, recording or HIPAA requirements',
-          'High operating or licensing costs',
-          'Poor integration with CRM or clinical systems',
-          'Supervisor coaching and quality management',
-          'High agent attrition / poor agent experience',
-          'Reporting is manual, slow or inaccurate'
-        ]
-      },
-
-      // ── Section 5: Integrations ──
-      {
-        id: 'crmSystems', section: 'Integrations',
-        text: "Which CRM or clinical systems do you use?",
-        hint: 'Select all that apply.',
-        type: 'multi',
-        options: ['Epic', 'Cerner / Oracle Health', 'Salesforce', 'ServiceNow', 'Microsoft Dynamics', 'SAP', 'Meditech', 'Custom / In-house', 'None', 'Other']
-      },
-      {
-        id: 'collabTools', section: 'Integrations',
-        text: "Which collaboration tools are in use across your organisation?",
-        hint: 'Select all that apply.',
-        type: 'multi',
-        options: ['Webex', 'Microsoft Teams', 'Zoom', 'Slack', 'Google Workspace', 'None']
-      },
-      {
-        id: 'otherIntegrations', section: 'Integrations',
-        text: "Are there any other key systems the contact centre needs to connect with?",
-        hint: 'e.g. workforce management, payment processing, HR systems.',
-        type: 'text', placeholder: 'List any other systems here, or leave blank'
-      },
-
-      // ── Section 6: Goals ──
-      {
-        id: 'primaryGoals', section: 'Goals & Priorities', required: true,
-        text: "What are your primary goals for this project?",
-        hint: 'Select your top priorities.',
-        type: 'multi',
-        options: [
-          'Reduce operating costs',
-          'Improve customer / patient experience (CSAT / HCAHPS)',
-          'Enable AI and automation',
-          'Modernise ageing infrastructure',
-          'Improve agent experience and reduce attrition',
-          'Better real-time reporting and analytics',
-          'Meet compliance or regulatory requirements',
-          'Support remote and hybrid workforce',
-          'Consolidate onto fewer platforms',
-          'Improve supervisor tools and coaching'
-        ]
-      },
-      {
-        id: 'successMetric', section: 'Goals & Priorities',
-        text: "How will you measure success 12 months after go-live?",
-        hint: 'e.g. CSAT score, AHT reduction, cost per call, agent attrition rate.',
-        type: 'text', placeholder: 'Describe your key success metric(s)'
-      },
-
-      // ── Section 7: Technical ──
-      {
-        id: 'deploymentModel', section: 'Technical Requirements',
-        text: "What is your preferred deployment model?",
-        type: 'single',
-        options: ['Full cloud (CCaaS)', 'Hybrid (cloud + some on-prem)', 'On-premises', 'No preference yet', 'Not sure — need guidance']
-      },
-      {
-        id: 'complianceReqs', section: 'Technical Requirements',
-        text: "Do you have specific compliance or security requirements?",
-        hint: 'Select all that apply.',
-        type: 'multi',
-        options: ['HIPAA', 'PCI-DSS', 'SOC 2', 'FedRAMP', 'GDPR', 'ISO 27001', 'State / regional data residency', 'None / Not sure']
-      },
-      {
-        id: 'itCapacity', section: 'Technical Requirements',
-        text: "How would you describe your internal IT capacity for this project?",
-        type: 'single',
-        options: [
-          'Large team — fully resourced for deployment',
-          'Small team — will need partner support',
-          'Minimal IT — fully partner-led preferred',
-          'Not yet determined'
-        ]
-      },
-
-      // ── Section 8: Project Details ──
-      {
-        id: 'timeline', section: 'Project Details', required: true,
-        text: "What is your target go-live timeline?",
-        type: 'single',
-        options: ['ASAP — within 3 months', '3 – 6 months', '6 – 12 months', '12 – 18 months', 'Beyond 18 months', 'Evaluating only — no timeline yet']
-      },
-      {
-        id: 'budget', section: 'Project Details',
-        text: "What is your approximate total budget for this project?",
-        hint: 'Including licences, implementation, and first-year support.',
-        type: 'single',
-        options: ['Under $100K', '$100K – $300K', '$300K – $750K', '$750K – $2M', 'Over $2M', 'Budget not yet defined']
-      },
-      {
-        id: 'stakeholders', section: 'Project Details',
-        text: "Who are the key stakeholders involved in this decision?",
-        hint: 'Select all that apply.',
-        type: 'multi',
-        options: ['CIO / CTO', 'CISO / Security', 'Contact Centre Director / Manager', 'Operations / COO', 'Finance / CFO', 'Clinical Leadership', 'IT Infrastructure', 'HR / Workforce Management', 'Procurement']
-      },
-      {
-        id: 'evalStage', section: 'Project Details',
-        text: "Where are you in the evaluation process?",
-        type: 'single',
-        options: ['Just starting — exploring options', 'Comparing 3+ vendors', 'Shortlisted 2–3 options', 'Ready to make a decision', 'Approved — looking for implementation partner']
-      },
-
-      // ── Section 9: Your Details ──
-      {
-        id: 'contactName', section: 'Your Details', required: true,
-        text: "What is your name?",
-        type: 'text', placeholder: 'Full name'
-      },
-      {
-        id: 'contactTitle', section: 'Your Details',
-        text: "And your title or role?",
-        type: 'text', placeholder: 'e.g. Director of Contact Centre Operations'
-      },
-      {
-        id: 'contactEmail', section: 'Your Details', required: true,
-        text: "Best email address to reach you?",
-        type: 'text', placeholder: 'name@organisation.com'
-      },
-      {
-        id: 'contactPhone', section: 'Your Details',
-        text: "Phone number? (optional)",
-        type: 'text', placeholder: '+1 (555) 000-0000'
-      },
+      { id:'orgName',          section:'Your Organisation',     required:true,  type:'text',   text:"What is the name of your organisation?", placeholder:'e.g. Mercy Health System' },
+      { id:'industry',         section:'Your Organisation',     required:true,  type:'single', text:"What industry are you in?", options:['Healthcare','Health Insurance','Government','Financial Services','Retail / eCommerce','Education','Utilities','Other'] },
+      { id:'orgSize',          section:'Your Organisation',     required:true,  type:'single', text:"Approximately how many employees does your organisation have?", options:['Under 100','100 – 500','500 – 2,000','2,000 – 10,000','Over 10,000'] },
+      { id:'numSites',         section:'Your Organisation',                     type:'single', text:"How many sites or locations does your contact centre span?", options:['Single site','2 – 5 sites','6 – 20 sites','More than 20 sites','Fully remote / no fixed sites'] },
+      { id:'currentPlatform',  section:'Contact Centre Today',  required:true,  type:'single', text:"What contact centre platform are you currently running?", options:['Cisco UCCE / CVP','Cisco UCCX','Avaya','Genesys','Amazon Connect','Five9','NICE CXone','Microsoft (Teams CC)','Mitel','No platform yet (new deployment)','Other'] },
+      { id:'numAgents',        section:'Contact Centre Today',  required:true,  type:'single', text:"How many contact centre agents do you have?", options:['Fewer than 25','25 – 100','100 – 500','500 – 1,000','More than 1,000'] },
+      { id:'numSupervisors',   section:'Contact Centre Today',                  type:'single', text:"How many supervisors or team leads?", options:['Fewer than 5','5 – 20','20 – 50','More than 50'] },
+      { id:'dailyVolume',      section:'Contact Centre Today',                  type:'single', text:"What is your average daily interaction volume?", options:['Under 500','500 – 2,000','2,000 – 10,000','10,000 – 50,000','Over 50,000'] },
+      { id:'contractExpiry',   section:'Contact Centre Today',                  type:'single', text:"When does your current platform contract expire?", options:['Already expired','Within 6 months','6 – 12 months','1 – 2 years','More than 2 years','No contract / perpetual license','Not sure'] },
+      { id:'currentChannels',  section:'Channels',              required:true,  type:'multi',  text:"Which channels are you currently handling?", hint:'Select all that apply.', options:['Voice / Phone','Email','Live Chat','SMS / Text','Social Media','Video','WhatsApp','None yet'] },
+      { id:'desiredChannels',  section:'Channels',                              type:'multi',  text:"Which channels do you want to support going forward?", hint:'Select all that apply.', options:['Voice / Phone','Email','Live Chat','SMS / Text','Social Media','Video','WhatsApp','AI Self-Service / Virtual Agent','Outbound Campaigns'] },
+      { id:'painPoints',       section:'Pain Points',           required:true,  type:'multi',  text:"What are your biggest contact centre challenges today?", hint:'Select all that apply. Be honest — this shapes everything.', options:['Long hold times & poor patient/customer experience','Agents using too many different tools / screens','IVR or routing changes take too long','Limited visibility into real-time performance','No AI or automation capabilities','Struggling with remote or hybrid agents','Compliance, recording or HIPAA requirements','High operating or licensing costs','Poor integration with CRM or clinical systems','Supervisor coaching and quality management','High agent attrition / poor agent experience','Reporting is manual, slow or inaccurate'] },
+      { id:'crmSystems',       section:'Integrations',                          type:'multi',  text:"Which CRM or clinical systems do you use?", hint:'Select all that apply.', options:['Epic','Cerner / Oracle Health','Salesforce','ServiceNow','Microsoft Dynamics','SAP','Meditech','Custom / In-house','None','Other'] },
+      { id:'collabTools',      section:'Integrations',                          type:'multi',  text:"Which collaboration tools are in use across your organisation?", hint:'Select all that apply.', options:['Webex','Microsoft Teams','Zoom','Slack','Google Workspace','None'] },
+      { id:'otherIntegrations',section:'Integrations',                          type:'text',   text:"Any other key systems the contact centre needs to connect with?", hint:'e.g. workforce management, payment processing, HR systems.', placeholder:'List any other systems here, or leave blank' },
+      { id:'primaryGoals',     section:'Goals & Priorities',    required:true,  type:'multi',  text:"What are your primary goals for this project?", hint:'Select your top priorities.', options:['Reduce operating costs','Improve customer / patient experience (CSAT / HCAHPS)','Enable AI and automation','Modernise ageing infrastructure','Improve agent experience and reduce attrition','Better real-time reporting and analytics','Meet compliance or regulatory requirements','Support remote and hybrid workforce','Consolidate onto fewer platforms','Improve supervisor tools and coaching'] },
+      { id:'successMetric',    section:'Goals & Priorities',                    type:'text',   text:"How will you measure success 12 months after go-live?", hint:'e.g. CSAT score, AHT reduction, cost per call, agent attrition rate.', placeholder:'Describe your key success metric(s)' },
+      { id:'deploymentModel',  section:'Technical Requirements',                type:'single', text:"What is your preferred deployment model?", options:['Full cloud (CCaaS)','Hybrid (cloud + some on-prem)','On-premises','No preference yet','Not sure — need guidance'] },
+      { id:'complianceReqs',   section:'Technical Requirements',                type:'multi',  text:"Do you have specific compliance or security requirements?", hint:'Select all that apply.', options:['HIPAA','PCI-DSS','SOC 2','FedRAMP','GDPR','ISO 27001','State / regional data residency','None / Not sure'] },
+      { id:'itCapacity',       section:'Technical Requirements',                type:'single', text:"How would you describe your internal IT capacity for this project?", options:['Large team — fully resourced for deployment','Small team — will need partner support','Minimal IT — fully partner-led preferred','Not yet determined'] },
+      { id:'timeline',         section:'Project Details',       required:true,  type:'single', text:"What is your target go-live timeline?", options:['ASAP — within 3 months','3 – 6 months','6 – 12 months','12 – 18 months','Beyond 18 months','Evaluating only — no timeline yet'] },
+      { id:'budget',           section:'Project Details',                       type:'single', text:"What is your approximate total budget for this project?", hint:'Including licences, implementation, and first-year support.', options:['Under $100K','$100K – $300K','$300K – $750K','$750K – $2M','Over $2M','Budget not yet defined'] },
+      { id:'stakeholders',     section:'Project Details',                       type:'multi',  text:"Who are the key stakeholders involved in this decision?", hint:'Select all that apply.', options:['CIO / CTO','CISO / Security','Contact Centre Director / Manager','Operations / COO','Finance / CFO','Clinical Leadership','IT Infrastructure','HR / Workforce Management','Procurement'] },
+      { id:'evalStage',        section:'Project Details',                       type:'single', text:"Where are you in the evaluation process?", options:['Just starting — exploring options','Comparing 3+ vendors','Shortlisted 2–3 options','Ready to make a decision','Approved — looking for implementation partner'] },
+      { id:'contactName',      section:'Your Details',          required:true,  type:'text',   text:"What is your name?", placeholder:'Full name' },
+      { id:'contactTitle',     section:'Your Details',                          type:'text',   text:"And your title or role?", placeholder:'e.g. Director of Contact Centre Operations' },
+      { id:'contactEmail',     section:'Your Details',          required:true,  type:'text',   text:"Best email address to reach you?", placeholder:'name@organisation.com.au' },
+      { id:'contactPhone',     section:'Your Details',                          type:'text',   text:"Phone number? (optional)", placeholder:'0412 345 678' },
     ];
 
     // ─────────────────────────────────────────────────────────────────
-    // PAIN POINT → DEMO USE CASE MAPPING
+    // PAIN POINT → DEMO MAPPING (with reasons)
     // ─────────────────────────────────────────────────────────────────
     const PAIN_TO_DEMO = {
-      'Long hold times & poor patient/customer experience':      [{ name: 'Callback & Queue Management', tier: 1 }, { name: 'AI Agents', tier: 1 }],
-      'Agents using too many different tools / screens':         [{ name: 'Agent Experience', tier: 1 }],
-      'IVR or routing changes take too long':                    [{ name: 'Flow Builder', tier: 2 }],
-      'Limited visibility into real-time performance':           [{ name: 'Supervisor Dashboard', tier: 1 }, { name: 'Reporting & Analytics', tier: 2 }],
-      'No AI or automation capabilities':                        [{ name: 'AI Agents', tier: 1 }, { name: 'AI Assist', tier: 1 }],
-      'Struggling with remote or hybrid agents':                 [{ name: 'Agent Experience', tier: 1 }, { name: 'Supervisor Dashboard', tier: 1 }],
-      'Compliance, recording or HIPAA requirements':             [{ name: 'Quality Management', tier: 2 }],
-      'High operating or licensing costs':                       [{ name: 'AI Agents', tier: 1 }, { name: 'Flow Builder', tier: 2 }],
-      'Poor integration with CRM or clinical systems':           [{ name: 'Integrations', tier: 2 }],
-      'Supervisor coaching and quality management':              [{ name: 'Quality Management', tier: 2 }, { name: 'Supervisor Dashboard', tier: 1 }],
-      'High agent attrition / poor agent experience':            [{ name: 'Agent Experience', tier: 1 }, { name: 'AI Assist', tier: 1 }],
-      'Reporting is manual, slow or inaccurate':                 [{ name: 'Reporting & Analytics', tier: 2 }],
+      'Long hold times & poor patient/customer experience':    [{ name:'Callback & Queue Management', tier:2 }, { name:'AI Agents', tier:1 }],
+      'Agents using too many different tools / screens':       [{ name:'Agent Experience', tier:1 }],
+      'IVR or routing changes take too long':                  [{ name:'Flow Builder', tier:2 }],
+      'Limited visibility into real-time performance':         [{ name:'Supervisor Dashboard', tier:1 }, { name:'Reporting & Analytics', tier:2 }],
+      'No AI or automation capabilities':                      [{ name:'AI Agents', tier:1 }, { name:'AI Assist', tier:1 }],
+      'Struggling with remote or hybrid agents':               [{ name:'Agent Experience', tier:1 }, { name:'Supervisor Dashboard', tier:1 }],
+      'Compliance, recording or HIPAA requirements':           [{ name:'Quality Management', tier:2 }],
+      'High operating or licensing costs':                     [{ name:'AI Agents', tier:1 }, { name:'Flow Builder', tier:2 }],
+      'Poor integration with CRM or clinical systems':         [{ name:'Integrations', tier:2 }],
+      'Supervisor coaching and quality management':            [{ name:'Quality Management', tier:2 }, { name:'Supervisor Dashboard', tier:1 }],
+      'High agent attrition / poor agent experience':          [{ name:'Agent Experience', tier:1 }, { name:'AI Assist', tier:1 }],
+      'Reporting is manual, slow or inaccurate':               [{ name:'Reporting & Analytics', tier:2 }],
     };
 
     const GOAL_TO_DEMO = {
-      'Enable AI and automation':                                [{ name: 'AI Agents', tier: 1 }, { name: 'AI Assist', tier: 1 }],
-      'Improve customer / patient experience (CSAT / HCAHPS)':  [{ name: 'Callback & Queue Management', tier: 2 }, { name: 'AI Agents', tier: 1 }],
-      'Improve agent experience and reduce attrition':           [{ name: 'Agent Experience', tier: 1 }, { name: 'AI Assist', tier: 1 }],
-      'Better real-time reporting and analytics':                [{ name: 'Reporting & Analytics', tier: 2 }, { name: 'Supervisor Dashboard', tier: 1 }],
-      'Meet compliance or regulatory requirements':              [{ name: 'Quality Management', tier: 2 }],
-      'Consolidate onto fewer platforms':                        [{ name: 'Omnichannel Routing', tier: 2 }],
-      'Improve supervisor tools and coaching':                   [{ name: 'Supervisor Dashboard', tier: 1 }, { name: 'Quality Management', tier: 2 }],
+      'Enable AI and automation':                                      [{ name:'AI Agents', tier:1 }, { name:'AI Assist', tier:1 }],
+      'Improve customer / patient experience (CSAT / HCAHPS)':        [{ name:'Callback & Queue Management', tier:2 }, { name:'AI Agents', tier:1 }],
+      'Improve agent experience and reduce attrition':                 [{ name:'Agent Experience', tier:1 }, { name:'AI Assist', tier:1 }],
+      'Better real-time reporting and analytics':                      [{ name:'Reporting & Analytics', tier:2 }, { name:'Supervisor Dashboard', tier:1 }],
+      'Meet compliance or regulatory requirements':                    [{ name:'Quality Management', tier:2 }],
+      'Consolidate onto fewer platforms':                              [{ name:'Omnichannel Routing', tier:2 }],
+      'Improve supervisor tools and coaching':                         [{ name:'Supervisor Dashboard', tier:1 }, { name:'Quality Management', tier:2 }],
     };
+
+    // ─────────────────────────────────────────────────────────────────
+    // READINESS SCORE
+    // ─────────────────────────────────────────────────────────────────
+    function calcReadiness(data) {
+      let score = 0;
+      const contractMap = { 'Already expired':25, 'Within 6 months':25, '6 – 12 months':22, '1 – 2 years':16, 'More than 2 years':8, 'No contract / perpetual license':12, 'Not sure':5 };
+      const timelineMap = { 'ASAP — within 3 months':25, '3 – 6 months':22, '6 – 12 months':18, '12 – 18 months':12, 'Beyond 18 months':6, 'Evaluating only — no timeline yet':3 };
+      const evalMap    = { 'Approved — looking for implementation partner':20, 'Ready to make a decision':18, 'Shortlisted 2–3 options':14, 'Comparing 3+ vendors':10, 'Just starting — exploring options':5 };
+      const budgetMap  = { 'Over $2M':15, '$750K – $2M':14, '$300K – $750K':12, '$100K – $300K':10, 'Under $100K':6, 'Budget not yet defined':4 };
+      const itMap      = { 'Large team — fully resourced for deployment':15, 'Small team — will need partner support':12, 'Minimal IT — fully partner-led preferred':10, 'Not yet determined':5 };
+      score += contractMap[data.currentState.contractExpiry] || 0;
+      score += timelineMap[data.project.timeline] || 0;
+      score += evalMap[data.project.evalStage] || 0;
+      score += budgetMap[data.project.budget] || 0;
+      score += itMap[data.technical.itCapacity] || 0;
+      return Math.min(score, 100);
+    }
+
+    function readinessProfile(score) {
+      if (score >= 80) return { label:'Strong Candidate',    desc:'Ready to move forward',      color:'#05C3DD' };
+      if (score >= 60) return { label:'Well Positioned',     desc:'Good momentum building',      color:'#34D399' };
+      if (score >= 40) return { label:'Building Momentum',   desc:'Early but promising stages',  color:'#F59E0B' };
+      return              { label:'Early Evaluation',      desc:'Still exploring options',     color:'#8FA3BA' };
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // NARRATIVE
+    // ─────────────────────────────────────────────────────────────────
+    function generateNarrative(data) {
+      const org      = data.organisation.name     || 'Your organisation';
+      const industry = data.organisation.industry ? data.organisation.industry.toLowerCase() + ' ' : '';
+      const platform = data.currentState.platform || 'their current platform';
+      const agents   = data.currentState.agents   ? data.currentState.agents.toLowerCase() + ' agents' : 'their agent team';
+      const volume   = data.currentState.dailyVolume ? `, handling ${data.currentState.dailyVolume.toLowerCase()} interactions daily` : '';
+      const pains    = data.painPoints || [];
+      const goals    = data.goals.primary || [];
+      const expiry   = data.currentState.contractExpiry;
+
+      let contractNote = '';
+      if (expiry === 'Already expired') contractNote = 'Their current contract has already expired, making this an urgent conversation.';
+      else if (expiry === 'Within 6 months') contractNote = 'With a contract expiring within 6 months, the window to act is narrow.';
+      else if (expiry === '6 – 12 months') contractNote = 'A contract renewal decision is approaching in the next 6–12 months.';
+
+      let painNote = '';
+      if (pains.length >= 3) painNote = `Across ${pains.length} identified challenges — including ${pains.slice(0,2).map(p => p.toLowerCase()).join(' and ')} — there is a compelling case for modernisation.`;
+      else if (pains.length > 0) painNote = `The key challenge of ${pains[0].toLowerCase()} is a clear driver for change.`;
+
+      let goalNote = '';
+      if (goals.length > 0) goalNote = `Their primary ambition — ${goals[0].toLowerCase()} — maps directly to Webex CC's core strengths.`;
+
+      return [
+        `${org} is a ${industry}organisation currently running ${platform}, with ${agents}${volume}.`,
+        contractNote,
+        painNote,
+        goalNote,
+      ].filter(Boolean).join(' ');
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // NEXT STEPS
+    // ─────────────────────────────────────────────────────────────────
+    function getNextSteps(data) {
+      const stage = data.project.evalStage;
+      const steps = {
+        'Just starting — exploring options': [
+          'Schedule a 30-minute discovery call with an ArchiTech architect to validate these findings and discuss fit',
+          'Request a personalised Webex CC demo scoped to the pain points identified in this assessment',
+          'Receive a budgetary estimate and indicative ROI calculation based on your agent count and interaction volume',
+        ],
+        'Comparing 3+ vendors': [
+          'Arrange a live Webex CC demo tailored specifically to the use cases flagged above',
+          'Request a vendor comparison document covering your specific channel, integration, and compliance requirements',
+          'Connect with an ArchiTech reference customer in the same industry at a similar scale',
+        ],
+        'Shortlisted 2–3 options': [
+          'Schedule an executive briefing with Cisco and ArchiTech leadership to discuss strategic alignment',
+          'Begin a proof-of-concept scoping session to validate the technical integration requirements',
+          'Arrange reference calls with current Webex CC customers running a comparable environment',
+        ],
+        'Ready to make a decision': [
+          'Request a formal commercial proposal with implementation scope, phasing, and timeline',
+          'Engage procurement and legal on master agreement and subscription terms',
+          'Define the go-live milestone, assign an internal project sponsor, and agree the kickoff date',
+        ],
+        'Approved — looking for implementation partner': [
+          'Kick off a formal project discovery workshop with the ArchiTech delivery team',
+          'Assign your internal project team and confirm availability for the implementation phase',
+          'Agree the implementation phasing plan, integration priorities, and go-live milestone',
+        ],
+      };
+      return steps[stage] || steps['Just starting — exploring options'];
+    }
 
     // ─────────────────────────────────────────────────────────────────
     // STATE
@@ -879,26 +442,13 @@
     let currentIndex = 0;
     const answers = {};
 
-    // ─────────────────────────────────────────────────────────────────
-    // SCREEN MANAGEMENT
-    // ─────────────────────────────────────────────────────────────────
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       window.scrollTo(0, 0);
     }
-
-    function startAssessment() {
-      currentIndex = 0;
-      showScreen('screen-question');
-      renderQuestion();
-    }
-
-    function restart() {
-      Object.keys(answers).forEach(k => delete answers[k]);
-      currentIndex = 0;
-      showScreen('screen-welcome');
-    }
+    function startAssessment() { currentIndex = 0; showScreen('screen-question'); renderQuestion(); }
+    function restart() { Object.keys(answers).forEach(k => delete answers[k]); currentIndex = 0; showScreen('screen-welcome'); }
 
     // ─────────────────────────────────────────────────────────────────
     // QUESTION RENDERING
@@ -906,71 +456,45 @@
     function renderQuestion() {
       const q = QUESTIONS[currentIndex];
       const total = QUESTIONS.length;
-
       document.getElementById('q-section').textContent = q.section;
       document.getElementById('q-text').textContent = q.text;
       document.getElementById('q-hint').textContent = q.hint || '';
       document.getElementById('q-num').textContent = currentIndex + 1;
       document.getElementById('q-total').textContent = total;
       document.getElementById('progress-fill').style.width = ((currentIndex / total) * 100) + '%';
-
       document.getElementById('btn-back').disabled = currentIndex === 0;
       document.getElementById('btn-skip').style.display = q.required ? 'none' : 'inline';
-
       const area = document.getElementById('q-input-area');
       area.innerHTML = '';
-
       if (q.type === 'text') {
         const inp = document.createElement('input');
-        inp.className = 'q-input';
-        inp.type = 'text';
-        inp.placeholder = q.placeholder || '';
-        inp.value = answers[q.id] || '';
+        inp.className = 'q-input'; inp.type = 'text';
+        inp.placeholder = q.placeholder || ''; inp.value = answers[q.id] || '';
         inp.addEventListener('input', () => { answers[q.id] = inp.value; updateNext(); });
         inp.addEventListener('keydown', e => { if (e.key === 'Enter') nextQuestion(); });
-        area.appendChild(inp);
-        setTimeout(() => inp.focus(), 50);
-
+        area.appendChild(inp); setTimeout(() => inp.focus(), 50);
       } else if (q.type === 'single') {
-        const grid = document.createElement('div');
-        grid.className = 'options-grid';
+        const grid = document.createElement('div'); grid.className = 'options-grid';
         q.options.forEach(opt => {
           const btn = document.createElement('button');
           btn.className = 'option-btn' + (answers[q.id] === opt ? ' selected' : '');
           btn.textContent = opt;
-          btn.onclick = () => {
-            answers[q.id] = opt;
-            grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            updateNext();
-            setTimeout(() => nextQuestion(), 300);
-          };
+          btn.onclick = () => { answers[q.id] = opt; grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); updateNext(); setTimeout(() => nextQuestion(), 300); };
           grid.appendChild(btn);
         });
         area.appendChild(grid);
-
       } else if (q.type === 'multi') {
-        const grid = document.createElement('div');
-        grid.className = 'multi-grid';
+        const grid = document.createElement('div'); grid.className = 'multi-grid';
         const current = answers[q.id] || [];
         q.options.forEach(opt => {
           const btn = document.createElement('button');
           btn.className = 'multi-btn' + (current.includes(opt) ? ' selected' : '');
           btn.textContent = opt;
-          btn.onclick = () => {
-            const arr = answers[q.id] || [];
-            const idx = arr.indexOf(opt);
-            if (idx === -1) arr.push(opt);
-            else arr.splice(idx, 1);
-            answers[q.id] = arr;
-            btn.classList.toggle('selected');
-            updateNext();
-          };
+          btn.onclick = () => { const arr = answers[q.id] || []; const idx = arr.indexOf(opt); if (idx === -1) arr.push(opt); else arr.splice(idx, 1); answers[q.id] = arr; btn.classList.toggle('selected'); updateNext(); };
           grid.appendChild(btn);
         });
         area.appendChild(grid);
       }
-
       updateNext();
     }
 
@@ -983,80 +507,25 @@
       const val = answers[q.id];
       btn.disabled = !val || (Array.isArray(val) && val.length === 0) || (typeof val === 'string' && val.trim() === '');
     }
-
-    function nextQuestion() {
-      const btn = document.getElementById('btn-next');
-      if (btn.disabled) return;
-      if (currentIndex === QUESTIONS.length - 1) {
-        submitAssessment();
-        return;
-      }
-      currentIndex++;
-      renderQuestion();
-    }
-
-    function prevQuestion() {
-      if (currentIndex === 0) return;
-      currentIndex--;
-      renderQuestion();
-    }
-
-    function skipQuestion() {
-      if (currentIndex === QUESTIONS.length - 1) { submitAssessment(); return; }
-      currentIndex++;
-      renderQuestion();
-    }
+    function nextQuestion() { if (document.getElementById('btn-next').disabled) return; if (currentIndex === QUESTIONS.length - 1) { submitAssessment(); return; } currentIndex++; renderQuestion(); }
+    function prevQuestion() { if (currentIndex === 0) return; currentIndex--; renderQuestion(); }
+    function skipQuestion() { if (currentIndex === QUESTIONS.length - 1) { submitAssessment(); return; } currentIndex++; renderQuestion(); }
 
     // ─────────────────────────────────────────────────────────────────
-    // BUILD JSON
+    // PAYLOAD
     // ─────────────────────────────────────────────────────────────────
     function buildPayload() {
       return {
         timestamp: new Date().toISOString(),
-        contact: {
-          name:  answers.contactName  || '',
-          title: answers.contactTitle || '',
-          email: answers.contactEmail || '',
-          phone: answers.contactPhone || '',
-        },
-        organisation: {
-          name:     answers.orgName   || '',
-          industry: answers.industry  || '',
-          size:     answers.orgSize   || '',
-          sites:    answers.numSites  || '',
-        },
-        currentState: {
-          platform:       answers.currentPlatform || '',
-          agents:         answers.numAgents       || '',
-          supervisors:    answers.numSupervisors  || '',
-          dailyVolume:    answers.dailyVolume     || '',
-          contractExpiry: answers.contractExpiry  || '',
-        },
-        channels: {
-          current: answers.currentChannels || [],
-          desired: answers.desiredChannels || [],
-        },
-        painPoints: answers.painPoints || [],
-        integrations: {
-          crm:           answers.crmSystems        || [],
-          collaboration: answers.collabTools        || [],
-          other:         answers.otherIntegrations  || '',
-        },
-        goals: {
-          primary:       answers.primaryGoals   || [],
-          successMetric: answers.successMetric  || '',
-        },
-        technical: {
-          deployment:  answers.deploymentModel || '',
-          compliance:  answers.complianceReqs  || [],
-          itCapacity:  answers.itCapacity      || '',
-        },
-        project: {
-          timeline:     answers.timeline     || '',
-          budget:       answers.budget       || '',
-          stakeholders: answers.stakeholders || [],
-          evalStage:    answers.evalStage    || '',
-        },
+        contact: { name: answers.contactName||'', title: answers.contactTitle||'', email: answers.contactEmail||'', phone: answers.contactPhone||'' },
+        organisation: { name: answers.orgName||'', industry: answers.industry||'', size: answers.orgSize||'', sites: answers.numSites||'' },
+        currentState: { platform: answers.currentPlatform||'', agents: answers.numAgents||'', supervisors: answers.numSupervisors||'', dailyVolume: answers.dailyVolume||'', contractExpiry: answers.contractExpiry||'' },
+        channels: { current: answers.currentChannels||[], desired: answers.desiredChannels||[] },
+        painPoints: answers.painPoints||[],
+        integrations: { crm: answers.crmSystems||[], collaboration: answers.collabTools||[], other: answers.otherIntegrations||'' },
+        goals: { primary: answers.primaryGoals||[], successMetric: answers.successMetric||'' },
+        technical: { deployment: answers.deploymentModel||'', compliance: answers.complianceReqs||[], itCapacity: answers.itCapacity||'' },
+        project: { timeline: answers.timeline||'', budget: answers.budget||'', stakeholders: answers.stakeholders||[], evalStage: answers.evalStage||'' },
       };
     }
 
@@ -1067,20 +536,10 @@
       showScreen('screen-submitting');
       const payload = buildPayload();
       let webhookResult = 'skipped';
-
       if (WEBHOOK_URL) {
-        try {
-          const res = await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          webhookResult = res.ok ? 'success' : 'error';
-        } catch (e) {
-          webhookResult = 'error';
-        }
+        try { const res = await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }); webhookResult = res.ok ? 'success' : 'error'; }
+        catch(e) { webhookResult = 'error'; }
       }
-
       renderResults(payload, webhookResult);
       showScreen('screen-results');
     }
@@ -1091,100 +550,122 @@
     function renderResults(data, webhookResult) {
       const body = document.getElementById('results-body');
 
-      // Build recommended demos from pain points + goals
+      // Build recommendations with reasons
       const recMap = {};
-      const addRec = (name, tier) => {
-        if (!recMap[name] || tier < recMap[name]) recMap[name] = tier;
+      const addRec = (name, tier, reason) => {
+        if (!recMap[name]) recMap[name] = { tier, reasons: [] };
+        if (tier < recMap[name].tier) recMap[name].tier = tier;
+        if (reason && !recMap[name].reasons.includes(reason)) recMap[name].reasons.push(reason);
       };
-      (data.painPoints || []).forEach(p => {
-        (PAIN_TO_DEMO[p] || []).forEach(r => addRec(r.name, r.tier));
-      });
-      (data.goals.primary || []).forEach(g => {
-        (GOAL_TO_DEMO[g] || []).forEach(r => addRec(r.name, r.tier));
-      });
-      const recommendations = Object.entries(recMap)
-        .sort((a, b) => a[1] - b[1])
-        .map(([name, tier]) => ({ name, tier }));
+      (data.painPoints||[]).forEach(p => (PAIN_TO_DEMO[p]||[]).forEach(r => addRec(r.name, r.tier, p)));
+      (data.goals.primary||[]).forEach(g => (GOAL_TO_DEMO[g]||[]).forEach(r => addRec(r.name, r.tier, g)));
+      const recommendations = Object.entries(recMap).sort((a,b) => a[1].tier - b[1].tier).map(([name, d]) => ({ name, ...d }));
+
+      // Score
+      const score = calcReadiness(data);
+      const profile = readinessProfile(score);
+      const circumference = 2 * Math.PI * 50;
+      const offset = circumference * (1 - score / 100);
+
+      // Helpers
+      const tag  = arr => arr && arr.length ? arr.map(t => `<span class="r-tag">${t}</span>`).join('') : `<span class="r-value empty">Not provided</span>`;
+      const val  = (v, fb='Not provided') => (v && v.toString().trim()) ? `<span class="r-value">${v}</span>` : `<span class="r-value empty">${fb}</span>`;
 
       const webhookHTML = {
-        success: `<div class="webhook-status success"><span class="status-dot"></span>Assessment submitted to Webex Connect successfully</div>`,
-        error:   `<div class="webhook-status error"><span class="status-dot"></span>Webhook submission failed — JSON available below for manual use</div>`,
-        skipped: `<div class="webhook-status skipped"><span class="status-dot"></span>No webhook configured — use JSON below to submit manually</div>`,
+        success: `<div class="webhook-status success animate-in" style="animation-delay:0.1s"><span class="status-dot"></span>Submitted to Webex Connect successfully</div>`,
+        error:   `<div class="webhook-status error animate-in" style="animation-delay:0.1s"><span class="status-dot"></span>Webhook failed — use the JSON below to submit manually</div>`,
+        skipped: `<div class="webhook-status skipped animate-in" style="animation-delay:0.1s"><span class="status-dot"></span>No webhook configured — set WEBHOOK_URL to enable auto-submission</div>`,
       }[webhookResult];
 
-      const tag = arr => arr && arr.length
-        ? arr.map(t => `<span class="r-tag">${t}</span>`).join('')
-        : '<span class="r-value empty">Not provided</span>';
+      const recCards = recommendations.length ? recommendations.map(r => `
+        <div class="rec-card tier-${r.tier}">
+          <div class="rec-tier">Tier ${r.tier}</div>
+          <div class="rec-name">${r.name}</div>
+          <div class="rec-reasons">${r.reasons.slice(0,2).map(reason => `<div class="rec-reason">${reason}</div>`).join('')}</div>
+        </div>`).join('')
+        : `<div class="r-value empty">Complete the pain points section to receive recommendations</div>`;
 
-      const val = (v, fallback = 'Not provided') =>
-        v && v.toString().trim() ? v : `<span class="r-value empty">${fallback}</span>`;
+      const stepItems = getNextSteps(data).map((s, i) => `
+        <div class="next-step">
+          <div class="next-step-num">${i+1}</div>
+          <div class="next-step-text">${s}</div>
+        </div>`).join('');
 
-      const recCards = recommendations.length
-        ? recommendations.map(r => `
-            <div class="rec-card tier-${r.tier}">
-              <div class="rec-tier">Tier ${r.tier}</div>
-              <div class="rec-name">${r.name}</div>
-            </div>`).join('')
-        : '<div class="r-value empty">Complete the pain points section to get recommendations</div>';
-
-      const painTags = (data.painPoints || []).length
-        ? data.painPoints.map(p => `<span class="pain-tag">${p}</span>`).join('')
-        : '<span class="r-value empty">None selected</span>';
+      const delays = [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75];
+      let d = 0;
+      const section = (content) => `<div class="animate-in" style="animation-delay:${delays[d++ % delays.length]}s">${content}</div>`;
 
       body.innerHTML = `
-        <div class="results-header">
-          <div class="results-label">Discovery Assessment</div>
-          <div class="results-title">${data.organisation.name || 'Assessment'} — Contact Centre Discovery</div>
-          <div class="results-subtitle">Completed ${new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })} &nbsp;·&nbsp; ${data.contact.name || ''} ${data.contact.title ? '· ' + data.contact.title : ''}</div>
-        </div>
-
         ${webhookHTML}
 
-        <!-- Recommended demos -->
+        ${section(`
+        <div class="results-hero animate-in" style="animation-delay:0.05s">
+          <div class="hero-text">
+            <div class="hero-label">Discovery Complete</div>
+            <div class="hero-org">${data.organisation.name || 'Your Organisation'}</div>
+            <div class="hero-meta">${[data.organisation.industry, data.organisation.size, data.currentState.agents ? data.currentState.agents + ' agents' : ''].filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>
+            <div class="hero-narrative">${generateNarrative(data)}</div>
+          </div>
+          <div class="score-wrap">
+            <svg class="score-ring-svg" viewBox="0 0 120 120">
+              <circle class="score-ring-bg" cx="60" cy="60" r="50"/>
+              <circle class="score-ring-fill" cx="60" cy="60" r="50"
+                stroke="${profile.color}"
+                style="--ring-full:${circumference};--ring-offset:${offset};stroke-dasharray:${circumference};stroke-dashoffset:${circumference}"
+                transform="rotate(-90 60 60)"/>
+              <text x="60" y="55" text-anchor="middle" font-size="26" font-weight="700" fill="${profile.color}" font-family="Roboto,sans-serif">${score}</text>
+              <text x="60" y="70" text-anchor="middle" font-size="9" fill="#4A607A" font-family="Roboto,sans-serif">OUT OF 100</text>
+            </svg>
+            <div class="score-label" style="color:${profile.color}">${profile.label}</div>
+            <div class="score-desc">${profile.desc}</div>
+          </div>
+        </div>`)}
+
+        ${section(`
         <div class="r-section">
           <div class="r-section-title">Recommended Demo Focus Areas</div>
           <div class="rec-grid">${recCards}</div>
-        </div>
+        </div>`)}
 
-        <!-- Pain points callout -->
-        ${(data.painPoints || []).length ? `
+        ${(data.painPoints||[]).length ? section(`
         <div class="pain-callout">
-          <div class="pain-callout-label">Identified Pain Points</div>
-          <div class="pain-list">${painTags}</div>
-        </div>` : ''}
+          <div class="pain-callout-label">Identified Pain Points (${data.painPoints.length})</div>
+          <div class="r-tags">${data.painPoints.map(p => `<span class="pain-tag">${p}</span>`).join('')}</div>
+        </div>`) : ''}
 
-        <!-- Contact & Org -->
+        ${section(`
+        <div class="r-section">
+          <div class="r-section-title">Recommended Next Steps</div>
+          <div class="next-steps-grid">${stepItems}</div>
+        </div>`)}
+
+        ${section(`
         <div class="summary-box">
           <div class="r-section">
-            <div class="r-section-title">Contact Details</div>
+            <div class="r-section-title">Contact & Organisation</div>
             <div class="r-grid">
-              <div class="r-field"><div class="r-label">Name</div><div class="r-value">${val(data.contact.name)}</div></div>
-              <div class="r-field"><div class="r-label">Title</div><div class="r-value">${val(data.contact.title)}</div></div>
-              <div class="r-field"><div class="r-label">Email</div><div class="r-value">${val(data.contact.email)}</div></div>
-              <div class="r-field"><div class="r-label">Phone</div><div class="r-value">${val(data.contact.phone)}</div></div>
+              <div class="r-field"><div class="r-label">Name</div>${val(data.contact.name)}</div>
+              <div class="r-field"><div class="r-label">Title</div>${val(data.contact.title)}</div>
+              <div class="r-field"><div class="r-label">Email</div>${val(data.contact.email)}</div>
+              <div class="r-field"><div class="r-label">Phone</div>${val(data.contact.phone)}</div>
+              <div class="r-field"><div class="r-label">Organisation</div>${val(data.organisation.name)}</div>
+              <div class="r-field"><div class="r-label">Industry</div>${val(data.organisation.industry)}</div>
+              <div class="r-field"><div class="r-label">Size</div>${val(data.organisation.size)}</div>
+              <div class="r-field"><div class="r-label">Sites</div>${val(data.organisation.sites)}</div>
             </div>
           </div>
-          <div class="r-section">
-            <div class="r-section-title">Organisation</div>
-            <div class="r-grid">
-              <div class="r-field"><div class="r-label">Name</div><div class="r-value">${val(data.organisation.name)}</div></div>
-              <div class="r-field"><div class="r-label">Industry</div><div class="r-value">${val(data.organisation.industry)}</div></div>
-              <div class="r-field"><div class="r-label">Size</div><div class="r-value">${val(data.organisation.size)}</div></div>
-              <div class="r-field"><div class="r-label">Sites</div><div class="r-value">${val(data.organisation.sites)}</div></div>
-            </div>
-          </div>
-        </div>
+        </div>`)}
 
-        <!-- Current state -->
+        ${section(`
         <div class="summary-box">
           <div class="r-section">
             <div class="r-section-title">Current Contact Centre</div>
             <div class="r-grid">
-              <div class="r-field"><div class="r-label">Platform</div><div class="r-value">${val(data.currentState.platform)}</div></div>
-              <div class="r-field"><div class="r-label">Agents</div><div class="r-value">${val(data.currentState.agents)}</div></div>
-              <div class="r-field"><div class="r-label">Supervisors</div><div class="r-value">${val(data.currentState.supervisors)}</div></div>
-              <div class="r-field"><div class="r-label">Daily Volume</div><div class="r-value">${val(data.currentState.dailyVolume)}</div></div>
-              <div class="r-field"><div class="r-label">Contract Expiry</div><div class="r-value">${val(data.currentState.contractExpiry)}</div></div>
+              <div class="r-field"><div class="r-label">Platform</div>${val(data.currentState.platform)}</div>
+              <div class="r-field"><div class="r-label">Agents</div>${val(data.currentState.agents)}</div>
+              <div class="r-field"><div class="r-label">Supervisors</div>${val(data.currentState.supervisors)}</div>
+              <div class="r-field"><div class="r-label">Daily Volume</div>${val(data.currentState.dailyVolume)}</div>
+              <div class="r-field"><div class="r-label">Contract Expiry</div>${val(data.currentState.contractExpiry)}</div>
             </div>
           </div>
           <div class="r-section">
@@ -1194,9 +675,9 @@
               <div class="r-field"><div class="r-label">Desired</div><div class="r-tags">${tag(data.channels.desired)}</div></div>
             </div>
           </div>
-        </div>
+        </div>`)}
 
-        <!-- Goals & Technical -->
+        ${section(`
         <div class="summary-box">
           <div class="r-section">
             <div class="r-section-title">Goals & Priorities</div>
@@ -1210,38 +691,45 @@
             <div class="r-grid">
               <div class="r-field"><div class="r-label">CRM / Clinical</div><div class="r-tags">${tag(data.integrations.crm)}</div></div>
               <div class="r-field"><div class="r-label">Collaboration</div><div class="r-tags">${tag(data.integrations.collaboration)}</div></div>
-              ${data.integrations.other ? `<div class="r-field" style="grid-column:1/-1"><div class="r-label">Other</div><div class="r-value">${data.integrations.other}</div></div>` : ''}
+              ${data.integrations.other ? `<div class="r-field" style="grid-column:1/-1"><div class="r-label">Other Systems</div><div class="r-value">${data.integrations.other}</div></div>` : ''}
             </div>
           </div>
-        </div>
+        </div>`)}
 
-        <!-- Project -->
+        ${section(`
         <div class="summary-box">
           <div class="r-section">
             <div class="r-section-title">Technical Requirements</div>
             <div class="r-grid">
-              <div class="r-field"><div class="r-label">Deployment</div><div class="r-value">${val(data.technical.deployment)}</div></div>
-              <div class="r-field"><div class="r-label">IT Capacity</div><div class="r-value">${val(data.technical.itCapacity)}</div></div>
+              <div class="r-field"><div class="r-label">Deployment Model</div>${val(data.technical.deployment)}</div>
+              <div class="r-field"><div class="r-label">IT Capacity</div>${val(data.technical.itCapacity)}</div>
               <div class="r-field" style="grid-column:1/-1"><div class="r-label">Compliance</div><div class="r-tags">${tag(data.technical.compliance)}</div></div>
             </div>
           </div>
           <div class="r-section">
             <div class="r-section-title">Project Details</div>
             <div class="r-grid">
-              <div class="r-field"><div class="r-label">Timeline</div><div class="r-value">${val(data.project.timeline)}</div></div>
-              <div class="r-field"><div class="r-label">Budget</div><div class="r-value">${val(data.project.budget)}</div></div>
-              <div class="r-field"><div class="r-label">Evaluation Stage</div><div class="r-value">${val(data.project.evalStage)}</div></div>
+              <div class="r-field"><div class="r-label">Timeline</div>${val(data.project.timeline)}</div>
+              <div class="r-field"><div class="r-label">Budget</div>${val(data.project.budget)}</div>
+              <div class="r-field"><div class="r-label">Evaluation Stage</div>${val(data.project.evalStage)}</div>
               <div class="r-field" style="grid-column:1/-1"><div class="r-label">Key Stakeholders</div><div class="r-tags">${tag(data.project.stakeholders)}</div></div>
             </div>
           </div>
-        </div>
+        </div>`)}
 
-        <!-- JSON output -->
-        <div id="json-section">
+        <div id="json-section" class="animate-in" style="animation-delay:0.7s">
           <button class="json-toggle" onclick="toggleJson()">Show raw JSON payload</button>
           <div class="json-block" id="json-block" style="display:none">${JSON.stringify(data, null, 2)}</div>
         </div>
       `;
+
+      // Trigger score ring animation after render
+      requestAnimationFrame(() => {
+        const ring = body.querySelector('.score-ring-fill');
+        if (ring) {
+          setTimeout(() => { ring.style.strokeDashoffset = offset; ring.style.transition = 'stroke-dashoffset 1.2s ease'; }, 100);
+        }
+      });
     }
 
     function toggleJson() {
