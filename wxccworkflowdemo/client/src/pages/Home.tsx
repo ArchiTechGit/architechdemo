@@ -110,20 +110,8 @@ const STAGE_META = [
   { icon: Activity, shortDesc: "AI agent initiates conversational check-in 48-72 hours post-discharge. Concerning responses trigger immediate nurse escalation. Critical flags generate emergency protocol alert." },
 ];
 
-const STAGE_COLORS = [
-  // 01 — ArchiTech Cyan (primary)
-  { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" },
-  // 02 — Periwinkle blue (secondary palette)
-  { bg: "linear-gradient(145deg, #0c1630 0%, #111e48 55%, #0a1228 100%)", accent: "#517FE3", accentBg: "rgba(81,127,227,0.12)", accentBorder: "rgba(81,127,227,0.38)", accentGlow: "rgba(81,127,227,0.18)", iconTint: "rgba(81,127,227,0.06)" },
-  // 03 — Light cyan (secondary palette)
-  { bg: "linear-gradient(145deg, #081c2e 0%, #0c2842 55%, #071820 100%)", accent: "#55CAFD", accentBg: "rgba(85,202,253,0.12)", accentBorder: "rgba(85,202,253,0.38)", accentGlow: "rgba(85,202,253,0.18)", iconTint: "rgba(85,202,253,0.06)" },
-  // 04 — ArchiTech Blue (secondary accent)
-  { bg: "linear-gradient(145deg, #081428 0%, #0c1e3e 55%, #061020 100%)", accent: "#1980BD", accentBg: "rgba(25,128,189,0.12)", accentBorder: "rgba(25,128,189,0.38)", accentGlow: "rgba(25,128,189,0.18)", iconTint: "rgba(25,128,189,0.06)" },
-  // 05 — Blue-gray (ArchiTech secondary palette #7F8FA9)
-  { bg: "linear-gradient(145deg, #0d1828 0%, #131e30 55%, #0b1422 100%)", accent: "#7F8FA9", accentBg: "rgba(127,143,169,0.14)", accentBorder: "rgba(127,143,169,0.42)", accentGlow: "rgba(127,143,169,0.16)", iconTint: "rgba(127,143,169,0.06)" },
-  // 06 — ArchiTech Blue (primary secondary)
-  { bg: "linear-gradient(145deg, #081030 0%, #0c1848 55%, #061028 100%)", accent: "#0055B8", accentBg: "rgba(0,85,184,0.14)", accentBorder: "rgba(0,85,184,0.42)", accentGlow: "rgba(0,85,184,0.2)", iconTint: "rgba(0,85,184,0.07)" },
-];
+const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
+const STAGE_COLORS = [STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR];
 
 const IMPACT_STATS = [
   {
