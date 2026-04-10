@@ -7,26 +7,1247 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <style>
+    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body { background: #0D1825; color: #F0F6FC; font-family: 'Roboto', sans-serif; display: flex; align-items: center; justify-content: center; }
-    .coming-soon { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
-    .label { font-size: 9px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: #05C3DD; }
-    h1 { font-size: 20px; font-weight: 700; color: #F0F6FC; }
-    p { font-size: 12px; color: #7F8FA9; letter-spacing: 0.05em; line-height: 1.6; max-width: 320px; }
-    a { color: #7F8FA9; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; transition: color 0.2s; }
-    a:hover { color: #F0F6FC; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #0D1825;
+      color: #F0F6FC;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Screen system ── */
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: flex; }
+
+    /* ══════════════════════════════════════
+       WELCOME SCREEN
+    ══════════════════════════════════════ */
+    #screen-welcome {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    #screen-welcome img { width: 160px; mix-blend-mode: screen; opacity: 0.9; margin-bottom: 48px; }
+    .welcome-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #05C3DD;
+      margin-bottom: 16px;
+    }
+    .welcome-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #F0F6FC;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      max-width: 520px;
+    }
+    .welcome-desc {
+      font-size: 15px;
+      color: #8FA3BA;
+      line-height: 1.75;
+      max-width: 480px;
+      margin-bottom: 12px;
+    }
+    .welcome-meta {
+      font-size: 12px;
+      color: #3D5268;
+      margin-bottom: 40px;
+    }
+    .welcome-meta span { color: #4A607A; }
+    .btn-primary {
+      background: #05C3DD;
+      color: #0D1825;
+      border: none;
+      border-radius: 6px;
+      padding: 14px 32px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { background: #04AFCA; }
+    .btn-primary:active { transform: scale(0.98); }
+    .back-link {
+      display: block;
+      margin-top: 24px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3D5268;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #8FA3BA; }
+
+    /* ══════════════════════════════════════
+       QUESTION SCREEN
+    ══════════════════════════════════════ */
+    #screen-question {
+      flex-direction: column;
+    }
+
+    /* Progress bar */
+    .progress-bar-wrap {
+      height: 3px;
+      background: rgba(255,255,255,0.05);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #05C3DD;
+      transition: width 0.4s ease;
+    }
+
+    /* Top nav */
+    .q-topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .q-topnav img { width: 100px; mix-blend-mode: screen; opacity: 0.8; }
+    .q-progress-text {
+      font-size: 11px;
+      color: #3D5268;
+      letter-spacing: 0.08em;
+    }
+    .q-progress-text strong { color: #4A607A; }
+
+    /* Section label */
+    .q-section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #05C3DD;
+      margin-bottom: 12px;
+    }
+
+    /* Question area */
+    .q-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px 20px;
+      max-width: 640px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .q-content { width: 100%; }
+    .q-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #F0F6FC;
+      line-height: 1.45;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .q-hint {
+      font-size: 13px;
+      color: #4A607A;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* Single select options */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .option-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #A0B4C8;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.4;
+    }
+    .option-btn:hover {
+      border-color: rgba(5,195,221,0.35);
+      color: #F0F6FC;
+      background: rgba(5,195,221,0.05);
+    }
+    .option-btn.selected {
+      border-color: #05C3DD;
+      background: rgba(5,195,221,0.1);
+      color: #F0F6FC;
+    }
+
+    /* Multi select */
+    .multi-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .multi-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #8FA3BA;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Roboto', sans-serif;
+    }
+    .multi-btn:hover {
+      border-color: rgba(5,195,221,0.35);
+      color: #F0F6FC;
+    }
+    .multi-btn.selected {
+      border-color: #05C3DD;
+      background: rgba(5,195,221,0.12);
+      color: #05C3DD;
+    }
+
+    /* Text / number input */
+    .q-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 16px;
+      font-family: 'Roboto', sans-serif;
+      color: #F0F6FC;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 32px;
+    }
+    .q-input::placeholder { color: #3D5268; }
+    .q-input:focus { border-color: rgba(5,195,221,0.5); }
+
+    /* Bottom nav */
+    .q-footnav {
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      max-width: 640px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .btn-back {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 11px 20px;
+      font-size: 12px;
+      color: #4A607A;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Roboto', sans-serif;
+    }
+    .btn-back:hover { border-color: rgba(255,255,255,0.2); color: #8FA3BA; }
+    .btn-back:disabled { opacity: 0.3; cursor: default; }
+    .btn-next {
+      background: #05C3DD;
+      color: #0D1825;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 28px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Roboto', sans-serif;
+    }
+    .btn-next:hover { background: #04AFCA; }
+    .btn-next:disabled { background: rgba(5,195,221,0.3); cursor: default; }
+    .btn-skip {
+      font-size: 11px;
+      color: #3D5268;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      transition: color 0.2s;
+      padding: 0 8px;
+    }
+    .btn-skip:hover { color: #4A607A; }
+
+    /* ══════════════════════════════════════
+       SUBMITTING SCREEN
+    ══════════════════════════════════════ */
+    #screen-submitting {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      text-align: center;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(5,195,221,0.2);
+      border-top-color: #05C3DD;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════════
+       RESULTS SCREEN
+    ══════════════════════════════════════ */
+    #screen-results {
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .results-topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky;
+      top: 0;
+      background: #0D1825;
+      z-index: 10;
+    }
+    .results-topnav img { width: 100px; mix-blend-mode: screen; opacity: 0.8; }
+    .results-actions { display: flex; gap: 12px; align-items: center; }
+    .btn-print {
+      background: rgba(5,195,221,0.1);
+      border: 1px solid rgba(5,195,221,0.3);
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #05C3DD;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-print:hover { background: rgba(5,195,221,0.18); }
+    .btn-restart {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 12px;
+      color: #4A607A;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-restart:hover { border-color: rgba(255,255,255,0.2); color: #8FA3BA; }
+
+    .results-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 40px 80px;
+      width: 100%;
+    }
+
+    /* Results header */
+    .results-header { margin-bottom: 48px; }
+    .results-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #05C3DD;
+      margin-bottom: 10px;
+    }
+    .results-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #F0F6FC;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .results-subtitle { font-size: 14px; color: #4A607A; }
+
+    /* Section blocks */
+    .r-section { margin-bottom: 40px; }
+    .r-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #4A607A;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Data grid */
+    .r-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .r-field { display: flex; flex-direction: column; gap: 4px; }
+    .r-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #3D5268;
+    }
+    .r-value { font-size: 14px; color: #D0DFF0; line-height: 1.5; }
+    .r-value.empty { color: #3D5268; font-style: italic; }
+
+    /* Tags */
+    .r-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .r-tag {
+      font-size: 12px;
+      color: #8FA3BA;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 3px 10px;
+    }
+
+    /* Recommendations */
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .rec-card {
+      background: rgba(5,195,221,0.05);
+      border: 1px solid rgba(5,195,221,0.15);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .rec-card.tier-1 { border-color: rgba(5,195,221,0.3); background: rgba(5,195,221,0.08); }
+    .rec-card.tier-2 { border-color: rgba(90,159,212,0.2); background: rgba(90,159,212,0.05); }
+    .rec-tier {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #05C3DD;
+      margin-bottom: 6px;
+    }
+    .rec-card.tier-2 .rec-tier { color: #6AAAD6; }
+    .rec-name { font-size: 14px; font-weight: 500; color: #F0F6FC; margin-bottom: 4px; }
+    .rec-reason { font-size: 12px; color: #6A8099; line-height: 1.5; }
+
+    /* Pain point callout */
+    .pain-callout {
+      background: rgba(240,80,80,0.05);
+      border-left: 3px solid rgba(240,80,80,0.4);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin-bottom: 32px;
+    }
+    .pain-callout-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(240,120,120,0.8);
+      margin-bottom: 10px;
+    }
+    .pain-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pain-tag {
+      font-size: 12px;
+      color: rgba(240,160,160,0.9);
+      background: rgba(240,80,80,0.08);
+      border: 1px solid rgba(240,80,80,0.15);
+      border-radius: 4px;
+      padding: 3px 10px;
+    }
+
+    /* Summary box */
+    .summary-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 16px;
+    }
+
+    /* JSON output */
+    .json-block {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 20px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: #5A8A6A;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+    .json-toggle {
+      font-size: 11px;
+      color: #3D5268;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      text-decoration: underline;
+      margin-top: 8px;
+    }
+    .json-toggle:hover { color: #4A607A; }
+
+    /* Webhook status */
+    .webhook-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .webhook-status.success { background: rgba(16,185,129,0.1); color: #34D399; border: 1px solid rgba(16,185,129,0.2); }
+    .webhook-status.error { background: rgba(240,80,80,0.08); color: #F87171; border: 1px solid rgba(240,80,80,0.15); }
+    .webhook-status.skipped { background: rgba(61,82,104,0.2); color: #4A607A; border: 1px solid rgba(61,82,104,0.2); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* ══════════════════════════════════════
+       PRINT STYLES
+    ══════════════════════════════════════ */
+    @media print {
+      body { background: #fff; color: #111; }
+      .results-topnav, .btn-print, .btn-restart, .btn-back-results,
+      .json-block, .json-toggle, #json-section { display: none !important; }
+      #screen-results { display: flex !important; }
+      .screen:not(#screen-results) { display: none !important; }
+      .results-body { padding: 20px; max-width: 100%; }
+      .results-label { color: #0077AA; }
+      .results-title { color: #111; }
+      .r-section-title { color: #555; border-color: #ddd; }
+      .r-label { color: #777; }
+      .r-value { color: #111; }
+      .r-tag { background: #f0f0f0; border-color: #ddd; color: #333; }
+      .rec-card { border-color: #ccc; background: #f9f9f9; break-inside: avoid; }
+      .rec-tier { color: #0077AA; }
+      .rec-name { color: #111; }
+      .rec-reason { color: #444; }
+      .pain-callout { border-color: #cc4444; background: #fff5f5; }
+      .pain-callout-label { color: #cc4444; }
+      .pain-tag { background: #fff0f0; border-color: #ffcccc; color: #cc4444; }
+      .summary-box { border-color: #ddd; background: #fafafa; }
+      .webhook-status { display: none !important; }
+    }
   </style>
 </head>
 <body>
-  <div class="coming-soon">
-    <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" style="width:160px;mix-blend-mode:screen;opacity:0.9;" />
-    <div class="label">Coming Soon</div>
-    <h1>Discovery Assessment</h1>
-    <p>A guided questionnaire that maps your contact center environment, pain points, and goals to a tailored Webex CC recommendation.</p>
-    <a href="/">← Back to demos</a>
+
+  <!-- ══ WELCOME SCREEN ══ -->
+  <div id="screen-welcome" class="screen active">
+    <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
+    <div class="welcome-label">WxCC Discovery Assessment</div>
+    <h1 class="welcome-title">Let's understand your contact centre</h1>
+    <p class="welcome-desc">
+      Answer a few detailed questions about your environment, challenges, and goals.
+      We'll generate a tailored summary and recommended demo focus areas on the spot.
+    </p>
+    <p class="welcome-meta"><span>~25 questions</span> &nbsp;·&nbsp; <span>10–15 minutes</span> &nbsp;·&nbsp; <span>Printable output</span></p>
+    <button class="btn-primary" onclick="startAssessment()">Start Assessment</button>
+    <a href="/" class="back-link">← Back to demos</a>
   </div>
+
+  <!-- ══ QUESTION SCREEN ══ -->
+  <div id="screen-question" class="screen">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
+    <div class="q-topnav">
+      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
+      <div class="q-progress-text">Question <strong id="q-num">1</strong> of <strong id="q-total">25</strong></div>
+    </div>
+    <div class="q-area">
+      <div class="q-content">
+        <div class="q-section-label" id="q-section"></div>
+        <div class="q-text" id="q-text"></div>
+        <div class="q-hint" id="q-hint"></div>
+        <div id="q-input-area"></div>
+      </div>
+    </div>
+    <div class="q-footnav">
+      <button class="btn-back" id="btn-back" onclick="prevQuestion()">← Back</button>
+      <button class="btn-skip" id="btn-skip" onclick="skipQuestion()">Skip</button>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+
+  <!-- ══ SUBMITTING SCREEN ══ -->
+  <div id="screen-submitting" class="screen">
+    <div class="spinner"></div>
+    <div style="font-size:15px;color:#8FA3BA;">Submitting your assessment…</div>
+  </div>
+
+  <!-- ══ RESULTS SCREEN ══ -->
+  <div id="screen-results" class="screen">
+    <div class="results-topnav">
+      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
+      <div class="results-actions">
+        <button class="btn-print" onclick="window.print()">Print / Save PDF</button>
+        <button class="btn-restart" onclick="restart()">Start Over</button>
+      </div>
+    </div>
+    <div class="results-body" id="results-body"></div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────
+    // CONFIGURATION — set your Webex Connect webhook URL here
+    // ─────────────────────────────────────────────────────────────────
+    const WEBHOOK_URL = ''; // e.g. https://your-org.eu1.connect.webex.com/apiv2/...
+
+    // ─────────────────────────────────────────────────────────────────
+    // QUESTIONS
+    // ─────────────────────────────────────────────────────────────────
+    const QUESTIONS = [
+      // ── Section 1: Your Organization ──
+      {
+        id: 'orgName', section: 'Your Organisation', required: true,
+        text: "What is the name of your organisation?",
+        type: 'text', placeholder: 'e.g. Mercy Health System'
+      },
+      {
+        id: 'industry', section: 'Your Organisation', required: true,
+        text: "What industry are you in?",
+        type: 'single',
+        options: ['Healthcare', 'Health Insurance', 'Government', 'Financial Services', 'Retail / eCommerce', 'Education', 'Utilities', 'Other']
+      },
+      {
+        id: 'orgSize', section: 'Your Organisation', required: true,
+        text: "Approximately how many employees does your organisation have?",
+        type: 'single',
+        options: ['Under 100', '100 – 500', '500 – 2,000', '2,000 – 10,000', 'Over 10,000']
+      },
+      {
+        id: 'numSites', section: 'Your Organisation',
+        text: "How many sites or locations does your contact centre span?",
+        type: 'single',
+        options: ['Single site', '2 – 5 sites', '6 – 20 sites', 'More than 20 sites', 'Fully remote / no fixed sites']
+      },
+
+      // ── Section 2: Contact Centre Today ──
+      {
+        id: 'currentPlatform', section: 'Contact Centre Today', required: true,
+        text: "What contact centre platform are you currently running?",
+        type: 'single',
+        options: ['Cisco UCCE / CVP', 'Cisco UCCX', 'Avaya', 'Genesys', 'Amazon Connect', 'Five9', 'NICE CXone', 'Microsoft (Teams CC)', 'Mitel', 'No platform yet (new deployment)', 'Other']
+      },
+      {
+        id: 'numAgents', section: 'Contact Centre Today', required: true,
+        text: "How many contact centre agents do you have?",
+        type: 'single',
+        options: ['Fewer than 25', '25 – 100', '100 – 500', '500 – 1,000', 'More than 1,000']
+      },
+      {
+        id: 'numSupervisors', section: 'Contact Centre Today',
+        text: "How many supervisors or team leads?",
+        type: 'single',
+        options: ['Fewer than 5', '5 – 20', '20 – 50', 'More than 50']
+      },
+      {
+        id: 'dailyVolume', section: 'Contact Centre Today',
+        text: "What is your average daily interaction volume (calls, chats, emails combined)?",
+        type: 'single',
+        options: ['Under 500', '500 – 2,000', '2,000 – 10,000', '10,000 – 50,000', 'Over 50,000']
+      },
+      {
+        id: 'contractExpiry', section: 'Contact Centre Today',
+        text: "When does your current platform contract expire?",
+        type: 'single',
+        options: ['Already expired', 'Within 6 months', '6 – 12 months', '1 – 2 years', 'More than 2 years', 'No contract / perpetual license', 'Not sure']
+      },
+
+      // ── Section 3: Channels ──
+      {
+        id: 'currentChannels', section: 'Channels', required: true,
+        text: "Which channels are you currently handling?",
+        hint: 'Select all that apply.',
+        type: 'multi',
+        options: ['Voice / Phone', 'Email', 'Live Chat', 'SMS / Text', 'Social Media', 'Video', 'WhatsApp', 'None yet']
+      },
+      {
+        id: 'desiredChannels', section: 'Channels',
+        text: "Which channels do you want to support going forward?",
+        hint: 'Select all that apply.',
+        type: 'multi',
+        options: ['Voice / Phone', 'Email', 'Live Chat', 'SMS / Text', 'Social Media', 'Video', 'WhatsApp', 'AI Self-Service / Virtual Agent', 'Outbound Campaigns']
+      },
+
+      // ── Section 4: Pain Points ──
+      {
+        id: 'painPoints', section: 'Pain Points', required: true,
+        text: "What are your biggest contact centre challenges today?",
+        hint: 'Select all that apply. Be honest — this shapes everything.',
+        type: 'multi',
+        options: [
+          'Long hold times & poor patient/customer experience',
+          'Agents using too many different tools / screens',
+          'IVR or routing changes take too long',
+          'Limited visibility into real-time performance',
+          'No AI or automation capabilities',
+          'Struggling with remote or hybrid agents',
+          'Compliance, recording or HIPAA requirements',
+          'High operating or licensing costs',
+          'Poor integration with CRM or clinical systems',
+          'Supervisor coaching and quality management',
+          'High agent attrition / poor agent experience',
+          'Reporting is manual, slow or inaccurate'
+        ]
+      },
+
+      // ── Section 5: Integrations ──
+      {
+        id: 'crmSystems', section: 'Integrations',
+        text: "Which CRM or clinical systems do you use?",
+        hint: 'Select all that apply.',
+        type: 'multi',
+        options: ['Epic', 'Cerner / Oracle Health', 'Salesforce', 'ServiceNow', 'Microsoft Dynamics', 'SAP', 'Meditech', 'Custom / In-house', 'None', 'Other']
+      },
+      {
+        id: 'collabTools', section: 'Integrations',
+        text: "Which collaboration tools are in use across your organisation?",
+        hint: 'Select all that apply.',
+        type: 'multi',
+        options: ['Webex', 'Microsoft Teams', 'Zoom', 'Slack', 'Google Workspace', 'None']
+      },
+      {
+        id: 'otherIntegrations', section: 'Integrations',
+        text: "Are there any other key systems the contact centre needs to connect with?",
+        hint: 'e.g. workforce management, payment processing, HR systems.',
+        type: 'text', placeholder: 'List any other systems here, or leave blank'
+      },
+
+      // ── Section 6: Goals ──
+      {
+        id: 'primaryGoals', section: 'Goals & Priorities', required: true,
+        text: "What are your primary goals for this project?",
+        hint: 'Select your top priorities.',
+        type: 'multi',
+        options: [
+          'Reduce operating costs',
+          'Improve customer / patient experience (CSAT / HCAHPS)',
+          'Enable AI and automation',
+          'Modernise ageing infrastructure',
+          'Improve agent experience and reduce attrition',
+          'Better real-time reporting and analytics',
+          'Meet compliance or regulatory requirements',
+          'Support remote and hybrid workforce',
+          'Consolidate onto fewer platforms',
+          'Improve supervisor tools and coaching'
+        ]
+      },
+      {
+        id: 'successMetric', section: 'Goals & Priorities',
+        text: "How will you measure success 12 months after go-live?",
+        hint: 'e.g. CSAT score, AHT reduction, cost per call, agent attrition rate.',
+        type: 'text', placeholder: 'Describe your key success metric(s)'
+      },
+
+      // ── Section 7: Technical ──
+      {
+        id: 'deploymentModel', section: 'Technical Requirements',
+        text: "What is your preferred deployment model?",
+        type: 'single',
+        options: ['Full cloud (CCaaS)', 'Hybrid (cloud + some on-prem)', 'On-premises', 'No preference yet', 'Not sure — need guidance']
+      },
+      {
+        id: 'complianceReqs', section: 'Technical Requirements',
+        text: "Do you have specific compliance or security requirements?",
+        hint: 'Select all that apply.',
+        type: 'multi',
+        options: ['HIPAA', 'PCI-DSS', 'SOC 2', 'FedRAMP', 'GDPR', 'ISO 27001', 'State / regional data residency', 'None / Not sure']
+      },
+      {
+        id: 'itCapacity', section: 'Technical Requirements',
+        text: "How would you describe your internal IT capacity for this project?",
+        type: 'single',
+        options: [
+          'Large team — fully resourced for deployment',
+          'Small team — will need partner support',
+          'Minimal IT — fully partner-led preferred',
+          'Not yet determined'
+        ]
+      },
+
+      // ── Section 8: Project Details ──
+      {
+        id: 'timeline', section: 'Project Details', required: true,
+        text: "What is your target go-live timeline?",
+        type: 'single',
+        options: ['ASAP — within 3 months', '3 – 6 months', '6 – 12 months', '12 – 18 months', 'Beyond 18 months', 'Evaluating only — no timeline yet']
+      },
+      {
+        id: 'budget', section: 'Project Details',
+        text: "What is your approximate total budget for this project?",
+        hint: 'Including licences, implementation, and first-year support.',
+        type: 'single',
+        options: ['Under $100K', '$100K – $300K', '$300K – $750K', '$750K – $2M', 'Over $2M', 'Budget not yet defined']
+      },
+      {
+        id: 'stakeholders', section: 'Project Details',
+        text: "Who are the key stakeholders involved in this decision?",
+        hint: 'Select all that apply.',
+        type: 'multi',
+        options: ['CIO / CTO', 'CISO / Security', 'Contact Centre Director / Manager', 'Operations / COO', 'Finance / CFO', 'Clinical Leadership', 'IT Infrastructure', 'HR / Workforce Management', 'Procurement']
+      },
+      {
+        id: 'evalStage', section: 'Project Details',
+        text: "Where are you in the evaluation process?",
+        type: 'single',
+        options: ['Just starting — exploring options', 'Comparing 3+ vendors', 'Shortlisted 2–3 options', 'Ready to make a decision', 'Approved — looking for implementation partner']
+      },
+
+      // ── Section 9: Your Details ──
+      {
+        id: 'contactName', section: 'Your Details', required: true,
+        text: "What is your name?",
+        type: 'text', placeholder: 'Full name'
+      },
+      {
+        id: 'contactTitle', section: 'Your Details',
+        text: "And your title or role?",
+        type: 'text', placeholder: 'e.g. Director of Contact Centre Operations'
+      },
+      {
+        id: 'contactEmail', section: 'Your Details', required: true,
+        text: "Best email address to reach you?",
+        type: 'text', placeholder: 'name@organisation.com'
+      },
+      {
+        id: 'contactPhone', section: 'Your Details',
+        text: "Phone number? (optional)",
+        type: 'text', placeholder: '+1 (555) 000-0000'
+      },
+    ];
+
+    // ─────────────────────────────────────────────────────────────────
+    // PAIN POINT → DEMO USE CASE MAPPING
+    // ─────────────────────────────────────────────────────────────────
+    const PAIN_TO_DEMO = {
+      'Long hold times & poor patient/customer experience':      [{ name: 'Callback & Queue Management', tier: 1 }, { name: 'AI Agents', tier: 1 }],
+      'Agents using too many different tools / screens':         [{ name: 'Agent Experience', tier: 1 }],
+      'IVR or routing changes take too long':                    [{ name: 'Flow Builder', tier: 2 }],
+      'Limited visibility into real-time performance':           [{ name: 'Supervisor Dashboard', tier: 1 }, { name: 'Reporting & Analytics', tier: 2 }],
+      'No AI or automation capabilities':                        [{ name: 'AI Agents', tier: 1 }, { name: 'AI Assist', tier: 1 }],
+      'Struggling with remote or hybrid agents':                 [{ name: 'Agent Experience', tier: 1 }, { name: 'Supervisor Dashboard', tier: 1 }],
+      'Compliance, recording or HIPAA requirements':             [{ name: 'Quality Management', tier: 2 }],
+      'High operating or licensing costs':                       [{ name: 'AI Agents', tier: 1 }, { name: 'Flow Builder', tier: 2 }],
+      'Poor integration with CRM or clinical systems':           [{ name: 'Integrations', tier: 2 }],
+      'Supervisor coaching and quality management':              [{ name: 'Quality Management', tier: 2 }, { name: 'Supervisor Dashboard', tier: 1 }],
+      'High agent attrition / poor agent experience':            [{ name: 'Agent Experience', tier: 1 }, { name: 'AI Assist', tier: 1 }],
+      'Reporting is manual, slow or inaccurate':                 [{ name: 'Reporting & Analytics', tier: 2 }],
+    };
+
+    const GOAL_TO_DEMO = {
+      'Enable AI and automation':                                [{ name: 'AI Agents', tier: 1 }, { name: 'AI Assist', tier: 1 }],
+      'Improve customer / patient experience (CSAT / HCAHPS)':  [{ name: 'Callback & Queue Management', tier: 2 }, { name: 'AI Agents', tier: 1 }],
+      'Improve agent experience and reduce attrition':           [{ name: 'Agent Experience', tier: 1 }, { name: 'AI Assist', tier: 1 }],
+      'Better real-time reporting and analytics':                [{ name: 'Reporting & Analytics', tier: 2 }, { name: 'Supervisor Dashboard', tier: 1 }],
+      'Meet compliance or regulatory requirements':              [{ name: 'Quality Management', tier: 2 }],
+      'Consolidate onto fewer platforms':                        [{ name: 'Omnichannel Routing', tier: 2 }],
+      'Improve supervisor tools and coaching':                   [{ name: 'Supervisor Dashboard', tier: 1 }, { name: 'Quality Management', tier: 2 }],
+    };
+
+    // ─────────────────────────────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────────────────────────────
+    let currentIndex = 0;
+    const answers = {};
+
+    // ─────────────────────────────────────────────────────────────────
+    // SCREEN MANAGEMENT
+    // ─────────────────────────────────────────────────────────────────
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function startAssessment() {
+      currentIndex = 0;
+      showScreen('screen-question');
+      renderQuestion();
+    }
+
+    function restart() {
+      Object.keys(answers).forEach(k => delete answers[k]);
+      currentIndex = 0;
+      showScreen('screen-welcome');
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // QUESTION RENDERING
+    // ─────────────────────────────────────────────────────────────────
+    function renderQuestion() {
+      const q = QUESTIONS[currentIndex];
+      const total = QUESTIONS.length;
+
+      document.getElementById('q-section').textContent = q.section;
+      document.getElementById('q-text').textContent = q.text;
+      document.getElementById('q-hint').textContent = q.hint || '';
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('q-total').textContent = total;
+      document.getElementById('progress-fill').style.width = ((currentIndex / total) * 100) + '%';
+
+      document.getElementById('btn-back').disabled = currentIndex === 0;
+      document.getElementById('btn-skip').style.display = q.required ? 'none' : 'inline';
+
+      const area = document.getElementById('q-input-area');
+      area.innerHTML = '';
+
+      if (q.type === 'text') {
+        const inp = document.createElement('input');
+        inp.className = 'q-input';
+        inp.type = 'text';
+        inp.placeholder = q.placeholder || '';
+        inp.value = answers[q.id] || '';
+        inp.addEventListener('input', () => { answers[q.id] = inp.value; updateNext(); });
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') nextQuestion(); });
+        area.appendChild(inp);
+        setTimeout(() => inp.focus(), 50);
+
+      } else if (q.type === 'single') {
+        const grid = document.createElement('div');
+        grid.className = 'options-grid';
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn' + (answers[q.id] === opt ? ' selected' : '');
+          btn.textContent = opt;
+          btn.onclick = () => {
+            answers[q.id] = opt;
+            grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            updateNext();
+            setTimeout(() => nextQuestion(), 300);
+          };
+          grid.appendChild(btn);
+        });
+        area.appendChild(grid);
+
+      } else if (q.type === 'multi') {
+        const grid = document.createElement('div');
+        grid.className = 'multi-grid';
+        const current = answers[q.id] || [];
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'multi-btn' + (current.includes(opt) ? ' selected' : '');
+          btn.textContent = opt;
+          btn.onclick = () => {
+            const arr = answers[q.id] || [];
+            const idx = arr.indexOf(opt);
+            if (idx === -1) arr.push(opt);
+            else arr.splice(idx, 1);
+            answers[q.id] = arr;
+            btn.classList.toggle('selected');
+            updateNext();
+          };
+          grid.appendChild(btn);
+        });
+        area.appendChild(grid);
+      }
+
+      updateNext();
+    }
+
+    function updateNext() {
+      const q = QUESTIONS[currentIndex];
+      const btn = document.getElementById('btn-next');
+      const isLast = currentIndex === QUESTIONS.length - 1;
+      btn.textContent = isLast ? 'Submit →' : 'Next →';
+      if (!q.required) { btn.disabled = false; return; }
+      const val = answers[q.id];
+      btn.disabled = !val || (Array.isArray(val) && val.length === 0) || (typeof val === 'string' && val.trim() === '');
+    }
+
+    function nextQuestion() {
+      const btn = document.getElementById('btn-next');
+      if (btn.disabled) return;
+      if (currentIndex === QUESTIONS.length - 1) {
+        submitAssessment();
+        return;
+      }
+      currentIndex++;
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentIndex === 0) return;
+      currentIndex--;
+      renderQuestion();
+    }
+
+    function skipQuestion() {
+      if (currentIndex === QUESTIONS.length - 1) { submitAssessment(); return; }
+      currentIndex++;
+      renderQuestion();
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // BUILD JSON
+    // ─────────────────────────────────────────────────────────────────
+    function buildPayload() {
+      return {
+        timestamp: new Date().toISOString(),
+        contact: {
+          name:  answers.contactName  || '',
+          title: answers.contactTitle || '',
+          email: answers.contactEmail || '',
+          phone: answers.contactPhone || '',
+        },
+        organisation: {
+          name:     answers.orgName   || '',
+          industry: answers.industry  || '',
+          size:     answers.orgSize   || '',
+          sites:    answers.numSites  || '',
+        },
+        currentState: {
+          platform:       answers.currentPlatform || '',
+          agents:         answers.numAgents       || '',
+          supervisors:    answers.numSupervisors  || '',
+          dailyVolume:    answers.dailyVolume     || '',
+          contractExpiry: answers.contractExpiry  || '',
+        },
+        channels: {
+          current: answers.currentChannels || [],
+          desired: answers.desiredChannels || [],
+        },
+        painPoints: answers.painPoints || [],
+        integrations: {
+          crm:           answers.crmSystems        || [],
+          collaboration: answers.collabTools        || [],
+          other:         answers.otherIntegrations  || '',
+        },
+        goals: {
+          primary:       answers.primaryGoals   || [],
+          successMetric: answers.successMetric  || '',
+        },
+        technical: {
+          deployment:  answers.deploymentModel || '',
+          compliance:  answers.complianceReqs  || [],
+          itCapacity:  answers.itCapacity      || '',
+        },
+        project: {
+          timeline:     answers.timeline     || '',
+          budget:       answers.budget       || '',
+          stakeholders: answers.stakeholders || [],
+          evalStage:    answers.evalStage    || '',
+        },
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // SUBMIT
+    // ─────────────────────────────────────────────────────────────────
+    async function submitAssessment() {
+      showScreen('screen-submitting');
+      const payload = buildPayload();
+      let webhookResult = 'skipped';
+
+      if (WEBHOOK_URL) {
+        try {
+          const res = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          webhookResult = res.ok ? 'success' : 'error';
+        } catch (e) {
+          webhookResult = 'error';
+        }
+      }
+
+      renderResults(payload, webhookResult);
+      showScreen('screen-results');
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // RENDER RESULTS
+    // ─────────────────────────────────────────────────────────────────
+    function renderResults(data, webhookResult) {
+      const body = document.getElementById('results-body');
+
+      // Build recommended demos from pain points + goals
+      const recMap = {};
+      const addRec = (name, tier) => {
+        if (!recMap[name] || tier < recMap[name]) recMap[name] = tier;
+      };
+      (data.painPoints || []).forEach(p => {
+        (PAIN_TO_DEMO[p] || []).forEach(r => addRec(r.name, r.tier));
+      });
+      (data.goals.primary || []).forEach(g => {
+        (GOAL_TO_DEMO[g] || []).forEach(r => addRec(r.name, r.tier));
+      });
+      const recommendations = Object.entries(recMap)
+        .sort((a, b) => a[1] - b[1])
+        .map(([name, tier]) => ({ name, tier }));
+
+      const webhookHTML = {
+        success: `<div class="webhook-status success"><span class="status-dot"></span>Assessment submitted to Webex Connect successfully</div>`,
+        error:   `<div class="webhook-status error"><span class="status-dot"></span>Webhook submission failed — JSON available below for manual use</div>`,
+        skipped: `<div class="webhook-status skipped"><span class="status-dot"></span>No webhook configured — use JSON below to submit manually</div>`,
+      }[webhookResult];
+
+      const tag = arr => arr && arr.length
+        ? arr.map(t => `<span class="r-tag">${t}</span>`).join('')
+        : '<span class="r-value empty">Not provided</span>';
+
+      const val = (v, fallback = 'Not provided') =>
+        v && v.toString().trim() ? v : `<span class="r-value empty">${fallback}</span>`;
+
+      const recCards = recommendations.length
+        ? recommendations.map(r => `
+            <div class="rec-card tier-${r.tier}">
+              <div class="rec-tier">Tier ${r.tier}</div>
+              <div class="rec-name">${r.name}</div>
+            </div>`).join('')
+        : '<div class="r-value empty">Complete the pain points section to get recommendations</div>';
+
+      const painTags = (data.painPoints || []).length
+        ? data.painPoints.map(p => `<span class="pain-tag">${p}</span>`).join('')
+        : '<span class="r-value empty">None selected</span>';
+
+      body.innerHTML = `
+        <div class="results-header">
+          <div class="results-label">Discovery Assessment</div>
+          <div class="results-title">${data.organisation.name || 'Assessment'} — Contact Centre Discovery</div>
+          <div class="results-subtitle">Completed ${new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })} &nbsp;·&nbsp; ${data.contact.name || ''} ${data.contact.title ? '· ' + data.contact.title : ''}</div>
+        </div>
+
+        ${webhookHTML}
+
+        <!-- Recommended demos -->
+        <div class="r-section">
+          <div class="r-section-title">Recommended Demo Focus Areas</div>
+          <div class="rec-grid">${recCards}</div>
+        </div>
+
+        <!-- Pain points callout -->
+        ${(data.painPoints || []).length ? `
+        <div class="pain-callout">
+          <div class="pain-callout-label">Identified Pain Points</div>
+          <div class="pain-list">${painTags}</div>
+        </div>` : ''}
+
+        <!-- Contact & Org -->
+        <div class="summary-box">
+          <div class="r-section">
+            <div class="r-section-title">Contact Details</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">Name</div><div class="r-value">${val(data.contact.name)}</div></div>
+              <div class="r-field"><div class="r-label">Title</div><div class="r-value">${val(data.contact.title)}</div></div>
+              <div class="r-field"><div class="r-label">Email</div><div class="r-value">${val(data.contact.email)}</div></div>
+              <div class="r-field"><div class="r-label">Phone</div><div class="r-value">${val(data.contact.phone)}</div></div>
+            </div>
+          </div>
+          <div class="r-section">
+            <div class="r-section-title">Organisation</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">Name</div><div class="r-value">${val(data.organisation.name)}</div></div>
+              <div class="r-field"><div class="r-label">Industry</div><div class="r-value">${val(data.organisation.industry)}</div></div>
+              <div class="r-field"><div class="r-label">Size</div><div class="r-value">${val(data.organisation.size)}</div></div>
+              <div class="r-field"><div class="r-label">Sites</div><div class="r-value">${val(data.organisation.sites)}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current state -->
+        <div class="summary-box">
+          <div class="r-section">
+            <div class="r-section-title">Current Contact Centre</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">Platform</div><div class="r-value">${val(data.currentState.platform)}</div></div>
+              <div class="r-field"><div class="r-label">Agents</div><div class="r-value">${val(data.currentState.agents)}</div></div>
+              <div class="r-field"><div class="r-label">Supervisors</div><div class="r-value">${val(data.currentState.supervisors)}</div></div>
+              <div class="r-field"><div class="r-label">Daily Volume</div><div class="r-value">${val(data.currentState.dailyVolume)}</div></div>
+              <div class="r-field"><div class="r-label">Contract Expiry</div><div class="r-value">${val(data.currentState.contractExpiry)}</div></div>
+            </div>
+          </div>
+          <div class="r-section">
+            <div class="r-section-title">Channels</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">Current</div><div class="r-tags">${tag(data.channels.current)}</div></div>
+              <div class="r-field"><div class="r-label">Desired</div><div class="r-tags">${tag(data.channels.desired)}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Goals & Technical -->
+        <div class="summary-box">
+          <div class="r-section">
+            <div class="r-section-title">Goals & Priorities</div>
+            <div class="r-grid">
+              <div class="r-field" style="grid-column:1/-1"><div class="r-label">Primary Goals</div><div class="r-tags">${tag(data.goals.primary)}</div></div>
+              ${data.goals.successMetric ? `<div class="r-field" style="grid-column:1/-1"><div class="r-label">Success Metric</div><div class="r-value">${data.goals.successMetric}</div></div>` : ''}
+            </div>
+          </div>
+          <div class="r-section">
+            <div class="r-section-title">Integrations</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">CRM / Clinical</div><div class="r-tags">${tag(data.integrations.crm)}</div></div>
+              <div class="r-field"><div class="r-label">Collaboration</div><div class="r-tags">${tag(data.integrations.collaboration)}</div></div>
+              ${data.integrations.other ? `<div class="r-field" style="grid-column:1/-1"><div class="r-label">Other</div><div class="r-value">${data.integrations.other}</div></div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Project -->
+        <div class="summary-box">
+          <div class="r-section">
+            <div class="r-section-title">Technical Requirements</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">Deployment</div><div class="r-value">${val(data.technical.deployment)}</div></div>
+              <div class="r-field"><div class="r-label">IT Capacity</div><div class="r-value">${val(data.technical.itCapacity)}</div></div>
+              <div class="r-field" style="grid-column:1/-1"><div class="r-label">Compliance</div><div class="r-tags">${tag(data.technical.compliance)}</div></div>
+            </div>
+          </div>
+          <div class="r-section">
+            <div class="r-section-title">Project Details</div>
+            <div class="r-grid">
+              <div class="r-field"><div class="r-label">Timeline</div><div class="r-value">${val(data.project.timeline)}</div></div>
+              <div class="r-field"><div class="r-label">Budget</div><div class="r-value">${val(data.project.budget)}</div></div>
+              <div class="r-field"><div class="r-label">Evaluation Stage</div><div class="r-value">${val(data.project.evalStage)}</div></div>
+              <div class="r-field" style="grid-column:1/-1"><div class="r-label">Key Stakeholders</div><div class="r-tags">${tag(data.project.stakeholders)}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JSON output -->
+        <div id="json-section">
+          <button class="json-toggle" onclick="toggleJson()">Show raw JSON payload</button>
+          <div class="json-block" id="json-block" style="display:none">${JSON.stringify(data, null, 2)}</div>
+        </div>
+      `;
+    }
+
+    function toggleJson() {
+      const b = document.getElementById('json-block');
+      b.style.display = b.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
 </body>
 </html>
