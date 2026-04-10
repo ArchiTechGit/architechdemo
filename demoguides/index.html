@@ -63,6 +63,66 @@
       max-width: 560px;
     }
 
+    /* ── Demo Environment ── */
+    .env-panel {
+      background: rgba(5,195,221,0.04);
+      border: 1px solid rgba(5,195,221,0.15);
+      border-radius: 10px;
+      padding: 24px 28px 28px;
+      margin-bottom: 48px;
+    }
+    .env-panel .page-label { margin-bottom: 6px; }
+    .env-subtitle {
+      font-size: 13px;
+      color: #4A607A;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .env-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 24px;
+    }
+    @media (max-width: 540px) { .env-grid { grid-template-columns: 1fr; } }
+    .env-field { display: flex; flex-direction: column; gap: 6px; }
+    .env-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #4A607A;
+    }
+    .env-input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: 'Roboto', sans-serif;
+      color: #F0F6FC;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 100%;
+    }
+    .env-input::placeholder { color: #3D5268; }
+    .env-input:focus {
+      border-color: rgba(5,195,221,0.4);
+      background: rgba(5,195,221,0.05);
+    }
+    .env-clear {
+      margin-top: 20px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3D5268;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .env-clear:hover { color: #8FA3BA; }
+
     /* ── Tier section ── */
     .tier { margin-bottom: 48px; }
     .tier-header {
@@ -264,6 +324,47 @@
       <div class="page-label">Presales Reference</div>
       <h1 class="page-title">WxCC Demo Guides</h1>
       <p class="page-desc">Step-by-step guides for demonstrating key Webex Contact Center use cases. Follow these during a live demo to drive the highest impact with your audience.</p>
+    </div>
+
+    <!-- Demo Environment -->
+    <div class="env-panel">
+      <div class="page-label">Demo Environment</div>
+      <p class="env-subtitle">Fill in your tenant details before the demo. Saved automatically in this browser.</p>
+      <div class="env-grid">
+        <div class="env-field">
+          <label class="env-label" for="env-phone">Inbound Phone Number</label>
+          <input class="env-input" id="env-phone" type="text" placeholder="+1 (555) 000-0000" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-org">Tenant / Org Name</label>
+          <input class="env-input" id="env-org" type="text" placeholder="e.g. ArchiTech Healthcare Demo" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-ai-agent">AI Agent Name</label>
+          <input class="env-input" id="env-ai-agent" type="text" placeholder="e.g. Aria" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-workflow">Connect Workflow Name</label>
+          <input class="env-input" id="env-workflow" type="text" placeholder="e.g. Inbound_Healthcare_Main" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-queue">Primary Queue Name</label>
+          <input class="env-input" id="env-queue" type="text" placeholder="e.g. General_Support_Queue" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-flow">Flow Designer Flow Name</label>
+          <input class="env-input" id="env-flow" type="text" placeholder="e.g. Patient_IVR_Flow_v2" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-agent-login">Agent Login</label>
+          <input class="env-input" id="env-agent-login" type="text" placeholder="e.g. demo.agent@org.com" />
+        </div>
+        <div class="env-field">
+          <label class="env-label" for="env-super-login">Supervisor Login</label>
+          <input class="env-input" id="env-super-login" type="text" placeholder="e.g. demo.super@org.com" />
+        </div>
+      </div>
+      <button class="env-clear" onclick="clearEnv()">Clear all fields</button>
     </div>
 
     <!-- TIER 1 -->
@@ -644,6 +745,36 @@
       card.classList.toggle('open', !isOpen);
       card.querySelector('.card-trigger').setAttribute('aria-expanded', String(!isOpen));
     }
+
+    // ── Demo Environment persistence ──
+    const ENV_FIELDS = [
+      'env-phone', 'env-org', 'env-ai-agent', 'env-workflow',
+      'env-queue', 'env-flow', 'env-agent-login', 'env-super-login'
+    ];
+
+    function loadEnv() {
+      ENV_FIELDS.forEach(id => {
+        const val = localStorage.getItem('demoenv_' + id);
+        if (val) document.getElementById(id).value = val;
+      });
+    }
+
+    function saveEnv(id) {
+      localStorage.setItem('demoenv_' + id, document.getElementById(id).value);
+    }
+
+    function clearEnv() {
+      ENV_FIELDS.forEach(id => {
+        localStorage.removeItem('demoenv_' + id);
+        document.getElementById(id).value = '';
+      });
+    }
+
+    ENV_FIELDS.forEach(id => {
+      document.getElementById(id).addEventListener('input', () => saveEnv(id));
+    });
+
+    loadEnv();
   </script>
 </body>
 </html>
