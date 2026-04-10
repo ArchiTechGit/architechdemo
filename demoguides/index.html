@@ -63,66 +63,6 @@
       max-width: 560px;
     }
 
-    /* ── Demo Environment ── */
-    .env-panel {
-      background: rgba(5,195,221,0.04);
-      border: 1px solid rgba(5,195,221,0.15);
-      border-radius: 10px;
-      padding: 24px 28px 28px;
-      margin-bottom: 48px;
-    }
-    .env-panel .page-label { margin-bottom: 6px; }
-    .env-subtitle {
-      font-size: 13px;
-      color: #4A607A;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-    .env-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 24px;
-    }
-    @media (max-width: 540px) { .env-grid { grid-template-columns: 1fr; } }
-    .env-field { display: flex; flex-direction: column; gap: 6px; }
-    .env-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: #4A607A;
-    }
-    .env-input {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 13px;
-      font-family: 'Roboto', sans-serif;
-      color: #F0F6FC;
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-      width: 100%;
-    }
-    .env-input::placeholder { color: #3D5268; }
-    .env-input:focus {
-      border-color: rgba(5,195,221,0.4);
-      background: rgba(5,195,221,0.05);
-    }
-    .env-clear {
-      margin-top: 20px;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #3D5268;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      transition: color 0.2s;
-    }
-    .env-clear:hover { color: #8FA3BA; }
-
     /* ── Tier section ── */
     .tier { margin-bottom: 48px; }
     .tier-header {
@@ -210,10 +150,49 @@
       overflow: hidden;
       transition: max-height 0.4s ease;
     }
-    .card.open .card-body { max-height: 2000px; }
+    .card.open .card-body { max-height: 3000px; }
     .card-body-inner { padding: 4px 28px 32px 28px; }
 
-    /* ── Description ── */
+    /* ── Demo Details ── */
+    .demo-details {
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 8px;
+      padding: 18px 20px 20px;
+      margin-bottom: 28px;
+    }
+    .demo-details .section-label {
+      color: #34D399;
+      margin-bottom: 14px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+    }
+    @media (max-width: 500px) { .detail-grid { grid-template-columns: 1fr; } }
+    .detail-item { display: flex; flex-direction: column; gap: 3px; }
+    .detail-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #2D8A60;
+    }
+    .detail-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #F0F6FC;
+      font-family: 'Roboto Mono', 'Roboto', monospace;
+      word-break: break-all;
+    }
+    .detail-value.not-set {
+      color: #3D5268;
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    /* ── Card description ── */
     .card-desc {
       font-size: 14px;
       color: #8FA3BA;
@@ -223,7 +202,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* ── Objective ── */
+    /* ── Section label ── */
     .section-label {
       font-size: 10px;
       font-weight: 700;
@@ -232,6 +211,8 @@
       color: #4A607A;
       margin-bottom: 12px;
     }
+
+    /* ── Objective ── */
     .objective {
       background: rgba(5,195,221,0.06);
       border-left: 3px solid #05C3DD;
@@ -239,7 +220,6 @@
       padding: 14px 18px;
       margin-bottom: 32px;
       font-size: 14px;
-      font-weight: 400;
       color: #B8CDE0;
       line-height: 1.7;
     }
@@ -274,10 +254,7 @@
       line-height: 1.7;
       padding-top: 5px;
     }
-    .step-text strong {
-      color: #F0F6FC;
-      font-weight: 500;
-    }
+    .step-text strong { color: #F0F6FC; font-weight: 500; }
 
     /* ── Talk Track ── */
     .talk-track {
@@ -286,15 +263,8 @@
       border-radius: 8px;
       padding: 18px 20px 20px;
     }
-    .talk-track .section-label {
-      color: #C88A30;
-      margin-bottom: 14px;
-    }
-    .tips {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .talk-track .section-label { color: #C88A30; margin-bottom: 14px; }
+    .tips { display: flex; flex-direction: column; gap: 12px; }
     .tip {
       display: flex;
       gap: 12px;
@@ -303,13 +273,7 @@
       color: #B09060;
       line-height: 1.65;
     }
-    .tip-icon {
-      color: #C88A30;
-      flex-shrink: 0;
-      font-size: 12px;
-      margin-top: 2px;
-      font-weight: 700;
-    }
+    .tip-icon { color: #C88A30; flex-shrink: 0; font-size: 12px; margin-top: 2px; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -323,48 +287,7 @@
     <div class="intro">
       <div class="page-label">Presales Reference</div>
       <h1 class="page-title">WxCC Demo Guides</h1>
-      <p class="page-desc">Step-by-step guides for demonstrating key Webex Contact Center use cases. Follow these during a live demo to drive the highest impact with your audience.</p>
-    </div>
-
-    <!-- Demo Environment -->
-    <div class="env-panel">
-      <div class="page-label">Demo Environment</div>
-      <p class="env-subtitle">Fill in your tenant details before the demo. Saved automatically in this browser.</p>
-      <div class="env-grid">
-        <div class="env-field">
-          <label class="env-label" for="env-phone">Inbound Phone Number</label>
-          <input class="env-input" id="env-phone" type="text" placeholder="+1 (555) 000-0000" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-org">Tenant / Org Name</label>
-          <input class="env-input" id="env-org" type="text" placeholder="e.g. ArchiTech Healthcare Demo" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-ai-agent">AI Agent Name</label>
-          <input class="env-input" id="env-ai-agent" type="text" placeholder="e.g. Aria" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-workflow">Connect Workflow Name</label>
-          <input class="env-input" id="env-workflow" type="text" placeholder="e.g. Inbound_Healthcare_Main" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-queue">Primary Queue Name</label>
-          <input class="env-input" id="env-queue" type="text" placeholder="e.g. General_Support_Queue" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-flow">Flow Designer Flow Name</label>
-          <input class="env-input" id="env-flow" type="text" placeholder="e.g. Patient_IVR_Flow_v2" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-agent-login">Agent Login</label>
-          <input class="env-input" id="env-agent-login" type="text" placeholder="e.g. demo.agent@org.com" />
-        </div>
-        <div class="env-field">
-          <label class="env-label" for="env-super-login">Supervisor Login</label>
-          <input class="env-input" id="env-super-login" type="text" placeholder="e.g. demo.super@org.com" />
-        </div>
-      </div>
-      <button class="env-clear" onclick="clearEnv()">Clear all fields</button>
+      <p class="page-desc">Step-by-step guides for demonstrating key Webex Contact Center use cases. Open a card to see exactly what you need and what to do.</p>
     </div>
 
     <!-- TIER 1 -->
@@ -374,7 +297,6 @@
         <span class="tier-line"></span>
       </div>
 
-      <!-- AI Agents -->
       <div class="card" id="card-ai-agents">
         <button class="card-trigger" onclick="toggle('card-ai-agents')" aria-expanded="false">
           <span class="card-num">01</span>
@@ -384,13 +306,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-ai-agents"></div>
+            </div>
             <p class="card-desc">Demonstrate Webex AI Agent handling a patient inquiry end-to-end without a live agent, then handing off seamlessly with full context intact.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Show that routine interactions — appointment lookups, prescription refill requests, billing questions — can be fully resolved by AI, freeing agents for complex cases.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Place a call into the demo number. Let the <strong>AI Agent greet the caller</strong> and present self-service options.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Call the <strong>inbound number</strong>. Let the AI Agent greet the caller and present self-service options.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Choose a common use case (e.g. <strong>"Check my appointment"</strong>). Walk through the natural language conversation — no menu presses.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Show the AI Agent <strong>confirming and resolving</strong> the request without agent involvement. Pause here — let it land.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Place a second call and request something the bot can't resolve. Show the <strong>escalation to a live agent</strong>, with full conversation transcript pre-loaded on the agent desktop.</span></li>
@@ -409,7 +335,6 @@
         </div>
       </div>
 
-      <!-- AI Assist -->
       <div class="card" id="card-ai-assist">
         <button class="card-trigger" onclick="toggle('card-ai-assist')" aria-expanded="false">
           <span class="card-num">02</span>
@@ -419,13 +344,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-ai-assist"></div>
+            </div>
             <p class="card-desc">Show how Webex AI surfaces real-time suggestions, transcribes the call live, and generates a post-call summary automatically — reducing handle time and after-call work.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Prove that AI makes every agent perform like your best agent, and eliminates the manual burden of note-taking and wrap-up.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Connect a call to the agent desktop. Draw attention to the <strong>live transcription panel</strong> — show it updating word-by-word in real time.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Log in as the <strong>agent</strong> and set status to Available. Connect an inbound call. Draw attention to the <strong>live transcription panel</strong> — show it updating word-by-word in real time.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">As the caller mentions a topic (e.g. billing dispute), point out <strong>Agent Answers surfacing</strong> relevant KB articles and suggested responses automatically.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Have the agent use a suggested response. Show how it <strong>reduces dead air</strong> and keeps the conversation moving.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">End the call and immediately show the <strong>auto-generated call summary</strong> — sentiment, key topics, action items — populated before the agent touches wrap-up.</span></li>
@@ -444,7 +373,6 @@
         </div>
       </div>
 
-      <!-- Agent Experience -->
       <div class="card" id="card-agent-exp">
         <button class="card-trigger" onclick="toggle('card-agent-exp')" aria-expanded="false">
           <span class="card-num">03</span>
@@ -454,13 +382,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-agent-exp"></div>
+            </div>
             <p class="card-desc">Walk through the full agent desktop experience — from logging in and going available, to handling a call, transferring, and wrapping up.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Show how intuitive and unified the agent desktop is, and how it reduces the tool-switching and screen chaos that agents deal with today.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Webex CC Agent Desktop</strong>. Show the single-browser experience — no separate softphone, no multiple apps.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Webex CC Agent Desktop</strong> and log in as the agent. Show the single-browser experience — no separate softphone, no multiple apps.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Set status to <strong>Available</strong>. Accept an inbound call and show the <strong>screen pop</strong> pulling patient/caller data immediately.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Show the <strong>interaction controls</strong> — hold, mute, transfer, conference — and execute a warm transfer to a specialist queue.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Show handling a <strong>second channel simultaneously</strong> (chat or email) in the same desktop without dropping the call.</span></li>
@@ -479,7 +411,6 @@
         </div>
       </div>
 
-      <!-- Supervisor Dashboard -->
       <div class="card" id="card-supervisor">
         <button class="card-trigger" onclick="toggle('card-supervisor')" aria-expanded="false">
           <span class="card-num">04</span>
@@ -489,13 +420,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-supervisor"></div>
+            </div>
             <p class="card-desc">Show supervisors their real-time command centre — live queue stats, agent states, and the ability to intervene in calls directly from the browser.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Give supervisors confidence they can manage their floor without leaving their desk or relying on lagged reports.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>Supervisor Desktop</strong>. Show the live queue panel — calls waiting, average wait time, agents available — all updating in real time.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Log in as the <strong>supervisor</strong>. Show the live queue panel — calls waiting, average wait time, agents available — all updating in real time.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Click into an <strong>active agent</strong>. Show their current call duration, channel, and state.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Demonstrate <strong>silent monitoring</strong> — join the call without the agent or caller knowing. Then switch to <strong>whisper coaching</strong> — speak only to the agent.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Show <strong>barge-in</strong> — join the call as a full participant when needed.</span></li>
@@ -522,7 +457,6 @@
         <span class="tier-line"></span>
       </div>
 
-      <!-- Flow Builder -->
       <div class="card" id="card-flow">
         <button class="card-trigger" onclick="toggle('card-flow')" aria-expanded="false">
           <span class="card-num">05</span>
@@ -532,16 +466,20 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-flow"></div>
+            </div>
             <p class="card-desc">Demonstrate the visual drag-and-drop flow designer — showing how routing logic, IVR menus, and call treatments are built and changed without coding or vendor tickets.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Replace the fear of "it takes 6 weeks and a change request to update our IVR" with a live demonstration of a change made in minutes.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Webex CC Flow Designer</strong>. Show an existing flow — highlight how readable it is visually.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Webex CC Flow Designer</strong> and load the demo flow. Highlight how readable it is visually.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Make a live change: <strong>add a new menu option</strong> (e.g. "Press 4 for pharmacy") by dragging a node and wiring it up.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Show a <strong>business hours condition</strong> — open hours route to queue, after-hours route to voicemail or callback.</span></li>
-                <li class="step"><span class="step-num">4</span><span class="step-text">Publish the flow and <strong>call in immediately</strong> to prove the change is live. This moment always lands.</span></li>
+                <li class="step"><span class="step-num">4</span><span class="step-text">Publish the flow and <strong>call the inbound number immediately</strong> to prove the change is live. This moment always lands.</span></li>
                 <li class="step"><span class="step-num">5</span><span class="step-text">Show a <strong>HTTP Request node</strong> — explain this is how the flow talks to Epic, Salesforce, or any API in real time.</span></li>
               </ol>
             </div>
@@ -557,7 +495,6 @@
         </div>
       </div>
 
-      <!-- Omnichannel -->
       <div class="card" id="card-omnichannel">
         <button class="card-trigger" onclick="toggle('card-omnichannel')" aria-expanded="false">
           <span class="card-num">06</span>
@@ -567,13 +504,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-omnichannel"></div>
+            </div>
             <p class="card-desc">Show how voice, chat, and email interactions all route through the same engine and land in a unified agent desktop — no channel silos.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Address the "our patients want to chat and text, not just call" objection with a live demonstration of channels working together.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Show the <strong>chat widget</strong> embedded on a sample patient portal page. Initiate a chat as the patient.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Open the <strong>patient portal demo page</strong> and initiate a chat as the patient.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">On the agent desktop, show the <strong>chat interaction arriving</strong> in the same queue view as voice — same routing rules, same agent pool.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Accept the chat. Show the agent handling it while <strong>simultaneously on a voice call</strong> — demonstrate concurrent interaction capacity.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Escalate the chat to a <strong>voice call</strong> — show the transition is seamless and the chat history carries over.</span></li>
@@ -591,7 +532,6 @@
         </div>
       </div>
 
-      <!-- Callback -->
       <div class="card" id="card-callback">
         <button class="card-trigger" onclick="toggle('card-callback')" aria-expanded="false">
           <span class="card-num">07</span>
@@ -601,13 +541,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-callback"></div>
+            </div>
             <p class="card-desc">Show how patients are offered a callback instead of waiting on hold, and how the system manages that promise reliably.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Directly address one of healthcare's biggest patient satisfaction pain points — hold time — with a concrete, working solution.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Call in during a simulated busy period. Have the IVR announce the <strong>estimated wait time</strong> and offer a callback option.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Call the <strong>inbound number</strong> during a simulated busy period. Have the IVR announce the estimated wait time and offer a callback option.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Accept the callback. Show the <strong>caller's position held in queue</strong> — they hang up but don't lose their place.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">On the supervisor dashboard, show the <strong>callback request in the queue</strong> alongside live calls.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">When the agent becomes available, show the <strong>system dialling the patient back</strong> automatically and the call connecting.</span></li>
@@ -633,7 +577,6 @@
         <span class="tier-line"></span>
       </div>
 
-      <!-- Reporting -->
       <div class="card" id="card-reporting">
         <button class="card-trigger" onclick="toggle('card-reporting')" aria-expanded="false">
           <span class="card-num">08</span>
@@ -643,13 +586,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-reporting"></div>
+            </div>
             <p class="card-desc">Walk through Cisco Analyzer — real-time dashboards and historical reports — showing the depth of data available out of the box.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Give ops and data buyers confidence that they'll have the visibility they need without needing a custom BI tool from day one.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Open <strong>Cisco Analyzer</strong>. Start with a real-time dashboard — show live call volume, SLA, and agent state widgets.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Log in as the <strong>supervisor</strong> and open Cisco Analyzer. Start with a real-time dashboard — show live call volume, SLA, and agent state widgets.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Switch to historical. Pull a <strong>queue performance report</strong> for the last 30 days — show abandonment rate, AHT, and FCR trends.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Show how to <strong>filter by team, queue, or time range</strong> — demonstrate the self-service nature of the tool.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Create a <strong>custom visualisation</strong> by dragging a new metric onto a dashboard. Save and share it.</span></li>
@@ -667,7 +614,6 @@
         </div>
       </div>
 
-      <!-- Integrations -->
       <div class="card" id="card-integrations">
         <button class="card-trigger" onclick="toggle('card-integrations')" aria-expanded="false">
           <span class="card-num">09</span>
@@ -677,13 +623,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-integrations"></div>
+            </div>
             <p class="card-desc">Demonstrate how Webex CC connects to the tools healthcare organisations already run — Epic, Salesforce Health Cloud, and Microsoft Teams.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Remove the "but will it work with our systems?" objection by showing live integrations with the platforms they already own.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Inbound call arrives. Show the <strong>Epic screen pop</strong> — patient name, MRN, last appointment, and open cases — surfaced automatically from caller ID.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Call the <strong>inbound number</strong>. Show the <strong>Epic screen pop</strong> on the agent desktop — patient name, MRN, last appointment, and open cases — surfaced automatically from caller ID.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Show the agent updating a <strong>Salesforce case</strong> directly from the agent desktop widget — no tab switching.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Show <strong>Teams presence integration</strong> — the agent can see if a specialist is available in Teams and transfer the call to them directly.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Open the <strong>Flow Designer HTTP node</strong> — briefly show how any REST API integration is configured (for IT audiences).</span></li>
@@ -701,7 +651,6 @@
         </div>
       </div>
 
-      <!-- Quality Management -->
       <div class="card" id="card-qm">
         <button class="card-trigger" onclick="toggle('card-qm')" aria-expanded="false">
           <span class="card-num">10</span>
@@ -711,13 +660,17 @@
         </button>
         <div class="card-body">
           <div class="card-body-inner">
+            <div class="demo-details">
+              <div class="section-label">Demo Details</div>
+              <div class="detail-grid" id="details-card-qm"></div>
+            </div>
             <p class="card-desc">Show call recording, quality scoring workflows, and how supervisors use recordings to coach agents — all within the Webex CC platform.</p>
             <div class="section-label">Objective</div>
             <div class="objective">Address compliance requirements and agent development needs in a single platform, eliminating the need for a separate QM tool.</div>
             <div class="steps-block">
               <div class="section-label">Steps</div>
               <ol class="steps">
-                <li class="step"><span class="step-num">1</span><span class="step-text">Navigate to the <strong>recording library</strong>. Find a recent call and play it back — show the waveform, transcript, and metadata side by side.</span></li>
+                <li class="step"><span class="step-num">1</span><span class="step-text">Log in as the <strong>supervisor</strong> and navigate to the recording library. Find a recent call and play it back — show the waveform, transcript, and metadata side by side.</span></li>
                 <li class="step"><span class="step-num">2</span><span class="step-text">Open a <strong>quality scorecard</strong>. Walk through scoring a call — compliance checklist, soft skills, resolution quality.</span></li>
                 <li class="step"><span class="step-num">3</span><span class="step-text">Show the <strong>agent coaching workflow</strong> — supervisor attaches a note and a specific clip timestamp, agent receives it in their desktop.</span></li>
                 <li class="step"><span class="step-num">4</span><span class="step-text">Show <strong>retention and access controls</strong> — recordings stored per policy, accessible only to authorised roles. Key for HIPAA conversations.</span></li>
@@ -734,47 +687,115 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
   <script>
+    // ─────────────────────────────────────────────────────────────────
+    // DEMO CONFIGURATION — update these values for your demo environment
+    // ─────────────────────────────────────────────────────────────────
+    const DEMO_CONFIG = {
+      phone:              '',   // e.g. +1 (555) 123-4567
+      aiAgentName:        '',   // e.g. Aria
+      aiAgentWorkflow:    '',   // Connect workflow name for AI Agent
+      aiAgentQueue:       '',   // Queue AI escalates to
+      assistWorkflow:     '',   // Connect workflow for AI Assist demo
+      assistQueue:        '',   // Queue for AI Assist demo
+      agentLogin:         '',   // demo agent email
+      agentPassword:      '',   // demo agent password
+      agentQueue:         '',   // primary agent queue
+      supervisorLogin:    '',   // demo supervisor email
+      supervisorPassword: '',   // demo supervisor password
+      flowName:           '',   // Flow Designer flow name
+      chatPortalUrl:      '',   // patient portal URL with chat widget
+      callbackQueue:      '',   // queue used for callback demo
+    };
+
+    // Which fields to show in each card's Demo Details box
+    const CARD_FIELDS = {
+      'card-ai-agents': [
+        { label: 'Inbound Number',    key: 'phone' },
+        { label: 'AI Agent Name',     key: 'aiAgentName' },
+        { label: 'Connect Workflow',  key: 'aiAgentWorkflow' },
+        { label: 'Escalation Queue',  key: 'aiAgentQueue' },
+      ],
+      'card-ai-assist': [
+        { label: 'Inbound Number',    key: 'phone' },
+        { label: 'Agent Login',       key: 'agentLogin' },
+        { label: 'Agent Password',    key: 'agentPassword' },
+        { label: 'Queue',             key: 'assistQueue' },
+        { label: 'Connect Workflow',  key: 'assistWorkflow' },
+      ],
+      'card-agent-exp': [
+        { label: 'Inbound Number',    key: 'phone' },
+        { label: 'Agent Login',       key: 'agentLogin' },
+        { label: 'Agent Password',    key: 'agentPassword' },
+        { label: 'Queue',             key: 'agentQueue' },
+      ],
+      'card-supervisor': [
+        { label: 'Supervisor Login',    key: 'supervisorLogin' },
+        { label: 'Supervisor Password', key: 'supervisorPassword' },
+        { label: 'Agent to Monitor',    key: 'agentLogin' },
+        { label: 'Queue',               key: 'agentQueue' },
+      ],
+      'card-flow': [
+        { label: 'Inbound Number',    key: 'phone' },
+        { label: 'Flow Name',         key: 'flowName' },
+        { label: 'Agent Login',       key: 'agentLogin' },
+        { label: 'Agent Password',    key: 'agentPassword' },
+      ],
+      'card-omnichannel': [
+        { label: 'Patient Portal URL', key: 'chatPortalUrl' },
+        { label: 'Agent Login',        key: 'agentLogin' },
+        { label: 'Agent Password',     key: 'agentPassword' },
+        { label: 'Queue',              key: 'agentQueue' },
+      ],
+      'card-callback': [
+        { label: 'Inbound Number',    key: 'phone' },
+        { label: 'Callback Queue',    key: 'callbackQueue' },
+        { label: 'Supervisor Login',  key: 'supervisorLogin' },
+        { label: 'Supervisor Password', key: 'supervisorPassword' },
+      ],
+      'card-reporting': [
+        { label: 'Supervisor Login',    key: 'supervisorLogin' },
+        { label: 'Supervisor Password', key: 'supervisorPassword' },
+        { label: 'Queue',               key: 'agentQueue' },
+      ],
+      'card-integrations': [
+        { label: 'Inbound Number',    key: 'phone' },
+        { label: 'Agent Login',       key: 'agentLogin' },
+        { label: 'Agent Password',    key: 'agentPassword' },
+        { label: 'Connect Workflow',  key: 'assistWorkflow' },
+      ],
+      'card-qm': [
+        { label: 'Supervisor Login',    key: 'supervisorLogin' },
+        { label: 'Supervisor Password', key: 'supervisorPassword' },
+        { label: 'Agent Login',         key: 'agentLogin' },
+      ],
+    };
+
+    // Render detail grids
+    Object.entries(CARD_FIELDS).forEach(([cardId, fields]) => {
+      const grid = document.getElementById('details-' + cardId);
+      if (!grid) return;
+      grid.innerHTML = fields.map(({ label, key }) => {
+        const val = DEMO_CONFIG[key];
+        const isEmpty = !val || val.trim() === '';
+        return `
+          <div class="detail-item">
+            <span class="detail-label">${label}</span>
+            <span class="detail-value${isEmpty ? ' not-set' : ''}">${isEmpty ? 'Not configured' : val}</span>
+          </div>`;
+      }).join('');
+    });
+
+    // Accordion toggle
     function toggle(id) {
       const card = document.getElementById(id);
       const isOpen = card.classList.contains('open');
       card.classList.toggle('open', !isOpen);
       card.querySelector('.card-trigger').setAttribute('aria-expanded', String(!isOpen));
     }
-
-    // ── Demo Environment persistence ──
-    const ENV_FIELDS = [
-      'env-phone', 'env-org', 'env-ai-agent', 'env-workflow',
-      'env-queue', 'env-flow', 'env-agent-login', 'env-super-login'
-    ];
-
-    function loadEnv() {
-      ENV_FIELDS.forEach(id => {
-        const val = localStorage.getItem('demoenv_' + id);
-        if (val) document.getElementById(id).value = val;
-      });
-    }
-
-    function saveEnv(id) {
-      localStorage.setItem('demoenv_' + id, document.getElementById(id).value);
-    }
-
-    function clearEnv() {
-      ENV_FIELDS.forEach(id => {
-        localStorage.removeItem('demoenv_' + id);
-        document.getElementById(id).value = '';
-      });
-    }
-
-    ENV_FIELDS.forEach(id => {
-      document.getElementById(id).addEventListener('input', () => saveEnv(id));
-    });
-
-    loadEnv();
   </script>
 </body>
 </html>
