@@ -19,25 +19,19 @@ Monthly cost is calculated from the number of concurrent agent seats and IVR por
 
 ### Customer-facing calculator — seat count assumptions
 
-Seat counts are derived automatically from the customer's annual separations volume:
+Seat counts are calculated from the **number of contact centre agents** entered by the user in the calculator wizard.
 
 | Parameter | Value | Basis |
 |---|---|---|
-| Voice call rate | 30% of monthly separations | Industry benchmark |
-| Calls per concurrent agent | 3,500 / month | 80% occupancy, 3-min AHT, 22-day month |
 | Standard / Premium split | 70% Standard / 30% Premium | Typical hospital deployment |
-| IVR port ratio | 1.2× concurrent agents | Conservative self-service headroom |
-| Minimum concurrent agents | 5 | Floor for any deployment |
-| Minimum IVR ports | 5 | Floor for any deployment |
+| IVR port ratio | 1.2× agent count | Conservative self-service headroom |
 
 **Derivation:**
 ```
-monthlySeparations  = annualSeparations ÷ 12
-voiceCallsPerMonth  = round(monthlySeparations × 0.30)
-concurrentAgents    = max(5, ceil(voiceCallsPerMonth ÷ 3,500))
+concurrentAgents    = agentsEntered
 premiumSeats        = round(concurrentAgents × 0.30)
 standardSeats       = concurrentAgents − premiumSeats
-ivrPorts            = max(5, round(concurrentAgents × 1.2))
+ivrPorts            = round(concurrentAgents × 1.2)
 monthlyLicenceCost  = (standardSeats × $177.79) + (premiumSeats × $262.82) + (ivrPorts × $108.22)
 ```
 

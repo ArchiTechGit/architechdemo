@@ -612,10 +612,8 @@ const COSTS = {
   licensePremium:  262.82,
   licenseIvr:      108.22,
   // Platform sizing assumptions
-  callsPerConcurrentAgent: 3500,  // conservative: 80% occupancy, 3-min AHT, 22-day month
-  premiumRatio: 0.30,             // 30% Premium, 70% Standard
-  ivrRatio:     1.2,              // IVR ports = concurrent agents × 1.2
-  minConcurrent: 5,               // minimum concurrent agent seats
+  premiumRatio: 0.30,  // 30% Premium, 70% Standard
+  ivrRatio:     1.2,   // IVR ports = agent count × 1.2
   // AI Agent unit pricing (RRP, effective May 2026)
   agentUnitPrice:           154.60,
   agentUnitVoiceSec:        1600 * 60,  // 1,600 min = 96,000 sec per unit (metered per second)
@@ -666,12 +664,10 @@ function calcAiCosts(selected) {
 }
 
 function calcLicensing() {
-  const monthlySeps = state.separations / 12;
-  const voiceCalls  = Math.round(monthlySeps * COSTS.voiceCallPct);
-  const concurrent  = Math.max(COSTS.minConcurrent, Math.ceil(voiceCalls / COSTS.callsPerConcurrentAgent));
+  const concurrent  = Math.max(1, state.agents);
   const premium     = Math.round(concurrent * COSTS.premiumRatio);
   const standard    = concurrent - premium;
-  const ivr         = Math.max(5, Math.round(concurrent * COSTS.ivrRatio));
+  const ivr         = Math.max(1, Math.round(concurrent * COSTS.ivrRatio));
   const monthly     = (standard * COSTS.licenseStandard) + (premium * COSTS.licensePremium) + (ivr * COSTS.licenseIvr);
   return { concurrent, standard, premium, ivr, monthly };
 }
@@ -923,7 +919,7 @@ function renderResults() {
 
         <div class="assume-note">
           Net annual saving = gross labour saving across selected workflows, minus annual platform licensing cost and any AI overage costs above included entitlement.
-          Platform seat count derived from separations volume: 30% of monthly separations become voice calls; concurrent agents sized at 3,500 calls/agent/month (80% occupancy, 3-min AHT); 70% Standard / 30% Premium split; IVR ports at 1.2× concurrent agents. Minimum 5 concurrent agents and 5 IVR ports applied.
+          Platform seat count based on entered contact centre agent headcount (${state.agents} agents): 70% Standard / 30% Premium split; IVR ports at 1.2× agent count.
           AI Agent units purchased based on monthly usage. Voice metered per second (1 unit = 96,000 sec / 1,600 min). Digital metered per 10-message session (1 unit = 4,800 sessions). Unit price: $${COSTS.agentUnitPrice.toFixed(2)} RRP.
           FTE calculated at 1,920 hours per year.
           <br /><br />
