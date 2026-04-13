@@ -40,7 +40,25 @@ function fmtCurrency(n: number): string {
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ThirdPartyService { id: string; name: string; monthlyCost: number; }
-interface AiCosts { agentUnitsPerMonth: number; agentUnitPrice: number; assistantUnitsPerMonth: number; assistantUnitPrice: number; }
+interface AiCosts {
+  // AI Agent voice
+  agentVoiceScriptedCalls: number;
+  agentVoiceAutoCalls: number;
+  agentAvgCallDurationSec: number;
+  // AI Agent digital
+  agentDigitalScriptedSessions: number;
+  agentDigitalAutoSessions: number;
+  // AI Assistant voice
+  assistantVoiceScriptedCalls: number;
+  assistantAvgCallDurationSec: number;
+  // AI Assistant digital
+  assistantDigitalScriptedSessions: number;
+  // Overage pricing
+  agentVoicePricePerSec: number;
+  agentDigitalPricePerSession: number;
+  assistantVoicePricePerSec: number;
+  assistantDigitalPricePerSession: number;
+}
 interface PlatformCosts {
   platformCostPerMonth: number;
   phoneLineMonthly: number;
@@ -67,10 +85,69 @@ const DEFAULT_PLATFORM: PlatformCosts = {
   phoneLineMonthly: 0,
   smsServiceMonthly: 0,
   thirdPartyServices: [],
-  aiCosts: { agentUnitsPerMonth: 0, agentUnitPrice: 109.77, assistantUnitsPerMonth: 0, assistantUnitPrice: 32.93 },
+  aiCosts: {
+    agentVoiceScriptedCalls: 0, agentVoiceAutoCalls: 0, agentAvgCallDurationSec: 120,
+    agentDigitalScriptedSessions: 0, agentDigitalAutoSessions: 0,
+    assistantVoiceScriptedCalls: 0, assistantAvgCallDurationSec: 120,
+    assistantDigitalScriptedSessions: 0,
+    agentVoicePricePerSec: 0, agentDigitalPricePerSession: 0,
+    assistantVoicePricePerSec: 0, assistantDigitalPricePerSession: 0,
+  },
   periodMonths: 12,
 };
 const DEFAULT_UNIT_COSTS: UnitCosts = { smsPerSegmentCost: 0.04, wxConnectRemoteRunCost: 0.08, emailSendCost: 0 };
+
+// ─── AI ENTITLEMENTS (included in platform fee, effective May 2026) ───────────
+const AI_INCLUDED = {
+  agent: {
+    voiceScriptedSec:  1600 * 60,  // 1,600 min voice scripted
+    voiceAutoSec:       250 * 60,  // 250 min voice autonomous
+    digitalScripted:       4800,   // sessions
+    digitalAuto:            200,   // sessions
+  },
+  assistant: {
+    voiceScriptedSec:  1500 * 60,  // 1,500 min voice scripted
+    digitalScripted:       1000,   // sessions
+  },
+};
+
+function calcAiTotal(ai: AiCosts): number {
+  const agVoiceScSec  = ai.agentVoiceScriptedCalls * ai.agentAvgCallDurationSec;
+  const agVoiceAuSec  = ai.agentVoiceAutoCalls     * ai.agentAvgCallDurationSec;
+  const asVoiceScSec  = ai.assistantVoiceScriptedCalls * ai.assistantAvgCallDurationSec;
+
+  const agVoiceOverage = Math.max(0, agVoiceScSec - AI_INCLUDED.agent.voiceScriptedSec)
+                       + Math.max(0, agVoiceAuSec  - AI_INCLUDED.agent.voiceAutoSec);
+  const agDigOverage   = Math.max(0, ai.agentDigitalScriptedSessions - AI_INCLUDED.agent.digitalScripted)
+                       + Math.max(0, ai.agentDigitalAutoSessions      - AI_INCLUDED.agent.digitalAuto);
+  const asVoiceOverage = Math.max(0, asVoiceScSec - AI_INCLUDED.assistant.voiceScriptedSec);
+  const asDigOverage   = Math.max(0, ai.assistantDigitalScriptedSessions - AI_INCLUDED.assistant.digitalScripted);
+
+  return agVoiceOverage  * ai.agentVoicePricePerSec
+       + agDigOverage    * ai.agentDigitalPricePerSession
+       + asVoiceOverage  * ai.assistantVoicePricePerSec
+       + asDigOverage    * ai.assistantDigitalPricePerSession;
+}
+
+function calcAiBreakdown(ai: AiCosts) {
+  const agVoiceScSec  = ai.agentVoiceScriptedCalls * ai.agentAvgCallDurationSec;
+  const agVoiceAuSec  = ai.agentVoiceAutoCalls     * ai.agentAvgCallDurationSec;
+  const asVoiceScSec  = ai.assistantVoiceScriptedCalls * ai.assistantAvgCallDurationSec;
+  return {
+    agVoiceSec:  agVoiceScSec + agVoiceAuSec,
+    agVoiceIncSec: AI_INCLUDED.agent.voiceScriptedSec + AI_INCLUDED.agent.voiceAutoSec,
+    agVoiceOverageSec: Math.max(0, agVoiceScSec - AI_INCLUDED.agent.voiceScriptedSec) + Math.max(0, agVoiceAuSec - AI_INCLUDED.agent.voiceAutoSec),
+    agDigSessions: ai.agentDigitalScriptedSessions + ai.agentDigitalAutoSessions,
+    agDigIncSessions: AI_INCLUDED.agent.digitalScripted + AI_INCLUDED.agent.digitalAuto,
+    agDigOverageSessions: Math.max(0, ai.agentDigitalScriptedSessions - AI_INCLUDED.agent.digitalScripted) + Math.max(0, ai.agentDigitalAutoSessions - AI_INCLUDED.agent.digitalAuto),
+    asVoiceSec: asVoiceScSec,
+    asVoiceIncSec: AI_INCLUDED.assistant.voiceScriptedSec,
+    asVoiceOverageSec: Math.max(0, asVoiceScSec - AI_INCLUDED.assistant.voiceScriptedSec),
+    asDigSessions: ai.assistantDigitalScriptedSessions,
+    asDigIncSessions: AI_INCLUDED.assistant.digitalScripted,
+    asDigOverageSessions: Math.max(0, ai.assistantDigitalScriptedSessions - AI_INCLUDED.assistant.digitalScripted),
+  };
+}
 const EXAMPLE_WORKFLOWS: Omit<Workflow, "id">[] = [
   { name: "Pre-Admission",             minutesRemoved: 30, smsPerFlow: 2, emailsPerFlow: 1, wxConnectRunsPerFlow: 1, lettersPerFlow: 1, annualVolume: 5000 },
   { name: "Appointment Confirmation",  minutesRemoved: 20, smsPerFlow: 1, emailsPerFlow: 1, wxConnectRunsPerFlow: 1, lettersPerFlow: 0, annualVolume: 12000 },
@@ -210,8 +287,7 @@ export default function Home() {
   // ── Platform cost total ──
   const annualPlatformCost = useMemo(() => {
     const thirdPartyTotal = platformCosts.thirdPartyServices.reduce((s, t) => s + t.monthlyCost, 0);
-    const aiTotal = platformCosts.aiCosts.agentUnitsPerMonth * platformCosts.aiCosts.agentUnitPrice
-      + platformCosts.aiCosts.assistantUnitsPerMonth * platformCosts.aiCosts.assistantUnitPrice;
+    const aiTotal = calcAiTotal(platformCosts.aiCosts);
     return (platformCosts.platformCostPerMonth + platformCosts.phoneLineMonthly + platformCosts.smsServiceMonthly + thirdPartyTotal + aiTotal) * platformCosts.periodMonths;
   }, [platformCosts]);
 
@@ -385,44 +461,137 @@ export default function Home() {
                 </div>
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>AI Costs</p>
-                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Cisco AI Agent and Assistant monthly consumption</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Voice billed per second · Digital per session (10 messages) · Overage above included entitlement</p>
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <NumInput label="AI Agent Units / Month" value={platformCosts.aiCosts.agentUnitsPerMonth} step={1}
-                  description="Number of Cisco AI Agent units consumed monthly"
-                  onChange={v => updateAiCosts("agentUnitsPerMonth", v)} />
-                <NumInput label="AI Assistant Units / Month" value={platformCosts.aiCosts.assistantUnitsPerMonth} step={1}
-                  description="Number of Cisco AI Assistant units consumed monthly"
-                  onChange={v => updateAiCosts("assistantUnitsPerMonth", v)} />
-              </div>
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setAiPricingOpen(v => !v)}
-                  style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, display: "flex", alignItems: "center", gap: 6, padding: 0 }}
-                >
-                  <ChevronDown size={14} style={{ transform: aiPricingOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-                  {aiPricingOpen ? "Hide" : "Show"} per-unit pricing
-                </button>
-                {aiPricingOpen && (
-                  <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: 16, background: C.bg, borderRadius: 8, border: `1px solid ${C.s3}` }}>
-                    <NumInput label="AI Agent Unit Price" prefix="$" step="0.001"
-                      value={platformCosts.aiCosts.agentUnitPrice}
-                      description="Cost per AI Agent unit"
-                      onChange={v => updateAiCosts("agentUnitPrice", v)} />
-                    <NumInput label="AI Assistant Unit Price" prefix="$" step="0.001"
-                      value={platformCosts.aiCosts.assistantUnitPrice}
-                      description="Cost per AI Assistant unit"
-                      onChange={v => updateAiCosts("assistantUnitPrice", v)} />
-                  </div>
-                )}
-                <p style={{ marginTop: 8, fontSize: 12, color: C.muted, textAlign: "right" }}>
-                  AI total: <span style={{ color: C.light, fontWeight: 500 }}>
-                    {fmtCurrency(platformCosts.aiCosts.agentUnitsPerMonth * platformCosts.aiCosts.agentUnitPrice + platformCosts.aiCosts.assistantUnitsPerMonth * platformCosts.aiCosts.assistantUnitPrice)}
-                  </span> / month
-                </p>
-              </div>
+
+              {/* AI Agent */}
+              {(() => {
+                const bd = calcAiBreakdown(platformCosts.aiCosts);
+                const ai = platformCosts.aiCosts;
+                const agOverageCost = bd.agVoiceOverageSec * ai.agentVoicePricePerSec + bd.agDigOverageSessions * ai.agentDigitalPricePerSession;
+                const assistantOverageCost = bd.asVoiceOverageSec * ai.assistantVoicePricePerSec + bd.asDigOverageSessions * ai.assistantDigitalPricePerSession;
+                const totalAiMonthly = calcAiTotal(ai);
+                return (
+                  <>
+                    {/* ── AI Agent ── */}
+                    <div style={{ background: C.bg, border: `1px solid ${C.s3}`, borderRadius: 8, padding: 16 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: C.cyan, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 14px" }}>AI Agent</p>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+                        <NumInput label="Voice Scripted Calls / Mo" value={ai.agentVoiceScriptedCalls} step={1}
+                          description={`Included: ${(AI_INCLUDED.agent.voiceScriptedSec/60).toLocaleString()} min`}
+                          onChange={v => updateAiCosts("agentVoiceScriptedCalls", v)} />
+                        <NumInput label="Voice Autonomous Calls / Mo" value={ai.agentVoiceAutoCalls} step={1}
+                          description={`Included: ${(AI_INCLUDED.agent.voiceAutoSec/60).toLocaleString()} min`}
+                          onChange={v => updateAiCosts("agentVoiceAutoCalls", v)} />
+                        <NumInput label="Avg Call Duration (sec)" value={ai.agentAvgCallDurationSec} step={1}
+                          description="Used for all agent voice billing"
+                          onChange={v => updateAiCosts("agentAvgCallDurationSec", v)} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                        <NumInput label="Digital Scripted Sessions / Mo" value={ai.agentDigitalScriptedSessions} step={1}
+                          description={`Included: ${AI_INCLUDED.agent.digitalScripted.toLocaleString()} sessions`}
+                          onChange={v => updateAiCosts("agentDigitalScriptedSessions", v)} />
+                        <NumInput label="Digital Autonomous Sessions / Mo" value={ai.agentDigitalAutoSessions} step={1}
+                          description={`Included: ${AI_INCLUDED.agent.digitalAuto.toLocaleString()} sessions`}
+                          onChange={v => updateAiCosts("agentDigitalAutoSessions", v)} />
+                      </div>
+                      {/* Agent overage summary */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "10px 12px", background: `${C.cyan}08`, border: `1px solid ${C.cyan}20`, borderRadius: 6 }}>
+                        <div style={{ fontSize: 11, color: C.muted }}>
+                          Voice: <span style={{ color: bd.agVoiceOverageSec > 0 ? C.cyan : C.muted }}>
+                            {Math.round(bd.agVoiceSec / 60).toLocaleString()} min used
+                          </span>
+                          {bd.agVoiceOverageSec > 0 && <span style={{ color: "#E05C5C" }}> · {Math.round(bd.agVoiceOverageSec).toLocaleString()} sec overage</span>}
+                        </div>
+                        <div style={{ fontSize: 11, color: C.muted }}>
+                          Digital: <span style={{ color: bd.agDigOverageSessions > 0 ? C.cyan : C.muted }}>
+                            {bd.agDigSessions.toLocaleString()} sessions used
+                          </span>
+                          {bd.agDigOverageSessions > 0 && <span style={{ color: "#E05C5C" }}> · {bd.agDigOverageSessions.toLocaleString()} overage</span>}
+                        </div>
+                        <div style={{ fontSize: 11, color: C.muted, gridColumn: "1/-1", textAlign: "right" }}>
+                          Agent overage cost: <span style={{ color: agOverageCost > 0 ? C.light : C.muted, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>{fmtCurrency(agOverageCost)}/mo</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── AI Assistant ── */}
+                    <div style={{ background: C.bg, border: `1px solid ${C.s3}`, borderRadius: 8, padding: 16 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#517FE3", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 14px" }}>AI Assistant</p>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                        <NumInput label="Voice Scripted Calls / Mo" value={ai.assistantVoiceScriptedCalls} step={1}
+                          description={`Included: ${(AI_INCLUDED.assistant.voiceScriptedSec/60).toLocaleString()} min`}
+                          onChange={v => updateAiCosts("assistantVoiceScriptedCalls", v)} />
+                        <NumInput label="Avg Call Duration (sec)" value={ai.assistantAvgCallDurationSec} step={1}
+                          description="Used for all assistant voice billing"
+                          onChange={v => updateAiCosts("assistantAvgCallDurationSec", v)} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, marginBottom: 12 }}>
+                        <NumInput label="Digital Scripted Sessions / Mo" value={ai.assistantDigitalScriptedSessions} step={1}
+                          description={`Included: ${AI_INCLUDED.assistant.digitalScripted.toLocaleString()} sessions`}
+                          onChange={v => updateAiCosts("assistantDigitalScriptedSessions", v)} />
+                      </div>
+                      {/* Assistant overage summary */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "10px 12px", background: "rgba(81,127,227,0.05)", border: "1px solid rgba(81,127,227,0.2)", borderRadius: 6 }}>
+                        <div style={{ fontSize: 11, color: C.muted }}>
+                          Voice: <span style={{ color: bd.asVoiceOverageSec > 0 ? "#517FE3" : C.muted }}>
+                            {Math.round(bd.asVoiceSec / 60).toLocaleString()} min used
+                          </span>
+                          {bd.asVoiceOverageSec > 0 && <span style={{ color: "#E05C5C" }}> · {Math.round(bd.asVoiceOverageSec).toLocaleString()} sec overage</span>}
+                        </div>
+                        <div style={{ fontSize: 11, color: C.muted }}>
+                          Digital: <span style={{ color: bd.asDigOverageSessions > 0 ? "#517FE3" : C.muted }}>
+                            {bd.asDigSessions.toLocaleString()} sessions used
+                          </span>
+                          {bd.asDigOverageSessions > 0 && <span style={{ color: "#E05C5C" }}> · {bd.asDigOverageSessions.toLocaleString()} overage</span>}
+                        </div>
+                        <div style={{ fontSize: 11, color: C.muted, gridColumn: "1/-1", textAlign: "right" }}>
+                          Assistant overage cost: <span style={{ color: assistantOverageCost > 0 ? C.light : C.muted, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>{fmtCurrency(assistantOverageCost)}/mo</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Overage pricing (expandable) ── */}
+                    <div>
+                      <button type="button" onClick={() => setAiPricingOpen(v => !v)}
+                        style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>
+                        <ChevronDown size={14} style={{ transform: aiPricingOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                        {aiPricingOpen ? "Hide" : "Show"} overage unit pricing
+                      </button>
+                      {aiPricingOpen && (
+                        <div style={{ marginTop: 12, padding: 16, background: C.bg, borderRadius: 8, border: `1px solid ${C.s3}` }}>
+                          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 12px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>AI Agent</p>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+                            <NumInput label="Voice overage ($ / sec)" prefix="$" step="0.0001"
+                              value={ai.agentVoicePricePerSec}
+                              description="Per second above included voice minutes"
+                              onChange={v => updateAiCosts("agentVoicePricePerSec", v)} />
+                            <NumInput label="Digital overage ($ / session)" prefix="$" step="0.001"
+                              value={ai.agentDigitalPricePerSession}
+                              description="Per session above included digital sessions"
+                              onChange={v => updateAiCosts("agentDigitalPricePerSession", v)} />
+                          </div>
+                          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 12px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>AI Assistant</p>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                            <NumInput label="Voice overage ($ / sec)" prefix="$" step="0.0001"
+                              value={ai.assistantVoicePricePerSec}
+                              description="Per second above included voice minutes"
+                              onChange={v => updateAiCosts("assistantVoicePricePerSec", v)} />
+                            <NumInput label="Digital overage ($ / session)" prefix="$" step="0.001"
+                              value={ai.assistantDigitalPricePerSession}
+                              description="Per session above included digital sessions"
+                              onChange={v => updateAiCosts("assistantDigitalPricePerSession", v)} />
+                          </div>
+                        </div>
+                      )}
+                      <p style={{ marginTop: 8, fontSize: 12, color: C.muted, textAlign: "right" }}>
+                        AI overage total: <span style={{ color: C.light, fontWeight: 500, fontFamily: "'JetBrains Mono', monospace" }}>{fmtCurrency(totalAiMonthly)}</span> / month
+                      </p>
+                    </div>
+                  </>
+                );
+              })()}
 
               <Divider />
 
@@ -699,7 +868,7 @@ export default function Home() {
                                 ["Digital cost", fmtCurrency(r.digitalCost)],
                                 r.annualBenefit !== null ? ["Annual benefit", fmtCurrency(r.annualBenefit)] : null,
                                 r.annualHoursSaved !== null ? ["Hours saved/yr", `${Math.round(r.annualHoursSaved)} hrs`] : null,
-                              ].filter(Boolean).map(([label, value], i) => (
+                              ].filter((x): x is [string, string] => x !== null).map(([label, value], i) => (
                                 <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
                                   <span style={{ color: C.muted }}>{label}</span>
                                   <span style={{ color: C.light, fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}>{value as string}</span>
@@ -708,7 +877,7 @@ export default function Home() {
                             </div>
                             {r.breakEvenInteractions < Infinity && (
                               <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.s2}`, fontSize: 11, color: C.muted }}>
-                                Break-even: <span style={{ color: C.lightCyan ?? C.cyan, fontFamily: "'JetBrains Mono', monospace" }}>{r.breakEvenInteractions.toLocaleString()}</span> interactions
+                                Break-even: <span style={{ color: C.cyan, fontFamily: "'JetBrains Mono', monospace" }}>{r.breakEvenInteractions.toLocaleString()}</span> interactions
                               </div>
                             )}
                           </div>
