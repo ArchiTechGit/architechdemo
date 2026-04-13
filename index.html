@@ -19,6 +19,15 @@
     .toc-item:hover { color: #F0F6FC; }
     .toc-item:focus-visible { outline: 2px solid #05C3DD; outline-offset: 4px; }
     .toc-num { font-size: 9px; color: #3D4F65; min-width: 20px; }
+    .toc-parent { display: flex; align-items: center; gap: 16px; color: #7F8FA9; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 0; cursor: pointer; background: none; border: none; font-family: inherit; width: 100%; transition: color 0.2s ease; }
+    .toc-parent:hover { color: #F0F6FC; }
+    .toc-parent:focus-visible { outline: 2px solid #05C3DD; outline-offset: 4px; }
+    .toc-chevron { margin-left: auto; font-size: 9px; color: #3D4F65; transition: transform 0.2s ease; }
+    .toc-submenu { display: none; flex-direction: column; gap: 8px; padding-left: 36px; margin-top: 4px; }
+    .toc-submenu.open { display: flex; }
+    .toc-sub-item { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #5A6E84; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; transition: color 0.2s ease; padding: 3px 0; }
+    .toc-sub-item:hover { color: #F0F6FC; }
+    .toc-sub-num { font-size: 8px; color: #3D4F65; min-width: 16px; }
   </style>
 </head>
 <body>
@@ -31,10 +40,17 @@
       <span class="toc-num">01</span>
       <span>Workflow Demonstration</span>
     </a>
-    <a href="/demoguides/" class="toc-item">
+    <button class="toc-parent" onclick="toggleSubmenu(this)" aria-expanded="false">
       <span class="toc-num">02</span>
       <span>Demo Guides</span>
-    </a>
+      <span class="toc-chevron">&#9654;</span>
+    </button>
+    <div class="toc-submenu" id="submenu-demoguides">
+      <a href="/demoguides/" class="toc-sub-item">
+        <span class="toc-sub-num">01</span>
+        <span>Webex Contact Center</span>
+      </a>
+    </div>
     <a href="/discovery/" class="toc-item">
       <span class="toc-num">03</span>
       <span>Discovery Assessment</span>
@@ -49,5 +65,14 @@
     </a>
   </nav>
   </div>
+  <script>
+    function toggleSubmenu(btn) {
+      const submenu = btn.nextElementSibling;
+      const chevron = btn.querySelector('.toc-chevron');
+      const isOpen = submenu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen);
+      chevron.style.transform = isOpen ? 'rotate(90deg)' : '';
+    }
+  </script>
 </body>
 </html>
