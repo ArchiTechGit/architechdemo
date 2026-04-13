@@ -81,7 +81,7 @@ interface Workflow {
 
 // ─── DEFAULTS ────────────────────────────────────────────────────────────────
 const DEFAULT_PLATFORM: PlatformCosts = {
-  platformCostPerMonth: 1238.15,
+  platformCostPerMonth: 103.18,
   phoneLineMonthly: 0,
   smsServiceMonthly: 0,
   thirdPartyServices: [],

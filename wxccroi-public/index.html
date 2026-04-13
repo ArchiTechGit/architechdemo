@@ -607,8 +607,8 @@ const WORKFLOWS = [
 
 const COSTS = {
   sms: 0.04, wx: 0.08, email: 0.00,
-  platformMonthly: 1238.15,
-  // AI overage pricing (AUD, 30% partner discount) — effective May 2026, per-second voice billing
+  platformMonthly: 103.18,
+  // AI overage pricing (AUD) — effective May 2026, per-second voice billing
   agentVoicePricePerSec:           0.00081,  // $115.95/unit ÷ 144,000 sec/unit
   agentDigitalPricePerSession:     0.024,    // $115.95/unit ÷ 4,800 sessions/unit
   assistantVoicePricePerSec:       0.00027,  // $32.47/unit ÷ 120,000 sec/unit
@@ -923,7 +923,7 @@ function renderResults() {
         <div class="assume-note">
           Net annual saving = gross labour saving across selected workflows, minus annual platform cost and any AI overage costs above included entitlement.
           Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month) with a 180-second average handle time. Voice billed per second (effective May 2026).
-          AI included entitlement: Agent 1,600 min + 250 min voice, 4,800 + 200 digital sessions; Assistant 1,500 min voice, 1,000 digital sessions — included in platform fee. Overage rates based on Cisco list pricing with 30% ArchiTech partner discount.
+          AI included entitlement: Agent 1,600 min + 250 min voice, 4,800 + 200 digital sessions; Assistant 1,500 min voice, 1,000 digital sessions — included in platform fee. Overage charged on usage above included entitlement.
           FTE calculated at 1,920 hours per year.
           <br /><br />
           Victorian hospital separation benchmarks sourced from
@@ -1096,7 +1096,7 @@ function printResults() {
     ${costs}
 
     <div class="print-footer">
-      Figures based on ArchiTech implementation benchmarks. Voice billed per second (effective May 2026). Included entitlement: Agent 1,850 min voice + 5,000 digital sessions; Assistant 1,500 min voice + 1,000 digital sessions — included in platform fee. Overage rates based on Cisco list pricing with 30% ArchiTech partner discount applied.
+      Figures based on ArchiTech implementation benchmarks. Voice billed per second (effective May 2026). Included entitlement: Agent 1,850 min voice + 5,000 digital sessions; Assistant 1,500 min voice + 1,000 digital sessions — included in platform fee. Overage charged on usage above included entitlement.
       Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month), 180-second AHT.
       Victorian hospital separation benchmarks sourced from AIHW and VAHI.
       Actual results will vary. For a detailed analysis, visit architech.net.au
