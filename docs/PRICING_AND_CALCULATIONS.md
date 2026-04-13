@@ -24,16 +24,19 @@ Seat counts are calculated from the **number of contact centre agents** entered 
 | Parameter | Value | Basis |
 |---|---|---|
 | Standard / Premium split | 70% Standard / 30% Premium | Typical hospital deployment |
-| IVR port ratio | 1.2× agent count | Conservative self-service headroom |
+| IVR ports included | agents × 2 | Bundled with each agent licence |
+| Additional IVR ports | agents (if > 20 agents) | Conditional — only for larger deployments |
 
 **Derivation:**
 ```
 concurrentAgents    = agentsEntered
 premiumSeats        = round(concurrentAgents × 0.30)
 standardSeats       = concurrentAgents − premiumSeats
-ivrPorts            = round(concurrentAgents × 1.2)
+ivrPorts            = concurrentAgents > 20 ? concurrentAgents : 0
 monthlyLicenceCost  = (standardSeats × $177.79) + (premiumSeats × $262.82) + (ivrPorts × $108.22)
 ```
+
+> Each agent licence includes 2 IVR ports. Additional IVR ports (1 per agent) are only purchased for deployments above 20 agents, where self-service and queue volume warrants the extra capacity.
 
 ---
 

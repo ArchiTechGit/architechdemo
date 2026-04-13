@@ -417,10 +417,10 @@
         <label class="input-label">Number of contact centre agents</label>
         <div class="input-sublabel">Scales the platform licensing cost in your calculation</div>
         <div class="slider-row">
-          <input type="range" id="sl-agents" min="5" max="500" step="5" value="30"
-            oninput="syncSlider('agents', this)" />
-          <input type="number" id="nb-agents" min="5" max="500" value="30"
-            oninput="syncNumber('agents', this)" />
+          <input type="range" id="sl-agents" min="0" max="100" step="1" value="50"
+            oninput="syncSliderAgents(this)" />
+          <input type="number" id="nb-agents" min="5" max="300" value="30"
+            oninput="syncNumberAgents(this)" />
         </div>
       </div>
 
@@ -667,7 +667,8 @@ function calcLicensing() {
   const concurrent  = Math.max(1, state.agents);
   const premium     = Math.round(concurrent * COSTS.premiumRatio);
   const standard    = concurrent - premium;
-  const ivr         = Math.max(1, Math.round(concurrent * COSTS.ivrRatio));
+  // Each agent includes 2 IVR ports. Additional ports purchased for deployments > 20 agents.
+  const ivr         = concurrent > 20 ? concurrent : 0;
   const monthly     = (standard * COSTS.licenseStandard) + (premium * COSTS.licensePremium) + (ivr * COSTS.licenseIvr);
   return { concurrent, standard, premium, ivr, monthly };
 }
@@ -777,11 +778,39 @@ function renderScreen2() {
     `Calculating ROI across <strong>${n} workflow${n !== 1 ? 's' : ''}</strong>: ${names}`;
 
   // Sync slider fills
-  setFill('sl-agents',     state.agents,      5,    500);
+  const agentPos = agentsToSliderPos(state.agents);
+  document.getElementById('sl-agents').value = agentPos;
+  document.getElementById('sl-agents').style.setProperty('--fill', agentPos + '%');
   setFill('sl-seps',       state.separations, 1000, 60000);
   document.getElementById('nb-agents').value = state.agents;
   document.getElementById('nb-seps').value   = state.separations;
   document.getElementById('nb-rate').value   = state.rate;
+}
+
+// ── Agents slider: piecewise scale — left half 5–30, right half 30–300 ──
+function sliderPosToAgents(pos) {
+  return pos <= 50
+    ? Math.round(5 + pos * 0.5)
+    : Math.round(30 + (pos - 50) * 5.4);
+}
+function agentsToSliderPos(agents) {
+  return agents <= 30
+    ? Math.round((agents - 5) * 2)
+    : Math.round(50 + (agents - 30) / 5.4);
+}
+function syncSliderAgents(el) {
+  const agents = sliderPosToAgents(Number(el.value));
+  state.agents = agents;
+  document.getElementById('nb-agents').value = agents;
+  el.style.setProperty('--fill', el.value + '%');
+}
+function syncNumberAgents(el) {
+  const agents = Math.min(300, Math.max(5, Number(el.value) || 5));
+  state.agents = agents;
+  const pos = agentsToSliderPos(agents);
+  const sl = document.getElementById('sl-agents');
+  sl.value = pos;
+  sl.style.setProperty('--fill', pos + '%');
 }
 
 function setFill(id, val, min, max) {
@@ -792,16 +821,14 @@ function setFill(id, val, min, max) {
 
 function syncSlider(key, el) {
   state[key] = Number(el.value);
-  const nbId = key === 'agents' ? 'nb-agents' : 'nb-seps';
-  document.getElementById(nbId).value = el.value;
+  document.getElementById('nb-seps').value = el.value;
   const pct = ((Number(el.value) - Number(el.min)) / (Number(el.max) - Number(el.min))) * 100;
   el.style.setProperty('--fill', pct + '%');
 }
 
 function syncNumber(key, el) {
   state[key] = Number(el.value);
-  const slId = key === 'agents' ? 'sl-agents' : 'sl-seps';
-  const sl = document.getElementById(slId);
+  const sl = document.getElementById('sl-seps');
   sl.value = el.value;
   const pct = ((Number(el.value) - Number(sl.min)) / (Number(sl.max) - Number(sl.min))) * 100;
   sl.style.setProperty('--fill', pct + '%');
