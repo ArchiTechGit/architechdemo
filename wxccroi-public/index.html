@@ -607,7 +607,15 @@ const WORKFLOWS = [
 
 const COSTS = {
   sms: 0.04, wx: 0.08, email: 0.00,
-  platformMonthly: 103.18,
+  // WxCC licensing (RRP per seat/port per month)
+  licenseStandard: 177.79,
+  licensePremium:  262.82,
+  licenseIvr:      108.22,
+  // Platform sizing assumptions
+  callsPerConcurrentAgent: 3500,  // conservative: 80% occupancy, 3-min AHT, 22-day month
+  premiumRatio: 0.30,             // 30% Premium, 70% Standard
+  ivrRatio:     1.2,              // IVR ports = concurrent agents × 1.2
+  minConcurrent: 5,               // minimum concurrent agent seats
   // AI overage pricing (AUD) — effective May 2026, per-second voice billing
   agentVoicePricePerSec:           0.00081,  // $115.95/unit ÷ 144,000 sec/unit
   agentDigitalPricePerSession:     0.024,    // $115.95/unit ÷ 4,800 sessions/unit
@@ -675,9 +683,21 @@ function calcAiCosts(selected) {
   };
 }
 
+function calcLicensing() {
+  const monthlySeps = state.separations / 12;
+  const voiceCalls  = Math.round(monthlySeps * COSTS.voiceCallPct);
+  const concurrent  = Math.max(COSTS.minConcurrent, Math.ceil(voiceCalls / COSTS.callsPerConcurrentAgent));
+  const premium     = Math.round(concurrent * COSTS.premiumRatio);
+  const standard    = concurrent - premium;
+  const ivr         = Math.max(5, Math.round(concurrent * COSTS.ivrRatio));
+  const monthly     = (standard * COSTS.licenseStandard) + (premium * COSTS.licensePremium) + (ivr * COSTS.licenseIvr);
+  return { concurrent, standard, premium, ivr, monthly };
+}
+
 function calcAll() {
   const selected = WORKFLOWS.filter(w => state.selected.has(w.id));
-  const platformAnnual = COSTS.platformMonthly * 12;
+  const lic = calcLicensing();
+  const platformAnnual = lic.monthly * 12;
   const ai = calcAiCosts(selected);
   const totalCostAnnual = platformAnnual + ai.totalAnnual;
 
@@ -696,7 +716,7 @@ function calcAll() {
   const totalSaving = rows.reduce((s, r) => s + r.annualSaving, 0);
   const totalHours  = rows.reduce((s, r) => s + r.annualHours,  0);
   return {
-    rows, ai,
+    rows, ai, lic,
     totalSaving,
     netSaving:       totalSaving - totalCostAnnual,
     totalHours,
@@ -854,8 +874,8 @@ function renderResults() {
     <div class="section-label">Annual platform costs deducted</div>
     <div class="breakdown-list" style="margin-bottom: 32px;">
       <div class="breakdown-row">
-        <div class="breakdown-name">WxCC platform base</div>
-        <div class="breakdown-mins"></div>
+        <div class="breakdown-name">WxCC platform licences</div>
+        <div class="breakdown-mins">${R.lic.standard} Standard · ${R.lic.premium} Premium · ${R.lic.ivr} IVR ports</div>
         <div class="breakdown-val" style="color:var(--negative)">−$${Math.round(R.platformAnnual).toLocaleString('en-AU')} / yr</div>
       </div>
       <div class="breakdown-row">
@@ -908,6 +928,17 @@ function renderResults() {
           </tbody>
         </table>
 
+        <div class="section-label">Platform licensing (derived from separations volume)</div>
+        <table class="at">
+          <thead><tr><th>Licence type</th><th>Seats / Ports</th><th>RRP / month</th><th>Monthly cost</th></tr></thead>
+          <tbody>
+            <tr><td>WxCC Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${COSTS.licenseStandard.toFixed(2)}</td><td>$${(R.lic.standard * COSTS.licenseStandard).toFixed(2)}</td></tr>
+            <tr><td>WxCC Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${COSTS.licensePremium.toFixed(2)}</td><td>$${(R.lic.premium * COSTS.licensePremium).toFixed(2)}</td></tr>
+            <tr><td>WxCC Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${COSTS.licenseIvr.toFixed(2)}</td><td>$${(R.lic.ivr * COSTS.licenseIvr).toFixed(2)}</td></tr>
+            <tr><td colspan="3"><strong>Total monthly platform cost</strong></td><td><strong>$${R.lic.monthly.toFixed(2)}</strong></td></tr>
+          </tbody>
+        </table>
+
         <div class="section-label">Unit costs</div>
         <table class="at">
           <thead><tr><th>Item</th><th>Rate</th></tr></thead>
@@ -916,13 +947,13 @@ function renderResults() {
             <tr><td>WX Connect remote run</td><td>$0.08</td></tr>
             <tr><td>Email send</td><td>$0.00</td></tr>
             <tr><td>Staff hourly rate</td><td>$${state.rate.toFixed(2)} / hr</td></tr>
-            <tr><td>WxCC platform base</td><td>$${COSTS.platformMonthly.toFixed(2)} / month</td></tr>
           </tbody>
         </table>
 
         <div class="assume-note">
-          Net annual saving = gross labour saving across selected workflows, minus annual platform cost and any AI overage costs above included entitlement.
-          Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month) with a 180-second average handle time. Voice billed per second (effective May 2026).
+          Net annual saving = gross labour saving across selected workflows, minus annual platform licensing cost and any AI overage costs above included entitlement.
+          Platform seat count derived from separations volume: 30% of monthly separations become voice calls; concurrent agents sized at 3,500 calls/agent/month (80% occupancy, 3-min AHT); 70% Standard / 30% Premium split; IVR ports at 1.2× concurrent agents. Minimum 5 concurrent agents and 5 IVR ports applied.
+          Voice billed per second (effective May 2026).
           AI included entitlement: Agent 1,600 min + 250 min voice, 4,800 + 200 digital sessions; Assistant 1,500 min voice, 1,000 digital sessions — included in platform fee. Overage charged on usage above included entitlement.
           FTE calculated at 1,920 hours per year.
           <br /><br />
@@ -1096,7 +1127,7 @@ function printResults() {
     ${costs}
 
     <div class="print-footer">
-      Figures based on ArchiTech implementation benchmarks. Voice billed per second (effective May 2026). Included entitlement: Agent 1,850 min voice + 5,000 digital sessions; Assistant 1,500 min voice + 1,000 digital sessions — included in platform fee. Overage charged on usage above included entitlement.
+      Figures based on ArchiTech implementation benchmarks. Platform licensing (${R.lic.standard} Standard · ${R.lic.premium} Premium · ${R.lic.ivr} IVR ports) derived from separations volume at 70/30 Standard/Premium split, 1.2× IVR ratio, min 5 seats. Voice billed per second (effective May 2026). AI included entitlement: Agent 1,600 min + 250 min voice, 4,800 + 200 digital sessions; Assistant 1,500 min voice, 1,000 digital sessions. Overage charged on usage above included entitlement.
       Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month), 180-second AHT.
       Victorian hospital separation benchmarks sourced from AIHW and VAHI.
       Actual results will vary. For a detailed analysis, visit architech.net.au

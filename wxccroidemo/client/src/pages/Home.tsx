@@ -59,8 +59,12 @@ interface AiCosts {
   assistantVoicePricePerSec: number;
   assistantDigitalPricePerSession: number;
 }
+const LICENSE_RATES = { standard: 177.79, premium: 262.82, ivr: 108.22 };
+
 interface PlatformCosts {
-  platformCostPerMonth: number;
+  standardSeats: number;
+  premiumSeats: number;
+  ivrPorts: number;
   phoneLineMonthly: number;
   smsServiceMonthly: number;
   thirdPartyServices: ThirdPartyService[];
@@ -81,7 +85,9 @@ interface Workflow {
 
 // ─── DEFAULTS ────────────────────────────────────────────────────────────────
 const DEFAULT_PLATFORM: PlatformCosts = {
-  platformCostPerMonth: 103.18,
+  standardSeats: 4,
+  premiumSeats: 2,
+  ivrPorts: 7,
   phoneLineMonthly: 0,
   smsServiceMonthly: 0,
   thirdPartyServices: [],
@@ -288,7 +294,8 @@ export default function Home() {
   const annualPlatformCost = useMemo(() => {
     const thirdPartyTotal = platformCosts.thirdPartyServices.reduce((s, t) => s + t.monthlyCost, 0);
     const aiTotal = calcAiTotal(platformCosts.aiCosts);
-    return (platformCosts.platformCostPerMonth + platformCosts.phoneLineMonthly + platformCosts.smsServiceMonthly + thirdPartyTotal + aiTotal) * platformCosts.periodMonths;
+    const licensingMonthly = platformCosts.standardSeats * LICENSE_RATES.standard + platformCosts.premiumSeats * LICENSE_RATES.premium + platformCosts.ivrPorts * LICENSE_RATES.ivr;
+    return (licensingMonthly + platformCosts.phoneLineMonthly + platformCosts.smsServiceMonthly + thirdPartyTotal + aiTotal) * platformCosts.periodMonths;
   }, [platformCosts]);
 
   const monthlyPlatformCost = annualPlatformCost / (platformCosts.periodMonths || 1);
@@ -427,17 +434,33 @@ export default function Home() {
                   <Server size={16} />
                 </div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Flex 3 / Month</p>
-                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Cisco Flex 3, telephony, AI and third-party services</p>
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>WxCC Licensing</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+                    Concurrent agent seats and IVR ports — monthly licensing cost: <span style={{ color: C.light, fontFamily: "'JetBrains Mono', monospace" }}>{fmtCurrency((platformCosts.standardSeats * LICENSE_RATES.standard) + (platformCosts.premiumSeats * LICENSE_RATES.premium) + (platformCosts.ivrPorts * LICENSE_RATES.ivr))}/mo</span>
+                  </p>
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
                 <NumInput
-                  label="Flex 3 / Month" prefix="$" step="0.01"
-                  value={platformCosts.platformCostPerMonth}
-                  description="Monthly cost for Agents and IVR"
-                  onChange={v => updatePlatform("platformCostPerMonth", v)}
+                  label="Standard Concurrent Agents" step={1} min={0}
+                  value={platformCosts.standardSeats}
+                  description={`$${LICENSE_RATES.standard.toFixed(2)} RRP / seat / month`}
+                  onChange={v => updatePlatform("standardSeats", Math.max(0, Math.round(v)))}
                 />
+                <NumInput
+                  label="Premium Concurrent Agents" step={1} min={0}
+                  value={platformCosts.premiumSeats}
+                  description={`$${LICENSE_RATES.premium.toFixed(2)} RRP / seat / month`}
+                  onChange={v => updatePlatform("premiumSeats", Math.max(0, Math.round(v)))}
+                />
+                <NumInput
+                  label="Additional IVR Ports" step={1} min={0}
+                  value={platformCosts.ivrPorts}
+                  description={`$${LICENSE_RATES.ivr.toFixed(2)} RRP / port / month`}
+                  onChange={v => updatePlatform("ivrPorts", Math.max(0, Math.round(v)))}
+                />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <NumInput
                   label="Phone Line Monthly" prefix="$" step="0.01"
                   value={platformCosts.phoneLineMonthly}
