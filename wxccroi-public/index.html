@@ -608,12 +608,19 @@ const WORKFLOWS = [
 const COSTS = {
   sms: 0.04, wx: 0.08, email: 0.00,
   platformMonthly: 1238.15,
-  // AI pricing (AUD, 30% partner discount)
-  aiAssistantUnitPrice: 32.47,   // $46.38 list × 0.70
-  aiAgentUnitPrice:     115.95,  // $154.60 list × 0.70
+  // AI overage pricing (AUD, 30% partner discount) — effective May 2026, per-second voice billing
+  agentVoicePricePerSec:           0.00081,  // $115.95/unit ÷ 144,000 sec/unit
+  agentDigitalPricePerSession:     0.024,    // $115.95/unit ÷ 4,800 sessions/unit
+  assistantVoicePricePerSec:       0.00027,  // $32.47/unit ÷ 120,000 sec/unit
+  assistantDigitalPricePerSession: 0.032,    // $32.47/unit ÷ 1,000 sessions/unit
+  // Included entitlements (built into platform fee, effective May 2026)
+  agentVoiceIncSec:    (1600 + 250) * 60,   // 1,600 min scripted + 250 min autonomous
+  agentDigitalInc:      4800 + 200,          // 4,800 scripted + 200 autonomous sessions
+  assistantVoiceIncSec: 1500 * 60,           // 1,500 min scripted
+  assistantDigitalInc:  1000,                // 1,000 scripted sessions
   // Voice estimation: 30% of monthly separations result in an AI-handled voice call
-  voiceCallPct:  0.30,
-  voiceAhtSec:   180,            // 3-minute average handle time
+  voiceCallPct: 0.30,
+  voiceAhtSec:  180,                         // 3-minute average handle time
 };
 
 // ══════════════════════════════════════════
@@ -637,31 +644,33 @@ function calcWorkflow(w, rate) {
   return { digitalCost, labourSaved, netPerSep: labourSaved - digitalCost };
 }
 
-// ── AI cost calculation ──
+// ── AI cost calculation — per-second voice, per-session digital (effective May 2026) ──
 function calcAiCosts(selected) {
-  const monthlySeps   = state.separations / 12;
-  const voiceCalls    = Math.round(monthlySeps * COSTS.voiceCallPct);
-  const aht           = COSTS.voiceAhtSec;
+  const monthlySeps     = state.separations / 12;
+  const voiceCalls      = Math.round(monthlySeps * COSTS.voiceCallPct);
+  const voiceSeconds    = voiceCalls * COSTS.voiceAhtSec;
   const digitalSessions = selected.reduce((s, w) => s + w.wx * monthlySeps, 0);
 
-  // AI Assistant units: ROUNDUP(((calls × aht) / 60 / 2000) + (sessions / 1000), 0)
-  const assistantUnits = Math.ceil(
-    ((voiceCalls * aht) / 60 / 2000) + (digitalSessions / 1000)
-  );
-  const assistantMonthly = assistantUnits * COSTS.aiAssistantUnitPrice;
+  // Agent: overage above included entitlement
+  const agVoiceOverageSec      = Math.max(0, voiceSeconds    - COSTS.agentVoiceIncSec);
+  const agDigitalOverageSessions = Math.max(0, Math.round(digitalSessions) - COSTS.agentDigitalInc);
+  const agentMonthly = agVoiceOverageSec      * COSTS.agentVoicePricePerSec
+                     + agDigitalOverageSessions * COSTS.agentDigitalPricePerSession;
 
-  // AI Agent Scripted units: ROUNDUP(((calls × CEILING(aht/120,1)) / 1200) + (sessions / 4800), 0)
-  const turns      = Math.ceil(aht / 120); // 2-minute turn brackets
-  const agentUnits = Math.ceil(
-    ((voiceCalls * turns) / 1200) + (digitalSessions / 4800)
-  );
-  const agentMonthly = agentUnits * COSTS.aiAgentUnitPrice;
+  // Assistant: overage above included entitlement
+  const asVoiceOverageSec      = Math.max(0, voiceSeconds    - COSTS.assistantVoiceIncSec);
+  const asDigitalOverageSessions = Math.max(0, Math.round(digitalSessions) - COSTS.assistantDigitalInc);
+  const assistantMonthly = asVoiceOverageSec      * COSTS.assistantVoicePricePerSec
+                          + asDigitalOverageSessions * COSTS.assistantDigitalPricePerSession;
 
-  const totalMonthly = assistantMonthly + agentMonthly;
+  const totalMonthly = agentMonthly + assistantMonthly;
   return {
-    voiceCalls, digitalSessions: Math.round(digitalSessions),
-    assistantUnits, assistantMonthly,
-    agentUnits, agentMonthly,
+    voiceCalls, voiceSeconds,
+    digitalSessions: Math.round(digitalSessions),
+    agVoiceIncSec:   COSTS.agentVoiceIncSec,
+    agVoiceOverageSec, agDigitalOverageSessions, agentMonthly,
+    asVoiceIncSec:   COSTS.assistantVoiceIncSec,
+    asVoiceOverageSec, asDigitalOverageSessions, assistantMonthly,
     totalMonthly, totalAnnual: totalMonthly * 12,
   };
 }
@@ -850,14 +859,18 @@ function renderResults() {
         <div class="breakdown-val" style="color:var(--negative)">−$${Math.round(R.platformAnnual).toLocaleString('en-AU')} / yr</div>
       </div>
       <div class="breakdown-row">
-        <div class="breakdown-name">AI Assistant (${R.ai.assistantUnits} units/month)</div>
-        <div class="breakdown-mins">$${R.ai.assistantMonthly.toFixed(0)}/month</div>
-        <div class="breakdown-val" style="color:var(--negative)">−$${Math.round(R.ai.assistantMonthly * 12).toLocaleString('en-AU')} / yr</div>
+        <div class="breakdown-name">AI Assistant${R.ai.assistantMonthly === 0 ? ' <span style="font-size:11px;color:var(--cyan);font-weight:400">(within included entitlement)</span>' : ''}</div>
+        <div class="breakdown-mins">${R.ai.assistantMonthly === 0 ? `${Math.round(R.ai.voiceSeconds/60).toLocaleString('en-AU')} min voice · ${R.ai.digitalSessions.toLocaleString('en-AU')} digital sessions` : `$${R.ai.assistantMonthly.toFixed(0)}/month overage`}</div>
+        <div class="breakdown-val" style="color:${R.ai.assistantMonthly === 0 ? 'var(--muted)' : 'var(--negative)'}">
+          ${R.ai.assistantMonthly === 0 ? '$0 / yr' : `−$${Math.round(R.ai.assistantMonthly * 12).toLocaleString('en-AU')} / yr`}
+        </div>
       </div>
       <div class="breakdown-row">
-        <div class="breakdown-name">AI Agent Scripted (${R.ai.agentUnits} units/month)</div>
-        <div class="breakdown-mins">$${R.ai.agentMonthly.toFixed(0)}/month</div>
-        <div class="breakdown-val" style="color:var(--negative)">−$${Math.round(R.ai.agentMonthly * 12).toLocaleString('en-AU')} / yr</div>
+        <div class="breakdown-name">AI Agent${R.ai.agentMonthly === 0 ? ' <span style="font-size:11px;color:var(--cyan);font-weight:400">(within included entitlement)</span>' : ''}</div>
+        <div class="breakdown-mins">${R.ai.agentMonthly === 0 ? `${Math.round(R.ai.voiceSeconds/60).toLocaleString('en-AU')} min voice · ${R.ai.digitalSessions.toLocaleString('en-AU')} digital sessions` : `$${R.ai.agentMonthly.toFixed(0)}/month overage`}</div>
+        <div class="breakdown-val" style="color:${R.ai.agentMonthly === 0 ? 'var(--muted)' : 'var(--negative)'}">
+          ${R.ai.agentMonthly === 0 ? '$0 / yr' : `−$${Math.round(R.ai.agentMonthly * 12).toLocaleString('en-AU')} / yr`}
+        </div>
       </div>
     </div>
 
@@ -881,17 +894,17 @@ function renderResults() {
           </tbody>
         </table>
 
-        <div class="section-label">AI cost assumptions</div>
+        <div class="section-label">AI cost assumptions (effective May 2026)</div>
         <table class="at">
           <thead><tr><th>Item</th><th>Basis</th><th>Value</th></tr></thead>
           <tbody>
             <tr><td>Voice calls / month</td><td>30% of monthly separations</td><td>${R.ai.voiceCalls.toLocaleString('en-AU')}</td></tr>
-            <tr><td>Avg handle time</td><td>Standard benchmark</td><td>180 sec (3 min)</td></tr>
+            <tr><td>Voice seconds / month</td><td>Calls × 180 sec avg handle time</td><td>${R.ai.voiceSeconds.toLocaleString('en-AU')} sec (${Math.round(R.ai.voiceSeconds/60).toLocaleString('en-AU')} min)</td></tr>
             <tr><td>Digital sessions / month</td><td>WX Connect runs × monthly separations</td><td>${R.ai.digitalSessions.toLocaleString('en-AU')}</td></tr>
-            <tr><td>AI Assistant units</td><td>((calls × AHT÷60) ÷ 2,000) + (sessions ÷ 1,000)</td><td>${R.ai.assistantUnits} units</td></tr>
-            <tr><td>AI Agent Scripted units</td><td>((calls × turns) ÷ 1,200) + (sessions ÷ 4,800)</td><td>${R.ai.agentUnits} units</td></tr>
-            <tr><td>AI Assistant unit price</td><td>$46.38 AUD list · 30% partner discount</td><td>$${COSTS.aiAssistantUnitPrice.toFixed(2)} / unit</td></tr>
-            <tr><td>AI Agent unit price</td><td>$154.60 AUD list · 30% partner discount</td><td>$${COSTS.aiAgentUnitPrice.toFixed(2)} / unit</td></tr>
+            <tr><td>AI Agent included</td><td>Voice: 1,600 min scripted + 250 min auto · Digital: 4,800 + 200 sessions</td><td>${Math.round(COSTS.agentVoiceIncSec/60).toLocaleString()} min voice · ${COSTS.agentDigitalInc.toLocaleString()} sessions</td></tr>
+            <tr><td>AI Agent overage</td><td>Above included entitlement, per second / per session</td><td>${R.ai.agVoiceOverageSec.toLocaleString()} sec voice · ${R.ai.agDigitalOverageSessions.toLocaleString()} digital sessions</td></tr>
+            <tr><td>AI Assistant included</td><td>Voice: 1,500 min scripted · Digital: 1,000 sessions</td><td>${Math.round(COSTS.assistantVoiceIncSec/60).toLocaleString()} min voice · ${COSTS.assistantDigitalInc.toLocaleString()} sessions</td></tr>
+            <tr><td>AI Assistant overage</td><td>Above included entitlement, per second / per session</td><td>${R.ai.asVoiceOverageSec.toLocaleString()} sec voice · ${R.ai.asDigitalOverageSessions.toLocaleString()} digital sessions</td></tr>
           </tbody>
         </table>
 
@@ -908,9 +921,10 @@ function renderResults() {
         </table>
 
         <div class="assume-note">
-          Net annual saving = gross labour saving across selected workflows, minus annual platform cost, AI Assistant cost, and AI Agent Scripted cost.
-          Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month) with a 180-second average handle time.
-          FTE calculated at 1,920 hours per year. AI unit pricing based on Cisco list pricing with 30% ArchiTech partner discount applied.
+          Net annual saving = gross labour saving across selected workflows, minus annual platform cost and any AI overage costs above included entitlement.
+          Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month) with a 180-second average handle time. Voice billed per second (effective May 2026).
+          AI included entitlement: Agent 1,600 min + 250 min voice, 4,800 + 200 digital sessions; Assistant 1,500 min voice, 1,000 digital sessions — included in platform fee. Overage rates based on Cisco list pricing with 30% ArchiTech partner discount.
+          FTE calculated at 1,920 hours per year.
           <br /><br />
           Victorian hospital separation benchmarks sourced from
           <a href="https://www.aihw.gov.au/reports-data/myhospitals/sectors/admitted-patients" target="_blank">AIHW Admitted Patient Care</a>
@@ -1042,8 +1056,8 @@ function printResults() {
 
   const costs = `
     <div class="print-row"><span>WxCC platform base</span><span class="print-neg">−$${Math.round(R.platformAnnual).toLocaleString('en-AU')} / yr</span></div>
-    <div class="print-row"><span>AI Assistant (${R.ai.assistantUnits} units/month)</span><span class="print-neg">−$${Math.round(R.ai.assistantMonthly * 12).toLocaleString('en-AU')} / yr</span></div>
-    <div class="print-row"><span>AI Agent Scripted (${R.ai.agentUnits} units/month)</span><span class="print-neg">−$${Math.round(R.ai.agentMonthly * 12).toLocaleString('en-AU')} / yr</span></div>
+    <div class="print-row"><span>AI Assistant${R.ai.assistantMonthly === 0 ? ' (within included entitlement)' : ' overage'}</span><span class="${R.ai.assistantMonthly === 0 ? '' : 'print-neg'}">−$${Math.round(R.ai.assistantMonthly * 12).toLocaleString('en-AU')} / yr</span></div>
+    <div class="print-row"><span>AI Agent${R.ai.agentMonthly === 0 ? ' (within included entitlement)' : ' overage'}</span><span class="${R.ai.agentMonthly === 0 ? '' : 'print-neg'}">−$${Math.round(R.ai.agentMonthly * 12).toLocaleString('en-AU')} / yr</span></div>
   `;
 
   const printDiv = document.getElementById('print-output');
@@ -1082,7 +1096,7 @@ function printResults() {
     ${costs}
 
     <div class="print-footer">
-      Figures based on ArchiTech implementation benchmarks and Cisco list pricing with 30% partner discount applied.
+      Figures based on ArchiTech implementation benchmarks. Voice billed per second (effective May 2026). Included entitlement: Agent 1,850 min voice + 5,000 digital sessions; Assistant 1,500 min voice + 1,000 digital sessions — included in platform fee. Overage rates based on Cisco list pricing with 30% ArchiTech partner discount applied.
       Voice call volume estimated at 30% of monthly separations (${R.ai.voiceCalls.toLocaleString('en-AU')} calls/month), 180-second AHT.
       Victorian hospital separation benchmarks sourced from AIHW and VAHI.
       Actual results will vary. For a detailed analysis, visit architech.net.au
