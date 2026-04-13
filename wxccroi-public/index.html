@@ -618,8 +618,8 @@ const COSTS = {
   minConcurrent: 5,               // minimum concurrent agent seats
   // AI Agent unit pricing (RRP, effective May 2026)
   agentUnitPrice:           154.60,
-  agentUnitVoiceMin:        1600,  // voice minutes per unit
-  agentUnitDigitalSessions: 4800,  // digital sessions per unit
+  agentUnitVoiceSec:        1600 * 60,  // 1,600 min = 96,000 sec per unit (metered per second)
+  agentUnitDigitalSessions: 4800,       // digital sessions per unit (1 session = 10 messages)
   // Voice estimation: 30% of monthly separations result in an AI-handled voice call
   voiceCallPct: 0.30,
   voiceAhtSec:  180,                         // 3-minute average handle time
@@ -650,17 +650,17 @@ function calcWorkflow(w, rate) {
 function calcAiCosts(selected) {
   const monthlySeps     = state.separations / 12;
   const voiceCalls      = Math.round(monthlySeps * COSTS.voiceCallPct);
-  const voiceMin        = Math.round(voiceCalls * COSTS.voiceAhtSec / 60);
-  const digitalSessions = Math.round(selected.reduce((s, w) => s + w.wx * monthlySeps, 0));
+  const voiceSec        = voiceCalls * COSTS.voiceAhtSec;  // metered per second
+  const digitalSessions = Math.round(selected.reduce((s, w) => s + w.wx * monthlySeps, 0));  // 1 session = 10 messages
 
   // Units needed = enough to cover voice AND digital usage
-  const unitsForVoice   = Math.ceil(voiceMin        / COSTS.agentUnitVoiceMin);
+  const unitsForVoice   = Math.ceil(voiceSec        / COSTS.agentUnitVoiceSec);
   const unitsForDigital = Math.ceil(digitalSessions  / COSTS.agentUnitDigitalSessions);
   const agentUnits      = Math.max(1, unitsForVoice, unitsForDigital);
   const totalMonthly    = agentUnits * COSTS.agentUnitPrice;
 
   return {
-    voiceCalls, voiceMin, digitalSessions,
+    voiceCalls, voiceSec, voiceMin: Math.round(voiceSec / 60), digitalSessions,
     agentUnits, totalMonthly, totalAnnual: totalMonthly * 12,
   };
 }
@@ -892,9 +892,9 @@ function renderResults() {
           <thead><tr><th>Item</th><th>Basis</th><th>Value</th></tr></thead>
           <tbody>
             <tr><td>Voice calls / month</td><td>30% of monthly separations</td><td>${R.ai.voiceCalls.toLocaleString('en-AU')}</td></tr>
-            <tr><td>Voice minutes / month</td><td>Calls × 3 min avg handle time</td><td>${R.ai.voiceMin.toLocaleString('en-AU')} min</td></tr>
-            <tr><td>Digital sessions / month</td><td>WX Connect runs × monthly separations</td><td>${R.ai.digitalSessions.toLocaleString('en-AU')}</td></tr>
-            <tr><td>Per-unit capacity</td><td>1 AI Agent unit covers</td><td>${COSTS.agentUnitVoiceMin.toLocaleString()} min voice · ${COSTS.agentUnitDigitalSessions.toLocaleString()} digital sessions</td></tr>
+            <tr><td>Voice seconds / month</td><td>Calls × 180 sec AHT, metered per second</td><td>${R.ai.voiceSec.toLocaleString('en-AU')} sec (${R.ai.voiceMin.toLocaleString('en-AU')} min)</td></tr>
+            <tr><td>Digital sessions / month</td><td>WX Connect runs × monthly separations (1 session = 10 messages)</td><td>${R.ai.digitalSessions.toLocaleString('en-AU')}</td></tr>
+            <tr><td>Per-unit capacity</td><td>1 AI Agent unit covers</td><td>96,000 sec (1,600 min) voice · ${COSTS.agentUnitDigitalSessions.toLocaleString()} digital sessions</td></tr>
             <tr><td>Units required</td><td>max(ceil(voice ÷ unit capacity), ceil(digital ÷ unit capacity))</td><td>${R.ai.agentUnits} unit${R.ai.agentUnits !== 1 ? 's' : ''} × $${COSTS.agentUnitPrice.toFixed(2)} = $${R.ai.totalMonthly.toFixed(2)}/month</td></tr>
           </tbody>
         </table>
@@ -924,7 +924,7 @@ function renderResults() {
         <div class="assume-note">
           Net annual saving = gross labour saving across selected workflows, minus annual platform licensing cost and any AI overage costs above included entitlement.
           Platform seat count derived from separations volume: 30% of monthly separations become voice calls; concurrent agents sized at 3,500 calls/agent/month (80% occupancy, 3-min AHT); 70% Standard / 30% Premium split; IVR ports at 1.2× concurrent agents. Minimum 5 concurrent agents and 5 IVR ports applied.
-          AI Agent units purchased based on monthly voice and digital usage. Each unit covers ${COSTS.agentUnitVoiceMin.toLocaleString()} voice minutes and ${COSTS.agentUnitDigitalSessions.toLocaleString()} digital sessions at $${COSTS.agentUnitPrice.toFixed(2)} RRP per unit.
+          AI Agent units purchased based on monthly usage. Voice metered per second (1 unit = 96,000 sec / 1,600 min). Digital metered per 10-message session (1 unit = 4,800 sessions). Unit price: $${COSTS.agentUnitPrice.toFixed(2)} RRP.
           FTE calculated at 1,920 hours per year.
           <br /><br />
           Victorian hospital separation benchmarks sourced from
