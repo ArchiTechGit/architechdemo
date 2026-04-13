@@ -896,84 +896,109 @@ function renderResults() {
     <div class="assume-body" id="assume-body">
       <div class="assume-inner">
 
-        <div class="section-label">Channel mix per workflow (per separation)</div>
+        ${/* ── Step 1: Savings ── */''}
+        <div class="section-label">Step 1 — How much staff time does automation recover?</div>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+          Each workflow removes a set amount of manual staff time per patient. Multiplied across
+          <strong style="color:var(--text)">${state.separations.toLocaleString('en-AU')} annual patients</strong>,
+          that adds up to real hours — and real dollars at
+          <strong style="color:var(--text)">$${state.rate.toFixed(0)}/hr</strong>.
+        </p>
         <table class="at">
-          <thead><tr><th>Workflow</th><th>SMS</th><th>WX Connect</th><th>Email</th><th>Mins saved</th></tr></thead>
+          <thead><tr><th>Workflow</th><th>Time saved per patient</th><th>Annual hours recovered</th><th>Annual value</th></tr></thead>
           <tbody>
             ${R.rows.map(r => `
               <tr>
-                <td>${r.w.name}</td>
-                <td>${r.w.sms}</td><td>${r.w.wx}</td><td>${r.w.email}</td>
-                <td>${r.w.mins}</td>
+                <td><strong>${r.w.name}</strong></td>
+                <td>${r.w.mins} min</td>
+                <td>${Math.round(r.annualHours).toLocaleString('en-AU')} hrs</td>
+                <td style="color:var(--cyan);font-weight:600">$${Math.round(r.annualSaving).toLocaleString('en-AU')}</td>
               </tr>
             `).join('')}
+            <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
+              <td colspan="2">Total</td>
+              <td>${Math.round(R.totalHours).toLocaleString('en-AU')} hrs &nbsp;(${R.fte.toFixed(1)} FTE)</td>
+              <td style="color:var(--cyan)">$${Math.round(R.totalSaving).toLocaleString('en-AU')}</td>
+            </tr>
           </tbody>
         </table>
 
-        <div class="section-label">AI Agent cost (effective May 2026)</div>
+        ${/* ── Step 2: Platform cost ── */''}
+        <div class="section-label" style="margin-top:24px">Step 2 — What does the platform cost?</div>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+          A <strong style="color:var(--text)">${state.agents}-agent</strong> Webex Contact Centre deployment
+          is licensed per concurrent agent seat and IVR port.
+        </p>
+        <table class="at">
+          <thead><tr><th>Licence</th><th>Qty</th><th>Rate / month</th><th>Monthly cost</th></tr></thead>
+          <tbody>
+            <tr><td>Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${COSTS.licenseStandard.toFixed(2)}</td><td>$${(R.lic.standard * COSTS.licenseStandard).toFixed(2)}</td></tr>
+            <tr><td>Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${COSTS.licensePremium.toFixed(2)}</td><td>$${(R.lic.premium * COSTS.licensePremium).toFixed(2)}</td></tr>
+            ${R.lic.ivr > 0 ? `<tr><td>Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${COSTS.licenseIvr.toFixed(2)}</td><td>$${(R.lic.ivr * COSTS.licenseIvr).toFixed(2)}</td></tr>` : ''}
+            <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
+              <td colspan="3">Total platform cost</td>
+              <td>$${R.lic.monthly.toFixed(2)}/mo &nbsp;→&nbsp; <span style="color:var(--negative)">$${Math.round(R.platformAnnual).toLocaleString('en-AU')}/yr</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        ${/* ── Step 3: AI cost ── */''}
+        <div class="section-label" style="margin-top:24px">Step 3 — What does the AI Agent cost?</div>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+          AI Agent is purchased in units. Each unit covers
+          <strong style="color:var(--text)">1,600 minutes of voice</strong> and
+          <strong style="color:var(--text)">4,800 digital sessions</strong>.
+          The number of units needed is driven by whichever channel uses more capacity.
+        </p>
         ${(() => {
-          const voiceUnits = Math.ceil(R.ai.voiceSec / COSTS.agentUnitVoiceSec);
+          const voiceUnits   = Math.ceil(R.ai.voiceSec / COSTS.agentUnitVoiceSec);
           const digitalUnits = Math.ceil(R.ai.digitalSessions / COSTS.agentUnitDigitalSessions);
-          const voiceDrives = voiceUnits >= digitalUnits;
+          const voiceDrives  = voiceUnits >= digitalUnits;
           return `
           <table class="at">
-            <thead><tr><th></th><th>Monthly usage</th><th>Per unit</th><th>Units needed</th></tr></thead>
+            <thead><tr><th>Channel</th><th>Monthly usage</th><th>Capacity per unit</th><th>Units needed</th></tr></thead>
             <tbody>
               <tr>
-                <td>Voice</td>
-                <td>${R.ai.voiceMin.toLocaleString('en-AU')} min<br><span style="font-size:11px;color:var(--muted)">${R.ai.voiceCalls.toLocaleString('en-AU')} calls × 3 min AHT</span></td>
+                <td>Voice calls</td>
+                <td>${R.ai.voiceMin.toLocaleString('en-AU')} min &nbsp;<span style="font-size:11px;color:var(--muted)">(${R.ai.voiceCalls.toLocaleString('en-AU')} calls × 3 min avg)</span></td>
                 <td>1,600 min</td>
-                <td style="color:${voiceDrives ? 'var(--cyan)' : 'inherit'}">${voiceUnits} unit${voiceUnits !== 1 ? 's' : ''}${voiceDrives ? ' ← drives total' : ''}</td>
+                <td style="color:${voiceDrives ? 'var(--cyan)' : 'var(--muted)'};font-weight:${voiceDrives ? 600 : 400}">${voiceUnits}${voiceDrives ? ' ← drives total' : ''}</td>
               </tr>
               <tr>
-                <td>Digital</td>
-                <td>${R.ai.digitalSessions.toLocaleString('en-AU')} sessions<br><span style="font-size:11px;color:var(--muted)">WX Connect runs per month</span></td>
+                <td>Digital interactions</td>
+                <td>${R.ai.digitalSessions.toLocaleString('en-AU')} sessions &nbsp;<span style="font-size:11px;color:var(--muted)">(automated chat / messaging)</span></td>
                 <td>4,800 sessions</td>
-                <td style="color:${!voiceDrives ? 'var(--cyan)' : 'inherit'}">${digitalUnits} unit${digitalUnits !== 1 ? 's' : ''}${!voiceDrives ? ' ← drives total' : ''}</td>
+                <td style="color:${!voiceDrives ? 'var(--cyan)' : 'var(--muted)'};font-weight:${!voiceDrives ? 600 : 400}">${digitalUnits}${!voiceDrives ? ' ← drives total' : ''}</td>
               </tr>
               <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
-                <td colspan="2">Total AI Agent units purchased</td>
-                <td>$${COSTS.agentUnitPrice.toFixed(2)} / unit</td>
-                <td style="color:var(--cyan)">${R.ai.agentUnits} × $${COSTS.agentUnitPrice.toFixed(2)} = $${R.ai.totalMonthly.toFixed(2)}/mo</td>
+                <td colspan="3">${R.ai.agentUnits} AI Agent unit${R.ai.agentUnits !== 1 ? 's' : ''} × $${COSTS.agentUnitPrice.toFixed(2)}/unit</td>
+                <td>$${R.ai.totalMonthly.toFixed(2)}/mo &nbsp;→&nbsp; <span style="color:var(--negative)">$${Math.round(R.ai.totalAnnual).toLocaleString('en-AU')}/yr</span></td>
               </tr>
             </tbody>
           </table>`;
         })()}
 
-        <div class="section-label">Platform licensing (based on ${state.agents} contact centre agents)</div>
+        ${/* ── Step 4: Net result ── */''}
+        <div class="section-label" style="margin-top:24px">Step 4 — The bottom line</div>
         <table class="at">
-          <thead><tr><th>Licence type</th><th>Seats / Ports</th><th>RRP / month</th><th>Monthly cost</th></tr></thead>
           <tbody>
-            <tr><td>WxCC Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${COSTS.licenseStandard.toFixed(2)}</td><td>$${(R.lic.standard * COSTS.licenseStandard).toFixed(2)}</td></tr>
-            <tr><td>WxCC Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${COSTS.licensePremium.toFixed(2)}</td><td>$${(R.lic.premium * COSTS.licensePremium).toFixed(2)}</td></tr>
-            <tr><td>WxCC Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${COSTS.licenseIvr.toFixed(2)}</td><td>$${(R.lic.ivr * COSTS.licenseIvr).toFixed(2)}</td></tr>
-            <tr><td colspan="3"><strong>Total monthly platform cost</strong></td><td><strong>$${R.lic.monthly.toFixed(2)}</strong></td></tr>
+            <tr><td>Gross annual saving (staff time recovered)</td><td style="color:var(--cyan);font-weight:600;text-align:right">+ $${Math.round(R.totalSaving).toLocaleString('en-AU')}</td></tr>
+            <tr><td>Less: annual platform licensing cost</td><td style="color:var(--negative);text-align:right">− $${Math.round(R.platformAnnual).toLocaleString('en-AU')}</td></tr>
+            <tr><td>Less: annual AI Agent cost</td><td style="color:var(--negative);text-align:right">− $${Math.round(R.ai.totalAnnual).toLocaleString('en-AU')}</td></tr>
+            <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:700;font-size:15px">
+              <td>Net annual saving</td>
+              <td style="color:var(--cyan);text-align:right">= $${Math.round(R.netSaving).toLocaleString('en-AU')}</td>
+            </tr>
           </tbody>
         </table>
 
-        <div class="section-label">Unit costs</div>
-        <table class="at">
-          <thead><tr><th>Item</th><th>Rate</th></tr></thead>
-          <tbody>
-            <tr><td>SMS per segment</td><td>$0.04</td></tr>
-            <tr><td>WX Connect remote run</td><td>$0.08</td></tr>
-            <tr><td>Email send</td><td>$0.00</td></tr>
-            <tr><td>Staff hourly rate</td><td>$${state.rate.toFixed(2)} / hr</td></tr>
-          </tbody>
-        </table>
-
-        <div class="assume-note">
-          Net annual saving = gross labour saving across selected workflows, minus annual platform licensing cost and any AI overage costs above included entitlement.
-          Platform seat count based on entered contact centre agent headcount (${state.agents} agents): 70% Standard / 30% Premium split; IVR ports at 1.2× agent count.
-          AI Agent units purchased based on monthly usage. Voice metered per second (1 unit = 96,000 sec / 1,600 min). Digital metered per 10-message session (1 unit = 4,800 sessions). Unit price: $${COSTS.agentUnitPrice.toFixed(2)} RRP.
-          FTE calculated at 1,920 hours per year.
+        <div class="assume-note" style="margin-top:20px">
+          Staff time valued at $${state.rate.toFixed(0)}/hr (fully-loaded labour rate). Voice call volume estimated at 30% of monthly separations with a 3-minute average handle time. FTE calculated at 1,920 hours/year. Platform seats: 70% Standard / 30% Premium split. IVR ports included with agent licences${state.agents > 20 ? '; additional ports purchased for deployments above 20 agents' : ''}.
           <br /><br />
-          Victorian hospital separation benchmarks sourced from
+          Separation benchmarks sourced from
           <a href="https://www.aihw.gov.au/reports-data/myhospitals/sectors/admitted-patients" target="_blank">AIHW Admitted Patient Care</a>
           and <a href="https://vahi.vic.gov.au/reports/victorian-health-services-performance/hospital-admission-and-discharge" target="_blank">VAHI Hospital Data</a>.
-          <br /><br />
-          For a detailed analysis specific to your organisation, visit
-          <a href="https://www.architech.net.au">architech.net.au</a>
+          For a tailored analysis, visit <a href="https://www.architech.net.au">architech.net.au</a>
         </div>
 
       </div>
