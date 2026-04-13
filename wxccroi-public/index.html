@@ -911,16 +911,34 @@ function renderResults() {
         </table>
 
         <div class="section-label">AI Agent cost (effective May 2026)</div>
-        <table class="at">
-          <thead><tr><th>Item</th><th>Basis</th><th>Value</th></tr></thead>
-          <tbody>
-            <tr><td>Voice calls / month</td><td>30% of monthly separations</td><td>${R.ai.voiceCalls.toLocaleString('en-AU')}</td></tr>
-            <tr><td>Voice seconds / month</td><td>Calls × 180 sec AHT, metered per second</td><td>${R.ai.voiceSec.toLocaleString('en-AU')} sec (${R.ai.voiceMin.toLocaleString('en-AU')} min)</td></tr>
-            <tr><td>Digital sessions / month</td><td>WX Connect runs × monthly separations (1 session = 10 messages)</td><td>${R.ai.digitalSessions.toLocaleString('en-AU')}</td></tr>
-            <tr><td>Per-unit capacity</td><td>1 AI Agent unit covers</td><td>96,000 sec (1,600 min) voice · ${COSTS.agentUnitDigitalSessions.toLocaleString()} digital sessions</td></tr>
-            <tr><td>Units required</td><td>max(ceil(voice ÷ unit capacity), ceil(digital ÷ unit capacity))</td><td>${R.ai.agentUnits} unit${R.ai.agentUnits !== 1 ? 's' : ''} × $${COSTS.agentUnitPrice.toFixed(2)} = $${R.ai.totalMonthly.toFixed(2)}/month</td></tr>
-          </tbody>
-        </table>
+        ${(() => {
+          const voiceUnits = Math.ceil(R.ai.voiceSec / COSTS.agentUnitVoiceSec);
+          const digitalUnits = Math.ceil(R.ai.digitalSessions / COSTS.agentUnitDigitalSessions);
+          const voiceDrives = voiceUnits >= digitalUnits;
+          return `
+          <table class="at">
+            <thead><tr><th></th><th>Monthly usage</th><th>Per unit</th><th>Units needed</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Voice</td>
+                <td>${R.ai.voiceMin.toLocaleString('en-AU')} min<br><span style="font-size:11px;color:var(--muted)">${R.ai.voiceCalls.toLocaleString('en-AU')} calls × 3 min AHT</span></td>
+                <td>1,600 min</td>
+                <td style="color:${voiceDrives ? 'var(--cyan)' : 'inherit'}">${voiceUnits} unit${voiceUnits !== 1 ? 's' : ''}${voiceDrives ? ' ← drives total' : ''}</td>
+              </tr>
+              <tr>
+                <td>Digital</td>
+                <td>${R.ai.digitalSessions.toLocaleString('en-AU')} sessions<br><span style="font-size:11px;color:var(--muted)">WX Connect runs per month</span></td>
+                <td>4,800 sessions</td>
+                <td style="color:${!voiceDrives ? 'var(--cyan)' : 'inherit'}">${digitalUnits} unit${digitalUnits !== 1 ? 's' : ''}${!voiceDrives ? ' ← drives total' : ''}</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
+                <td colspan="2">Total AI Agent units purchased</td>
+                <td>$${COSTS.agentUnitPrice.toFixed(2)} / unit</td>
+                <td style="color:var(--cyan)">${R.ai.agentUnits} × $${COSTS.agentUnitPrice.toFixed(2)} = $${R.ai.totalMonthly.toFixed(2)}/mo</td>
+              </tr>
+            </tbody>
+          </table>`;
+        })()}
 
         <div class="section-label">Platform licensing (based on ${state.agents} contact centre agents)</div>
         <table class="at">
