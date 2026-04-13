@@ -897,8 +897,8 @@ function renderResults() {
       <div class="assume-inner">
 
         ${/* ── Step 1: Savings ── */''}
-        <div class="section-label">Step 1 — How much staff time does automation recover?</div>
-        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+        <p style="font-size:17px;font-weight:700;color:var(--text);margin:0 0 8px;letter-spacing:-0.01em">Step 1 — How much staff time does automation recover?</p>
+        <p style="font-size:15px;color:var(--muted);margin:0 0 14px;line-height:1.7">
           Each workflow removes a set amount of manual staff time per patient. Multiplied across
           <strong style="color:var(--text)">${state.separations.toLocaleString('en-AU')} annual patients</strong>,
           that adds up to real hours — and real dollars at
@@ -924,17 +924,17 @@ function renderResults() {
         </table>
 
         ${/* ── Step 2: Platform cost ── */''}
-        <div class="section-label" style="margin-top:24px">Step 2 — What does the platform cost?</div>
-        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+        <p style="font-size:17px;font-weight:700;color:var(--text);margin:32px 0 8px;letter-spacing:-0.01em">Step 2 — What does the platform cost?</p>
+        <p style="font-size:15px;color:var(--muted);margin:0 0 14px;line-height:1.7">
           A <strong style="color:var(--text)">${state.agents}-agent</strong> Webex Contact Centre deployment
-          is licensed per concurrent agent seat and IVR port.
+          is licensed per concurrent agent seat and IVR port. All rates are RRP.
         </p>
         <table class="at">
-          <thead><tr><th>Licence</th><th>Qty</th><th>Rate / month</th><th>Monthly cost</th></tr></thead>
+          <thead><tr><th>Licence</th><th>Qty</th><th>RRP / month</th><th>Monthly cost</th></tr></thead>
           <tbody>
-            <tr><td>Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${COSTS.licenseStandard.toFixed(2)}</td><td>$${(R.lic.standard * COSTS.licenseStandard).toFixed(2)}</td></tr>
-            <tr><td>Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${COSTS.licensePremium.toFixed(2)}</td><td>$${(R.lic.premium * COSTS.licensePremium).toFixed(2)}</td></tr>
-            ${R.lic.ivr > 0 ? `<tr><td>Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${COSTS.licenseIvr.toFixed(2)}</td><td>$${(R.lic.ivr * COSTS.licenseIvr).toFixed(2)}</td></tr>` : ''}
+            <tr><td>Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${COSTS.licenseStandard.toFixed(2)} RRP</td><td>$${(R.lic.standard * COSTS.licenseStandard).toFixed(2)}</td></tr>
+            <tr><td>Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${COSTS.licensePremium.toFixed(2)} RRP</td><td>$${(R.lic.premium * COSTS.licensePremium).toFixed(2)}</td></tr>
+            ${R.lic.ivr > 0 ? `<tr><td>Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${COSTS.licenseIvr.toFixed(2)} RRP</td><td>$${(R.lic.ivr * COSTS.licenseIvr).toFixed(2)}</td></tr>` : ''}
             <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
               <td colspan="3">Total platform cost</td>
               <td>$${R.lic.monthly.toFixed(2)}/mo &nbsp;→&nbsp; <span style="color:var(--negative)">$${Math.round(R.platformAnnual).toLocaleString('en-AU')}/yr</span></td>
@@ -943,8 +943,8 @@ function renderResults() {
         </table>
 
         ${/* ── Step 3: AI cost ── */''}
-        <div class="section-label" style="margin-top:24px">Step 3 — What does the AI Agent cost?</div>
-        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+        <p style="font-size:17px;font-weight:700;color:var(--text);margin:32px 0 8px;letter-spacing:-0.01em">Step 3 — What does the AI Agent cost?</p>
+        <p style="font-size:15px;color:var(--muted);margin:0 0 14px;line-height:1.7">
           AI Agent is purchased in units. Each unit covers
           <strong style="color:var(--text)">1,600 minutes of voice</strong> and
           <strong style="color:var(--text)">4,800 digital sessions</strong>.
@@ -979,7 +979,7 @@ function renderResults() {
         })()}
 
         ${/* ── Step 4: Net result ── */''}
-        <div class="section-label" style="margin-top:24px">Step 4 — The bottom line</div>
+        <p style="font-size:17px;font-weight:700;color:var(--text);margin:32px 0 8px;letter-spacing:-0.01em">Step 4 — The bottom line</p>
         <table class="at">
           <tbody>
             <tr><td>Gross annual saving (staff time recovered)</td><td style="color:var(--cyan);font-weight:600;text-align:right">+ $${Math.round(R.totalSaving).toLocaleString('en-AU')}</td></tr>
