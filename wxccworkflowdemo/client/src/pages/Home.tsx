@@ -936,7 +936,7 @@ export default function Home() {
                   }}
                 >
                   {/* Banner */}
-                  <div className="relative overflow-hidden" style={{ height: "140px", background: stageColor.bg }}>
+                  <div className="relative overflow-hidden" style={{ height: "168px", background: stageColor.bg }}>
                     {StageIcon && (
                       <div className="absolute -right-6 -bottom-6 pointer-events-none">
                         <StageIcon style={{ width: "160px", height: "160px", color: stageColor.iconTint }} />
