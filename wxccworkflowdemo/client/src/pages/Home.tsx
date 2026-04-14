@@ -143,43 +143,6 @@ const STAGE_META = [
 const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
 const STAGE_COLORS = [STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR];
 
-const IMPACT_STATS = [
-  {
-    hero: "20x",
-    headline: "More cost-effective per interaction than a manual phone call.",
-    body: "Routine patient communications cost $10–$30 each when handled by clinical staff. The same outcome delivered digitally costs",
-    highlight: "$0.12–$0.20 per interaction",
-    tail: "Every touchpoint adds to it. So does every site.",
-  },
-  {
-    hero: "80%",
-    headline: "Of manual effort cut from appointment confirmation.",
-    body: "Multiple call attempts, voicemail, manual documentation, follow-up — replaced by a single automated message.",
-    highlight: "Confirmed in the Proof of Value.",
-    tail: "No clinical judgment required. No staff time consumed.",
-  },
-  {
-    hero: "~$84",
-    headline: "In staff cost recovered per patient episode across all four workflows.",
-    body: "Appointment scheduling, pre-admission, surgery prep, recovery check-in. At 2,000 surgical cases that returns $168K. At 10,000 cases,",
-    highlight: "the saving exceeds $840K annually",
-    tail: "The platform cost stays fixed as volume grows.",
-  },
-  {
-    hero: "250hrs",
-    headline: "Of clinical staff time recovered for every 1,000 interactions automated.",
-    body: "At 15 minutes per manual call, every thousand interactions automated returns",
-    highlight: "~$14,000 in clinical capacity",
-    tail: "Small facility. Large network. The math scales either way.",
-  },
-  {
-    hero: "12–18",
-    headline: "Months to full break-even. Net positive every year after.",
-    body: "Total first-year investment $71K–$96K including one-time setup. Annual return scales with patient volume —",
-    highlight: "higher volume means faster break-even",
-    tail: "and more return every year after that.",
-  },
-];
 
 const STAFF_BENEFITS = [
   { icon: "🧠", headline: "Less cognitive load", body: "Routine tasks — confirmations, callbacks, reminders — are handled automatically. Clinicians focus on clinical decisions, not admin." },
@@ -199,8 +162,6 @@ const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
 const TECH_STACK = ["Webex CC Flow Designer", "Webex Connect", "Calendar API", "EHR Integration"];
 
 export default function Home() {
-  const [statIndex, setStatIndex] = useState(0);
-  const [statVisible, setStatVisible] = useState(true);
   const [patientName, setPatientName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [demoMobile, setDemoMobile] = useState("");
@@ -212,7 +173,7 @@ export default function Home() {
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
-  const [benefitsTab, setBenefitsTab] = useState<"roi" | "staff" | "patient">("roi");
+  const [benefitsTab, setBenefitsTab] = useState<"staff" | "patient">("staff");
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
@@ -225,40 +186,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const goToStat = (index: number) => {
-    setStatVisible(false);
-    setTimeout(() => {
-      setStatIndex(index);
-      setStatVisible(true);
-    }, 350);
-  };
-
-  const advanceStat = (dir: 1 | -1) => {
-    const next = (statIndex + dir + IMPACT_STATS.length) % IMPACT_STATS.length;
-    goToStat(next);
-    if (statIntervalRef.current) clearInterval(statIntervalRef.current);
-    statIntervalRef.current = setInterval(() => {
-      setStatVisible(false);
-      setTimeout(() => {
-        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
-        setStatVisible(true);
-      }, 350);
-    }, 12000);
-  };
-
-  useEffect(() => {
-    statIntervalRef.current = setInterval(() => {
-      setStatVisible(false);
-      setTimeout(() => {
-        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
-        setStatVisible(true);
-      }, 350);
-    }, 12000);
-    return () => { if (statIntervalRef.current) clearInterval(statIntervalRef.current); };
-  }, []);
 
   const allComplete = triggeredStages.size === JOURNEY_STAGES.length;
   const [showCompleteModal, setShowCompleteModal] = useState(false);
@@ -416,103 +343,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Impact banner */}
-      <div
-        className="relative border-b border-white/[0.06] overflow-hidden"
-        style={{ background: "#070d15", minHeight: "220px" }}
-      >
-        <img
-          src={bgImage}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ opacity: 0.14, mixBlendMode: "luminosity" }}
-        />
-        {/* Layered dramatic gradients */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(135deg, rgba(7,13,21,0.95) 0%, rgba(13,24,37,0.75) 50%, rgba(19,41,75,0.92) 100%)" }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 55% 120% at 0% 50%, rgba(5,195,221,0.13) 0%, transparent 55%)" }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 40% 80% at 100% 50%, rgba(19,41,75,0.6) 0%, transparent 60%)" }}
-        />
-        {/* Subtle top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.3) 30%, rgba(5,195,221,0.15) 70%, transparent 100%)" }} />
-        <div
-          className="container mx-auto px-6 md:px-10 py-10 flex items-center gap-8 md:gap-14 relative"
-          style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
-        >
-          {/* Hero number */}
-          <div className="flex-shrink-0 flex items-end gap-4">
-            <span
-              className="font-black text-primary leading-none"
-              style={{
-                fontSize: "clamp(64px, 8vw, 100px)",
-                textShadow: "0 0 40px rgba(5,195,221,0.35), 0 0 80px rgba(5,195,221,0.15)",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {IMPACT_STATS[statIndex].hero}
-            </span>
-            <div className="pb-3">
-              <div className="w-10 h-px mb-3" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.8), rgba(5,195,221,0.2))" }} />
-              {/* Dot indicators + prev/next controls */}
-              <div className="flex gap-1.5 items-center">
-                <button
-                  onClick={() => advanceStat(-1)}
-                  aria-label="Previous stat"
-                  className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors"
-                  style={{ fontSize: "12px" }}
-                >‹</button>
-                {IMPACT_STATS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goToStat(i)}
-                    aria-label={`Show stat ${i + 1}`}
-                    className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                    style={{
-                      width: i === statIndex ? "18px" : "5px",
-                      height: "5px",
-                      background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
-                      boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
-                    }}
-                  />
-                ))}
-                <button
-                  onClick={() => advanceStat(1)}
-                  aria-label="Next stat"
-                  className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors"
-                  style={{ fontSize: "12px" }}
-                >›</button>
-              </div>
-            </div>
-          </div>
-          <div className="hidden md:block w-px self-stretch" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)" }} />
-          {/* Story */}
-          <div className="flex-1">
-            <p className="text-xl md:text-2xl font-black text-white mb-3 leading-snug tracking-tight">
-              {IMPACT_STATS[statIndex].headline}
-            </p>
-            <p className="text-base text-white/65 leading-relaxed">
-              {IMPACT_STATS[statIndex].body}{" "}
-              <span className="text-white font-bold" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>{IMPACT_STATS[statIndex].highlight}</span>
-              {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Benefits section — tabbed */}
       <div className="border-b border-white/[0.06]" style={{ background: "linear-gradient(180deg, #080f19 0%, #0a1320 100%)" }}>
         <div className="container mx-auto px-6 md:px-10 py-8">
           {/* Tab strip */}
           <div className="flex items-center gap-1 mb-7 p-1 rounded-xl w-fit" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            {([ ["roi", "Financial ROI"], ["staff", "Clinical Staff"], ["patient", "Patient & Carer"] ] as const).map(([tab, label]) => (
+            {([ ["staff", "Clinical Staff"], ["patient", "Patient & Carer"] ] as const).map(([tab, label]) => (
               <button
                 key={tab}
                 onClick={() => setBenefitsTab(tab)}
@@ -526,26 +362,6 @@ export default function Home() {
               >{label}</button>
             ))}
           </div>
-
-          {/* ROI tab — summary of the rotating stats */}
-          {benefitsTab === "roi" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { hero: "20x", headline: "More cost-effective per interaction", body: "Routine patient communications cost $10–$30 per staff call. The same outcome digitally costs $0.12–$0.20." },
-                { hero: "~$84", headline: "Staff cost recovered per patient episode", body: "Across four workflows per surgical case. At 2,000 cases annually, that's $168K recovered. At 10,000 cases, $840K+." },
-                { hero: "250hrs", headline: "Clinical capacity returned per 1,000 interactions", body: "At 15 minutes per manual call, automating 1,000 interactions returns ~$14,000 in clinical capacity." },
-                { hero: "80%", headline: "Manual effort cut from appointment confirmation", body: "Multiple call attempts, voicemail, manual documentation — replaced by a single automated conversation." },
-                { hero: "12–18mo", headline: "To full break-even", body: "Total first-year investment $71K–$96K. Net positive every year after that. Volume scales the return." },
-                { hero: "$0.12", headline: "Per automated interaction", body: "vs $10–$30 per manual staff interaction. The unit economics are irreversible at any scale." },
-              ].map(({ hero, headline, body }) => (
-                <div key={hero} className="rounded-xl p-4" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.1)" }}>
-                  <p className="font-black text-primary mb-1" style={{ fontSize: "clamp(22px, 4vw, 32px)", textShadow: "0 0 20px rgba(5,195,221,0.3)", letterSpacing: "-0.02em" }}>{hero}</p>
-                  <p className="text-sm font-bold text-white mb-1.5 leading-snug">{headline}</p>
-                  <p className="text-xs text-white/45 leading-relaxed">{body}</p>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* Clinical Staff tab */}
           {benefitsTab === "staff" && (
