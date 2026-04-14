@@ -6,6 +6,8 @@ import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Lo
 import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
+import webexLogoUrl from "@/assets/logo-webex.svg";
+import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -21,7 +23,14 @@ interface JourneyStage {
   phoneMessage: string;
   phoneAction: string;
   systemEvents: string[];
-  partnerBadge?: { label: string; logoSvg: string };
+  partnerBadge?: {
+    label: string;
+    sublabel?: string;
+    logoUrl: string;
+    bg: string;
+    border: string;
+    filterWhite?: boolean;
+  };
   phoneActionUrl?: string;
   conversationThread?: { role: "ai" | "patient"; text: string }[];
 }
@@ -54,8 +63,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
     partnerBadge: {
-      label: "Webex Instant Connect",
-      logoSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(5,195,221,0.15)" stroke="rgba(5,195,221,0.4)" stroke-width="1.5"/><path d="M14 18c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H26l-4 4v-4h-6a2 2 0 0 1-2-2v-8z" fill="rgba(5,195,221,0.9)"/><circle cx="19" cy="22" r="1.5" fill="white"/><circle cx="24" cy="22" r="1.5" fill="white"/><circle cx="29" cy="22" r="1.5" fill="white"/></svg>`,
+      label: "Webex",
+      sublabel: "Instant Connect",
+      logoUrl: webexLogoUrl,
+      bg: "rgba(0,191,111,0.12)",
+      border: "rgba(0,191,111,0.4)",
+      filterWhite: true,
     },
   },
   {
@@ -73,7 +86,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
     partnerBadge: {
       label: "Cisco Spaces",
-      logoSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(0,169,145,0.15)" stroke="rgba(0,169,145,0.4)" stroke-width="1.5"/><path d="M24 12c-6.6 0-12 5.4-12 12 0 4.4 2.4 8.3 6 10.4V36l4-3.2c.6.1 1.3.2 2 .2 6.6 0 12-5.4 12-12S30.6 12 24 12z" fill="rgba(0,169,145,0.85)"/><circle cx="24" cy="24" r="3" fill="white"/><circle cx="17" cy="24" r="2" fill="rgba(255,255,255,0.6)"/><circle cx="31" cy="24" r="2" fill="rgba(255,255,255,0.6)"/></svg>`,
+      logoUrl: ciscoSpacesLogoUrl,
+      bg: "rgba(0,169,145,0.12)",
+      border: "rgba(0,169,145,0.4)",
     },
   },
   {
@@ -941,8 +956,15 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
-                            <div className="flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: "rgba(5,195,221,0.1)", border: "1px solid rgba(5,195,221,0.25)" }}>
-                              <span className="text-[9px] font-bold font-mono tracking-wider" style={{ color: "rgba(5,195,221,0.8)" }}>Epic · HL7 FHIR</span>
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex flex-col items-center px-2 py-1 rounded-md" style={{ background: "rgba(46,125,50,0.18)", border: "1px solid rgba(76,175,80,0.45)" }}>
+                                <span className="text-[9px] font-black tracking-wide leading-none" style={{ color: "#66BB6A" }}>Epic</span>
+                                <span className="text-[6.5px] font-bold tracking-[0.15em] uppercase leading-none mt-0.5" style={{ color: "rgba(102,187,106,0.55)" }}>EMR</span>
+                              </div>
+                              <div className="flex flex-col items-center px-2 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
+                                <span className="text-[9px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR</span>
+                                <span className="text-[6.5px] font-bold tracking-[0.15em] uppercase leading-none mt-0.5" style={{ color: "rgba(255,167,38,0.5)" }}>R4</span>
+                              </div>
                             </div>
                           )}
                           {isTriggered && (
@@ -956,13 +978,25 @@ export default function Home() {
                       <div className="flex items-end justify-between gap-3">
                         <div className="flex flex-col gap-1.5">
                           {stage.partnerBadge && (
-                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md w-fit" style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(4px)" }}>
-                              <span
-                                className="flex-shrink-0"
-                                style={{ width: 18, height: 18, display: "inline-block" }}
-                                dangerouslySetInnerHTML={{ __html: stage.partnerBadge.logoSvg }}
+                            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg w-fit" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)" }}>
+                              <img
+                                src={stage.partnerBadge.logoUrl}
+                                alt={stage.partnerBadge.label}
+                                style={{
+                                  height: stage.partnerBadge.sublabel ? 14 : 16,
+                                  width: "auto",
+                                  maxWidth: stage.partnerBadge.sublabel ? 18 : 56,
+                                  objectFit: "contain",
+                                  filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
+                                  flexShrink: 0,
+                                }}
                               />
-                              <span className="text-[9px] font-bold tracking-wider uppercase font-mono" style={{ color: "rgba(255,255,255,0.6)" }}>{stage.partnerBadge.label}</span>
+                              {stage.partnerBadge.sublabel && (
+                                <div className="flex flex-col">
+                                  <span className="text-[9px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
+                                  <span className="text-[7px] font-semibold leading-none mt-0.5 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                                </div>
+                              )}
                             </div>
                           )}
                           <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
