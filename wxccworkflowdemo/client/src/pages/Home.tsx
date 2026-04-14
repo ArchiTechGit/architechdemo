@@ -957,13 +957,13 @@ export default function Home() {
                         <div className="flex items-center gap-1.5">
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
                             <div className="flex items-center gap-1.5">
-                              <div className="flex flex-col items-center px-2 py-1 rounded-md" style={{ background: "rgba(46,125,50,0.18)", border: "1px solid rgba(76,175,80,0.45)" }}>
-                                <span className="text-[9px] font-black tracking-wide leading-none" style={{ color: "#66BB6A" }}>Epic</span>
-                                <span className="text-[6.5px] font-bold tracking-[0.15em] uppercase leading-none mt-0.5" style={{ color: "rgba(102,187,106,0.55)" }}>EMR</span>
+                              <div className="flex flex-col items-center px-3 py-1.5 rounded-md" style={{ background: "rgba(5,195,221,0.12)", border: "1px solid rgba(5,195,221,0.4)" }}>
+                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#05C3DD" }}>EMR · EHR · PHR</span>
+                                <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.5)" }}>Integration</span>
                               </div>
-                              <div className="flex flex-col items-center px-2 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
-                                <span className="text-[9px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR</span>
-                                <span className="text-[6.5px] font-bold tracking-[0.15em] uppercase leading-none mt-0.5" style={{ color: "rgba(255,167,38,0.5)" }}>R4</span>
+                              <div className="flex flex-col items-center px-3 py-1.5 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
+                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR</span>
+                                <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none mt-1" style={{ color: "rgba(255,167,38,0.5)" }}>R4</span>
                               </div>
                             </div>
                           )}
@@ -978,14 +978,14 @@ export default function Home() {
                       <div className="flex items-end justify-between gap-3">
                         <div className="flex flex-col gap-1.5">
                           {stage.partnerBadge && (
-                            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg w-fit" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)" }}>
+                            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg w-fit" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)" }}>
                               <img
                                 src={stage.partnerBadge.logoUrl}
                                 alt={stage.partnerBadge.label}
                                 style={{
-                                  height: stage.partnerBadge.sublabel ? 14 : 16,
+                                  height: stage.partnerBadge.sublabel ? 20 : 22,
                                   width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 18 : 56,
+                                  maxWidth: stage.partnerBadge.sublabel ? 24 : 80,
                                   objectFit: "contain",
                                   filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
                                   flexShrink: 0,
@@ -993,8 +993,8 @@ export default function Home() {
                               />
                               {stage.partnerBadge.sublabel && (
                                 <div className="flex flex-col">
-                                  <span className="text-[9px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
-                                  <span className="text-[7px] font-semibold leading-none mt-0.5 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                                  <span className="text-[11px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
+                                  <span className="text-[8.5px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
                                 </div>
                               )}
                             </div>
