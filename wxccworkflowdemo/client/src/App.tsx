@@ -5,6 +5,7 @@ import { Route, Router, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Screensaver from "./components/Screensaver";
 
 
 function RouterComponent() {
@@ -35,6 +36,7 @@ function App() {
           <Router base="/wxccworkflowdemo/dist">
             <RouterComponent />
           </Router>
+          <Screensaver idleSeconds={45} />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
