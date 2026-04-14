@@ -954,7 +954,29 @@ export default function Home() {
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{stage.sectionHeader}</span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-start gap-1.5">
+                          {stage.partnerBadge && (
+                            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)" }}>
+                              <img
+                                src={stage.partnerBadge.logoUrl}
+                                alt={stage.partnerBadge.label}
+                                style={{
+                                  height: stage.partnerBadge.sublabel ? 20 : 22,
+                                  width: "auto",
+                                  maxWidth: stage.partnerBadge.sublabel ? 24 : 80,
+                                  objectFit: "contain",
+                                  filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              {stage.partnerBadge.sublabel && (
+                                <div className="flex flex-col">
+                                  <span className="text-[11px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
+                                  <span className="text-[8.5px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
                             <div className="flex items-center gap-1.5">
                               <div className="flex flex-col items-center px-3 py-1.5 rounded-md" style={{ background: "rgba(5,195,221,0.12)", border: "1px solid rgba(5,195,221,0.4)" }}>
@@ -976,29 +998,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="flex items-end justify-between gap-3">
-                        <div className="flex flex-col gap-1.5">
-                          {stage.partnerBadge && (
-                            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg w-fit" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)" }}>
-                              <img
-                                src={stage.partnerBadge.logoUrl}
-                                alt={stage.partnerBadge.label}
-                                style={{
-                                  height: stage.partnerBadge.sublabel ? 20 : 22,
-                                  width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 24 : 80,
-                                  objectFit: "contain",
-                                  filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
-                                  flexShrink: 0,
-                                }}
-                              />
-                              {stage.partnerBadge.sublabel && (
-                                <div className="flex flex-col">
-                                  <span className="text-[11px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
-                                  <span className="text-[8.5px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                        <div>
                           <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
