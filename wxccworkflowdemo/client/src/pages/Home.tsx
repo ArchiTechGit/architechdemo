@@ -328,8 +328,6 @@ export default function Home() {
       setLastTriggeredStage(workflowId);
       setPhonePulse(true);
       setTimeout(() => setPhonePulse(false), 2000);
-      const nextIdx = JOURNEY_STAGES.findIndex((s) => s.id === workflowId) + 1;
-      if (nextIdx < JOURNEY_STAGES.length) setTimeout(() => setActiveStepperStage(JOURNEY_STAGES[nextIdx].id), 600);
       const revealTimeouts = [450, 950, 1500].map((delay, idx) =>
         setTimeout(() => {
           setStageStepReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
