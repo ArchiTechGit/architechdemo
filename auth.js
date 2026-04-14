@@ -1,10 +1,10 @@
 /* ArchiTech Demo — Password Gate
  * To change the password, replace HASH with the SHA-256 of your new password.
  * Generate with: echo -n "YourNewPassword" | sha256sum
- * Current password: ArchiTech2024!
+ * Current password: DHF#2026
  */
 (function () {
-  var HASH = '1e21f96c12d90732faa4f8f949b76097c6f2c8889fcd99a6b452d9889536f6d3';
+  var HASH = 'b89ac9cd490377608eb7c2f48fb57b31791d1bf0cbc122d4113647aed9f3d977';
   var STORAGE_KEY = 'architech_auth';
   var EXPIRY_KEY = 'architech_auth_expiry';
   var ONE_DAY = 24 * 60 * 60 * 1000;
