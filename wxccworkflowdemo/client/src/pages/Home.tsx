@@ -22,6 +22,7 @@ interface JourneyStage {
   phoneAction: string;
   systemEvents: string[];
   partnerBadge?: { label: string; logoSvg: string };
+  phoneActionUrl?: string;
 }
 
 const JOURNEY_STAGES: JourneyStage[] = [
@@ -63,8 +64,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Patient arrives, joins queue at admissions desk.",
     automationOpportunity: "Day of surgery SMS before patient enters hospital carpark. \"When you arrive please proceed to Level 2, Bay 4. For assistance locating, please use this wayfinder URL\".",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
+    phoneMessage: "Hi John Smith, surgery is confirmed for tomorrow at 7:30am. When you arrive, proceed directly to Level 2, Bay 4 — Pre-Admission Suite. Tap below for live navigation.",
     phoneAction: "Open Wayfinder →",
+    phoneActionUrl: "/wxccworkflowdemo/dist/wayfinding.html",
     systemEvents: [],
     partnerBadge: {
       label: "Cisco Spaces",
@@ -668,9 +670,18 @@ export default function Home() {
                           <div className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
                             <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{activePhoneStage.phoneMessage}</p>
                           </div>
-                          <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
-                            <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
-                          </div>
+                          {activePhoneStage.phoneActionUrl ? (
+                            <a href={activePhoneStage.phoneActionUrl} target="_blank" rel="noopener noreferrer" className="block no-underline">
+                              <div className="bg-[#05C3DD] rounded-2xl px-3 py-2 flex items-center justify-center gap-1.5" style={{ boxShadow: "0 0 12px rgba(5,195,221,0.3)" }}>
+                                <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8L8 2M8 2H4M8 2v4" stroke="white" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                              </div>
+                            </a>
+                          ) : (
+                            <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
+                              <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
