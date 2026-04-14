@@ -23,7 +23,10 @@ interface JourneyStage {
   systemEvents: string[];
   partnerBadge?: { label: string; logoSvg: string };
   phoneActionUrl?: string;
+  conversationThread?: { role: "ai" | "patient"; text: string }[];
 }
+
+const VOICE_AI_DEMO_NUMBER = "+61 2 0000 0000"; // Replace with real demo number
 
 const JOURNEY_STAGES: JourneyStage[] = [
   {
@@ -114,6 +117,17 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi John Smith, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
+    conversationThread: [
+      { role: "ai", text: "Hi John, it's been 2 days since your surgery. On a scale of 1–10, how would you rate your pain right now?" },
+      { role: "patient", text: "About a 3. Manageable." },
+      { role: "ai", text: "Good to hear — that's within the expected range. How does your wound site look? Any redness, swelling, or discharge?" },
+      { role: "patient", text: "A little red around the edge but no discharge." },
+      { role: "ai", text: "Thank you. Some redness in the first 48 hours is normal. Are you taking your prescribed pain medication as directed?" },
+      { role: "patient", text: "Yes, every 6 hours like they said." },
+      { role: "ai", text: "Perfect. One more — any fever, chills, or difficulty breathing since discharge?" },
+      { role: "patient", text: "No, feeling okay overall." },
+      { role: "ai", text: "Great news, John. Your responses look within normal range. A nurse will review this and follow up if anything needs attention. Stay rested and we'll check in again in 48 hours. 💙" },
+    ],
   },
 ];
 
@@ -182,6 +196,8 @@ export default function Home() {
   const [phonePulse, setPhonePulse] = useState(false);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
+  const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
@@ -315,6 +331,15 @@ export default function Home() {
         );
         stepRevealTimeoutsRef.current.push(...sysTimeouts);
       }
+      // Reveal conversational AI thread progressively
+      if (triggeredStage && triggeredStage.conversationThread && triggeredStage.conversationThread.length > 0) {
+        const threadTimeouts = triggeredStage.conversationThread.map((_, idx) =>
+          setTimeout(() => {
+            setThreadReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
+          }, 800 + idx * 1800)
+        );
+        stepRevealTimeoutsRef.current.push(...threadTimeouts);
+      }
       toast.success(`${workflowLabel} sent`, { description: mobileNumber });
     } catch (error) {
       toast.error("Workflow trigger failed", { description: error instanceof Error ? error.message : "Unknown error" });
@@ -331,6 +356,7 @@ export default function Home() {
     setPhonePulse(false);
     setStageStepReveal({});
     setSystemEventReveal({});
+    setThreadReveal({});
     setExpandedStages(new Set());
     setPatientName("");
     setMobileNumber("");
@@ -659,6 +685,31 @@ export default function Home() {
                             <p className="text-slate-300 text-xs">Trigger a stage →</p>
                           </div>
                         </div>
+                      ) : activePhoneStage.conversationThread && (threadReveal[activePhoneStage.id] ?? 0) > 0 ? (
+                        /* Conversational AI thread view (Stage 06) */
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #05C3DD, #0095A8)" }}>
+                              <span className="text-white font-bold" style={{ fontSize: "8px" }}>AI</span>
+                            </div>
+                            <span className="text-slate-500" style={{ fontSize: "10px" }}>Webex AI Agent · now</span>
+                          </div>
+                          {activePhoneStage.conversationThread.slice(0, threadReveal[activePhoneStage.id] ?? 0).map((msg, i) => (
+                            <div key={i} className={`flex ${msg.role === "patient" ? "justify-end" : "justify-start"}`}>
+                              <div
+                                className="rounded-2xl px-2.5 py-1.5"
+                                style={{
+                                  maxWidth: "82%",
+                                  background: msg.role === "ai" ? "#f1f5f9" : "#05C3DD",
+                                  borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined,
+                                  borderTopRightRadius: msg.role === "patient" ? "4px" : undefined,
+                                }}
+                              >
+                                <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.text}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 mb-3">
@@ -922,6 +973,12 @@ export default function Home() {
                               Start Meeting
                             </Button>
                           )}
+                          {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
+                            <Button onClick={() => setVoiceModalOpen(true)} className="font-medium text-[10px] h-7 px-2.5 shadow-none flex items-center gap-1" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.35)", color: "#00A991" }}>
+                              <Phone className="w-3 h-3" />
+                              Call AI →
+                            </Button>
+                          )}
                           {!isTriggered && (
                             <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-xs h-7 px-3 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
                               {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
@@ -1120,6 +1177,56 @@ export default function Home() {
               className="w-full h-auto rounded-lg border border-white/10"
               onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/1200x560/13294B/1A3460?text=${encodeURIComponent(lightboxImage.label)}`; }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Voice AI Demo Modal */}
+      {voiceModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setVoiceModalOpen(false)}
+        >
+          <div
+            className="relative mx-6 rounded-3xl overflow-hidden"
+            style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid rgba(0,169,145,0.35)", boxShadow: "0 0 0 1px rgba(0,169,145,0.1), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(0,169,145,0.08)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top accent */}
+            <div style={{ height: "3px", background: "linear-gradient(90deg, #00A991, #05C3DD, #00A991)" }} />
+            <div className="p-8 text-center">
+              {/* Pulse ring */}
+              <div className="inline-flex items-center justify-center mb-6" style={{ position: "relative" }}>
+                <div style={{ position: "absolute", width: "80px", height: "80px", borderRadius: "50%", border: "1px solid rgba(0,169,145,0.2)", animation: "ping-slow 2s ease-in-out infinite" }} />
+                <div style={{ position: "absolute", width: "64px", height: "64px", borderRadius: "50%", border: "1px solid rgba(0,169,145,0.35)", animation: "ping-slow 2s ease-in-out 0.5s infinite" }} />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.5)", boxShadow: "0 0 24px rgba(0,169,145,0.3)" }}>
+                  <Phone className="w-5 h-5 text-[#00A991]" />
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+                <span className="text-xs font-bold text-[#00A991] tracking-widest uppercase">Live AI Agent</span>
+              </div>
+              <h3 className="text-xl font-black text-white mb-1">Voice AI Demo</h3>
+              <p className="text-xs text-white/40 mb-6">Call this number to experience the AI post-discharge check-in. The AI will guide you through a realistic patient survey conversation.</p>
+              <div className="rounded-2xl py-4 px-6 mb-6" style={{ background: "rgba(0,169,145,0.06)", border: "1px solid rgba(0,169,145,0.2)" }}>
+                <p className="text-xs font-mono text-white/30 mb-1 uppercase tracking-wider">Demo number</p>
+                <p className="text-2xl font-black text-white tracking-widest" style={{ textShadow: "0 0 20px rgba(0,169,145,0.3)", fontFamily: "monospace" }}>{VOICE_AI_DEMO_NUMBER}</p>
+              </div>
+              <p className="text-xs text-white/30 mb-5">Powered by Webex AI Agent &amp; Webex Connect</p>
+              <button
+                onClick={() => setVoiceModalOpen(false)}
+                className="text-white/40 hover:text-white/70 text-xs font-mono border border-white/10 hover:border-white/25 px-4 py-2 rounded-xl transition-colors"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <style>{`
+              @keyframes ping-slow {
+                0%, 100% { transform: scale(1); opacity: 0.5; }
+                50% { transform: scale(1.15); opacity: 0.15; }
+              }
+            `}</style>
           </div>
         </div>
       )}
