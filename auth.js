@@ -5,9 +5,13 @@
  */
 (function () {
   var HASH = '1e21f96c12d90732faa4f8f949b76097c6f2c8889fcd99a6b452d9889536f6d3';
-  var SESSION_KEY = 'architech_auth';
+  var STORAGE_KEY = 'architech_auth';
+  var EXPIRY_KEY = 'architech_auth_expiry';
+  var ONE_DAY = 24 * 60 * 60 * 1000;
 
-  if (sessionStorage.getItem(SESSION_KEY) === HASH) return;
+  var stored = localStorage.getItem(STORAGE_KEY);
+  var expiry = parseInt(localStorage.getItem(EXPIRY_KEY) || '0', 10);
+  if (stored === HASH && Date.now() < expiry) return;
 
   // Prevent flash of underlying content
   document.documentElement.style.visibility = 'hidden';
@@ -111,7 +115,8 @@
           .join('');
 
         if (hex === HASH) {
-          sessionStorage.setItem(SESSION_KEY, HASH);
+          localStorage.setItem(STORAGE_KEY, HASH);
+          localStorage.setItem(EXPIRY_KEY, String(Date.now() + ONE_DAY));
           overlay.remove();
         } else {
           var inputEl = document.getElementById('auth-input');
