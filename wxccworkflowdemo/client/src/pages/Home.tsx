@@ -181,20 +181,6 @@ const IMPACT_STATS = [
   },
 ];
 
-const STAFF_BENEFITS = [
-  { icon: "🧠", headline: "Less cognitive load", body: "Routine tasks — confirmations, callbacks, reminders — are handled automatically. Clinicians focus on clinical decisions, not admin." },
-  { icon: "📞", headline: "Fewer interruptions", body: "Outbound call volumes drop significantly. Staff stop chasing voicemails and start focusing on patients in front of them." },
-  { icon: "📋", headline: "Pre-populated context", body: "When escalation is needed, the AI passes the full conversation transcript. Staff arrive at each interaction fully briefed, not starting from zero." },
-  { icon: "🏥", headline: "Better job satisfaction", body: "Removing low-value repetitive work is consistently linked to improved retention, lower burnout, and higher engagement scores in clinical roles." },
-];
-
-const PATIENT_BENEFITS = [
-  { icon: "💬", headline: "Reach us on your terms", body: "No hold music. No calling during work hours. Patients interact when it suits them — morning, evening, from anywhere." },
-  { icon: "📱", headline: "Everything in one place", body: "Appointment details, wayfinding, discharge instructions, medication reminders — all in SMS. No apps, no portals, no logins." },
-  { icon: "👨‍👩‍👧", headline: "Family kept in the loop", body: "Nominated family members receive automated surgery updates. No more anxious waiting rooms with no information." },
-  { icon: "🩺", headline: "Earlier safety net", body: "AI-driven post-discharge check-ins catch concerning symptoms earlier. Patients get the right care before a problem becomes an emergency." },
-];
-
 const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
 const TECH_STACK = ["Webex CC Flow Designer", "Webex Connect", "Calendar API", "EHR Integration"];
 
@@ -212,7 +198,6 @@ export default function Home() {
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
-  const [benefitsTab, setBenefitsTab] = useState<"roi" | "staff" | "patient">("roi");
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
@@ -504,86 +489,6 @@ export default function Home() {
               {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Benefits section — tabbed */}
-      <div className="border-b border-white/[0.06]" style={{ background: "linear-gradient(180deg, #080f19 0%, #0a1320 100%)" }}>
-        <div className="container mx-auto px-6 md:px-10 py-8">
-          {/* Tab strip */}
-          <div className="flex items-center gap-1 mb-7 p-1 rounded-xl w-fit" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            {([ ["roi", "Financial ROI"], ["staff", "Clinical Staff"], ["patient", "Patient & Carer"] ] as const).map(([tab, label]) => (
-              <button
-                key={tab}
-                onClick={() => setBenefitsTab(tab)}
-                className="px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200"
-                style={{
-                  background: benefitsTab === tab ? "rgba(5,195,221,0.12)" : "transparent",
-                  border: benefitsTab === tab ? "1px solid rgba(5,195,221,0.35)" : "1px solid transparent",
-                  color: benefitsTab === tab ? "#05C3DD" : "rgba(255,255,255,0.35)",
-                  boxShadow: benefitsTab === tab ? "0 0 12px rgba(5,195,221,0.15)" : "none",
-                }}
-              >{label}</button>
-            ))}
-          </div>
-
-          {/* ROI tab — summary of the rotating stats */}
-          {benefitsTab === "roi" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { hero: "20x", headline: "More cost-effective per interaction", body: "Routine patient communications cost $10–$30 per staff call. The same outcome digitally costs $0.12–$0.20." },
-                { hero: "~$84", headline: "Staff cost recovered per patient episode", body: "Across four workflows per surgical case. At 2,000 cases annually, that's $168K recovered. At 10,000 cases, $840K+." },
-                { hero: "250hrs", headline: "Clinical capacity returned per 1,000 interactions", body: "At 15 minutes per manual call, automating 1,000 interactions returns ~$14,000 in clinical capacity." },
-                { hero: "80%", headline: "Manual effort cut from appointment confirmation", body: "Multiple call attempts, voicemail, manual documentation — replaced by a single automated conversation." },
-                { hero: "12–18mo", headline: "To full break-even", body: "Total first-year investment $71K–$96K. Net positive every year after that. Volume scales the return." },
-                { hero: "$0.12", headline: "Per automated interaction", body: "vs $10–$30 per manual staff interaction. The unit economics are irreversible at any scale." },
-              ].map(({ hero, headline, body }) => (
-                <div key={hero} className="rounded-xl p-4" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.1)" }}>
-                  <p className="font-black text-primary mb-1" style={{ fontSize: "clamp(22px, 4vw, 32px)", textShadow: "0 0 20px rgba(5,195,221,0.3)", letterSpacing: "-0.02em" }}>{hero}</p>
-                  <p className="text-sm font-bold text-white mb-1.5 leading-snug">{headline}</p>
-                  <p className="text-xs text-white/45 leading-relaxed">{body}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Clinical Staff tab */}
-          {benefitsTab === "staff" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {STAFF_BENEFITS.map(({ icon, headline, body }) => (
-                <div key={headline} className="flex gap-4 rounded-xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <span style={{ fontSize: "28px", flexShrink: 0, lineHeight: 1 }}>{icon}</span>
-                  <div>
-                    <p className="text-sm font-black text-white mb-1.5">{headline}</p>
-                    <p className="text-xs text-white/50 leading-relaxed">{body}</p>
-                  </div>
-                </div>
-              ))}
-              <div className="md:col-span-2 rounded-xl px-5 py-4 flex items-center gap-4" style={{ background: "rgba(0,169,145,0.06)", border: "1px solid rgba(0,169,145,0.18)" }}>
-                <span style={{ fontSize: "20px", flexShrink: 0 }}>💡</span>
-                <p className="text-xs text-white/50 leading-relaxed"><span className="text-white font-semibold">The story for clinical staff</span> isn't about replacing them — it's about giving them back the hours that matter. Every automated interaction is a routine task they don't have to do. That time goes back to direct patient care, professional development, or simply leaving on time.</p>
-              </div>
-            </div>
-          )}
-
-          {/* Patient & Carer tab */}
-          {benefitsTab === "patient" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {PATIENT_BENEFITS.map(({ icon, headline, body }) => (
-                <div key={headline} className="flex gap-4 rounded-xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <span style={{ fontSize: "28px", flexShrink: 0, lineHeight: 1 }}>{icon}</span>
-                  <div>
-                    <p className="text-sm font-black text-white mb-1.5">{headline}</p>
-                    <p className="text-xs text-white/50 leading-relaxed">{body}</p>
-                  </div>
-                </div>
-              ))}
-              <div className="md:col-span-2 rounded-xl px-5 py-4 flex items-center gap-4" style={{ background: "rgba(0,169,145,0.06)", border: "1px solid rgba(0,169,145,0.18)" }}>
-                <span style={{ fontSize: "20px", flexShrink: 0 }}>💡</span>
-                <p className="text-xs text-white/50 leading-relaxed"><span className="text-white font-semibold">The story for patients</span> is about control, clarity, and confidence. They know what's happening, where to go, and what to do — without waiting on hold or losing a piece of paper. For their families, it's the difference between anxious uncertainty and real-time reassurance.</p>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
