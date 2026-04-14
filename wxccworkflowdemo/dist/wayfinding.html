@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cisco Spaces — Wayfinding</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #040b14;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(5,195,221,0.12);
+      flex-shrink: 0;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-brand .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #00A991;
+      box-shadow: 0 0 8px rgba(0,169,145,0.9);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+    .header-brand span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #00A991;
+    }
+    .header-dest {
+      text-align: right;
+    }
+    .header-dest .label {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .header-dest .value {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    /* ── Map image ── */
+    .map-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .map-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    /* ── Steps panel ── */
+    .steps {
+      flex-shrink: 0;
+      padding: 12px 24px 20px;
+      border-top: 1px solid rgba(5,195,221,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .step.visible { opacity: 1; transform: translateY(0); }
+    .step-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(5,195,221,0.12);
+      border: 1px solid rgba(5,195,221,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800;
+      color: #05C3DD;
+      flex-shrink: 0;
+    }
+    .step-text { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.75); }
+    .step.active .step-num { background: rgba(5,195,221,0.25); border-color: #05C3DD; box-shadow: 0 0 10px rgba(5,195,221,0.4); }
+    .step.active .step-text { color: #fff; }
+    .step.done .step-num { background: rgba(0,169,145,0.2); border-color: #00A991; color: #00A991; }
+    .step.done .step-text { color: rgba(255,255,255,0.45); }
+
+    /* ── Arrived overlay ── */
+    #arrived {
+      position: fixed;
+      inset: 0;
+      background: rgba(4,11,20,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+      backdrop-filter: blur(6px);
+    }
+    #arrived.show { opacity: 1; pointer-events: auto; }
+    .arrived-ring {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 2px solid #00A991;
+      display: flex; align-items: center; justify-content: center;
+      animation: arrived-glow 2s ease-in-out infinite;
+    }
+    @keyframes arrived-glow {
+      0%, 100% { box-shadow: 0 0 30px rgba(0,169,145,0.4); }
+      50% { box-shadow: 0 0 50px rgba(0,169,145,0.7), 0 0 24px 8px rgba(0,169,145,0.1); }
+    }
+    .arrived-check { color: #00A991; font-size: 32px; line-height: 1; }
+    #arrived h2 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; color: #fff; letter-spacing: 0.04em; }
+    #arrived p { font-size: 14px; color: rgba(255,255,255,0.5); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+    #arrived .restart {
+      margin-top: 8px; padding: 10px 28px; border-radius: 999px;
+      border: 1px solid rgba(5,195,221,0.35); background: rgba(5,195,221,0.08);
+      color: #05C3DD; font-size: 12px; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
+    }
+    #arrived .restart:hover { background: rgba(5,195,221,0.15); }
+
+    .scanline {
+      position: fixed; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.5) 40%, rgba(5,195,221,0.5) 60%, transparent 100%);
+      animation: scanline 8s linear infinite; pointer-events: none;
+    }
+    @keyframes scanline {
+      0% { transform: translateY(0); opacity: 1; }
+      95% { opacity: 0.6; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<header>
+  <div class="header-brand">
+    <div class="dot"></div>
+    <span>Cisco Spaces · Live Navigation</span>
+  </div>
+  <div class="header-dest">
+    <div class="label">Destination</div>
+    <div class="value">Level 2 · Bay 4 · Pre-Admission Suite</div>
+  </div>
+</header>
+
+<div class="map-wrap">
+  <img src="wayfinding-map.png" alt="Wayfinding map" />
+</div>
+
+<div class="steps">
+  <div class="step active" id="step-1">
+    <div class="step-num">1</div>
+    <div class="step-text">Enter Level 2 via the main lifts</div>
+  </div>
+  <div class="step" id="step-2">
+    <div class="step-num">2</div>
+    <div class="step-text">Turn right along the main corridor</div>
+  </div>
+  <div class="step" id="step-3">
+    <div class="step-num">3</div>
+    <div class="step-text">Continue past Bays 2 &amp; 3 — Bay 4 is ahead on your right</div>
+  </div>
+  <div class="step" id="step-4">
+    <div class="step-num">4</div>
+    <div class="step-text">Check in at the Pre-Admission Suite desk</div>
+  </div>
+</div>
+
+<div id="arrived">
+  <div class="arrived-ring">
+    <div class="arrived-check">✓</div>
+  </div>
+  <h2>You have arrived</h2>
+  <p>Bay 4 · Pre-Admission Suite · Level 2</p>
+  <button class="restart" onclick="restart()">Navigate again</button>
+</div>
+
+<script>
+  const steps = [
+    document.getElementById('step-1'),
+    document.getElementById('step-2'),
+    document.getElementById('step-3'),
+    document.getElementById('step-4'),
+  ];
+
+  const stepTimings = [400, 1800, 3200, 4400];
+  stepTimings.forEach((delay, i) => {
+    setTimeout(() => {
+      steps.forEach((s, j) => {
+        if (j < i) { s.classList.remove('active'); s.classList.add('done'); }
+        else if (j === i) { s.classList.add('active'); }
+      });
+      steps[i].classList.add('visible');
+    }, delay);
+  });
+
+  setTimeout(() => {
+    document.getElementById('arrived').classList.add('show');
+  }, 7000);
+
+  function restart() { window.location.reload(); }
+</script>
+</body>
+</html>
