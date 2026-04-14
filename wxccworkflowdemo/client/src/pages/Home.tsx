@@ -21,6 +21,7 @@ interface JourneyStage {
   phoneMessage: string;
   phoneAction: string;
   systemEvents: string[];
+  partnerBadge?: { label: string; logoSvg: string };
 }
 
 const JOURNEY_STAGES: JourneyStage[] = [
@@ -48,6 +49,10 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
+    partnerBadge: {
+      label: "Webex Instant Connect",
+      logoSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(5,195,221,0.15)" stroke="rgba(5,195,221,0.4)" stroke-width="1.5"/><path d="M14 18c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H26l-4 4v-4h-6a2 2 0 0 1-2-2v-8z" fill="rgba(5,195,221,0.9)"/><circle cx="19" cy="22" r="1.5" fill="white"/><circle cx="24" cy="22" r="1.5" fill="white"/><circle cx="29" cy="22" r="1.5" fill="white"/></svg>`,
+    },
   },
   {
     id: "PATIENT_ARRIVAL_WAYFINDING",
@@ -61,6 +66,10 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Open Wayfinder →",
     systemEvents: [],
+    partnerBadge: {
+      label: "Cisco Spaces",
+      logoSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(0,169,145,0.15)" stroke="rgba(0,169,145,0.4)" stroke-width="1.5"/><path d="M24 12c-6.6 0-12 5.4-12 12 0 4.4 2.4 8.3 6 10.4V36l4-3.2c.6.1 1.3.2 2 .2 6.6 0 12-5.4 12-12S30.6 12 24 12z" fill="rgba(0,169,145,0.85)"/><circle cx="24" cy="24" r="3" fill="white"/><circle cx="17" cy="24" r="2" fill="rgba(255,255,255,0.6)"/><circle cx="31" cy="24" r="2" fill="rgba(255,255,255,0.6)"/></svg>`,
+    },
   },
   {
     id: "PATIENT_FAMILY_SURGERY_UPDATE",
@@ -72,7 +81,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Acknowledge →",
-    systemEvents: [],
+    systemEvents: [
+      "HL7 ADT^A03 — Patient discharge event received from Epic EMR",
+      "HL7 ORM^O01 — Surgery completion order from OR system",
+      "Webex CC flow triggered by EMR event",
+      "Family notification dispatched via Webex Connect",
+    ],
   },
   {
     id: "PATIENT_DISCHARGE_INSTRUCTIONS",
@@ -165,6 +179,7 @@ export default function Home() {
   const [lastTriggeredStage, setLastTriggeredStage] = useState<string | null>(null);
   const [phonePulse, setPhonePulse] = useState(false);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
+  const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
@@ -288,6 +303,16 @@ export default function Home() {
         }, delay)
       );
       stepRevealTimeoutsRef.current.push(...revealTimeouts);
+      // Reveal HL7 system events sequentially for stages that have them
+      const triggeredStage = JOURNEY_STAGES.find((s) => s.id === workflowId);
+      if (triggeredStage && triggeredStage.systemEvents.length > 0) {
+        const sysTimeouts = triggeredStage.systemEvents.map((_, idx) =>
+          setTimeout(() => {
+            setSystemEventReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
+          }, 2200 + idx * 900)
+        );
+        stepRevealTimeoutsRef.current.push(...sysTimeouts);
+      }
       toast.success(`${workflowLabel} sent`, { description: mobileNumber });
     } catch (error) {
       toast.error("Workflow trigger failed", { description: error instanceof Error ? error.message : "Unknown error" });
@@ -303,6 +328,7 @@ export default function Home() {
     setLastTriggeredStage(null);
     setPhonePulse(false);
     setStageStepReveal({});
+    setSystemEventReveal({});
     setExpandedStages(new Set());
     setPatientName("");
     setMobileNumber("");
@@ -851,15 +877,34 @@ export default function Home() {
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{stage.sectionHeader}</span>
                           )}
                         </div>
-                        {isTriggered && (
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
-                            <Check className="w-3 h-3 text-[#00A991]" />
-                            <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: "rgba(5,195,221,0.1)", border: "1px solid rgba(5,195,221,0.25)" }}>
+                              <span className="text-[9px] font-bold font-mono tracking-wider" style={{ color: "rgba(5,195,221,0.8)" }}>Epic · HL7 FHIR</span>
+                            </div>
+                          )}
+                          {isTriggered && (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
+                              <Check className="w-3 h-3 text-[#00A991]" />
+                              <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-end justify-between gap-3">
-                        <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                        <div className="flex flex-col gap-1.5">
+                          {stage.partnerBadge && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md w-fit" style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(4px)" }}>
+                              <span
+                                className="flex-shrink-0"
+                                style={{ width: 18, height: 18, display: "inline-block" }}
+                                dangerouslySetInnerHTML={{ __html: stage.partnerBadge.logoSvg }}
+                              />
+                              <span className="text-[9px] font-bold tracking-wider uppercase font-mono" style={{ color: "rgba(255,255,255,0.6)" }}>{stage.partnerBadge.label}</span>
+                            </div>
+                          )}
+                          <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                        </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
                             <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[10px] h-7 px-2.5 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
@@ -891,6 +936,20 @@ export default function Home() {
                             <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {/* HL7 / EMR system event feed — Stage 04 */}
+                    {isTriggered && stage.systemEvents.length > 0 && (systemEventReveal[stage.id] ?? 0) > 0 && (
+                      <div className="mt-2.5">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
+                        <div className="flex flex-col gap-1">
+                          {stage.systemEvents.slice(0, systemEventReveal[stage.id] ?? 0).map((evt, i) => (
+                            <div key={i} className="flex items-start gap-1.5 px-2 py-1 rounded" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.12)" }}>
+                              <span className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0" style={{ background: "#05C3DD", boxShadow: "0 0 4px rgba(5,195,221,0.7)" }} />
+                              <span className="text-[10px] font-mono leading-relaxed" style={{ color: "rgba(5,195,221,0.65)" }}>{evt}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                     {/* Expand toggle — image only */}
