@@ -8,6 +8,7 @@ import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
 import webexLogoUrl from "@/assets/logo-webex.svg";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
+import wayfindingMapUrl from "@/assets/wayfinding-map.png";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -213,6 +214,7 @@ export default function Home() {
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
+  const [wayfindingOpen, setWayfindingOpen] = useState(false);
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
@@ -371,6 +373,7 @@ export default function Home() {
     setSystemEventReveal({});
     setThreadReveal({});
     setExpandedStages(new Set());
+    setWayfindingOpen(false);
     setPatientName("");
     setMobileNumber("");
     setDemoMobile("");
@@ -673,6 +676,42 @@ export default function Home() {
                     </div>
                     {/* Dynamic Island */}
                     <div className="absolute bg-black" style={{ top: "8px", left: "50%", transform: "translateX(-50%)", width: "72px", height: "24px", borderRadius: "12px", zIndex: 10 }} />
+
+                    {/* Wayfinding in-phone overlay */}
+                    {wayfindingOpen && (
+                      <div className="absolute inset-0 flex flex-col" style={{ zIndex: 20, background: "#000", borderRadius: "42px", overflow: "hidden" }}>
+                        <img
+                          src={wayfindingMapUrl}
+                          alt="Wayfinding map"
+                          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+                        />
+                        <button
+                          onClick={() => setWayfindingOpen(false)}
+                          style={{
+                            position: "absolute",
+                            top: "18px",
+                            right: "18px",
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "50%",
+                            background: "rgba(0,0,0,0.55)",
+                            border: "1px solid rgba(255,255,255,0.25)",
+                            backdropFilter: "blur(6px)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            zIndex: 30,
+                            padding: 0,
+                          }}
+                          aria-label="Close wayfinding"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M1 1l8 8M9 1l-8 8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                     <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex-shrink-0">
                       <p className="font-semibold text-slate-700 text-xs">Messages</p>
                     </div>
@@ -735,12 +774,12 @@ export default function Home() {
                             <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{activePhoneStage.phoneMessage}</p>
                           </div>
                           {activePhoneStage.phoneActionUrl ? (
-                            <a href={activePhoneStage.phoneActionUrl} target="_blank" rel="noopener noreferrer" className="block no-underline">
+                            <button onClick={() => setWayfindingOpen(true)} className="w-full" style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
                               <div className="bg-[#05C3DD] rounded-2xl px-3 py-2 flex items-center justify-center gap-1.5" style={{ boxShadow: "0 0 12px rgba(5,195,221,0.3)" }}>
                                 <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8L8 2M8 2H4M8 2v4" stroke="white" strokeWidth="1.3" strokeLinecap="round"/></svg>
                               </div>
-                            </a>
+                            </button>
                           ) : (
                             <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
                               <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
