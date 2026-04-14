@@ -860,18 +860,18 @@ export default function Home() {
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
-                        {!isTriggered && (
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
-                              <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[10px] h-7 px-2.5 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
-                                Start Meeting
-                              </Button>
-                            )}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
+                            <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[10px] h-7 px-2.5 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                              Start Meeting
+                            </Button>
+                          )}
+                          {!isTriggered && (
                             <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-xs h-7 px-3 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
                               {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
                             </Button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

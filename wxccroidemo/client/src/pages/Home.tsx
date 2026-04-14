@@ -119,7 +119,7 @@ const EXAMPLE_WORKFLOWS: Omit<Workflow, "id">[] = [
 interface NumInputProps {
   id?: string;
   label: string;
-  description?: string;
+  description?: React.ReactNode;
   value: number;
   step?: string | number;
   min?: number;
@@ -439,6 +439,13 @@ export default function Home() {
                   <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Unit-based · Voice metered per second · Digital per 10-message session</p>
                 </div>
               </div>
+              <div style={{ padding: "12px 14px", background: `${C.cyan}08`, border: `1px solid ${C.cyan}1a`, borderRadius: 8 }}>
+                <p style={{ fontSize: 12, color: C.light, margin: "0 0 4px 0", fontWeight: 500 }}>What is AI Agent?</p>
+                <p style={{ fontSize: 12, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+                  Webex AI Agent handles routine contacts autonomously — voice calls and digital conversations — without a human agent. It handles tasks like appointment confirmations, post-discharge check-ins, and FAQs around the clock. Staff focus on complex, high-value cases only.
+                  The cost below is your platform investment in AI automation. The return shows up in your workflows above as reduced handle time and eliminated callbacks.
+                </p>
+              </div>
 
               {(() => {
                 const ai = platformCosts.aiCosts;
@@ -568,7 +575,7 @@ export default function Home() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <NumInput id="staff-hourly" label="Staff Hourly Rate" prefix="$" step="0.01"
                   value={staffHourlyCost}
-                  description="Average fully-loaded labour cost per hour"
+                  description={<>Average fully-loaded labour cost per hour. <span style={{ opacity: 0.7 }}>Default based on AIHW Health Workforce Data 2023 (base salary + 25% on-costs).</span></>}
                   onChange={setStaffHourlyCost} />
                 <NumInput id="postage-cost" label="Postage & Paper Cost" prefix="$" step="0.01"
                   value={postagePaperCost}
@@ -857,18 +864,25 @@ export default function Home() {
                   <>
                     <div style={{ height: 1, background: C.s2 }} />
                     <details style={{ fontSize: 11, color: C.muted }}>
-                      <summary style={{ cursor: "pointer", fontWeight: 600, color: C.muted, letterSpacing: "0.06em" }}>How the math works</summary>
+                      <summary style={{ cursor: "pointer", fontWeight: 600, color: C.muted, letterSpacing: "0.06em" }}>How is this calculated?</summary>
                       <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
                         <p style={{ margin: 0 }}>
-                          We calculate the cost of human labor (e.g., $60/hr = $1.00/min) and add physical material costs (postage/paper).
-                          If a workflow saves 30 minutes, that's ${(staffHourlyCost / 2).toFixed(2)} in labour reclaimed.
+                          <strong style={{ color: C.light }}>1. Labour saving per workflow run.</strong>{" "}
+                          We calculate the cost of human labor at your staff hourly rate (currently ${staffHourlyCost}/hr = ${(staffHourlyCost / 60).toFixed(2)}/min) and add physical material costs (postage/paper).
+                          If a workflow saves 30 minutes, that's {fmtCurrency(staffHourlyCost / 2)} in labour reclaimed per interaction.
                         </p>
                         <p style={{ margin: 0 }}>
+                          <strong style={{ color: C.light }}>2. Digital channel cost per workflow run.</strong>{" "}
                           We calculate the cost of automation (SMS, Email, and WX Connect runs).
                           These typically cost {fmtCurrency(unitCosts.smsPerSegmentCost + unitCosts.emailSendCost + unitCosts.wxConnectRemoteRunCost)} per interaction at current rates.
                         </p>
                         <p style={{ margin: 0 }}>
-                          The net value is the direct operational benefit realized every time a workflow runs: (Labour Saved + Material Savings) − (Digital Channel Costs).
+                          <strong style={{ color: C.light }}>3. Net value per interaction.</strong>{" "}
+                          The operational benefit realised every time a workflow runs: (Labour Saved + Material Savings) − (Digital Channel Costs). Multiplied by annual volume gives your gross annual benefit.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong style={{ color: C.light }}>4. AI Agent cost.</strong>{" "}
+                          AI Agent is a separate platform cost (voice metered per second, digital per 10-message session) that sits alongside your WxCC licence. It is added to the annual platform cost denominator — it reduces net ROI slightly but enables workflows that would otherwise require a human agent for every interaction. When your AI Agent handles a call or digital session, the time saving from that interaction should be reflected in the "minutes removed" field of the relevant workflow above.
                         </p>
                       </div>
                     </details>
