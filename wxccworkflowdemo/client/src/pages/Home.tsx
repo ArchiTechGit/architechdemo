@@ -236,6 +236,9 @@ export default function Home() {
   const [loadingStage, setLoadingStage] = useState<string | null>(null);
   const [lastTriggeredStage, setLastTriggeredStage] = useState<string | null>(null);
   const [phonePulse, setPhonePulse] = useState(false);
+  const [phoneScreen, setPhoneScreen] = useState<"home" | "sms">("home");
+  const [phoneNotif, setPhoneNotif] = useState(false);
+  const notifTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
@@ -368,6 +371,14 @@ export default function Home() {
       setTriggeredStages((prev) => new Set([...prev, workflowId]));
       setLastTriggeredStage(workflowId);
       setPhonePulse(true);
+      if (phoneScreen === "home") {
+        setPhoneNotif(true);
+        if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
+        notifTimerRef.current = setTimeout(() => {
+          setPhoneNotif(false);
+          setPhoneScreen("sms");
+        }, 2500);
+      }
       setTimeout(() => setPhonePulse(false), 2000);
       const revealTimeouts = [450, 950, 1500].map((delay, idx) =>
         setTimeout(() => {
@@ -413,6 +424,9 @@ export default function Home() {
     setThreadReveal({});
     setExpandedStages(new Set());
     setWayfindingOpen(false);
+    if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
+    setPhoneScreen("home");
+    setPhoneNotif(false);
     setPatientName("");
     setMobileNumber("");
     setDemoMobile("");
@@ -757,151 +771,198 @@ export default function Home() {
                   <div style={{ position: "absolute", right: "-4px", top: "120px", width: "3px", height: "52px", background: "linear-gradient(180deg,#1F3D72,#13294B)", borderRadius: "0 2px 2px 0", boxShadow: "1px 0 2px rgba(0,0,0,0.5)" }} />
 
                   {/* Screen */}
-                  <div className="absolute bg-white flex flex-col overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
-                    {/* Status bar */}
-                    <div className="flex justify-between items-center px-5 bg-white flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
-                      <span className="font-bold" style={{ fontSize: "11px", color: "#13294B" }}>{clockTime}</span>
-                      <div className="flex items-center gap-1.5">
-                        {/* Signal bars */}
-                        <div className="flex items-end gap-px">
-                          <div className="w-1 h-1.5 rounded-sm" style={{ background: "#54565B" }} />
-                          <div className="w-1 h-2 rounded-sm" style={{ background: "#54565B" }} />
-                          <div className="w-1 h-2.5 rounded-sm" style={{ background: "#54565B" }} />
-                          <div className="w-1 h-3 rounded-sm" style={{ background: "#54565B" }} />
-                        </div>
-                        {/* WiFi */}
-                        <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-                          <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#54565B"/>
-                          <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                          <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                        </svg>
-                        {/* Battery */}
-                        <div className="flex items-center gap-px">
-                          <div className="rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px", border: "1px solid #54565B" }}>
-                            <div className="absolute left-0 top-0 bottom-0" style={{ width: "75%", background: "#54565B" }} />
+                  <div className="absolute overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
+                    {phoneScreen === "home" ? (
+                      /* ─── HOME SCREEN ─── */
+                      <div className="relative flex flex-col h-full overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2744 0%, #2d1b6e 50%, #0d1a3a 100%)" }}>
+                        {/* Status bar – white */}
+                        <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
+                          <span className="font-bold" style={{ fontSize: "11px", color: "white" }}>{clockTime}</span>
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-end gap-px">
+                              <div style={{ width: "4px", height: "6px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "8px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "10px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "12px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
+                            </div>
+                            <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+                              <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="rgba(255,255,255,0.9)"/>
+                              <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                              <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                            </svg>
+                            <div className="flex items-center gap-px">
+                              <div style={{ width: "18px", height: "10px", border: "1px solid rgba(255,255,255,0.7)", borderRadius: "2px", position: "relative", overflow: "hidden" }}>
+                                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "75%", background: "rgba(255,255,255,0.9)" }} />
+                              </div>
+                              <div style={{ width: "2px", height: "5px", background: "rgba(255,255,255,0.7)", borderRadius: "1px" }} />
+                            </div>
                           </div>
-                          <div className="rounded-sm" style={{ width: "2px", height: "5px", background: "#54565B" }} />
                         </div>
-                      </div>
-                    </div>
-                    {/* Dynamic Island */}
-                    <div className="absolute bg-black" style={{ top: "8px", left: "50%", transform: "translateX(-50%)", width: "72px", height: "24px", borderRadius: "12px", zIndex: 10 }} />
 
-                    {/* Wayfinding in-phone overlay */}
-                    {wayfindingOpen && (
-                      <div className="absolute inset-0 flex flex-col" style={{ zIndex: 20, background: "#000", borderRadius: "42px", overflow: "hidden" }}>
-                        <img
-                          src={wayfindingMapUrl}
-                          alt="Wayfinding map"
-                          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
-                        />
-                        <button
-                          onClick={() => setWayfindingOpen(false)}
-                          style={{
-                            position: "absolute",
-                            top: "18px",
-                            right: "18px",
-                            width: "28px",
-                            height: "28px",
-                            borderRadius: "50%",
-                            background: "rgba(0,0,0,0.55)",
-                            border: "1px solid rgba(255,255,255,0.25)",
-                            backdropFilter: "blur(6px)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer",
-                            zIndex: 30,
-                            padding: 0,
-                          }}
-                          aria-label="Close wayfinding"
-                        >
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                            <path d="M1 1l8 8M9 1l-8 8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-                          </svg>
-                        </button>
+                        {/* Dynamic Island */}
+                        <div className="absolute bg-black" style={{ top: "8px", left: "50%", transform: "translateX(-50%)", width: "72px", height: "24px", borderRadius: "12px", zIndex: 10 }} />
+
+                        {/* Notification banner */}
+                        {phoneNotif && activePhoneStage && (
+                          <button
+                            onClick={() => { if (notifTimerRef.current) clearTimeout(notifTimerRef.current); setPhoneNotif(false); setPhoneScreen("sms"); }}
+                            style={{ position: "absolute", top: "48px", left: "8px", right: "8px", zIndex: 20, background: "rgba(235,240,250,0.88)", backdropFilter: "blur(20px)", borderRadius: "16px", padding: "10px 12px", animation: "phone-notif-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards", textAlign: "left", border: "none", cursor: "pointer" }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                              <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "linear-gradient(135deg,#34c759,#25a244)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5l-3 2V3z" fill="white"/></svg>
+                              </div>
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: "#1c1c1e", flex: 1 }}>Messages</span>
+                              <span style={{ fontSize: "10px", color: "#8e8e93" }}>now</span>
+                            </div>
+                            <p style={{ fontSize: "11px", color: "#3c3c43", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                              {interpolate((activePhoneStage.phoneMessages || [activePhoneStage.phoneMessage])[0]).substring(0, 90)}
+                            </p>
+                          </button>
+                        )}
+
+                        {/* Time + date */}
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "clamp(28px,8%,44px)", paddingBottom: "8px", flexShrink: 0 }}>
+                          <span style={{ fontSize: "clamp(34px,12vw,44px)", fontWeight: 100, color: "white", letterSpacing: "-0.02em", lineHeight: 1 }}>{clockTime}</span>
+                          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", marginTop: "4px" }}>{new Date().toLocaleDateString("en-AU", { weekday: "long", month: "long", day: "numeric" })}</span>
+                        </div>
+
+                        {/* App grid */}
+                        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "8px", padding: "8px 10px 4px 10px", alignContent: "start" }}>
+                          {([
+                            { bg: "linear-gradient(135deg,#ff9f0a,#ff375f)", label: "Photos", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="5.5" stroke="white" strokeWidth="1.4" fill="none"/><circle cx="9" cy="9" r="2" fill="white"/><path d="M9 3.5v1.5M9 13v1.5M3.5 9H5M13 9h1.5" stroke="white" strokeWidth="1.3" strokeLinecap="round"/></svg> },
+                            { bg: "linear-gradient(135deg,#1c1c1e,#3a3a3c)", label: "Camera", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="5" width="14" height="10" rx="2" stroke="white" strokeWidth="1.4" fill="none"/><circle cx="9" cy="10" r="2.5" stroke="white" strokeWidth="1.3" fill="none"/><path d="M6 5l1.5-2h3L12 5" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none"/></svg> },
+                            { bg: "linear-gradient(135deg,#30d158,#248a3d)", label: "Maps", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2C6.8 2 5 3.8 5 6c0 3.5 4 9 4 9s4-5.5 4-9c0-2.2-1.8-4-4-4z" stroke="white" strokeWidth="1.4" fill="none"/><circle cx="9" cy="6" r="1.5" fill="white"/></svg> },
+                            { bg: "linear-gradient(135deg,#636366,#3a3a3c)", label: "Settings", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="5.5" stroke="white" strokeWidth="1.4" fill="none"/><circle cx="9" cy="9" r="2" fill="white"/><path d="M9 3.5v2M9 12.5v2M3.5 9h2M12.5 9h2" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg> },
+                            { bg: "linear-gradient(135deg,#ffffff,#f2f2f7)", label: "Health", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 14s-6-4-6-8a4 4 0 0 1 6-3.46A4 4 0 0 1 15 6c0 4-6 8-6 8z" fill="#ff375f"/></svg> },
+                            { bg: "linear-gradient(135deg,#0a84ff,#0055d4)", label: "Mail", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="11" rx="1.5" stroke="white" strokeWidth="1.4" fill="none"/><path d="M2 7l7 4.5 7-4.5" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none"/></svg> },
+                            { bg: "linear-gradient(135deg,#ffd60a,#ff9f0a)", label: "Notes", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="2" width="12" height="14" rx="2" stroke="white" strokeWidth="1.4" fill="none"/><path d="M6 7h6M6 10h6M6 13h4" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg> },
+                            { bg: "linear-gradient(135deg,#2c2c2e,#1c1c1e)", label: "Clock", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.5" stroke="white" strokeWidth="1.4" fill="none"/><path d="M9 5.5v3.5l2.5 2" stroke="white" strokeWidth="1.4" strokeLinecap="round" fill="none"/></svg> },
+                          ] as {bg:string;label:string;icon:React.ReactNode}[]).map(({ bg, icon, label }) => (
+                            <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                              <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+                                {icon}
+                              </div>
+                              <span style={{ fontSize: "9px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.7)", textAlign: "center" }}>{label}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Dock */}
+                        <div style={{ margin: "4px 8px 0 8px", padding: "8px 10px", background: "rgba(255,255,255,0.14)", backdropFilter: "blur(20px)", borderRadius: "22px", display: "flex", justifyContent: "space-around", alignItems: "center", flexShrink: 0 }}>
+                          {([
+                            { bg: "linear-gradient(135deg,#34c759,#25a244)", label: "Phone", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5.5 3.5C4 3.5 3 4.5 3 6c0 7 7 13 9 13 1.5 0 2.5-1 2.5-2.5V14l-3-1-1 1.5C9 14 6.5 12.5 6 9l1.5-1L6.5 5H5.5z" fill="white"/></svg> },
+                            { bg: "linear-gradient(135deg,#34c759,#25a244)", label: "Messages", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6.5l-3.5 2.5V4z" fill="white"/></svg> },
+                            { bg: "linear-gradient(135deg,#0a84ff,#0055d4)", label: "Safari", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="white" strokeWidth="1.5" fill="none"/><path d="M10 3v14M3 10h14" stroke="white" strokeWidth="1.1" strokeLinecap="round" opacity="0.5"/><path d="M7 7l6 3-3 3-3 3 3-6z" fill="white"/></svg> },
+                            { bg: "linear-gradient(135deg,#0a84ff,#5e5ce6)", label: "App Store", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3.5L13 9H7L10 3.5z" fill="white"/><path d="M10 16.5L7 11H13L10 16.5z" fill="white" opacity="0.75"/><path d="M3.5 10.5L6.5 5.5M16.5 10.5L13.5 5.5" stroke="white" strokeWidth="1.4" strokeLinecap="round"/></svg> },
+                          ] as {bg:string;label:string;icon:React.ReactNode}[]).map(({ bg, icon, label }) => (
+                            <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" }}>
+                              <div style={{ width: "46px", height: "46px", borderRadius: "14px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 10px rgba(0,0,0,0.45)" }}>
+                                {icon}
+                              </div>
+                              <span style={{ fontSize: "9px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}>{label}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Home indicator */}
+                        <div style={{ margin: "6px auto 8px", width: "100px", height: "4px", background: "rgba(255,255,255,0.6)", borderRadius: "9999px", flexShrink: 0 }} />
+                      </div>
+                    ) : (
+                      /* ─── SMS SCREEN ─── */
+                      <div className="flex flex-col h-full bg-white overflow-hidden">
+                        {/* Status bar */}
+                        <div className="flex justify-between items-center px-5 bg-white flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
+                          <span className="font-bold" style={{ fontSize: "11px", color: "#13294B" }}>{clockTime}</span>
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-end gap-px">
+                              <div className="w-1 h-1.5 rounded-sm" style={{ background: "#54565B" }} />
+                              <div className="w-1 h-2 rounded-sm" style={{ background: "#54565B" }} />
+                              <div className="w-1 h-2.5 rounded-sm" style={{ background: "#54565B" }} />
+                              <div className="w-1 h-3 rounded-sm" style={{ background: "#54565B" }} />
+                            </div>
+                            <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+                              <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#54565B"/>
+                              <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                              <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                            </svg>
+                            <div className="flex items-center gap-px">
+                              <div className="rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px", border: "1px solid #54565B" }}>
+                                <div className="absolute left-0 top-0 bottom-0" style={{ width: "75%", background: "#54565B" }} />
+                              </div>
+                              <div className="rounded-sm" style={{ width: "2px", height: "5px", background: "#54565B" }} />
+                            </div>
+                          </div>
+                        </div>
+                        {/* Dynamic Island */}
+                        <div className="absolute bg-black" style={{ top: "8px", left: "50%", transform: "translateX(-50%)", width: "72px", height: "24px", borderRadius: "12px", zIndex: 10 }} />
+
+                        {/* Wayfinding in-phone overlay */}
+                        {wayfindingOpen && (
+                          <div className="absolute inset-0 flex flex-col" style={{ zIndex: 20, background: "#000", borderRadius: "42px", overflow: "hidden" }}>
+                            <img src={wayfindingMapUrl} alt="Wayfinding map" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+                            <button
+                              onClick={() => setWayfindingOpen(false)}
+                              style={{ position: "absolute", top: "18px", right: "18px", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.25)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 30, padding: 0 }}
+                              aria-label="Close wayfinding"
+                            >
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1l-8 8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex-shrink-0">
+                          <p className="font-semibold text-slate-700 text-xs">Messages</p>
+                        </div>
+                        <div className="flex-1 p-4 overflow-hidden">
+                          {activePhoneStage && activePhoneStage.conversationThread && (threadReveal[activePhoneStage.id] ?? 0) > 0 ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #05C3DD, #0095A8)" }}>
+                                  <span className="text-white font-bold" style={{ fontSize: "8px" }}>AI</span>
+                                </div>
+                                <span className="text-slate-500" style={{ fontSize: "10px" }}>Webex AI Agent · now</span>
+                              </div>
+                              {activePhoneStage.conversationThread.slice(0, threadReveal[activePhoneStage.id] ?? 0).map((msg, i) => (
+                                <div key={i} className={`flex ${msg.role === "patient" ? "justify-end" : "justify-start"}`}>
+                                  <div className="rounded-2xl px-2.5 py-1.5" style={{ maxWidth: "82%", background: msg.role === "ai" ? "#f1f5f9" : "#05C3DD", borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined, borderTopRightRadius: msg.role === "patient" ? "4px" : undefined }}>
+                                    <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.role === "ai" ? interpolate(msg.text) : msg.text}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : activePhoneStage ? (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                  <span className="text-white font-bold" style={{ fontSize: "9px" }}>AT</span>
+                                </div>
+                                <span className="text-slate-500 text-xs">ArchiTech · now</span>
+                              </div>
+                              {(activePhoneStage.phoneMessages || [activePhoneStage.phoneMessage]).map((msg, mi) => (
+                                <div key={mi} className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
+                                  <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{interpolate(msg)}</p>
+                                </div>
+                              ))}
+                              {activePhoneStage.phoneActionUrl ? (
+                                <button onClick={() => setWayfindingOpen(true)} className="w-full" style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                                  <div className="bg-[#05C3DD] rounded-2xl px-3 py-2 flex items-center justify-center gap-1.5" style={{ boxShadow: "0 0 12px rgba(5,195,221,0.3)" }}>
+                                    <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8L8 2M8 2H4M8 2v4" stroke="white" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                                  </div>
+                                </button>
+                              ) : (
+                                <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
+                                  <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
+                                </div>
+                              )}
+                            </div>
+                          ) : null}
+                        </div>
+                        {/* Home indicator */}
+                        <div className="bg-slate-800 rounded-full flex-shrink-0" style={{ margin: "6px auto 8px", width: "100px", height: "4px" }} />
                       </div>
                     )}
-                    <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex-shrink-0">
-                      <p className="font-semibold text-slate-700 text-xs">Messages</p>
-                    </div>
-                    <div className="flex-1 p-4 overflow-hidden">
-                      {!activePhoneStage ? (
-                        <div className="space-y-2.5">
-                          <div className="flex items-center gap-2 mb-2.5">
-                            <div className="w-7 h-7 rounded-full bg-slate-300 flex items-center justify-center flex-shrink-0">
-                              <span className="text-slate-600 font-bold" style={{ fontSize: "9px" }}>AT</span>
-                            </div>
-                            <span className="text-slate-400 text-xs">Health System · 2h ago</span>
-                          </div>
-                          <div className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                            <p className="text-slate-600 leading-snug text-xs">Hi Sarah! We're checking in on your recovery. How are you feeling today?</p>
-                          </div>
-                          <div className="bg-slate-200 rounded-2xl px-3 py-2">
-                            <p className="text-slate-400 font-semibold text-center text-xs">Share How You're Feeling →</p>
-                          </div>
-                          <div className="flex justify-end mt-0.5">
-                            <span className="text-slate-300 text-xs">Read 2:14pm ✓✓</span>
-                          </div>
-                          <div className="pt-3 border-t border-slate-100 text-center">
-                            <p className="text-slate-300 text-xs">Trigger a stage →</p>
-                          </div>
-                        </div>
-                      ) : activePhoneStage.conversationThread && (threadReveal[activePhoneStage.id] ?? 0) > 0 ? (
-                        /* Conversational AI thread view (Stage 06) */
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #05C3DD, #0095A8)" }}>
-                              <span className="text-white font-bold" style={{ fontSize: "8px" }}>AI</span>
-                            </div>
-                            <span className="text-slate-500" style={{ fontSize: "10px" }}>Webex AI Agent · now</span>
-                          </div>
-                          {activePhoneStage.conversationThread.slice(0, threadReveal[activePhoneStage.id] ?? 0).map((msg, i) => (
-                            <div key={i} className={`flex ${msg.role === "patient" ? "justify-end" : "justify-start"}`}>
-                              <div
-                                className="rounded-2xl px-2.5 py-1.5"
-                                style={{
-                                  maxWidth: "82%",
-                                  background: msg.role === "ai" ? "#f1f5f9" : "#05C3DD",
-                                  borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined,
-                                  borderTopRightRadius: msg.role === "patient" ? "4px" : undefined,
-                                }}
-                              >
-                                <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.role === "ai" ? interpolate(msg.text) : msg.text}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold" style={{ fontSize: "9px" }}>AT</span>
-                            </div>
-                            <span className="text-slate-500 text-xs">ArchiTech · now</span>
-                          </div>
-                          {(activePhoneStage.phoneMessages || [activePhoneStage.phoneMessage]).map((msg, mi) => (
-                            <div key={mi} className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                              <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{interpolate(msg)}</p>
-                            </div>
-                          ))}
-                          {activePhoneStage.phoneActionUrl ? (
-                            <button onClick={() => setWayfindingOpen(true)} className="w-full" style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                              <div className="bg-[#05C3DD] rounded-2xl px-3 py-2 flex items-center justify-center gap-1.5" style={{ boxShadow: "0 0 12px rgba(5,195,221,0.3)" }}>
-                                <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8L8 2M8 2H4M8 2v4" stroke="white" strokeWidth="1.3" strokeLinecap="round"/></svg>
-                              </div>
-                            </button>
-                          ) : (
-                            <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
-                              <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {/* Home indicator */}
-                    <div className="bg-slate-800 rounded-full flex-shrink-0" style={{ margin: "6px auto 8px", width: "100px", height: "4px" }} />
                   </div>
                 </div>
               </div>
