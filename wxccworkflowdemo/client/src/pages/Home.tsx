@@ -624,37 +624,46 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Journey Overview Diagram */}
+      {/* Journey Overview link */}
       <div className="border-b border-white/[0.06]" style={{ background: "linear-gradient(180deg, #0c1623 0%, #080f19 100%)" }}>
-        <div className="container mx-auto px-6 md:px-10 py-6">
+        <div className="container mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-[3px] h-5 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+            <span className="text-[11px] font-bold text-white/30 uppercase tracking-[0.2em] font-mono">6 stages · end-to-end digital patient journey</span>
+          </div>
           <button
-            onClick={() => setOverviewOpen((o) => !o)}
-            className={`flex items-center gap-4 w-full text-left group focus-visible:outline-none ${overviewOpen ? "mb-7" : "mb-0"}`}
-            aria-expanded={overviewOpen}
+            onClick={() => setOverviewOpen(true)}
+            className="flex items-center gap-2 group focus-visible:outline-none"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
-              <span className="text-[15px] font-black text-white uppercase tracking-widest">Journey Overview</span>
-            </div>
-            <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25), transparent)" }} />
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <span className="text-xs text-white/30 font-mono">6 stages · end-to-end digital</span>
-              <div className="flex items-center gap-1.5 border border-white/10 rounded-full px-3 py-1.5 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/8" style={{ background: "rgba(255,255,255,0.03)" }}>
-                <span className="text-xs text-white/40 group-hover:text-primary transition-colors duration-300">{overviewOpen ? "Collapse" : "Expand"}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-all duration-300 group-hover:text-primary ${overviewOpen ? "rotate-0" : "-rotate-90"}`} />
-              </div>
-            </div>
+            <span className="text-[11px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+              Click here to learn about the journey
+            </span>
+            <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
           </button>
+        </div>
+      </div>
 
-          <div className={`overflow-hidden transition-all duration-300 ${overviewOpen ? "opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
-            style={{ maxHeight: overviewOpen ? "800px" : "0" }}
-          >
-            {/* Section labels — text only, no divider lines */}
+      {/* Journey Overview Modal */}
+      {overviewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setOverviewOpen(false)}>
+          <div className="relative w-full mx-6" style={{ maxWidth: "1200px" }} onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+                <span className="text-[15px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
+              </div>
+              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
+                ✕ Close
+              </button>
+            </div>
+
+            {/* Section labels */}
             <div className="flex mb-3">
               {[
-                { label: "Pre Admission", color: "rgba(5,195,221,0.5)" },
-                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.5)" },
-                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.5)" },
+                { label: "Pre Admission", color: "rgba(5,195,221,0.55)" },
+                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.55)" },
+                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.55)" },
               ].map(({ label, color }) => (
                 <div key={label} className="flex items-center justify-center px-1" style={{ flex: 2 }}>
                   <span className="text-xs font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
@@ -662,43 +671,20 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Timeline */}
-            <div className="relative flex">
-              {/* Single subtle track line */}
+            {/* Cards */}
+            <div className="relative flex gap-3">
               <div className="absolute top-5 left-5 right-5 h-px pointer-events-none" style={{ background: "rgba(5,195,221,0.12)" }} />
-
               {JOURNEY_STAGES.map((stage, idx) => {
                 const sc = STAGE_COLORS[idx];
                 const Icon = STAGE_META[idx].icon;
                 return (
-                  <div key={stage.id} className="flex flex-col items-center gap-3" style={{ flex: 1, padding: "0 4px" }}>
-                    {/* Node */}
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-200"
-                      style={{
-                        background: sc.accentBg,
-                        border: `1.5px solid ${sc.accentBorder}`,
-                        boxShadow: `0 0 14px ${sc.accentGlow}`,
-                      }}
-                    >
+                  <div key={stage.id} className="flex flex-col items-center gap-3" style={{ flex: 1 }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center relative z-10 flex-shrink-0" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
                       <Icon className="w-4 h-4" style={{ color: sc.accent }} />
                     </div>
-
-                    {/* Card */}
-                    <div
-                      className="w-full rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden transition-all duration-200 group/oc"
-                      style={{
-                        border: `1px solid ${sc.accentBorder}`,
-                        background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.8) 100%)`,
-                        boxShadow: `0 4px 20px rgba(0,0,0,0.35), 0 0 0 0 ${sc.accentGlow}`,
-                      }}
-                    >
-                      {/* Top edge glow on hover */}
-                      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
-
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
-                      </div>
+                    <div className="w-full rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.85) 100%)` }}>
+                      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
+                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
                       <h3 className="text-sm font-black text-white leading-tight">{stage.label}</h3>
                       <p className="text-xs text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
                     </div>
@@ -708,7 +694,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main layout */}
       <div className="container mx-auto px-6 md:px-10 py-10">
