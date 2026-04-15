@@ -55,6 +55,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_APPOINTMENT_CONFIRM",
     chapter: "02",
+    sectionHeader: "Pre Admission",
     label: "Appointment Scheduling and Reminders",
     image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
@@ -95,6 +96,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_FAMILY_SURGERY_UPDATE",
     chapter: "04",
+    sectionHeader: "Day-of-Surgery Coordination",
     label: "Family Updates During Surgery",
     image: "/wxccworkflowdemo/dist/workflow-images/family-surgery-update.png",
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
@@ -125,6 +127,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_POST_DISCHARGE_SURVEY",
     chapter: "06",
+    sectionHeader: "Discharge and Recovery",
     label: "Post Discharge Check-Up",
     image: "/wxccworkflowdemo/dist/workflow-images/post-discharge-survey.png",
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
