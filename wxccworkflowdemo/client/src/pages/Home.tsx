@@ -986,10 +986,10 @@ export default function Home() {
               }}
             >
             <div className="grid grid-cols-3 gap-5">
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3 h-3 text-primary/40" />
-                  <span className="text-xs font-semibold text-white/50">Patient Name</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Name</span>
                 </label>
                 <Input
                   id="patient-name"
@@ -1012,7 +1012,7 @@ export default function Home() {
               <div className="space-y-2.5">
                 <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-xs font-semibold text-white/50">Patient Mobile</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
                 </label>
                 <Input
                   id="patient-mobile"
@@ -1035,7 +1035,7 @@ export default function Home() {
               <div className="space-y-2.5">
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-xs font-semibold text-white/50">Demo Mobile</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Demo Mobile</span>
                 </label>
                 <Input
                   id="demo-mobile"
