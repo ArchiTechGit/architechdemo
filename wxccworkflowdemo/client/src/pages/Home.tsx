@@ -474,7 +474,7 @@ export default function Home() {
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 2, paddingBottom: "100px" }}>
 
             {/* Event label */}
-            <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.45em", textTransform: "uppercase", color: "rgba(5,195,221,0.55)", fontFamily: "monospace", marginBottom: "32px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.45em", textTransform: "uppercase", color: "rgba(5,195,221,0.55)", fontFamily: "'JetBrains Mono', monospace", marginBottom: "32px" }}>
               Digital Health Festival · 2026
             </div>
 
@@ -499,7 +499,7 @@ export default function Home() {
             </div>
 
             {/* Subtitle */}
-            <div style={{ fontSize: "clamp(11px, 1.2vw, 15px)", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: "monospace", marginBottom: "48px" }}>
+            <div style={{ fontSize: "clamp(11px, 1.2vw, 15px)", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: "'JetBrains Mono', monospace", marginBottom: "48px" }}>
               Patient Experience Journey · Powered by Webex Contact Center
             </div>
 
@@ -526,7 +526,7 @@ export default function Home() {
           </div>
 
           {/* CTA */}
-          <div style={{ position: "absolute", bottom: "28px", left: 0, right: 0, textAlign: "center", fontSize: "12px", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "#05C3DD", fontFamily: "monospace", animation: "ss-cta-pulse 2.2s ease-in-out infinite" }}>
+          <div style={{ position: "absolute", bottom: "28px", left: 0, right: 0, textAlign: "center", fontSize: "12px", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "#05C3DD", fontFamily: "'JetBrains Mono', monospace", animation: "ss-cta-pulse 2.2s ease-in-out infinite" }}>
             Move to explore
           </div>
 
@@ -1443,7 +1443,7 @@ export default function Home() {
               <p className="text-xs text-white/40 mb-6">Call this number to experience the AI post-discharge check-in. The AI will guide you through a realistic patient survey conversation.</p>
               <div className="rounded-2xl py-4 px-6 mb-6" style={{ background: "rgba(0,169,145,0.06)", border: "1px solid rgba(0,169,145,0.2)" }}>
                 <p className="text-xs font-mono text-white/30 mb-1 uppercase tracking-wider">Demo number</p>
-                <p className="text-2xl font-black text-white tracking-widest" style={{ textShadow: "0 0 20px rgba(0,169,145,0.3)", fontFamily: "monospace" }}>{VOICE_AI_DEMO_NUMBER}</p>
+                <p className="text-2xl font-black text-white tracking-widest" style={{ textShadow: "0 0 20px rgba(0,169,145,0.3)", fontFamily: "'JetBrains Mono', monospace" }}>{VOICE_AI_DEMO_NUMBER}</p>
               </div>
               <p className="text-xs text-white/30 mb-5">Powered by Webex AI Agent &amp; Webex Connect</p>
               <button
