@@ -22,6 +22,7 @@ interface JourneyStage {
   image: string;
   webhookUrl: string;
   phoneMessage: string;
+  phoneMessages?: string[];
   phoneAction: string;
   systemEvents: string[];
   partnerBadge?: {
@@ -38,6 +39,21 @@ interface JourneyStage {
 
 const VOICE_AI_DEMO_NUMBER = "+61 2 0000 0000"; // Replace with real demo number
 
+function formatHumanDate(date: Date): string {
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const dayName = days[date.getDay()];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const ampm = hours < 12 ? "am" : "pm";
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  const mins = date.getMinutes();
+  const timeStr = mins === 0 ? `${hour12}${ampm}` : `${hour12}:${String(mins).padStart(2,"0")}${ampm}`;
+  return `${dayName} ${day} ${month} ${year} at ${timeStr}`;
+}
+
 const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_PRE_ADMISSION_ENROL",
@@ -47,7 +63,11 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
     automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Completed forms route to nurse dashboard with color-coded priority. Nurse reviews flagged items only. Simple cases require no callback. Reduces pre-admission appointment from 45 minutes to 10-15 minutes at most.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, this is ArchiTech contacting you ahead of your surgery on 15 April 2026. We need to collect some health information beforehand. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
+    phoneMessage: "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to collect some health information beforehand. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
+    phoneMessages: [
+      "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to collect some health information beforehand. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
+      "Thanks {NAME}, here is the link to your pre-admission form. https://form.jotform.com/260597744938071\n\nA nurse will review your details before your appointment date. We'll be in touch if we have any questions.",
+    ],
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
   },
@@ -59,7 +79,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
     automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
+    phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time no longer works, reply HELP and we'll find an alternative.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
     partnerBadge: {
@@ -79,7 +99,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Patient arrives, joins queue at admissions desk.",
     automationOpportunity: "Day of surgery SMS before patient enters hospital carpark. \"When you arrive please proceed to Level 2, Bay 4. For assistance locating, please use this wayfinder URL\".",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, surgery is confirmed for tomorrow at 7:30am. When you arrive, proceed directly to Level 2, Bay 4 — Pre-Admission Suite. Tap below for live navigation.",
+    phoneMessage: "Hi {NAME}, when you arrive at ArchiTech Hospital please proceed directly to Level 3, Bay C. Need help finding your way? Use this link: https://architechdemo.com/wxccworkflowdemo/dist/wayfinding.html . See you shortly.",
     phoneAction: "Open Wayfinder →",
     phoneActionUrl: "/wxccworkflowdemo/dist/wayfinding.html",
     systemEvents: [],
@@ -98,7 +118,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
     automationOpportunity: "Automated status updates sent to nominated contact. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.",
+    phoneMessages: [
+      "Hi Family Member, this is ArchiTech Hospital. {NAME}'s surgery is underway. We'll update you when there's a change in status. No need to call, we'll contact you.",
+      "Update from ArchiTech Hospital: {NAME} has moved to recovery. We'll let you know when they're ready for a visit.",
+      "{NAME} is settled and ready for a family visit. They're in Ward A, Room 15. Visiting hours run until 6PM. See you soon.",
+    ],
+    phoneMessage: "Hi Family Member, this is ArchiTech Hospital. {NAME}'s surgery is underway. We'll update you when there's a change in status. No need to call, we'll contact you.",
     phoneAction: "Acknowledge →",
     systemEvents: [
       "HL7 ADT^A03 — Patient discharge event received from Epic EMR",
@@ -115,7 +140,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurse hands patient printed sheets. Patient loses them.",
     automationOpportunity: "Personalised discharge instructions (wound care, activity restrictions, red flags) sent via SMS with embedded video links. \"Here's how to change your dressing\" with 90-second demo video specific to their surgical site.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, your pre-admission appointment is booked for 15 April 2026. If this time no longer works, reply HELP and we'll find an alternative.\n\nWound care: https://google.com\nActivity: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. We will follow up in 2 days time.",
+    phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
     phoneAction: "View Discharge Instructions →",
     systemEvents: [],
   },
@@ -127,11 +152,15 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
     automationOpportunity: "AI agent sends SMS 48-72 hours post-discharge initiating conversational survey. Asks about pain levels, wound condition, medication adherence, mobility, and red flag symptoms. Routine responses auto-documented in EMR. Concerning responses trigger immediate escalation to nurse with pre-populated context. Critical flags generate emergency protocol alert.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi John Smith, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
+    phoneMessages: [
+      "Hi {NAME}, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
+      "What is your pain level on a scale of 1–10?",
+    ],
+    phoneMessage: "Hi {NAME}, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
     conversationThread: [
-      { role: "ai", text: "Hi John, it's been 2 days since your surgery. On a scale of 1–10, how would you rate your pain right now?" },
+      { role: "ai", text: "Hi {NAME}, it's been 2 days since your surgery. On a scale of 1–10, how would you rate your pain right now?" },
       { role: "patient", text: "About a 3. Manageable." },
       { role: "ai", text: "Good to hear — that's within the expected range. How does your wound site look? Any redness, swelling, or discharge?" },
       { role: "patient", text: "A little red around the edge but no discharge." },
@@ -217,6 +246,8 @@ export default function Home() {
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string } | null>(null);
   const toggleExpanded = (id: string) => setExpandedStages((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  const displayApptDate = formatHumanDate((() => { const d = new Date(Date.now() + 24*60*60*1000); d.setMinutes(d.getMinutes() >= 30 ? 60 : 0, 0, 0); return d; })());
+  const interpolate = (msg: string) => msg.replace(/\{NAME\}/g, patientName.trim() || "Patient").replace(/\{DATE\}/g, displayApptDate);
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   useEffect(() => {
     const tick = () => setClockTime(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
@@ -313,21 +344,6 @@ export default function Home() {
     const now = new Date();
     const appointmentDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     appointmentDate.setMinutes(appointmentDate.getMinutes() >= 30 ? 60 : 0, 0, 0);
-
-    const formatHumanDate = (date: Date) => {
-      const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-      const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      const dayName = days[date.getDay()];
-      const day = date.getDate();
-      const month = months[date.getMonth()];
-      const year = date.getFullYear();
-      const hours = date.getHours();
-      const ampm = hours < 12 ? "am" : "pm";
-      const hour12 = hours % 12 === 0 ? 12 : hours % 12;
-      const mins = date.getMinutes();
-      const timeStr = mins === 0 ? `${hour12}${ampm}` : `${hour12}:${String(mins).padStart(2,"0")}${ampm}`;
-      return `${dayName} ${day} ${month} ${year} at ${timeStr}`;
-    };
 
     const payload = {
       workflowId,
@@ -677,7 +693,7 @@ export default function Home() {
                     <div className="w-full rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.85) 100%)` }}>
                       <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
                       <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
-                      <h3 className="text-sm font-black text-white leading-tight">{stage.label}</h3>
+                      <h3 className="text-base font-black text-white leading-tight">{stage.label}</h3>
                       <p className="text-xs text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
                     </div>
                   </div>
@@ -851,7 +867,7 @@ export default function Home() {
                                   borderTopRightRadius: msg.role === "patient" ? "4px" : undefined,
                                 }}
                               >
-                                <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.text}</p>
+                                <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.role === "ai" ? interpolate(msg.text) : msg.text}</p>
                               </div>
                             </div>
                           ))}
@@ -864,9 +880,11 @@ export default function Home() {
                             </div>
                             <span className="text-slate-500 text-xs">ArchiTech · now</span>
                           </div>
-                          <div className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                            <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{activePhoneStage.phoneMessage}</p>
-                          </div>
+                          {(activePhoneStage.phoneMessages || [activePhoneStage.phoneMessage]).map((msg, mi) => (
+                            <div key={mi} className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
+                              <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{interpolate(msg)}</p>
+                            </div>
+                          ))}
                           {activePhoneStage.phoneActionUrl ? (
                             <button onClick={() => setWayfindingOpen(true)} className="w-full" style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
                               <div className="bg-[#05C3DD] rounded-2xl px-3 py-2 flex items-center justify-center gap-1.5" style={{ boxShadow: "0 0 12px rgba(5,195,221,0.3)" }}>
@@ -1131,19 +1149,19 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
-                            <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[10px] h-7 px-2.5 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                            <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Meeting
                             </Button>
                           )}
                           {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
-                            <Button onClick={() => setVoiceModalOpen(true)} className="font-medium text-[10px] h-7 px-2.5 shadow-none flex items-center gap-1" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.35)", color: "#00A991" }}>
-                              <Phone className="w-3 h-3" />
+                            <Button onClick={() => setVoiceModalOpen(true)} className="font-medium text-xs h-9 px-4 shadow-none flex items-center gap-1.5" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.35)", color: "#00A991" }}>
+                              <Phone className="w-3.5 h-3.5" />
                               Call AI →
                             </Button>
                           )}
                           {!isTriggered && (
-                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-xs h-7 px-3 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
-                              {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Send →"}
+                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
                             </Button>
                           )}
                         </div>
