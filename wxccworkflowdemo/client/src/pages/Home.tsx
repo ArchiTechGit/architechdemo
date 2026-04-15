@@ -1145,7 +1145,7 @@ export default function Home() {
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <div>
-                          <h3 className="text-base font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                          <h3 className="text-xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
