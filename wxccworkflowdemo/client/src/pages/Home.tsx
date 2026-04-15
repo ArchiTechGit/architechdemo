@@ -944,18 +944,6 @@ export default function Home() {
                                   <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{interpolate(msg)}</p>
                                 </div>
                               ))}
-                              {activePhoneStage.phoneActionUrl ? (
-                                <button onClick={() => setWayfindingOpen(true)} className="w-full" style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                                  <div className="bg-[#05C3DD] rounded-2xl px-3 py-2 flex items-center justify-center gap-1.5" style={{ boxShadow: "0 0 12px rgba(5,195,221,0.3)" }}>
-                                    <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
-                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8L8 2M8 2H4M8 2v4" stroke="white" strokeWidth="1.3" strokeLinecap="round"/></svg>
-                                  </div>
-                                </button>
-                              ) : (
-                                <div className="bg-[#05C3DD] rounded-2xl px-3 py-2">
-                                  <p className="text-white font-semibold text-center text-xs">{activePhoneStage.phoneAction}</p>
-                                </div>
-                              )}
                             </div>
                           ) : null}
                         </div>
@@ -1073,11 +1061,12 @@ export default function Home() {
             {/* Stepper */}
             <div className="relative">
               {/* Connecting track */}
-              <div className="absolute top-6 left-6 right-6 h-px pointer-events-none" style={{ background: "rgba(255,255,255,0.07)" }} />
+              <div className="absolute left-0 right-0 h-px pointer-events-none" style={{ top: "70px", background: "rgba(255,255,255,0.07)" }} />
               {/* Filled progress track */}
               <div
-                className="absolute top-6 left-6 h-px pointer-events-none transition-all duration-700"
+                className="absolute left-0 h-px pointer-events-none transition-all duration-700"
                 style={{
+                  top: "70px",
                   background: "linear-gradient(90deg, #00A991, #05C3DD)",
                   boxShadow: "0 0 8px rgba(5,195,221,0.4)",
                   width: triggeredStages.size === 0 ? "0%" : `${((JOURNEY_STAGES.findIndex((s) => s.id === [...triggeredStages].at(-1)) + 1) / JOURNEY_STAGES.length) * (100 - (100 / JOURNEY_STAGES.length))}%`,
@@ -1095,27 +1084,29 @@ export default function Home() {
                     <button
                       key={stage.id}
                       onClick={() => setActiveStepperStage(stage.id)}
-                      className="flex flex-col items-center gap-2 group"
+                      className="flex flex-col items-center gap-3 group"
                       style={{ flex: 1 }}
                     >
                       {/* Node circle */}
                       <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 relative z-10"
+                        className="rounded-full flex items-center justify-center transition-all duration-300 relative z-10"
                         style={{
+                          width: "140px",
+                          height: "140px",
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
                           border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.1)",
                           boxShadow: isTriggered ? "0 0 18px rgba(0,169,145,0.35)" : isActive ? `0 0 18px ${sc.accentGlow}` : "none",
                         }}
                       >
                         {isTriggered
-                          ? <Check className="w-5 h-5 text-[#00A991]" />
-                          : SIcon && <SIcon className="w-5 h-5 transition-colors duration-300" style={{ color: isActive ? sc.accent : "rgba(255,255,255,0.25)" }} />
+                          ? <Check style={{ width: "60px", height: "60px" }} className="text-[#00A991]" />
+                          : SIcon && <SIcon style={{ width: "60px", height: "60px", color: isActive ? sc.accent : "rgba(255,255,255,0.25)" }} className="transition-colors duration-300" />
                         }
                       </div>
                       {/* Label */}
                       <span
-                        className="text-[9px] font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.6)", maxWidth: "72px" }}
+                        className="font-bold text-center leading-tight transition-colors duration-300 px-1"
+                        style={{ fontSize: "17px", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.6)", maxWidth: "180px" }}
                       >
                         {stage.label}
                       </span>
@@ -1168,9 +1159,9 @@ export default function Home() {
                                 src={stage.partnerBadge.logoUrl}
                                 alt={stage.partnerBadge.label}
                                 style={{
-                                  height: stage.partnerBadge.sublabel ? 20 : 22,
+                                  height: stage.partnerBadge.sublabel ? 32 : 40,
                                   width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 24 : 80,
+                                  maxWidth: stage.partnerBadge.sublabel ? 36 : 140,
                                   objectFit: "contain",
                                   filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
                                   flexShrink: 0,
