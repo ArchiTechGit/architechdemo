@@ -225,6 +225,32 @@ export default function Home() {
   }, []);
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  const [screensaverActive, setScreensaverActive] = useState(false);
+  const [ssStatIdx, setSsStatIdx] = useState(0);
+  const ssTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const reset = () => {
+      setScreensaverActive(false);
+      if (ssTimerRef.current) clearTimeout(ssTimerRef.current);
+      ssTimerRef.current = setTimeout(() => setScreensaverActive(true), 30000);
+    };
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"] as const;
+    events.forEach(e => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      events.forEach(e => window.removeEventListener(e, reset));
+      if (ssTimerRef.current) clearTimeout(ssTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!screensaverActive) return;
+    setSsStatIdx(0);
+    const id = setInterval(() => setSsStatIdx(i => (i + 1) % IMPACT_STATS.length), 5000);
+    return () => clearInterval(id);
+  }, [screensaverActive]);
+
   const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const goToStat = (index: number) => {
@@ -381,8 +407,92 @@ export default function Home() {
     ? JOURNEY_STAGES.find((s) => s.id === lastTriggeredStage)
     : null;
 
+  // ECG path: 8 beats at 300px spacing starting at x=50, viewBox 2400×80, baseline y=40
+  // Pattern repeats at x=1200 so translateX(-50%) loops seamlessly
+  const ECG_PATH = "M 0,40 L 50,40 L 60,35 L 68,35 L 76,40 L 90,40 L 94,43 L 96,2 L 100,65 L 105,40 L 115,30 L 126,30 L 140,40 L 350,40 L 360,35 L 368,35 L 376,40 L 390,40 L 394,43 L 396,2 L 400,65 L 405,40 L 415,30 L 426,30 L 440,40 L 650,40 L 660,35 L 668,35 L 676,40 L 690,40 L 694,43 L 696,2 L 700,65 L 705,40 L 715,30 L 726,30 L 740,40 L 950,40 L 960,35 L 968,35 L 976,40 L 990,40 L 994,43 L 996,2 L 1000,65 L 1005,40 L 1015,30 L 1026,30 L 1040,40 L 1250,40 L 1260,35 L 1268,35 L 1276,40 L 1290,40 L 1294,43 L 1296,2 L 1300,65 L 1305,40 L 1315,30 L 1326,30 L 1340,40 L 1550,40 L 1560,35 L 1568,35 L 1576,40 L 1590,40 L 1594,43 L 1596,2 L 1600,65 L 1605,40 L 1615,30 L 1626,30 L 1640,40 L 1850,40 L 1860,35 L 1868,35 L 1876,40 L 1890,40 L 1894,43 L 1896,2 L 1900,65 L 1905,40 L 1915,30 L 1926,30 L 1940,40 L 2150,40 L 2160,35 L 2168,35 L 2176,40 L 2190,40 L 2194,43 L 2196,2 L 2200,65 L 2205,40 L 2215,30 L 2226,30 L 2240,40 L 2400,40";
+
+  const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
+    left: `${(i * 3.7 + 1.2) % 100}%`,
+    size: 2 + (i % 4),
+    color: i % 3 === 0 ? "#05C3DD" : i % 3 === 1 ? "#00A991" : "rgba(255,255,255,0.5)",
+    duration: `${9 + (i % 10)}s`,
+    delay: `${(i * 0.6) % 9}s`,
+    glow: i % 5 === 0,
+  }));
+
   return (
     <div className="min-h-screen bg-background">
+
+      {/* ── Screensaver overlay ── */}
+      {screensaverActive && (
+        <div className="fixed inset-0 z-[9999] overflow-hidden select-none" style={{ background: "#020810", cursor: "none" }}>
+
+          {/* Drifting glow orbs */}
+          <div style={{ position: "absolute", width: "900px", height: "900px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.16) 0%, transparent 68%)", filter: "blur(60px)", top: "5%", left: "15%", animation: "ss-drift-1 24s ease-in-out infinite", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", width: "700px", height: "700px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,169,145,0.13) 0%, transparent 68%)", filter: "blur(80px)", top: "40%", right: "10%", animation: "ss-drift-2 30s ease-in-out infinite", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.09) 0%, transparent 68%)", filter: "blur(60px)", bottom: "10%", left: "5%", animation: "ss-drift-3 20s ease-in-out infinite", pointerEvents: "none" }} />
+
+          {/* Floating particles */}
+          {PARTICLES.map((p, i) => (
+            <div key={i} style={{ position: "absolute", bottom: "-10px", left: p.left, width: `${p.size}px`, height: `${p.size}px`, borderRadius: "50%", background: p.color, animation: `ss-float ${p.duration} linear ${p.delay} infinite`, boxShadow: p.glow ? `0 0 8px ${p.color}` : "none", pointerEvents: "none" }} />
+          ))}
+
+          {/* Scan line */}
+          <div style={{ position: "absolute", left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.07) 50%, transparent 100%)", animation: "ss-scan 10s linear infinite", pointerEvents: "none" }} />
+
+          {/* ── Central content ── */}
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 2, paddingBottom: "100px" }}>
+
+            {/* Event label */}
+            <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.45em", textTransform: "uppercase", color: "rgba(5,195,221,0.55)", fontFamily: "monospace", marginBottom: "32px" }}>
+              Digital Health Festival · 2026
+            </div>
+
+            {/* ArchiTech logo */}
+            <img src={logoUrl} alt="ArchiTech" style={{ width: "clamp(220px, 22vw, 360px)", mixBlendMode: "screen", animation: "ss-logo-pulse 3.5s ease-in-out infinite", marginBottom: "48px" }} />
+
+            {/* Cycling stat */}
+            <div key={ssStatIdx} style={{ textAlign: "center", animation: "ss-stat-enter 0.7s cubic-bezier(0.22,1,0.36,1) forwards", marginBottom: "28px" }}>
+              <div style={{ fontSize: "clamp(88px, 16vw, 200px)", fontWeight: 900, color: "#05C3DD", lineHeight: 1, letterSpacing: "-0.03em", textShadow: "0 0 80px rgba(5,195,221,0.5), 0 0 160px rgba(5,195,221,0.2)" }}>
+                {IMPACT_STATS[ssStatIdx].hero}
+              </div>
+              <div style={{ fontSize: "clamp(15px, 2.2vw, 26px)", fontWeight: 700, color: "rgba(255,255,255,0.82)", maxWidth: "700px", lineHeight: 1.35, marginTop: "12px", padding: "0 24px" }}>
+                {IMPACT_STATS[ssStatIdx].headline}
+              </div>
+            </div>
+
+            {/* Dot progress indicators */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "36px" }}>
+              {IMPACT_STATS.map((_, i) => (
+                <div key={i} style={{ width: i === ssStatIdx ? "28px" : "7px", height: "7px", borderRadius: "4px", background: i === ssStatIdx ? "#05C3DD" : "rgba(255,255,255,0.18)", transition: "width 0.4s ease, background 0.4s ease", boxShadow: i === ssStatIdx ? "0 0 10px rgba(5,195,221,0.7)" : "none" }} />
+              ))}
+            </div>
+
+            {/* Subtitle */}
+            <div style={{ fontSize: "clamp(11px, 1.2vw, 15px)", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: "monospace" }}>
+              Patient Experience Journey · Powered by Webex Contact Center
+            </div>
+          </div>
+
+          {/* ── ECG band ── */}
+          <div style={{ position: "absolute", bottom: "80px", left: 0, right: 0, height: "80px", overflow: "hidden", opacity: 0.65 }}>
+            {/* Glow layer */}
+            <svg viewBox="0 0 2400 80" style={{ width: "200%", height: "100%", display: "block", filter: "blur(3px) drop-shadow(0 0 6px rgba(5,195,221,0.9))", animation: "ss-ecg 6s linear infinite", position: "absolute", top: 0, left: 0 }} preserveAspectRatio="none">
+              <path d={ECG_PATH} stroke="rgba(5,195,221,0.5)" strokeWidth="3" fill="none" />
+            </svg>
+            {/* Sharp layer */}
+            <svg viewBox="0 0 2400 80" style={{ width: "200%", height: "100%", display: "block", animation: "ss-ecg 6s linear infinite", position: "absolute", top: 0, left: 0 }} preserveAspectRatio="none">
+              <path d={ECG_PATH} stroke="#05C3DD" strokeWidth="1.5" fill="none" />
+            </svg>
+          </div>
+
+          {/* CTA */}
+          <div style={{ position: "absolute", bottom: "28px", left: 0, right: 0, textAlign: "center", fontSize: "12px", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "#05C3DD", fontFamily: "monospace", animation: "ss-cta-pulse 2.2s ease-in-out infinite" }}>
+            Move to explore
+          </div>
+
+        </div>
+      )}
 
       {/* Header */}
       <div className="h-16 bg-[#080f19] border-b border-white/[0.06] flex items-center px-6 md:px-10 justify-between" style={{ boxShadow: "0 1px 0 rgba(5,195,221,0.08), 0 4px 24px rgba(0,0,0,0.4)" }}>
