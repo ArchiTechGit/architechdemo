@@ -633,12 +633,12 @@ export default function Home() {
           </div>
           <button
             onClick={() => setOverviewOpen(true)}
-            className="flex items-center gap-2 group focus-visible:outline-none"
+            className="flex items-center gap-1.5 group focus-visible:outline-none"
           >
-            <span className="text-[11px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
-              Click here to learn about the journey
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35 group-hover:text-primary transition-colors duration-200 font-mono">
+              Learn about the journey
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
+            <ChevronDown className="w-3 h-3 text-white/25 group-hover:text-primary transition-colors duration-200 -rotate-90" />
           </button>
         </div>
       </div>
