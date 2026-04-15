@@ -1063,12 +1063,12 @@ export default function Home() {
             {/* Stepper */}
             <div className="relative">
               {/* Connecting track */}
-              <div className="absolute left-0 right-0 h-px pointer-events-none" style={{ top: "60px", background: "rgba(255,255,255,0.07)" }} />
+              <div className="absolute left-0 right-0 h-px pointer-events-none" style={{ top: "clamp(24px, 4vw, 60px)", background: "rgba(255,255,255,0.07)" }} />
               {/* Filled progress track */}
               <div
                 className="absolute left-0 h-px pointer-events-none transition-all duration-700"
                 style={{
-                  top: "60px",
+                  top: "clamp(24px, 4vw, 60px)",
                   background: "linear-gradient(90deg, #00A991, #05C3DD)",
                   boxShadow: "0 0 8px rgba(5,195,221,0.4)",
                   width: triggeredStages.size === 0 ? "0%" : `${((JOURNEY_STAGES.findIndex((s) => s.id === [...triggeredStages].at(-1)) + 1) / JOURNEY_STAGES.length) * (100 - (100 / JOURNEY_STAGES.length))}%`,
@@ -1086,29 +1086,29 @@ export default function Home() {
                     <button
                       key={stage.id}
                       onClick={() => setActiveStepperStage(stage.id)}
-                      className="flex flex-col items-center gap-3 group"
+                      className="flex flex-col items-center gap-2 group"
                       style={{ flex: 1 }}
                     >
                       {/* Node circle */}
                       <div
                         className="rounded-full flex items-center justify-center transition-all duration-300 relative z-10"
                         style={{
-                          width: "120px",
-                          height: "120px",
+                          width: "clamp(48px, 8vw, 120px)",
+                          height: "clamp(48px, 8vw, 120px)",
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
                           border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.1)",
                           boxShadow: isTriggered ? "0 0 18px rgba(0,169,145,0.35)" : isActive ? `0 0 18px ${sc.accentGlow}` : "none",
                         }}
                       >
                         {isTriggered
-                          ? <Check style={{ width: "52px", height: "52px" }} className="text-[#00A991]" />
-                          : SIcon && <SIcon style={{ width: "52px", height: "52px", color: isActive ? sc.accent : "rgba(255,255,255,0.25)" }} className="transition-colors duration-300" />
+                          ? <Check style={{ width: "clamp(20px, 3.5vw, 52px)", height: "clamp(20px, 3.5vw, 52px)" }} className="text-[#00A991]" />
+                          : SIcon && <SIcon style={{ width: "clamp(20px, 3.5vw, 52px)", height: "clamp(20px, 3.5vw, 52px)", color: isActive ? sc.accent : "rgba(255,255,255,0.25)" }} className="transition-colors duration-300" />
                         }
                       </div>
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "20px", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.6)", maxWidth: "180px" }}
+                        style={{ fontSize: "clamp(10px, 1.4vw, 20px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.6)", maxWidth: "clamp(60px, 10vw, 180px)" }}
                       >
                         {stage.label}
                       </span>
