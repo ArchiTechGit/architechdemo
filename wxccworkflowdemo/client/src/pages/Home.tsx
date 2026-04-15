@@ -620,22 +620,16 @@ export default function Home() {
               <span className="text-white font-bold" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>{IMPACT_STATS[statIndex].highlight}</span>
               {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
             </p>
+            <button
+              onClick={() => setOverviewOpen(true)}
+              className="flex items-center gap-2 group focus-visible:outline-none mt-5"
+            >
+              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+                Learn about the journey
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
+            </button>
           </div>
-        </div>
-      </div>
-
-      {/* Journey Overview link */}
-      <div className="border-b border-white/[0.06]" style={{ background: "linear-gradient(180deg, #0c1623 0%, #080f19 100%)" }}>
-        <div className="container mx-auto px-6 md:px-10 py-4 flex items-center">
-          <button
-            onClick={() => setOverviewOpen(true)}
-            className="flex items-center gap-2 group focus-visible:outline-none"
-          >
-            <span className="text-[11px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
-              Learn about the journey
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
-          </button>
         </div>
       </div>
 
