@@ -21,6 +21,7 @@ interface JourneyStage {
   automationOpportunity: string;
   image: string;
   webhookUrl: string;
+  voiceWebhookUrl?: string;
   phoneMessage: string;
   phoneMessages?: string[];
   phoneAction: string;
@@ -152,6 +153,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
     automationOpportunity: "AI agent sends SMS 48-72 hours post-discharge initiating conversational survey. Asks about pain levels, wound condition, medication adherence, mobility, and red flag symptoms. Routine responses auto-documented in EMR. Concerning responses trigger immediate escalation to nurse with pre-populated context. Critical flags generate emergency protocol alert.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
+    voiceWebhookUrl: "https://hooks.au.webexconnect.io/events/ODITZ4C6HA",
     phoneMessages: [
       "Hi {NAME}, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
       "What is your pain level on a scale of 1–10?",
@@ -1206,8 +1208,8 @@ export default function Home() {
                             </Button>
                           )}
                           {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
-                            <Button onClick={() => setVoiceModalOpen(true)} className="font-medium text-xs h-9 px-4 shadow-none flex items-center gap-1.5" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.35)", color: "#00A991" }}>
-                              <Phone className="w-3.5 h-3.5" />
+                            <Button onClick={() => triggerWorkflow("PATIENT_POST_DISCHARGE_SURVEY_VOICE", "AI Call", stage.voiceWebhookUrl!)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none flex items-center gap-1.5" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.35)", color: "#00A991" }}>
+                              {loadingStage === "PATIENT_POST_DISCHARGE_SURVEY_VOICE" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Phone className="w-3.5 h-3.5" />}
                               Call AI →
                             </Button>
                           )}
