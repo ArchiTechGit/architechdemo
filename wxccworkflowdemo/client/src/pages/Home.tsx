@@ -41,8 +41,7 @@ const VOICE_AI_DEMO_NUMBER = "+61 2 0000 0000"; // Replace with real demo number
 const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_PRE_ADMISSION_ENROL",
-    chapter: "01",
-    sectionHeader: "Pre Admission",
+    chapter: "Stage 1",
     label: "Pre Admission Enrolment",
     image: "/wxccworkflowdemo/dist/workflow-images/pre-admission-enrolment.png",
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
@@ -54,8 +53,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   },
   {
     id: "PATIENT_APPOINTMENT_CONFIRM",
-    chapter: "02",
-    sectionHeader: "Pre Admission",
+    chapter: "Stage 2",
     label: "Appointment Scheduling and Reminders",
     image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
@@ -75,8 +73,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   },
   {
     id: "PATIENT_ARRIVAL_WAYFINDING",
-    chapter: "03",
-    sectionHeader: "Day-of-Surgery Coordination",
+    chapter: "Stage 3",
     label: "Arrival Coordination",
     image: "/wxccworkflowdemo/dist/workflow-images/arrival-coordination.png",
     currentState: "Patient arrives, joins queue at admissions desk.",
@@ -95,8 +92,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   },
   {
     id: "PATIENT_FAMILY_SURGERY_UPDATE",
-    chapter: "04",
-    sectionHeader: "Day-of-Surgery Coordination",
+    chapter: "Stage 4",
     label: "Family Updates During Surgery",
     image: "/wxccworkflowdemo/dist/workflow-images/family-surgery-update.png",
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
@@ -113,8 +109,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   },
   {
     id: "PATIENT_DISCHARGE_INSTRUCTIONS",
-    chapter: "05",
-    sectionHeader: "Discharge and Recovery",
+    chapter: "Stage 5",
     label: "Take-Home Instruction Delivery",
     image: "/wxccworkflowdemo/dist/workflow-images/discharge-instructions.png",
     currentState: "Nurse hands patient printed sheets. Patient loses them.",
@@ -126,8 +121,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   },
   {
     id: "PATIENT_POST_DISCHARGE_SURVEY",
-    chapter: "06",
-    sectionHeader: "Discharge and Recovery",
+    chapter: "Stage 6",
     label: "Post Discharge Check-Up",
     image: "/wxccworkflowdemo/dist/workflow-images/post-discharge-survey.png",
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
@@ -990,9 +984,6 @@ export default function Home() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>{stage.chapter}</span>
-                          {stage.sectionHeader && (
-                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{stage.sectionHeader}</span>
-                          )}
                         </div>
                         <div className="flex items-start gap-1.5">
                           {stage.partnerBadge && (
