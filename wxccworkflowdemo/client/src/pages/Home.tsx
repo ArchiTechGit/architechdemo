@@ -233,7 +233,7 @@ export default function Home() {
     const reset = () => {
       setScreensaverActive(false);
       if (ssTimerRef.current) clearTimeout(ssTimerRef.current);
-      ssTimerRef.current = setTimeout(() => setScreensaverActive(true), 30000);
+      ssTimerRef.current = setTimeout(() => setScreensaverActive(true), 120000);
     };
     const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"] as const;
     events.forEach(e => window.addEventListener(e, reset, { passive: true }));
