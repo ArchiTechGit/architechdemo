@@ -469,8 +469,17 @@ export default function Home() {
             </div>
 
             {/* Subtitle */}
-            <div style={{ fontSize: "clamp(11px, 1.2vw, 15px)", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: "monospace" }}>
+            <div style={{ fontSize: "clamp(11px, 1.2vw, 15px)", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: "monospace", marginBottom: "48px" }}>
               Patient Experience Journey · Powered by Webex Contact Center
+            </div>
+
+            {/* Ask for demo badge */}
+            <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 1.5vw, 20px)", background: "rgba(5,195,221,0.1)", border: "2px solid rgba(5,195,221,0.55)", borderRadius: "100px", padding: "clamp(14px, 2vh, 22px) clamp(32px, 4vw, 60px)", animation: "ss-demo-badge 2.5s ease-in-out infinite" }}>
+              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0, animation: "ss-cta-pulse 1.2s ease-in-out infinite" }} />
+              <span style={{ fontSize: "clamp(22px, 3.5vw, 48px)", fontWeight: 900, color: "white", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1, whiteSpace: "nowrap" }}>
+                Ask us for a live demo
+              </span>
+              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0, animation: "ss-cta-pulse 1.2s ease-in-out infinite" }} />
             </div>
           </div>
 
