@@ -122,6 +122,9 @@
     @apply border-border outline-ring/50;
     font-family: 'Roboto', Arial, sans-serif;
   }
+  input, textarea, select, button {
+    font-family: 'Roboto', Arial, sans-serif;
+  }
   body {
     @apply bg-background text-foreground;
   }
