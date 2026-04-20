@@ -667,12 +667,31 @@ export default function Home() {
         />
         {/* Subtle top accent line */}
         <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.3) 30%, rgba(5,195,221,0.15) 70%, transparent 100%)" }} />
+        {/* Fixed nav controls */}
+        <div className="absolute bottom-5 left-6 md:left-10 flex gap-1.5 items-center z-10">
+          <button onClick={() => advanceStat(-1)} aria-label="Previous stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>‹</button>
+          {IMPACT_STATS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToStat(i)}
+              aria-label={`Show stat ${i + 1}`}
+              className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+              style={{
+                width: i === statIndex ? "18px" : "5px",
+                height: "5px",
+                background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
+                boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
+              }}
+            />
+          ))}
+          <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
+        </div>
         <div
           className="container mx-auto px-6 md:px-10 py-10 flex items-center gap-8 md:gap-14 relative"
           style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
         >
           {/* Hero number */}
-          <div className="flex-shrink-0 flex items-end gap-4">
+          <div className="flex-shrink-0">
             <span
               className="font-black text-primary leading-none"
               style={{
@@ -683,38 +702,6 @@ export default function Home() {
             >
               {IMPACT_STATS[statIndex].hero}
             </span>
-            <div className="pb-3">
-              <div className="w-10 h-px mb-3" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.8), rgba(5,195,221,0.2))" }} />
-              {/* Dot indicators + prev/next controls */}
-              <div className="flex gap-1.5 items-center">
-                <button
-                  onClick={() => advanceStat(-1)}
-                  aria-label="Previous stat"
-                  className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors"
-                  style={{ fontSize: "12px" }}
-                >‹</button>
-                {IMPACT_STATS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goToStat(i)}
-                    aria-label={`Show stat ${i + 1}`}
-                    className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                    style={{
-                      width: i === statIndex ? "18px" : "5px",
-                      height: "5px",
-                      background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
-                      boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
-                    }}
-                  />
-                ))}
-                <button
-                  onClick={() => advanceStat(1)}
-                  aria-label="Next stat"
-                  className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors"
-                  style={{ fontSize: "12px" }}
-                >›</button>
-              </div>
-            </div>
           </div>
           <div className="hidden md:block w-px self-stretch" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)" }} />
           {/* Story */}
