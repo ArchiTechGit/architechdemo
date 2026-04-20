@@ -283,7 +283,7 @@ export default function Home() {
   useEffect(() => {
     if (!screensaverActive) return;
     setSsStatIdx(0);
-    const id = setInterval(() => setSsStatIdx(i => (i + 1) % IMPACT_STATS.length), 5000);
+    const id = setInterval(() => setSsStatIdx(i => (i + 1) % IMPACT_STATS.length), 10000);
     return () => clearInterval(id);
   }, [screensaverActive]);
 
@@ -481,7 +481,37 @@ export default function Home() {
             </div>
 
             {/* ArchiTech logo */}
-            <img src={logoUrl} alt="ArchiTech" style={{ width: "clamp(220px, 22vw, 360px)", mixBlendMode: "screen", animation: "ss-logo-pulse 3.5s ease-in-out infinite", marginBottom: "48px" }} />
+            <img src={logoUrl} alt="ArchiTech" style={{ width: "clamp(220px, 22vw, 360px)", mixBlendMode: "screen", animation: "ss-logo-pulse 3.5s ease-in-out infinite", marginBottom: "20px" }} />
+
+            {/* Demo identity headline */}
+            <div style={{ textAlign: "center", marginBottom: "24px" }}>
+              <div style={{ fontSize: "clamp(22px, 3.5vw, 52px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1.05, textShadow: "0 0 40px rgba(5,195,221,0.4), 0 2px 8px rgba(0,0,0,0.8)" }}>
+                Digital Front Door
+              </div>
+              <div style={{ fontSize: "clamp(13px, 2vw, 28px)", fontWeight: 700, color: "#05C3DD", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: "6px", textShadow: "0 0 20px rgba(5,195,221,0.6)" }}>
+                Patient Experience Demonstration
+              </div>
+            </div>
+
+            {/* Journey visual — 6 steps */}
+            <div style={{ display: "flex", alignItems: "flex-start", marginBottom: "28px", gap: 0 }}>
+              {JOURNEY_STAGES.map((stage, idx) => {
+                const Icon = STAGE_META[idx].icon;
+                return (
+                  <div key={stage.id} style={{ display: "flex", alignItems: "center" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                      <div style={{ width: "clamp(40px, 4.5vw, 68px)", height: "clamp(40px, 4.5vw, 68px)", borderRadius: "50%", background: "rgba(5,195,221,0.12)", border: "1.5px solid rgba(5,195,221,0.45)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 14px rgba(5,195,221,0.2)" }}>
+                        <Icon style={{ width: "clamp(18px, 2.2vw, 32px)", height: "clamp(18px, 2.2vw, 32px)", color: "#05C3DD" }} />
+                      </div>
+                      <span style={{ fontSize: "clamp(9px, 0.85vw, 12px)", fontWeight: 700, color: "rgba(255,255,255,0.65)", textAlign: "center", maxWidth: "clamp(64px, 7vw, 100px)", lineHeight: 1.25 }}>{stage.label}</span>
+                    </div>
+                    {idx < JOURNEY_STAGES.length - 1 && (
+                      <div style={{ width: "clamp(16px, 2.5vw, 40px)", height: "1px", background: "linear-gradient(90deg, rgba(5,195,221,0.45), rgba(5,195,221,0.15))", marginBottom: "24px", flexShrink: 0 }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Cycling stat */}
             <div key={ssStatIdx} style={{ textAlign: "center", animation: "ss-stat-enter 0.7s cubic-bezier(0.22,1,0.36,1) forwards", marginBottom: "28px" }}>
@@ -659,8 +689,8 @@ export default function Home() {
             onClick={() => setOverviewOpen(true)}
             className="flex items-center gap-2 group focus-visible:outline-none"
           >
-            <span className="text-[11px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
-              Learn about the journey
+            <span className="text-[16.5px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+              Click here to learn about the journey
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
           </button>
@@ -1225,10 +1255,10 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
-                    <p className="text-xs leading-relaxed text-white/60 mb-2">{stage.automationOpportunity}</p>
+                    <p className="text-[18px] leading-relaxed text-white/60 mb-2">{stage.automationOpportunity}</p>
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
-                      <p className="text-xs leading-relaxed text-white/50">{stage.currentState}</p>
+                      <p className="text-[15px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
+                      <p className="text-[18px] leading-relaxed text-white/50">{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
@@ -1414,6 +1444,44 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* ── Footer ── */}
+      <footer style={{ borderTop: "1px solid rgba(5,195,221,0.15)", background: "rgba(4,11,20,0.95)", padding: "clamp(24px, 4vh, 40px) clamp(24px, 4vw, 48px)", marginTop: "16px" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(5,195,221,0.5)" }}>
+            What's next?
+          </div>
+          <div style={{ display: "flex", gap: "clamp(16px, 3vw, 40px)", flexWrap: "wrap", justifyContent: "center" }}>
+            <a
+              href="/wxccroi-public/"
+              style={{ display: "flex", alignItems: "center", gap: "14px", padding: "18px 32px", borderRadius: "14px", background: "rgba(5,195,221,0.07)", border: "1px solid rgba(5,195,221,0.35)", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(5,195,221,0.08)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(5,195,221,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(5,195,221,0.6)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(5,195,221,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(5,195,221,0.35)"; }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#05C3DD", marginBottom: "4px" }}>Step 2</span>
+                <span style={{ fontSize: "clamp(15px, 1.8vw, 22px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.02em" }}>ROI Calculator</span>
+                <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "3px" }}>See your return on investment →</span>
+              </div>
+            </a>
+            <a
+              href="/discovery/"
+              style={{ display: "flex", alignItems: "center", gap: "14px", padding: "18px 32px", borderRadius: "14px", background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.35)", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(0,169,145,0.08)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,169,145,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,169,145,0.6)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,169,145,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,169,145,0.35)"; }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#00A991", marginBottom: "4px" }}>Step 3</span>
+                <span style={{ fontSize: "clamp(15px, 1.8vw, 22px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.02em" }}>Discovery Assessment</span>
+                <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "3px" }}>Start your discovery conversation →</span>
+              </div>
+            </a>
+          </div>
+          <div style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            Powered by Webex Contact Centre · ArchiTech
+          </div>
+        </div>
+      </footer>
 
       {/* Voice AI Demo Modal */}
       {voiceModalOpen && (
