@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Loader2, MapPin, Phone, User, Users } from "lucide-react";
+import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
 import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
@@ -215,13 +215,6 @@ const IMPACT_STATS = [
     body: "At 15 minutes per manual call, every thousand interactions automated returns",
     highlight: "~$14,000 in clinical capacity",
     tail: "Small facility. Large network. The math scales either way.",
-  },
-  {
-    hero: "12–18",
-    headline: "Months to full break-even. Net positive every year after.",
-    body: "Total first-year investment $71K–$96K including one-time setup. Annual return scales with patient volume —",
-    highlight: "higher volume means faster break-even",
-    tail: "and more return every year after that.",
   },
 ];
 
@@ -589,9 +582,19 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 border border-[#00A991]/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-          <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-          <span className="text-xs font-bold text-[#00A991] tracking-wider uppercase">Live</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.dispatchEvent(new Event("screensaver:show"))}
+            className="flex items-center gap-1.5 border border-white/10 rounded-full px-3 py-1.5 text-white/30 hover:text-white/60 hover:border-white/20 transition-colors"
+            title="Sleep"
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-bold tracking-widest uppercase">Sleep</span>
+          </button>
+          <div className="flex items-center gap-2 border border-[#00A991]/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+            <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+            <span className="text-xs font-bold text-[#00A991] tracking-wider uppercase">Live</span>
+          </div>
         </div>
       </div>
 
