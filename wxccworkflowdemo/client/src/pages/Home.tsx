@@ -700,51 +700,53 @@ export default function Home() {
       {/* Journey Overview Modal */}
       {overviewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setOverviewOpen(false)}>
-          <div className="relative w-full mx-6" style={{ maxWidth: "1200px" }} onClick={e => e.stopPropagation()}>
+          <div className="relative w-full mx-6" style={{ maxWidth: "1400px" }} onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-7">
               <div className="flex items-center gap-3">
-                <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+                <div className="w-[3px] h-7 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
                 <span className="text-[22.5px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
               </div>
-              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
+              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-3 py-1.5 rounded transition-colors">
                 ✕ Close
               </button>
             </div>
 
-            {/* Section labels */}
-            <div className="flex mb-3">
+            {/* 3-column grid — one column per journey phase, 2 stages stacked per column */}
+            <div className="grid gap-6" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
               {[
-                { label: "Pre Admission", color: "rgba(5,195,221,0.55)" },
-                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.55)" },
-                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.55)" },
-              ].map(({ label, color }) => (
-                <div key={label} className="flex items-center justify-center px-1" style={{ flex: 2 }}>
-                  <span className="text-[18px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
+                { label: "Pre Admission", color: "rgba(5,195,221,0.55)", stages: [0, 1] },
+                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.55)", stages: [2, 3] },
+                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.55)", stages: [4, 5] },
+              ].map(({ label, color, stages }) => (
+                <div key={label} className="flex flex-col gap-4">
+                  {/* Section label */}
+                  <div className="text-center pb-2" style={{ borderBottom: "1px solid rgba(5,195,221,0.1)" }}>
+                    <span className="text-[18px] font-bold font-mono uppercase tracking-[0.18em]" style={{ color }}>{label}</span>
+                  </div>
+                  {/* Stage cards */}
+                  {stages.map((idx) => {
+                    const stage = JOURNEY_STAGES[idx];
+                    const sc = STAGE_COLORS[idx];
+                    const Icon = STAGE_META[idx].icon;
+                    return (
+                      <div key={stage.id} className="rounded-xl relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.9) 100%)` }}>
+                        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
+                        <div className="flex items-start gap-4 p-5">
+                          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
+                            <Icon className="w-6 h-6" style={{ color: sc.accent }} />
+                          </div>
+                          <div className="flex flex-col gap-2 min-w-0">
+                            <span className="font-mono text-[13px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
+                            <h3 className="text-[22px] font-black text-white leading-tight">{stage.label}</h3>
+                            <p className="text-[16px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
-            </div>
-
-            {/* Cards */}
-            <div className="relative flex gap-3">
-              <div className="absolute top-5 left-5 right-5 h-px pointer-events-none" style={{ background: "rgba(5,195,221,0.12)" }} />
-              {JOURNEY_STAGES.map((stage, idx) => {
-                const sc = STAGE_COLORS[idx];
-                const Icon = STAGE_META[idx].icon;
-                return (
-                  <div key={stage.id} className="flex flex-col items-center gap-3" style={{ flex: 1 }}>
-                    <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center relative z-10 flex-shrink-0" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
-                      <Icon className="w-6 h-6" style={{ color: sc.accent }} />
-                    </div>
-                    <div className="w-full rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.85) 100%)` }}>
-                      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
-                      <span className="font-mono text-[15px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
-                      <h3 className="text-[24px] font-black text-white leading-tight">{stage.label}</h3>
-                      <p className="text-[18px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>
