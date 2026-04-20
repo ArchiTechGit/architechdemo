@@ -460,13 +460,13 @@ export default function Home() {
         <div className="fixed inset-0 z-[9999] overflow-hidden select-none" style={{ background: "#020810", cursor: "none" }}>
 
           {/* Drifting glow orbs */}
-          <div style={{ position: "absolute", width: "900px", height: "900px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.16) 0%, transparent 68%)", filter: "blur(60px)", top: "5%", left: "15%", animation: "ss-drift-1 24s ease-in-out infinite", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", width: "700px", height: "700px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,169,145,0.13) 0%, transparent 68%)", filter: "blur(80px)", top: "40%", right: "10%", animation: "ss-drift-2 30s ease-in-out infinite", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.09) 0%, transparent 68%)", filter: "blur(60px)", bottom: "10%", left: "5%", animation: "ss-drift-3 20s ease-in-out infinite", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", width: "900px", height: "900px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.16) 0%, transparent 68%)", filter: "blur(60px)", top: "5%", left: "15%", animation: "ss-drift-1 24s ease-in-out infinite", pointerEvents: "none", opacity: 0.18 }} />
+          <div style={{ position: "absolute", width: "700px", height: "700px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,169,145,0.13) 0%, transparent 68%)", filter: "blur(80px)", top: "40%", right: "10%", animation: "ss-drift-2 30s ease-in-out infinite", pointerEvents: "none", opacity: 0.18 }} />
+          <div style={{ position: "absolute", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.09) 0%, transparent 68%)", filter: "blur(60px)", bottom: "10%", left: "5%", animation: "ss-drift-3 20s ease-in-out infinite", pointerEvents: "none", opacity: 0.18 }} />
 
           {/* Floating particles */}
           {PARTICLES.map((p, i) => (
-            <div key={i} style={{ position: "absolute", bottom: "-10px", left: p.left, width: `${p.size}px`, height: `${p.size}px`, borderRadius: "50%", background: p.color, animation: `ss-float ${p.duration} linear ${p.delay} infinite`, boxShadow: p.glow ? `0 0 8px ${p.color}` : "none", pointerEvents: "none" }} />
+            <div key={i} style={{ position: "absolute", bottom: "-10px", left: p.left, width: `${p.size}px`, height: `${p.size}px`, borderRadius: "50%", background: p.color, animation: `ss-float ${p.duration} linear ${p.delay} infinite`, boxShadow: p.glow ? `0 0 8px ${p.color}` : "none", pointerEvents: "none", opacity: 0.15 }} />
           ))}
 
           {/* Scan line */}
@@ -485,10 +485,10 @@ export default function Home() {
 
             {/* Demo identity headline */}
             <div style={{ textAlign: "center", marginBottom: "24px" }}>
-              <div style={{ fontSize: "clamp(22px, 3.5vw, 52px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1.05, textShadow: "0 0 40px rgba(5,195,221,0.4), 0 2px 8px rgba(0,0,0,0.8)" }}>
+              <div style={{ fontSize: "clamp(29px, 4.55vw, 68px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1.05, textShadow: "0 0 40px rgba(5,195,221,0.4), 0 2px 8px rgba(0,0,0,0.8)" }}>
                 Digital Front Door
               </div>
-              <div style={{ fontSize: "clamp(13px, 2vw, 28px)", fontWeight: 700, color: "#05C3DD", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: "6px", textShadow: "0 0 20px rgba(5,195,221,0.6)" }}>
+              <div style={{ fontSize: "clamp(17px, 2.6vw, 36px)", fontWeight: 700, color: "#05C3DD", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: "6px", textShadow: "0 0 20px rgba(5,195,221,0.6)" }}>
                 Patient Experience Demonstration
               </div>
             </div>
@@ -499,14 +499,14 @@ export default function Home() {
                 const Icon = STAGE_META[idx].icon;
                 return (
                   <div key={stage.id} style={{ display: "flex", alignItems: "center" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                      <div style={{ width: "clamp(40px, 4.5vw, 68px)", height: "clamp(40px, 4.5vw, 68px)", borderRadius: "50%", background: "rgba(5,195,221,0.12)", border: "1.5px solid rgba(5,195,221,0.45)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 14px rgba(5,195,221,0.2)" }}>
-                        <Icon style={{ width: "clamp(18px, 2.2vw, 32px)", height: "clamp(18px, 2.2vw, 32px)", color: "#05C3DD" }} />
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+                      <div style={{ width: "clamp(56px, 6vw, 90px)", height: "clamp(56px, 6vw, 90px)", borderRadius: "50%", background: "rgba(5,195,221,0.12)", border: "1.5px solid rgba(5,195,221,0.45)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 18px rgba(5,195,221,0.25)" }}>
+                        <Icon style={{ width: "clamp(26px, 3vw, 44px)", height: "clamp(26px, 3vw, 44px)", color: "#05C3DD" }} />
                       </div>
-                      <span style={{ fontSize: "clamp(9px, 0.85vw, 12px)", fontWeight: 700, color: "rgba(255,255,255,0.65)", textAlign: "center", maxWidth: "clamp(64px, 7vw, 100px)", lineHeight: 1.25 }}>{stage.label}</span>
+                      <span style={{ fontSize: "clamp(11px, 1vw, 15px)", fontWeight: 700, color: "rgba(255,255,255,0.65)", textAlign: "center", maxWidth: "clamp(72px, 8vw, 112px)", lineHeight: 1.25 }}>{stage.label}</span>
                     </div>
                     {idx < JOURNEY_STAGES.length - 1 && (
-                      <div style={{ width: "clamp(16px, 2.5vw, 40px)", height: "1px", background: "linear-gradient(90deg, rgba(5,195,221,0.45), rgba(5,195,221,0.15))", marginBottom: "24px", flexShrink: 0 }} />
+                      <div style={{ width: "clamp(16px, 2.5vw, 40px)", height: "1px", background: "linear-gradient(90deg, rgba(5,195,221,0.45), rgba(5,195,221,0.15))", marginBottom: "28px", flexShrink: 0 }} />
                     )}
                   </div>
                 );
@@ -705,9 +705,9 @@ export default function Home() {
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
-                <span className="text-[15px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
+                <span className="text-[22.5px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
               </div>
-              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
+              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
                 ✕ Close
               </button>
             </div>
@@ -720,7 +720,7 @@ export default function Home() {
                 { label: "Discharge & Recovery", color: "rgba(85,202,253,0.55)" },
               ].map(({ label, color }) => (
                 <div key={label} className="flex items-center justify-center px-1" style={{ flex: 2 }}>
-                  <span className="text-xs font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
+                  <span className="text-[18px] font-bold font-mono uppercase tracking-[0.2em] whitespace-nowrap" style={{ color }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -733,14 +733,14 @@ export default function Home() {
                 const Icon = STAGE_META[idx].icon;
                 return (
                   <div key={stage.id} className="flex flex-col items-center gap-3" style={{ flex: 1 }}>
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center relative z-10 flex-shrink-0" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
-                      <Icon className="w-4 h-4" style={{ color: sc.accent }} />
+                    <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center relative z-10 flex-shrink-0" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
+                      <Icon className="w-6 h-6" style={{ color: sc.accent }} />
                     </div>
                     <div className="w-full rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.85) 100%)` }}>
                       <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
-                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
-                      <h3 className="text-base font-black text-white leading-tight">{stage.label}</h3>
-                      <p className="text-xs text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                      <span className="font-mono text-[15px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
+                      <h3 className="text-[24px] font-black text-white leading-tight">{stage.label}</h3>
+                      <p className="text-[18px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
                     </div>
                   </div>
                 );
