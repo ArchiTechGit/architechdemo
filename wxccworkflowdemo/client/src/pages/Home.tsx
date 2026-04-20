@@ -372,6 +372,13 @@ export default function Home() {
     return () => { stepRevealTimeoutsRef.current.forEach(clearTimeout); };
   }, []);
 
+  const normalizeAuMobile = (input: string): string => {
+    const digits = input.replace(/[\s\-\(\)]/g, "").replace(/^\+/, "");
+    if (digits.startsWith("61")) return digits;
+    if (digits.startsWith("0")) return "61" + digits.slice(1);
+    return digits;
+  };
+
   const validateInputs = () => {
     if (!mobileNumber.trim()) { toast.error("Mobile number is required"); return false; }
     if (!/^[\d\s\-\+\(\)]+$/.test(mobileNumber)) { toast.error("Please enter a valid mobile number"); return false; }
@@ -388,8 +395,8 @@ export default function Home() {
     const payload = {
       workflowId,
       patientName: patientName.trim(),
-      mobileNumber: mobileNumber.replace(/\s/g, ""),
-      demoMobile: demoMobile.replace(/\s/g, ""),
+      mobileNumber: normalizeAuMobile(mobileNumber),
+      demoMobile: normalizeAuMobile(demoMobile),
       timestamp: formatHumanDate(now),
       appointmentDate: formatHumanDate(appointmentDate),
     };
