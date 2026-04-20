@@ -1,45 +1,36 @@
 # ROI Calculator — Stats Reference
 
-## Sticky Bar (always visible)
+## Sticky Bar
 
-| Stat | Example Value | Formula |
-|---|---|---|
-| ROI | +340% | (Total annual benefit − platform cost) ÷ platform cost × 100 |
-| Net Annual Gain | A$142,000 | Total annual benefit − total annual platform cost |
-| FTE Reclaimed | 1.24 FTE | Total annual hours saved ÷ 1,920 hrs/year |
+- **ROI**
+- **Net Annual Gain**
+- **FTE Reclaimed**
 
 ---
 
-## Organisational Impact — Calculated
+## Organisational Impact
 
-Visible once the user enters volumes. Recalculates live.
+- **FTE Capacity Reclaimed** — "The number of Full-Time Equivalent staff members whose time is freed up from manual tasks. Calculated based on a standard 1,920-hour work year (40 hours/week minus leave)."
 
-| Stat | Example Value | Formula |
-|---|---|---|
-| FTE Capacity Reclaimed | 1.24 FTE | Total annual hours saved ÷ 1,920 (standard working hours/year) |
-| Return Multiplier | 4.4x | Total annual benefit ÷ total annual platform cost |
-| Annual Hours Saved | 2,380 hrs | Sum of (time saved per interaction × annual volume) across all workflows |
+- **Return Multiplier** — "The ratio of savings to cost. For every $1.00 invested in the platform, your organization realizes this much in operational value."
 
----
+- **Annual Hours Saved** — "The total number of staff hours returned to the organization annually across all automated workflows at your projected volumes."
 
-## Organisational Impact — Industry Benchmarks (animated ticker)
+- **DNA Rate Reduction** — "SMS reminders reduced outpatient failure-to-attend rates from 23.4% to 14.2% in Australian hospital outpatient clinics — a 9.2 percentage point reduction."
+  *Source: Downer SR, Meara JG, Da Costa AC. Medical Journal of Australia, 183(7):366–368, 2005.*
 
-Static reference stats sourced from peer-reviewed research. Count up from zero on load.
+- **Annual Savings from SMS** — "Hospitals can reduce missed appointments and save AUD $66,000 per year through targeted SMS messaging."
+  *Source: Behavioural Insights Team, randomised controlled trial, Sydney hospital, 2014.*
 
-| Stat | Value | Source |
-|---|---|---|
-| DNA Rate Reduction | ↓9.2pp (23.4% → 14.2%) | Downer SR, Meara JG, Da Costa AC. SMS reminders reduced outpatient failure-to-attend rates in Australian hospital outpatient clinics. *Medical Journal of Australia*, 183(7):366–368, 2005. |
-| Annual Savings from SMS | A$66,000 / year | Behavioural Insights Team, randomised controlled trial, Sydney hospital, 2014. bi.team/articles/reducing-missed-hospital-appointments-australia |
-| Want Digital Health Access | 88% of 6,622 Australians surveyed | National Digital Health Strategy 'Have your Say' Survey, 2021. Cited in Australasian Institute of Digital Health Capability Framework, 2024. digitalhealth.org.au |
+- **Want Digital Health Access** — "88% of 6,622 Australians surveyed indicated a desire for digital access to their personal health information."
+  *Source: National Digital Health Strategy 'Have your Say' Survey, 2021. Cited in Australasian Institute of Digital Health Capability Framework, 2024.*
 
 ---
 
-## Break-Even Analysis — Calculated
+## Break-Even Analysis
 
-Visible once at least one workflow is configured.
+- **Annual Break-Even** — "The total number of automated interactions required per year to cover the platform's fixed costs. Every interaction beyond this point generates net operational value."
 
-| Stat | Example Value | Formula |
-|---|---|---|
-| Annual Break-Even | 4,200 interactions/yr | Total annual platform cost ÷ net value per interaction, rounded up |
-| Monthly Break-Even | 350 interactions/mo | Annual break-even ÷ 12, rounded up |
-| Net Value / Interaction | A$8.40 | (Manual labour saved + material/postage savings) − digital channel cost, per workflow set |
+- **Monthly Break-Even** — "The average number of interactions needed each month to reach the break-even point. This helps track progress against monthly volume targets."
+
+- **Net Value / Interaction** — "The direct operational benefit realized every time a workflow set runs. Calculated as (Manual Labour Saved + Material Savings) - (Digital Channel Costs)."
