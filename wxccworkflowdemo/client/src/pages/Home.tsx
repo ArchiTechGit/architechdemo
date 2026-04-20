@@ -187,63 +187,6 @@ const STAGE_META = [
 const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
 const STAGE_COLORS = [STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR];
 
-const EVIDENCE_STATS = [
-  {
-    badge: "Missed appointments",
-    badgeColor: "#c0392b",
-    hero: "6–20%",
-    heroColor: "#e67e5a",
-    description: 'of public hospital outpatient appointments are DNAs — "Did Not Attend" — with some clinics at the higher end',
-    callout: "At 40.9 million outpatient events per year nationally, even 6% represents millions of wasted appointment slots",
-    source: "AIHW 2023, via medicalsearch.com.au",
-  },
-  {
-    badge: "Cost per DNA",
-    badgeColor: "#c0392b",
-    hero: "$125–$800",
-    heroColor: "#e67e5a",
-    description: "lost per missed outpatient appointment in a public hospital",
-    callout: "Even at the low end, a clinic with a 10% DNA rate on 50 appointments/day loses over $22,000 per month",
-    source: "NSW Behavioural Insights Unit, 2019",
-  },
-  {
-    badge: "NSW public hospitals",
-    badgeColor: "#0e7a6e",
-    hero: "34%",
-    heroColor: "#2ec4a9",
-    description: "reduction in missed appointments achieved by Central Coast LHD using behaviourally-informed SMS reminders across four outpatient clinics",
-    callout: "Produced nearly $120,000 in public health and productivity benefits — and CCLHD committed to scaling across all 800 clinics",
-    source: "NSW Behavioural Insights Unit, 2019",
-  },
-  {
-    badge: "St Vincent's Hospital Sydney",
-    badgeColor: "#0e7a6e",
-    hero: "19%",
-    heroColor: "#2ec4a9",
-    description: "reduction in no-shows at St Vincent's Hospital Sydney using a single targeted SMS intervention",
-    callout: "The message referenced the cost of the missed appointment to the hospital — a simple change to channel and content",
-    source: "NSW Behavioural Insights Unit, 2016",
-  },
-  {
-    badge: "System scale",
-    badgeColor: "#1a5276",
-    hero: "40.9M",
-    heroColor: "#5dade2",
-    description: "non-admitted patient service events in Australian public hospitals in 2023–24",
-    callout: "Each percentage point improvement in attendance or efficiency has outsized impact at this scale",
-    source: "AIHW / Productivity Commission 2026",
-  },
-  {
-    badge: "Automation potential",
-    badgeColor: "#7d4e0f",
-    hero: "30%",
-    heroColor: "#e8a44a",
-    description: "of tasks currently performed by the healthcare workforce could be automated using digital technology and AI",
-    callout: "Freeing clinical staff from administrative work is one of the most direct impacts of a Digital Front Door",
-    source: "Productivity Commission, May 2024",
-  },
-];
-
 const IMPACT_STATS = [
   {
     hero: "20x",
@@ -272,6 +215,48 @@ const IMPACT_STATS = [
     body: "At 15 minutes per manual call, every thousand interactions automated returns",
     highlight: "~$14,000 in clinical capacity",
     tail: "Small facility. Large network. The math scales either way.",
+  },
+  {
+    hero: "6–20%",
+    headline: "Of public hospital outpatient appointments are missed — Did Not Attend.",
+    body: "At 40.9 million outpatient events per year nationally,",
+    highlight: "even 6% represents millions of wasted appointment slots.",
+    tail: "Source: AIHW 2023.",
+  },
+  {
+    hero: "$125–$800",
+    headline: "Lost per missed outpatient appointment in a public hospital.",
+    body: "Even at the low end, a clinic with a 10% DNA rate on 50 appointments/day loses",
+    highlight: "over $22,000 per month.",
+    tail: "Source: NSW Behavioural Insights Unit, 2019.",
+  },
+  {
+    hero: "34%",
+    headline: "Reduction in missed appointments using behaviourally-informed SMS reminders.",
+    body: "Central Coast LHD achieved this across four outpatient clinics — producing nearly",
+    highlight: "$120,000 in public health and productivity benefits.",
+    tail: "Source: NSW Behavioural Insights Unit, 2019.",
+  },
+  {
+    hero: "19%",
+    headline: "Reduction in no-shows at St Vincent's Hospital Sydney.",
+    body: "Achieved using a single targeted SMS intervention — the message referenced the cost of the missed appointment to the hospital.",
+    highlight: "A simple change to channel and content.",
+    tail: "Source: NSW Behavioural Insights Unit, 2016.",
+  },
+  {
+    hero: "40.9M",
+    headline: "Non-admitted patient service events in Australian public hospitals in 2023–24.",
+    body: "Each percentage point improvement in attendance or efficiency has",
+    highlight: "outsized impact at this scale.",
+    tail: "Source: AIHW / Productivity Commission 2026.",
+  },
+  {
+    hero: "30%",
+    headline: "Of healthcare workforce tasks could be automated using digital technology and AI.",
+    body: "Freeing clinical staff from administrative work is",
+    highlight: "one of the most direct impacts of a Digital Front Door.",
+    tail: "Source: Productivity Commission, May 2024.",
   },
 ];
 
@@ -1506,37 +1491,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* ── Industry Evidence ── */}
-      <section style={{ background: "#070d15", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "clamp(48px, 6vh, 80px) clamp(24px, 4vw, 48px)" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ marginBottom: "40px" }}>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(5,195,221,0.6)", marginBottom: "10px" }}>Supporting Evidence</p>
-            <h2 style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 900, color: "#ffffff", margin: 0 }}>The problem is well-documented.</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
-            {EVIDENCE_STATS.map((s, i) => (
-              <div key={i} style={{ background: "#111820", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.07)", padding: "28px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                <span style={{ display: "inline-block", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#fff", background: s.badgeColor, borderRadius: "999px", padding: "3px 12px", alignSelf: "flex-start" }}>
-                  {s.badge}
-                </span>
-                <div style={{ fontSize: "clamp(36px, 5vw, 52px)", fontWeight: 900, color: s.heroColor, lineHeight: 1, letterSpacing: "-0.02em" }}>
-                  {s.hero}
-                </div>
-                <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.75)", lineHeight: 1.5, margin: 0 }}>
-                  {s.description}
-                </p>
-                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "8px", padding: "12px 14px", fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
-                  {s.callout}
-                </div>
-                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.28)", margin: "auto 0 0 0", paddingTop: "6px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  {s.source}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Footer ── */}
       <footer style={{ borderTop: "1px solid rgba(5,195,221,0.15)", background: "rgba(4,11,20,0.95)", padding: "clamp(24px, 4vh, 40px) clamp(24px, 4vw, 48px)", marginTop: "16px" }}>
