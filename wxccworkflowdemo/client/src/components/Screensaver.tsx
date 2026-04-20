@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import logoUrl from "@/assets/logo_darkbackground.png";
 
-// Orb definition
 interface Orb {
   x: number;
   y: number;
@@ -27,7 +26,7 @@ function makeOrb(width: number, height: number): Orb {
     vx: (Math.random() - 0.5) * 0.6,
     vy: (Math.random() - 0.5) * 0.6,
     r: 80 + Math.random() * 220,
-    opacity: 0.08 + Math.random() * 0.18,
+    opacity: 0.015 + Math.random() * 0.025,
     color,
   };
 }
@@ -51,7 +50,7 @@ function useIdleTimer(idleMs: number, onIdle: () => void, onActive: () => void) 
 
     const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"];
     events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
-    reset(); // start timer immediately
+    reset();
 
     return () => {
       events.forEach((e) => window.removeEventListener(e, reset));
@@ -66,11 +65,10 @@ interface ScreensaverProps {
 
 export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
   const [visible, setVisible] = useState(false);
-  const [mounted, setMounted] = useState(false); // delayed unmount for fade-out
+  const [mounted, setMounted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const orbsRef = useRef<Orb[]>([]);
   const rafRef = useRef<number>(0);
-  const [pulse, setPulse] = useState(false);
 
   useIdleTimer(
     idleSeconds * 1000,
@@ -78,7 +76,13 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
     () => setVisible(false),
   );
 
-  // Manage mount/unmount with fade delay
+  // Listen for manual trigger from sleep button
+  useEffect(() => {
+    const handler = () => setVisible(true);
+    window.addEventListener("screensaver:show", handler);
+    return () => window.removeEventListener("screensaver:show", handler);
+  }, []);
+
   useEffect(() => {
     if (visible) {
       setMounted(true);
@@ -86,13 +90,6 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
       const t = setTimeout(() => setMounted(false), 600);
       return () => clearTimeout(t);
     }
-  }, [visible]);
-
-  // Pulsing CTA beacon
-  useEffect(() => {
-    if (!visible) return;
-    const id = setInterval(() => setPulse((p) => !p), 1200);
-    return () => clearInterval(id);
   }, [visible]);
 
   // Canvas animation
@@ -116,14 +113,11 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
       ctx.clearRect(0, 0, width, height);
 
       for (const orb of orbsRef.current) {
-        // Move
         orb.x += orb.vx;
         orb.y += orb.vy;
-        // Bounce
         if (orb.x - orb.r < 0 || orb.x + orb.r > width) orb.vx *= -1;
         if (orb.y - orb.r < 0 || orb.y + orb.r > height) orb.vy *= -1;
 
-        // Draw soft radial glow
         const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
         const c = orb.color.replace("OP", String(orb.opacity));
         grad.addColorStop(0, c);
@@ -169,19 +163,6 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
       <canvas
         ref={canvasRef}
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-      />
-
-      {/* Top scan line */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.6) 40%, rgba(5,195,221,0.6) 60%, transparent 100%)",
-          animation: "scanline 6s linear infinite",
-        }}
       />
 
       {/* Content */}
@@ -260,14 +241,10 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: pulse
-                ? "0 0 0 16px rgba(5,195,221,0.06), 0 0 0 32px rgba(5,195,221,0.03), 0 0 40px rgba(5,195,221,0.4)"
-                : "0 0 0 8px rgba(5,195,221,0.08), 0 0 20px rgba(5,195,221,0.2)",
-              transition: "box-shadow 1.2s ease",
+              boxShadow: "0 0 0 8px rgba(5,195,221,0.08), 0 0 20px rgba(5,195,221,0.2)",
               background: "rgba(5,195,221,0.08)",
             }}
           >
-            {/* Tap/touch icon — concentric rings */}
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <circle cx="16" cy="16" r="3" fill="rgba(5,195,221,1)" />
               <circle cx="16" cy="16" r="7" stroke="rgba(5,195,221,0.7)" strokeWidth="1.5" />
@@ -308,15 +285,6 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
           </span>
         </div>
       </div>
-
-      {/* Keyframe styles */}
-      <style>{`
-        @keyframes scanline {
-          0% { transform: translateY(0); opacity: 1; }
-          95% { opacity: 0.8; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 }
