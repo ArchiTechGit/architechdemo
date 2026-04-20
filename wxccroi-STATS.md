@@ -1,29 +1,45 @@
 # ROI Calculator — Stats Reference
 
 ## Sticky Bar (always visible)
-| Stat | Type | Description |
+
+| Stat | Example Value | Formula |
 |---|---|---|
-| ROI | Calculated | Net annual gain as a percentage of total platform cost |
-| Net Annual Gain | Calculated | Total annual savings minus total platform cost |
-| FTE Reclaimed | Calculated | Full-time equivalent staff freed from manual tasks |
+| ROI | +340% | (Total annual benefit − platform cost) ÷ platform cost × 100 |
+| Net Annual Gain | A$142,000 | Total annual benefit − total annual platform cost |
+| FTE Reclaimed | 1.24 FTE | Total annual hours saved ÷ 1,920 hrs/year |
 
-## Organisational Impact
-Displayed when volumes are entered. Calculated from user inputs.
+---
 
-| Stat | Type | Description |
+## Organisational Impact — Calculated
+
+Visible once the user enters volumes. Recalculates live.
+
+| Stat | Example Value | Formula |
 |---|---|---|
-| FTE Capacity Reclaimed | Calculated | Hours saved ÷ 1,920 (standard working hours/year) |
-| Return Multiplier | Calculated | Total annual benefit ÷ total platform cost |
-| Annual Hours Saved | Calculated | Sum of hours saved across all workflows at projected volumes |
-| DNA Rate Reduction | Benchmark (ticker) | ↓9.2pp — SMS reminders reduced outpatient FTA rates from 23.4% to 14.2%. Source: Downer et al., MJA 183(7), 2005. |
-| Annual Savings from SMS | Benchmark (ticker) | A$66K/year — Targeted SMS messaging reduces missed appointments. Source: Behavioural Insights Team RCT, Sydney, 2014. |
-| Want Digital Health Access | Benchmark (ticker) | 88% of 6,622 Australians want digital access to their health information. Source: National Digital Health Strategy Survey, 2021. |
+| FTE Capacity Reclaimed | 1.24 FTE | Total annual hours saved ÷ 1,920 (standard working hours/year) |
+| Return Multiplier | 4.4x | Total annual benefit ÷ total annual platform cost |
+| Annual Hours Saved | 2,380 hrs | Sum of (time saved per interaction × annual volume) across all workflows |
 
-## Break-Even Analysis
-Displayed when at least one workflow is configured.
+---
 
-| Stat | Type | Description |
+## Organisational Impact — Industry Benchmarks (animated ticker)
+
+Static reference stats sourced from peer-reviewed research. Count up from zero on load.
+
+| Stat | Value | Source |
 |---|---|---|
-| Annual Break-Even | Calculated | Interactions/year needed to cover platform costs |
-| Monthly Break-Even | Calculated | Annual break-even ÷ 12, rounded up |
-| Net Value / Interaction | Calculated | (Labour saved + material savings) − digital channel costs, per workflow set |
+| DNA Rate Reduction | ↓9.2pp (23.4% → 14.2%) | Downer SR, Meara JG, Da Costa AC. SMS reminders reduced outpatient failure-to-attend rates in Australian hospital outpatient clinics. *Medical Journal of Australia*, 183(7):366–368, 2005. |
+| Annual Savings from SMS | A$66,000 / year | Behavioural Insights Team, randomised controlled trial, Sydney hospital, 2014. bi.team/articles/reducing-missed-hospital-appointments-australia |
+| Want Digital Health Access | 88% of 6,622 Australians surveyed | National Digital Health Strategy 'Have your Say' Survey, 2021. Cited in Australasian Institute of Digital Health Capability Framework, 2024. digitalhealth.org.au |
+
+---
+
+## Break-Even Analysis — Calculated
+
+Visible once at least one workflow is configured.
+
+| Stat | Example Value | Formula |
+|---|---|---|
+| Annual Break-Even | 4,200 interactions/yr | Total annual platform cost ÷ net value per interaction, rounded up |
+| Monthly Break-Even | 350 interactions/mo | Annual break-even ÷ 12, rounded up |
+| Net Value / Interaction | A$8.40 | (Manual labour saved + material/postage savings) − digital channel cost, per workflow set |
