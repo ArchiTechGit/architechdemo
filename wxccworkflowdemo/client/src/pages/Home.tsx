@@ -556,6 +556,11 @@ export default function Home() {
               <div style={{ fontSize: "clamp(15px, 2.2vw, 26px)", fontWeight: 700, color: "rgba(255,255,255,0.82)", maxWidth: "700px", lineHeight: 1.35, marginTop: "12px", padding: "0 24px" }}>
                 {IMPACT_STATS[ssStatIdx].headline}
               </div>
+              <div style={{ fontSize: "clamp(12px, 1.4vw, 18px)", color: "rgba(255,255,255,0.5)", maxWidth: "600px", lineHeight: 1.5, marginTop: "10px", padding: "0 24px" }}>
+                {IMPACT_STATS[ssStatIdx].body}{" "}
+                <span style={{ color: "#ffffff", fontWeight: 700 }}>{IMPACT_STATS[ssStatIdx].highlight}</span>
+                {" "}<span style={{ color: "rgba(255,255,255,0.35)" }}>{IMPACT_STATS[ssStatIdx].tail}</span>
+              </div>
             </div>
 
             {/* Dot progress indicators */}
