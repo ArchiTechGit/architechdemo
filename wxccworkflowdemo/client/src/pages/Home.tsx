@@ -485,34 +485,12 @@ export default function Home() {
   // Pattern repeats at x=1200 so translateX(-50%) loops seamlessly
   const ECG_PATH = "M 0,40 L 50,40 L 60,35 L 68,35 L 76,40 L 90,40 L 94,43 L 96,2 L 100,65 L 105,40 L 115,30 L 126,30 L 140,40 L 350,40 L 360,35 L 368,35 L 376,40 L 390,40 L 394,43 L 396,2 L 400,65 L 405,40 L 415,30 L 426,30 L 440,40 L 650,40 L 660,35 L 668,35 L 676,40 L 690,40 L 694,43 L 696,2 L 700,65 L 705,40 L 715,30 L 726,30 L 740,40 L 950,40 L 960,35 L 968,35 L 976,40 L 990,40 L 994,43 L 996,2 L 1000,65 L 1005,40 L 1015,30 L 1026,30 L 1040,40 L 1250,40 L 1260,35 L 1268,35 L 1276,40 L 1290,40 L 1294,43 L 1296,2 L 1300,65 L 1305,40 L 1315,30 L 1326,30 L 1340,40 L 1550,40 L 1560,35 L 1568,35 L 1576,40 L 1590,40 L 1594,43 L 1596,2 L 1600,65 L 1605,40 L 1615,30 L 1626,30 L 1640,40 L 1850,40 L 1860,35 L 1868,35 L 1876,40 L 1890,40 L 1894,43 L 1896,2 L 1900,65 L 1905,40 L 1915,30 L 1926,30 L 1940,40 L 2150,40 L 2160,35 L 2168,35 L 2176,40 L 2190,40 L 2194,43 L 2196,2 L 2200,65 L 2205,40 L 2215,30 L 2226,30 L 2240,40 L 2400,40";
 
-  const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
-    left: `${(i * 3.7 + 1.2) % 100}%`,
-    size: 2 + (i % 4),
-    color: i % 3 === 0 ? "#05C3DD" : i % 3 === 1 ? "#00A991" : "rgba(255,255,255,0.5)",
-    duration: `${9 + (i % 10)}s`,
-    delay: `${(i * 0.6) % 9}s`,
-    glow: i % 5 === 0,
-  }));
-
   return (
     <div className="min-h-screen bg-background">
 
       {/* ── Screensaver overlay ── */}
       {screensaverActive && (
         <div className="fixed inset-0 z-[9999] overflow-hidden select-none" style={{ background: "#020810", cursor: "none" }}>
-
-          {/* Drifting glow orbs */}
-          <div style={{ position: "absolute", width: "900px", height: "900px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.16) 0%, transparent 68%)", filter: "blur(60px)", top: "5%", left: "15%", animation: "ss-drift-1 24s ease-in-out infinite", pointerEvents: "none", opacity: 0.18 }} />
-          <div style={{ position: "absolute", width: "700px", height: "700px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,169,145,0.13) 0%, transparent 68%)", filter: "blur(80px)", top: "40%", right: "10%", animation: "ss-drift-2 30s ease-in-out infinite", pointerEvents: "none", opacity: 0.18 }} />
-          <div style={{ position: "absolute", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(5,195,221,0.09) 0%, transparent 68%)", filter: "blur(60px)", bottom: "10%", left: "5%", animation: "ss-drift-3 20s ease-in-out infinite", pointerEvents: "none", opacity: 0.18 }} />
-
-          {/* Floating particles */}
-          {PARTICLES.map((p, i) => (
-            <div key={i} style={{ position: "absolute", bottom: "-10px", left: p.left, width: `${p.size}px`, height: `${p.size}px`, borderRadius: "50%", background: p.color, animation: `ss-float ${p.duration} linear ${p.delay} infinite`, boxShadow: p.glow ? `0 0 8px ${p.color}` : "none", pointerEvents: "none", opacity: 0.15 }} />
-          ))}
-
-          {/* Scan line */}
-          <div style={{ position: "absolute", left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.07) 50%, transparent 100%)", animation: "ss-scan 10s linear infinite", pointerEvents: "none" }} />
 
           {/* ── Central content ── */}
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 2, paddingBottom: "100px" }}>
