@@ -80,7 +80,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Manual phone calls from booking clerks, voicemail tag.",
     automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time no longer works, reply HELP and we'll find an alternative.",
+    phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
     partnerBadge: {
