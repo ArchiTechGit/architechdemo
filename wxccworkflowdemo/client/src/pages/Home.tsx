@@ -481,10 +481,6 @@ export default function Home() {
     ? JOURNEY_STAGES.find((s) => s.id === lastTriggeredStage)
     : null;
 
-  // ECG path: 8 beats at 300px spacing starting at x=50, viewBox 2400×80, baseline y=40
-  // Pattern repeats at x=1200 so translateX(-50%) loops seamlessly
-  const ECG_PATH = "M 0,40 L 50,40 L 60,35 L 68,35 L 76,40 L 90,40 L 94,43 L 96,2 L 100,65 L 105,40 L 115,30 L 126,30 L 140,40 L 350,40 L 360,35 L 368,35 L 376,40 L 390,40 L 394,43 L 396,2 L 400,65 L 405,40 L 415,30 L 426,30 L 440,40 L 650,40 L 660,35 L 668,35 L 676,40 L 690,40 L 694,43 L 696,2 L 700,65 L 705,40 L 715,30 L 726,30 L 740,40 L 950,40 L 960,35 L 968,35 L 976,40 L 990,40 L 994,43 L 996,2 L 1000,65 L 1005,40 L 1015,30 L 1026,30 L 1040,40 L 1250,40 L 1260,35 L 1268,35 L 1276,40 L 1290,40 L 1294,43 L 1296,2 L 1300,65 L 1305,40 L 1315,30 L 1326,30 L 1340,40 L 1550,40 L 1560,35 L 1568,35 L 1576,40 L 1590,40 L 1594,43 L 1596,2 L 1600,65 L 1605,40 L 1615,30 L 1626,30 L 1640,40 L 1850,40 L 1860,35 L 1868,35 L 1876,40 L 1890,40 L 1894,43 L 1896,2 L 1900,65 L 1905,40 L 1915,30 L 1926,30 L 1940,40 L 2150,40 L 2160,35 L 2168,35 L 2176,40 L 2190,40 L 2194,43 L 2196,2 L 2200,65 L 2205,40 L 2215,30 L 2226,30 L 2240,40 L 2400,40";
-
   return (
     <div className="min-h-screen bg-background">
 
@@ -501,7 +497,7 @@ export default function Home() {
             </div>
 
             {/* ArchiTech logo */}
-            <img src={logoUrl} alt="ArchiTech" style={{ width: "clamp(220px, 22vw, 360px)", mixBlendMode: "screen", animation: "ss-logo-pulse 3.5s ease-in-out infinite", marginBottom: "20px" }} />
+            <img src={logoUrl} alt="ArchiTech" style={{ width: "clamp(220px, 22vw, 360px)", mixBlendMode: "screen", marginBottom: "20px" }} />
 
             {/* Demo identity headline */}
             <div style={{ textAlign: "center", marginBottom: "24px" }}>
@@ -534,7 +530,7 @@ export default function Home() {
             </div>
 
             {/* Cycling stat */}
-            <div key={ssStatIdx} style={{ textAlign: "center", animation: "ss-stat-enter 0.7s cubic-bezier(0.22,1,0.36,1) forwards", marginBottom: "28px" }}>
+            <div key={ssStatIdx} style={{ textAlign: "center", marginBottom: "28px" }}>
               <div style={{ fontSize: "clamp(88px, 16vw, 200px)", fontWeight: 900, color: "#05C3DD", lineHeight: 1, letterSpacing: "-0.03em", textShadow: "0 0 80px rgba(5,195,221,0.5), 0 0 160px rgba(5,195,221,0.2)" }}>
                 {IMPACT_STATS[ssStatIdx].hero}
               </div>
@@ -561,29 +557,17 @@ export default function Home() {
             </div>
 
             {/* Ask for demo badge */}
-            <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 1.5vw, 20px)", background: "rgba(5,195,221,0.1)", border: "2px solid rgba(5,195,221,0.55)", borderRadius: "100px", padding: "clamp(14px, 2vh, 22px) clamp(32px, 4vw, 60px)", animation: "ss-demo-badge 2.5s ease-in-out infinite" }}>
-              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0, animation: "ss-cta-pulse 1.2s ease-in-out infinite" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 1.5vw, 20px)", background: "rgba(5,195,221,0.1)", border: "2px solid rgba(5,195,221,0.55)", borderRadius: "100px", padding: "clamp(14px, 2vh, 22px) clamp(32px, 4vw, 60px)" }}>
+              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0 }} />
               <span style={{ fontSize: "clamp(22px, 3.5vw, 48px)", fontWeight: 900, color: "white", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1, whiteSpace: "nowrap" }}>
                 Ask us for a live demo
               </span>
-              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0, animation: "ss-cta-pulse 1.2s ease-in-out infinite" }} />
+              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0 }} />
             </div>
           </div>
 
-          {/* ── ECG band ── */}
-          <div style={{ position: "absolute", bottom: "80px", left: 0, right: 0, height: "80px", overflow: "hidden", opacity: 0.65 }}>
-            {/* Glow layer */}
-            <svg viewBox="0 0 2400 80" style={{ width: "200%", height: "100%", display: "block", filter: "blur(3px) drop-shadow(0 0 6px rgba(5,195,221,0.9))", animation: "ss-ecg 6s linear infinite", position: "absolute", top: 0, left: 0 }} preserveAspectRatio="none">
-              <path d={ECG_PATH} stroke="rgba(5,195,221,0.5)" strokeWidth="3" fill="none" />
-            </svg>
-            {/* Sharp layer */}
-            <svg viewBox="0 0 2400 80" style={{ width: "200%", height: "100%", display: "block", animation: "ss-ecg 6s linear infinite", position: "absolute", top: 0, left: 0 }} preserveAspectRatio="none">
-              <path d={ECG_PATH} stroke="#05C3DD" strokeWidth="1.5" fill="none" />
-            </svg>
-          </div>
-
           {/* CTA */}
-          <div style={{ position: "absolute", bottom: "28px", left: 0, right: 0, textAlign: "center", fontSize: "12px", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "#05C3DD", fontFamily: "'JetBrains Mono', monospace", animation: "ss-cta-pulse 2.2s ease-in-out infinite" }}>
+          <div style={{ position: "absolute", bottom: "28px", left: 0, right: 0, textAlign: "center", fontSize: "12px", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "#05C3DD", fontFamily: "'JetBrains Mono', monospace" }}>
             Move to explore
           </div>
 
