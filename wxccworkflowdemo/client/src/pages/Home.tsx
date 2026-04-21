@@ -1289,11 +1289,9 @@ export default function Home() {
                               Call AI →
                             </Button>
                           )}
-                          {!isTriggered && (
-                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
-                              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
-                            </Button>
-                          )}
+                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
+                          </Button>
                         </div>
                       </div>
                     </div>
