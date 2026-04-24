@@ -16,8 +16,8 @@ export default function App() {
           <Route path="/appointments" component={Appointments} />
           <Route component={() => <Redirect to="/patients" />} />
         </Switch>
+        <DemoStageControl />
       </Router>
-      <DemoStageControl />
     </DemoStageProvider>
   );
 }

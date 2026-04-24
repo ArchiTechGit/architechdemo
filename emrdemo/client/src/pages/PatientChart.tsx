@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -65,7 +65,15 @@ function useChartPatient(id: string | undefined): Patient | null {
 export default function PatientChart() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
+  const { recommendedTab } = useDemoStage();
   const patient = useChartPatient(id);
+  const [activeTab, setActiveTab] = useState("summary");
+
+  useEffect(() => {
+    if (patient?.isHeroPatient && recommendedTab) {
+      setActiveTab(recommendedTab);
+    }
+  }, [recommendedTab, patient?.isHeroPatient]);
 
   if (!patient) {
     return (
@@ -102,7 +110,7 @@ export default function PatientChart() {
       <AllergyBanner allergies={patient.allergies} />
 
       {/* Tabs */}
-      <Tabs defaultValue="summary" className="flex-1 flex flex-col overflow-hidden">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="shrink-0 rounded-none border-b bg-card px-4 justify-start h-10 gap-1">
           <TabsTrigger value="summary" className="text-xs h-8">Summary</TabsTrigger>
           <TabsTrigger value="medications" className="text-xs h-8">Medications</TabsTrigger>
