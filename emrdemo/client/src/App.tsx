@@ -1,16 +1,7 @@
 import { Router, Route, Switch, Redirect } from "wouter";
 import { DemoStageProvider } from "@/contexts/DemoStageContext";
 import AppShell from "@/components/layout/AppShell";
-
-function PatientListPage() {
-  return (
-    <AppShell>
-      <div className="flex-1 flex items-center justify-center">
-        <span className="text-muted-foreground text-sm">Patient List — coming soon</span>
-      </div>
-    </AppShell>
-  );
-}
+import PatientList from "@/pages/PatientList";
 
 function PatientChartPage() {
   return (
@@ -38,7 +29,7 @@ export default function App() {
       <Router base="/emrdemo/dist">
         <Switch>
           <Route path="/" component={() => <Redirect to="/patients" />} />
-          <Route path="/patients" component={PatientListPage} />
+          <Route path="/patients" component={PatientList} />
           <Route path="/patients/:id" component={PatientChartPage} />
           <Route path="/appointments" component={AppointmentsPage} />
           <Route component={() => <Redirect to="/patients" />} />
