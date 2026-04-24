@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,14 @@ export default function PatientList() {
   const [search, setSearch] = useState("");
   const [ward, setWard] = useState("All Wards");
   const [clinician, setClinician] = useState("All Clinicians");
+  const [justEnrolled, setJustEnrolled] = useState(false);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+    setJustEnrolled(true);
+    const t = setTimeout(() => setJustEnrolled(false), 2000);
+    return () => clearTimeout(t);
+  }, [hasStarted]);
 
   const patients = useMemo(() => {
     return PATIENTS
@@ -54,6 +62,11 @@ export default function PatientList() {
           return { ...p, admissionStatus: stage.status, ewsScore: stage.latestVitals.ewsScore };
         }
         return p;
+      })
+      .sort((a, b) => {
+        if (a.isHeroPatient) return -1;
+        if (b.isHeroPatient) return 1;
+        return `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`);
       });
   }, [currentStage, hasStarted]);
 
@@ -124,8 +137,12 @@ export default function PatientList() {
               <TableRow
                 key={patient.id}
                 className={cn(
-                  "h-9 cursor-pointer transition-colors hover:bg-secondary/60 text-sm",
-                  i % 2 === 0 ? "bg-card" : "bg-background"
+                  "h-9 cursor-pointer text-sm transition-colors duration-700",
+                  patient.isHeroPatient && justEnrolled
+                    ? "bg-green-100 hover:bg-green-100"
+                    : i % 2 === 0
+                    ? "bg-card hover:bg-secondary/60"
+                    : "bg-background hover:bg-secondary/60"
                 )}
                 onClick={() => navigate(`/patients/${patient.id}`)}
               >

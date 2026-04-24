@@ -52,7 +52,7 @@ const margaretThompson: Patient = {
       id: "enc-mt-1",
       type: "Admission",
       date: "2026-04-22",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Cardiology",
       clinician: "Dr James Chen",
       note: {
@@ -66,7 +66,7 @@ const margaretThompson: Patient = {
       id: "enc-mt-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Cardiology",
       clinician: "Dr James Chen",
       note: {
@@ -129,7 +129,7 @@ const robertAdeyemi: Patient = {
       id: "enc-ra-1",
       type: "Admission",
       date: "2026-04-21",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Endocrinology",
       clinician: "Dr Patricia Lam",
       note: {
@@ -143,7 +143,7 @@ const robertAdeyemi: Patient = {
       id: "enc-ra-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Endocrinology",
       clinician: "Dr Patricia Lam",
       note: {
@@ -201,7 +201,7 @@ const isabelleDupont: Patient = {
       id: "enc-id-1",
       type: "Admission",
       date: "2026-04-23",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Respiratory Medicine",
       clinician: "Dr Michael Torres",
       note: {
@@ -215,7 +215,7 @@ const isabelleDupont: Patient = {
       id: "enc-id-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Respiratory Medicine",
       clinician: "Dr Michael Torres",
       note: {
@@ -277,7 +277,7 @@ const danielKowalczyk: Patient = {
       id: "enc-dk-1",
       type: "Procedure",
       date: "2026-04-23",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Neurosurgery",
       clinician: "Dr Rachel Kim",
       note: {
@@ -291,7 +291,7 @@ const danielKowalczyk: Patient = {
       id: "enc-dk-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Neurosurgery",
       clinician: "Dr Rachel Kim",
       note: {
@@ -353,7 +353,7 @@ const evelynNakamura: Patient = {
       id: "enc-en-1",
       type: "Admission",
       date: "2026-04-21",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Respiratory Medicine",
       clinician: "Dr William Patel",
       note: {
@@ -367,7 +367,7 @@ const evelynNakamura: Patient = {
       id: "enc-en-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Respiratory Medicine",
       clinician: "Dr William Patel",
       note: {
@@ -430,7 +430,7 @@ const thomasSullivan: Patient = {
       id: "enc-ts-1",
       type: "ED Triage",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Emergency Medicine",
       clinician: "Dr Emma Walsh",
       note: {
@@ -489,7 +489,7 @@ const priyaKrishnamurthy: Patient = {
       id: "enc-pk-1",
       type: "Procedure",
       date: "2026-04-23",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "General Surgery",
       clinician: "Dr Simon Burke",
       note: {
@@ -503,7 +503,7 @@ const priyaKrishnamurthy: Patient = {
       id: "enc-pk-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "General Surgery",
       clinician: "Dr Simon Burke",
       note: {
@@ -565,7 +565,7 @@ const williamGrant: Patient = {
       id: "enc-wg-1",
       type: "Admission",
       date: "2026-04-22",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Respiratory Medicine",
       clinician: "Dr William Patel",
       note: {
@@ -579,7 +579,7 @@ const williamGrant: Patient = {
       id: "enc-wg-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Respiratory Medicine",
       clinician: "Dr William Patel",
       note: {
@@ -641,7 +641,7 @@ const sandraOkonkwo: Patient = {
       id: "enc-so-1",
       type: "Admission",
       date: "2026-04-20",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Intensive Care",
       clinician: "Dr James Chen",
       note: {
@@ -655,7 +655,7 @@ const sandraOkonkwo: Patient = {
       id: "enc-so-2",
       type: "Nursing",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Intensive Care",
       clinician: "Dr James Chen",
       note: {
@@ -716,7 +716,7 @@ const jamesMoretti: Patient = {
       id: "enc-jm-1",
       type: "Procedure",
       date: "2026-04-22",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Orthopaedics",
       clinician: "Dr Rachel Kim",
       note: {
@@ -730,7 +730,7 @@ const jamesMoretti: Patient = {
       id: "enc-jm-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Orthopaedics",
       clinician: "Dr Rachel Kim",
       note: {
@@ -791,7 +791,7 @@ const aishaAlHassan: Patient = {
       id: "enc-ah-1",
       type: "Admission",
       date: "2026-04-22",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Obstetrics",
       clinician: "Dr Fatima Malik",
       note: {
@@ -805,7 +805,7 @@ const aishaAlHassan: Patient = {
       id: "enc-ah-2",
       type: "Ward Round",
       date: "2026-04-24",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Obstetrics",
       clinician: "Dr Fatima Malik",
       note: {
@@ -821,15 +821,9 @@ const aishaAlHassan: Patient = {
 export const supportingPatients: Patient[] = [
   margaretThompson,
   robertAdeyemi,
-  isabelleDupont,
-  danielKowalczyk,
-  evelynNakamura,
   thomasSullivan,
-  priyaKrishnamurthy,
-  williamGrant,
   sandraOkonkwo,
   jamesMoretti,
-  aishaAlHassan,
 ];
 
 // ---------------------------------------------------------------------------
@@ -857,7 +851,7 @@ const astridDemoStages: DemoStage[] = [
       id: "enc-astrid-1",
       type: "Pre-Admission",
       date: "2026-04-22",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Orthopaedics Pre-Admission Clinic",
       clinician: "Dr Rachel Kim",
       note: {
@@ -880,7 +874,7 @@ const astridDemoStages: DemoStage[] = [
       id: "enc-astrid-2",
       type: "Pre-Admission",
       date: "2026-04-23",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Anaesthetics",
       clinician: "Dr Sarah Nguyen",
       note: {
@@ -903,7 +897,7 @@ const astridDemoStages: DemoStage[] = [
       id: "enc-astrid-3",
       type: "Admission",
       date: "2026-04-25",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Day Surgery Unit",
       clinician: "Dr Rachel Kim",
       note: {
@@ -926,7 +920,7 @@ const astridDemoStages: DemoStage[] = [
       id: "enc-astrid-4",
       type: "Procedure",
       date: "2026-04-25",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Operating Theatre Suite 3",
       clinician: "Dr Rachel Kim",
       note: {
@@ -949,7 +943,7 @@ const astridDemoStages: DemoStage[] = [
       id: "enc-astrid-5",
       type: "Discharge",
       date: "2026-04-25",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Day Surgery Unit",
       clinician: "Dr Rachel Kim",
       note: {
@@ -972,7 +966,7 @@ const astridDemoStages: DemoStage[] = [
       id: "enc-astrid-6",
       type: "Outpatient",
       date: "2026-04-27",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Orthopaedic Outpatients",
       clinician: "Dr Rachel Kim",
       note: {
@@ -1029,7 +1023,7 @@ const astridNygaard: Patient = {
       id: "enc-astrid-1",
       type: "Pre-Admission",
       date: "2026-04-22",
-      facility: "Royal Melbourne Hospital",
+      facility: "ArchiTech Hospital",
       department: "Orthopaedics Pre-Admission Clinic",
       clinician: "Dr Rachel Kim",
       note: {

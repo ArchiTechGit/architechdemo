@@ -69,7 +69,7 @@ export default function DemoGuide() {
             </h2>
             <div className="rounded-lg border p-4 text-sm leading-relaxed space-y-2" style={{ backgroundColor: "var(--card)", borderColor: "var(--border)", color: "var(--foreground)" }}>
               <p>
-                This demo follows <strong>Astrid Nygaard</strong>, a 38-year-old patient undergoing an elective right total knee replacement (TKR) at Royal Melbourne Hospital. Her journey is pre-staged across <strong>6 steps</strong> that align with the Webex Contact Center automation workflows shown in the companion demo.
+                This demo follows <strong>Astrid Nygaard</strong>, a 38-year-old patient undergoing an elective right total knee replacement (TKR) at ArchiTech Hospital. Her journey is pre-staged across <strong>6 steps</strong> that align with the Webex Contact Center automation workflows shown in the companion demo.
               </p>
               <p style={{ color: "var(--muted-foreground)" }}>
                 The other 11 patients exist to make the list look realistic — only Astrid's chart changes during the demo.
