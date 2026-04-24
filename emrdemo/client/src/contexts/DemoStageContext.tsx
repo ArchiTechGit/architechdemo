@@ -65,38 +65,45 @@ export interface StageNotification {
   action: string;
   recipient: string;
   message: string;
+  nextStep: string;
 }
 
 export const STAGE_NOTIFICATIONS: StageNotification[] = [
   {
-    action: "Pre-admission form sent",
+    action: "Patient record created · Questionnaire sent",
     recipient: "Astrid Nygaard",
-    message: "Hi Astrid, we've received your referral for a Right Knee Replacement at ArchiTech Hospital. Please complete your pre-admission details at the link below.",
+    message: "Hi Astrid, we've received a referral from Dr Peter Walsh for a Right Knee Replacement at ArchiTech Hospital. Your patient record has been created. We've sent you a link to complete your pre-admission health questionnaire.",
+    nextStep: "Press › to advance to appointment scheduling — navigate to Appointments",
   },
   {
     action: "Appointment confirmation sent",
     recipient: "Astrid Nygaard",
     message: "Hi Astrid, your Right Knee Replacement is confirmed for Tuesday 29 April at 7:00 AM, Day Surgery Unit. Reply YES to confirm or call us to reschedule.",
+    nextStep: "Press › to advance to arrival — open Astrid's chart to see admission",
   },
   {
     action: "Arrival instructions sent",
     recipient: "Astrid Nygaard",
     message: "Hi Astrid, your check-in is confirmed. Day Surgery is on Level 2. Your nurse will meet you at reception. Expected procedure time: 9:30 AM.",
+    nextStep: "Press › to advance to surgery — check Visit History for the OR note",
   },
   {
     action: "Family update sent",
     recipient: "Family contact",
     message: "Hi, this is ArchiTech Hospital. Astrid's surgery is now underway. We'll send you an update when there's a change in status — no need to call.",
+    nextStep: "Press › to advance to discharge — check Medications for take-home drugs",
   },
   {
     action: "Discharge instructions sent",
     recipient: "Astrid Nygaard",
     message: "Hi Astrid, your discharge care guide has been sent to your email. Follow-up appointment: 6 May at 10:30 AM with Dr Sarah Nguyen.",
+    nextStep: "Press › to advance to post-discharge — return to Appointments screen",
   },
   {
     action: "7-day check-in sent",
     recipient: "Astrid Nygaard",
     message: "Hi Astrid, hope your recovery is going well! On a scale of 1–10, how would you rate your pain today? Reply with a number.",
+    nextStep: "Journey complete — press ↺ to reset the demo from the beginning",
   },
 ];
 

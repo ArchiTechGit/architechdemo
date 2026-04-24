@@ -1,4 +1,4 @@
-import type { Patient, Appointment, VitalReading, Encounter, Medication, Allergy, Diagnosis, DemoStage } from "@/types";
+﻿import type { Patient, Appointment, VitalReading, Encounter, Medication, Allergy, Diagnosis, DemoStage } from "@/types";
 
 const margaretThompson: Patient = {
   id: "margaret-thompson",
@@ -56,10 +56,10 @@ const margaretThompson: Patient = {
       department: "Cardiology",
       clinician: "Dr James Chen",
       note: {
-        subjective: "74yo female presented via ambulance with acute chest pain onset 0340. Diaphoretic, SOB. Aspirin allergy documented — clopidogrel loading dose given instead. ECG: anterior ST elevation leads V1-V4.",
+        subjective: "74yo female presented via ambulance with acute chest pain onset 0340. Diaphoretic, SOB. Aspirin allergy documented â€” clopidogrel loading dose given instead. ECG: anterior ST elevation leads V1-V4.",
         objective: "HR 92 BP 162/98 SpO2 94% on 4L O2. Troponin I 8.4 (markedly elevated). ECG confirmed STEMI. CXR mild pulmonary oedema.",
-        assessment: "Anterior STEMI. Aspirin allergy — clopidogrel-based antiplatelet therapy. Cardiogenic compromise.",
-        plan: "Emergency PPCI performed — LAD stented. ICU post-procedure monitoring. Enoxaparin, Metoprolol, Atorvastatin commenced.",
+        assessment: "Anterior STEMI. Aspirin allergy â€” clopidogrel-based antiplatelet therapy. Cardiogenic compromise.",
+        plan: "Emergency PPCI performed â€” LAD stented. ICU post-procedure monitoring. Enoxaparin, Metoprolol, Atorvastatin commenced.",
       },
     },
     {
@@ -221,7 +221,7 @@ const isabelleDupont: Patient = {
       note: {
         subjective: "Dyspnoea improving. Pleuritic pain 6/10, tolerable.",
         objective: "HR 102 SpO2 93% on 2L O2. Haemodynamically stable. Anticoagulation therapeutic.",
-        assessment: "Bilateral PE — improving on anticoagulation therapy.",
+        assessment: "Bilateral PE â€” improving on anticoagulation therapy.",
         plan: "Continue Rivaroxaban. Wean oxygen as tolerated. Echo to assess RV function. Thrombophilia results pending. Haematology review arranged.",
       },
     },
@@ -284,7 +284,7 @@ const danielKowalczyk: Patient = {
         subjective: "38yo male for elective L4/L5 microdiscectomy. Longstanding sciatica left leg unresponsive to conservative management. Codeine allergy documented.",
         objective: "Pre-op obs stable. Procedure performed under GA without complications. EBL minimal. Intraoperative findings consistent with L4/L5 disc herniation compressing left nerve root.",
         assessment: "Uncomplicated L4/L5 microdiscectomy. Good decompression achieved.",
-        plan: "Post-op analgesia protocol avoiding codeine — Oxycodone and Paracetamol. Physio day 1. Ambulate with assistance. Ondansetron PRN.",
+        plan: "Post-op analgesia protocol avoiding codeine â€” Oxycodone and Paracetamol. Physio day 1. Ambulate with assistance. Ondansetron PRN.",
       },
     },
     {
@@ -296,7 +296,7 @@ const danielKowalczyk: Patient = {
       clinician: "Dr Rachel Kim",
       note: {
         subjective: "Pain 5/10 improving. Left leg sciatica significantly reduced. Walking short distances with frame.",
-        objective: "Wound clean and dry. Neuro exam: left leg power improving 4/5 → 4+/5. Reflexes intact.",
+        objective: "Wound clean and dry. Neuro exam: left leg power improving 4/5 â†’ 4+/5. Reflexes intact.",
         assessment: "Good early post-operative recovery. Neurological improvement evident.",
         plan: "Upgrade to oral analgesia. Increase mobilisation. Discharge planning day 2. Outpatient physio referral.",
       },
@@ -327,7 +327,7 @@ const evelynNakamura: Patient = {
   department: "Respiratory Medicine",
   fallsRisk: "High",
   ewsScore: 5,
-  alerts: ["FALLS RISK — HIGH", "HEARING IMPAIRMENT"],
+  alerts: ["FALLS RISK â€” HIGH", "HEARING IMPAIRMENT"],
   allergies: [
     { allergen: "Sulfonamides", type: "Drug", reaction: "Urticarial rash", severity: "Moderate", verified: true },
   ],
@@ -357,10 +357,10 @@ const evelynNakamura: Patient = {
       department: "Respiratory Medicine",
       clinician: "Dr William Patel",
       note: {
-        subjective: "82yo female with known AF and osteoporosis presenting with 3-day history of productive cough, fever, and increasing dyspnoea. Lives alone. Son concerned about functional decline. Hearing impairment noted — communicate clearly. Sulfonamide allergy documented.",
-        objective: "Temp 39.1°C HR 96 BP 138/82 RR 26 SpO2 89% RA. CXR: right lower lobe consolidation. WBC 18.2. CRP 214. Sputum culture pending. INR 2.4 (therapeutic on Warfarin).",
-        assessment: "Community-acquired pneumonia. Atrial fibrillation — rate controlled. Sulfonamide allergy documented — dual therapy with Augmentin and Azithromycin commenced.",
-        plan: "Commence dual antibiotic therapy. Supplemental O2 to maintain SpO2 >92%. Falls risk precautions — high risk. Continue Warfarin with INR monitoring. Aged care OT review. Physiotherapy for airway clearance.",
+        subjective: "82yo female with known AF and osteoporosis presenting with 3-day history of productive cough, fever, and increasing dyspnoea. Lives alone. Son concerned about functional decline. Hearing impairment noted â€” communicate clearly. Sulfonamide allergy documented.",
+        objective: "Temp 39.1Â°C HR 96 BP 138/82 RR 26 SpO2 89% RA. CXR: right lower lobe consolidation. WBC 18.2. CRP 214. Sputum culture pending. INR 2.4 (therapeutic on Warfarin).",
+        assessment: "Community-acquired pneumonia. Atrial fibrillation â€” rate controlled. Sulfonamide allergy documented â€” dual therapy with Augmentin and Azithromycin commenced.",
+        plan: "Commence dual antibiotic therapy. Supplemental O2 to maintain SpO2 >92%. Falls risk precautions â€” high risk. Continue Warfarin with INR monitoring. Aged care OT review. Physiotherapy for airway clearance.",
       },
     },
     {
@@ -372,8 +372,8 @@ const evelynNakamura: Patient = {
       clinician: "Dr William Patel",
       note: {
         subjective: "Fever persisting but trending down. Cough productive, less frequent. Son present and reports patient more alert than yesterday.",
-        objective: "Temp 38.6°C HR 94 SpO2 92% on 2L O2. CXR unchanged. WBC improving 14.6. CRP 168. INR 2.6.",
-        assessment: "CAP — slowly responding to antibiotics. AF rate-controlled. Falls risk ongoing.",
+        objective: "Temp 38.6Â°C HR 94 SpO2 92% on 2L O2. CXR unchanged. WBC improving 14.6. CRP 168. INR 2.6.",
+        assessment: "CAP â€” slowly responding to antibiotics. AF rate-controlled. Falls risk ongoing.",
         plan: "Continue antibiotics for full course. Maintain O2 support. Falls precautions reinforced. INR recheck 48 hours. Social work referral for discharge planning. Occupational therapy home assessment arranged.",
       },
     },
@@ -403,7 +403,7 @@ const thomasSullivan: Patient = {
   department: "Emergency Medicine",
   fallsRisk: "Low",
   ewsScore: 6,
-  alerts: ["CONTRAST ALLERGY — IODINE", "RESUS BAY"],
+  alerts: ["CONTRAST ALLERGY â€” IODINE", "RESUS BAY"],
   allergies: [
     { allergen: "Iodine contrast", type: "Contrast", reaction: "Anaphylaxis", severity: "Life-threatening", verified: true },
   ],
@@ -434,9 +434,9 @@ const thomasSullivan: Patient = {
       department: "Emergency Medicine",
       clinician: "Dr Emma Walsh",
       note: {
-        subjective: "55yo male presenting via ambulance with acute onset central chest pain radiating to left arm, onset approximately 45 minutes prior to arrival. Associated diaphoresis and nausea. Background hypertension. Iodine contrast allergy documented — anaphylaxis.",
-        objective: "HR 114 BP 168/100 RR 20 SpO2 94% RA. ECG: ST depression lateral leads V5-V6, I, aVL. Troponin I pending. CXR unremarkable. Iodine contrast allergy noted — CT coronary angiography will require alternative imaging strategy.",
-        assessment: "Likely non-ST elevation ACS. Iodine contrast allergy (anaphylaxis) documented — cardiology notified. Resus bay monitoring commenced.",
+        subjective: "55yo male presenting via ambulance with acute onset central chest pain radiating to left arm, onset approximately 45 minutes prior to arrival. Associated diaphoresis and nausea. Background hypertension. Iodine contrast allergy documented â€” anaphylaxis.",
+        objective: "HR 114 BP 168/100 RR 20 SpO2 94% RA. ECG: ST depression lateral leads V5-V6, I, aVL. Troponin I pending. CXR unremarkable. Iodine contrast allergy noted â€” CT coronary angiography will require alternative imaging strategy.",
+        assessment: "Likely non-ST elevation ACS. Iodine contrast allergy (anaphylaxis) documented â€” cardiology notified. Resus bay monitoring commenced.",
         plan: "Aspirin 300mg stat. IV Heparin commenced. GTN SL PRN chest pain. IV Morphine PRN. Serial ECGs and troponin. Cardiology consult requested. Iodine allergy flagged for any imaging. Monitor in resus bay.",
       },
     },
@@ -494,7 +494,7 @@ const priyaKrishnamurthy: Patient = {
       clinician: "Dr Simon Burke",
       note: {
         subjective: "29yo female presenting with 24-hour history of periumbilical pain migrating to right iliac fossa, associated nausea and low-grade fever. NKDA. LMP 3 weeks ago. Urine hCG negative.",
-        objective: "Temp 37.8°C HR 88 BP 118/74. RIF tenderness with guarding. WBC 14.8. CRP 98. USS equivocal. CT abdomen: inflamed appendix, no perforation. Laparoscopic appendicectomy performed under GA without complications.",
+        objective: "Temp 37.8Â°C HR 88 BP 118/74. RIF tenderness with guarding. WBC 14.8. CRP 98. USS equivocal. CT abdomen: inflamed appendix, no perforation. Laparoscopic appendicectomy performed under GA without complications.",
         assessment: "Uncomplicated acute appendicitis. Laparoscopic appendicectomy performed.",
         plan: "Post-operative analgesia with Paracetamol and Ibuprofen. IV Cefazolin prophylaxis. Regular diet when tolerated. Mobilise day 1. Discharge planning day 2.",
       },
@@ -508,7 +508,7 @@ const priyaKrishnamurthy: Patient = {
       clinician: "Dr Simon Burke",
       note: {
         subjective: "Pain well controlled 3/10 with oral analgesia. Tolerating light diet. No nausea. Passed flatus. Ambulating independently.",
-        objective: "Temp 37.0°C HR 76 BP 116/72. Laparoscopic port sites clean and dry. Abdomen soft. Bowel sounds present.",
+        objective: "Temp 37.0Â°C HR 76 BP 116/72. Laparoscopic port sites clean and dry. Abdomen soft. Bowel sounds present.",
         assessment: "Uncomplicated post-operative day 1 following laparoscopic appendicectomy. Recovery progressing well.",
         plan: "Continue oral analgesia. Upgrade to full diet. Cease IV Cefazolin, transition to oral Cefalexin. Discharge tomorrow. Wound review GP in 1 week. Return precautions documented.",
       },
@@ -569,9 +569,9 @@ const williamGrant: Patient = {
       department: "Respiratory Medicine",
       clinician: "Dr William Patel",
       note: {
-        subjective: "68yo male with known COPD presenting with 3-day worsening dyspnoea, increased sputum production (purulent), and reduced exercise tolerance. 40 pack-year smoking history, quit 5 years ago. Penicillin allergy — rash.",
-        objective: "HR 96 BP 138/86 RR 28 Temp 37.9°C SpO2 84% RA. ABG: pH 7.36 pO2 52 pCO2 52 HCO3 29. CXR: hyperinflation, no consolidation. FEV1 historically 38% predicted.",
-        assessment: "Acute exacerbation of COPD with type 1 respiratory failure. Penicillin allergy documented — Doxycycline commenced as alternative antibiotic.",
+        subjective: "68yo male with known COPD presenting with 3-day worsening dyspnoea, increased sputum production (purulent), and reduced exercise tolerance. 40 pack-year smoking history, quit 5 years ago. Penicillin allergy â€” rash.",
+        objective: "HR 96 BP 138/86 RR 28 Temp 37.9Â°C SpO2 84% RA. ABG: pH 7.36 pO2 52 pCO2 52 HCO3 29. CXR: hyperinflation, no consolidation. FEV1 historically 38% predicted.",
+        assessment: "Acute exacerbation of COPD with type 1 respiratory failure. Penicillin allergy documented â€” Doxycycline commenced as alternative antibiotic.",
         plan: "Salbutamol and Ipratropium nebulisers. Prednisolone 50mg Mane. Doxycycline for infective exacerbation. Controlled O2 therapy to maintain SpO2 88-92%. Respiratory physiotherapy. Smoking cessation support. Consider NIV if deteriorating.",
       },
     },
@@ -585,7 +585,7 @@ const williamGrant: Patient = {
       note: {
         subjective: "Dyspnoea improving. Sputum less purulent. Feels more comfortable. Wife reports he slept better last night.",
         objective: "HR 92 RR 26 SpO2 89% on 2L controlled O2. Chest auscultation: scattered wheeze, improving. ABG: pH 7.38 pO2 58 pCO2 50.",
-        assessment: "COPD exacerbation — slowly responding to treatment. Type 1 respiratory failure improving.",
+        assessment: "COPD exacerbation â€” slowly responding to treatment. Type 1 respiratory failure improving.",
         plan: "Continue nebulisers and Prednisolone. Wean oxygen gradually. Respiratory physio twice daily. Pulmonary rehab referral. Inhaler technique education. Anticipate discharge day 5-6.",
       },
     },
@@ -615,9 +615,9 @@ const sandraOkonkwo: Patient = {
   department: "Intensive Care",
   fallsRisk: "High",
   ewsScore: 9,
-  alerts: ["CONTACT PRECAUTIONS — MRSA", "ICU ISOLATION REQUIRED", "VANCOMYCIN ALLERGY"],
+  alerts: ["CONTACT PRECAUTIONS â€” MRSA", "ICU ISOLATION REQUIRED", "VANCOMYCIN ALLERGY"],
   allergies: [
-    { allergen: "Vancomycin", type: "Drug", reaction: "Red Man Syndrome — anaphylactoid reaction", severity: "Severe", verified: true },
+    { allergen: "Vancomycin", type: "Drug", reaction: "Red Man Syndrome â€” anaphylactoid reaction", severity: "Severe", verified: true },
   ],
   diagnoses: [
     { icdCode: "A41.9", description: "Sepsis, unspecified organism", shortName: "Sepsis", status: "Active" },
@@ -626,7 +626,7 @@ const sandraOkonkwo: Patient = {
   ],
   medications: [
     { id: "m-so-1", name: "Linezolid", brandName: "Zyvox", dose: "600mg", frequency: "BD", route: "IV", status: "Active", isHighAlert: true, prescriber: "Dr James Chen", startDate: "2026-04-20" },
-    { id: "m-so-2", name: "Noradrenaline", dose: "0.1–0.3 mcg/kg/min", frequency: "Continuous", route: "IV", status: "Active", isHighAlert: true, prescriber: "Dr James Chen", startDate: "2026-04-20" },
+    { id: "m-so-2", name: "Noradrenaline", dose: "0.1â€“0.3 mcg/kg/min", frequency: "Continuous", route: "IV", status: "Active", isHighAlert: true, prescriber: "Dr James Chen", startDate: "2026-04-20" },
     { id: "m-so-3", name: "Piperacillin-Tazobactam", brandName: "Tazocin", dose: "4.5g", frequency: "6-hrly", route: "IV", status: "Active", isHighAlert: false, prescriber: "Dr James Chen", startDate: "2026-04-20" },
   ],
   vitals: [
@@ -645,10 +645,10 @@ const sandraOkonkwo: Patient = {
       department: "Intensive Care",
       clinician: "Dr James Chen",
       note: {
-        subjective: "51yo female transferred from ED with septic shock. Source suspected line-related MRSA bacteraemia — blood cultures drawn. Vancomycin allergy documented (Red Man Syndrome) — Linezolid commenced as alternative. Contact precautions and ICU isolation in place.",
-        objective: "Temp 39.4°C HR 132 BP 82/48 RR 30 SpO2 88% on high-flow O2. WBC 28.4 CRP 348. Lactate 4.2. Blood cultures positive MRSA. Creatinine 284 (baseline ~80) — AKI. Vasopressor support commenced.",
-        assessment: "Septic shock secondary to MRSA bacteraemia. AKI stage 3. Vancomycin allergy — Linezolid used as MRSA-active alternative. Broad cover with Piperacillin-Tazobactam.",
-        plan: "ICU isolation. Contact precautions strictly observed. Linezolid IV BD for MRSA. Piperacillin-Tazobactam for gram-negative cover. Noradrenaline infusion for vasopressor support. Fluid resuscitation. Strict fluid balance. Renal team review — risk of dialysis. Infectious diseases consult.",
+        subjective: "51yo female transferred from ED with septic shock. Source suspected line-related MRSA bacteraemia â€” blood cultures drawn. Vancomycin allergy documented (Red Man Syndrome) â€” Linezolid commenced as alternative. Contact precautions and ICU isolation in place.",
+        objective: "Temp 39.4Â°C HR 132 BP 82/48 RR 30 SpO2 88% on high-flow O2. WBC 28.4 CRP 348. Lactate 4.2. Blood cultures positive MRSA. Creatinine 284 (baseline ~80) â€” AKI. Vasopressor support commenced.",
+        assessment: "Septic shock secondary to MRSA bacteraemia. AKI stage 3. Vancomycin allergy â€” Linezolid used as MRSA-active alternative. Broad cover with Piperacillin-Tazobactam.",
+        plan: "ICU isolation. Contact precautions strictly observed. Linezolid IV BD for MRSA. Piperacillin-Tazobactam for gram-negative cover. Noradrenaline infusion for vasopressor support. Fluid resuscitation. Strict fluid balance. Renal team review â€” risk of dialysis. Infectious diseases consult.",
       },
     },
     {
@@ -660,7 +660,7 @@ const sandraOkonkwo: Patient = {
       clinician: "Dr James Chen",
       note: {
         subjective: "Patient sedated and intubated. Husband at bedside. Contact precautions maintained. No new symptoms elicitable.",
-        objective: "HR 124 BP 88/52 on Noradrenaline 0.2 mcg/kg/min. Temp 39.1°C SpO2 90% on ventilator FiO2 0.55. Urine output 18mL/hr — oliguric. Creatinine 312. Blood cultures — MRSA confirmed. Linezolid levels pending.",
+        objective: "HR 124 BP 88/52 on Noradrenaline 0.2 mcg/kg/min. Temp 39.1Â°C SpO2 90% on ventilator FiO2 0.55. Urine output 18mL/hr â€” oliguric. Creatinine 312. Blood cultures â€” MRSA confirmed. Linezolid levels pending.",
         assessment: "MRSA bacteraemia with septic shock and AKI. Persistently critical. Isolation and contact precautions maintained.",
         plan: "Continue Linezolid and Tazocin. Titrate Noradrenaline to MAP >65. Renal team to review for CVVHD. Family meeting today. Infection control review. Daily blood cultures.",
       },
@@ -691,7 +691,7 @@ const jamesMoretti: Patient = {
   department: "Orthopaedics",
   fallsRisk: "High",
   ewsScore: 2,
-  alerts: ["FALLS RISK — HIGH", "POST-THR PRECAUTIONS"],
+  alerts: ["FALLS RISK â€” HIGH", "POST-THR PRECAUTIONS"],
   allergies: [],
   diagnoses: [
     { icdCode: "M16.11", description: "Unilateral primary osteoarthritis, right hip", shortName: "Right Hip OA", status: "Chronic" },
@@ -721,9 +721,9 @@ const jamesMoretti: Patient = {
       clinician: "Dr Rachel Kim",
       note: {
         subjective: "77yo male with longstanding right hip osteoarthritis presenting for elective right total hip replacement. Pain significantly limiting mobility and quality of life. NKDA. Medically optimised pre-operatively.",
-        objective: "Pre-op Hb 138. Right THR performed under spinal anaesthesia without intraoperative complications. Cementless prosthesis inserted. EBL 450mL. Post-op Hb 94 — iron supplementation commenced.",
-        assessment: "Right total hip replacement completed. Post-operative anaemia. Falls risk — high due to age and post-THR precautions.",
-        plan: "Post-THR precautions: avoid hip flexion >90°, internal rotation, adduction across midline. Enoxaparin 40mg SC Mane for VTE prophylaxis. Oxycodone and Paracetamol for analgesia. Ferrous Sulphate for anaemia. Physio from day 1. Falls prevention — call bell in reach, non-slip footwear, bed rails.",
+        objective: "Pre-op Hb 138. Right THR performed under spinal anaesthesia without intraoperative complications. Cementless prosthesis inserted. EBL 450mL. Post-op Hb 94 â€” iron supplementation commenced.",
+        assessment: "Right total hip replacement completed. Post-operative anaemia. Falls risk â€” high due to age and post-THR precautions.",
+        plan: "Post-THR precautions: avoid hip flexion >90Â°, internal rotation, adduction across midline. Enoxaparin 40mg SC Mane for VTE prophylaxis. Oxycodone and Paracetamol for analgesia. Ferrous Sulphate for anaemia. Physio from day 1. Falls prevention â€” call bell in reach, non-slip footwear, bed rails.",
       },
     },
     {
@@ -734,10 +734,10 @@ const jamesMoretti: Patient = {
       department: "Orthopaedics",
       clinician: "Dr Rachel Kim",
       note: {
-        subjective: "Day 2 post right THR. Pain 4/10 with oral analgesia. Mobilised with walking frame this morning with physiotherapy — tolerated well. Wife present.",
-        objective: "HR 82 BP 128/76 SpO2 97%. Wound: dressing intact, no signs of infection. Hb 98 — stable. Right hip: no dislocation signs, good range of movement within precautions.",
+        subjective: "Day 2 post right THR. Pain 4/10 with oral analgesia. Mobilised with walking frame this morning with physiotherapy â€” tolerated well. Wife present.",
+        objective: "HR 82 BP 128/76 SpO2 97%. Wound: dressing intact, no signs of infection. Hb 98 â€” stable. Right hip: no dislocation signs, good range of movement within precautions.",
         assessment: "Good progress day 2 post right THR. Post-operative anaemia improving. VTE prophylaxis in place.",
-        plan: "Continue Enoxaparin. Maintain THR precautions. Increase mobilisation — aim walking 20m with frame. OT assessment for home equipment. Discharge planning day 4-5. Outpatient orthopaedic review 6 weeks.",
+        plan: "Continue Enoxaparin. Maintain THR precautions. Increase mobilisation â€” aim walking 20m with frame. OT assessment for home equipment. Discharge planning day 4-5. Outpatient orthopaedic review 6 weeks.",
       },
     },
   ],
@@ -766,7 +766,7 @@ const aishaAlHassan: Patient = {
   department: "Obstetrics",
   fallsRisk: "Low",
   ewsScore: 2,
-  alerts: ["PREGNANCY — 16 WEEKS"],
+  alerts: ["PREGNANCY â€” 16 WEEKS"],
   allergies: [],
   diagnoses: [
     { icdCode: "O21.1", description: "Hyperemesis gravidarum with metabolic disturbance", shortName: "Hyperemesis Gravidarum", status: "Active" },
@@ -796,9 +796,9 @@ const aishaAlHassan: Patient = {
       clinician: "Dr Fatima Malik",
       note: {
         subjective: "34yo G1P0 at 16 weeks gestation presenting with intractable nausea and vomiting for 3 weeks, unable to tolerate oral intake. Weight loss 4kg since 12-week scan. Husband reports she has been unable to keep any food or fluids down. NKDA.",
-        objective: "HR 102 BP 104/66 SpO2 99%. Weight 54kg. Clinically dehydrated. UEC: Na 133 K 3.1 Cl 94 — hypochloraemic hypokalaemia. Urine ketones +++. USS foetal wellbeing: normal foetal movements, heart rate 156bpm, appropriate for dates.",
-        assessment: "Hyperemesis gravidarum with metabolic disturbance — hypochloraemic hypokalaemia. Foetal wellbeing confirmed on USS. Dehydration secondary to vomiting.",
-        plan: "IV Hartmann's solution for rehydration. IV Thiamine to prevent Wernicke encephalopathy. IV Ondansetron and Metoclopramide for antiemesis. Folate supplementation. Strict fluid balance. Daily UEC. Dietitian referral. Advance diet as tolerated — start with clear fluids and small sips.",
+        objective: "HR 102 BP 104/66 SpO2 99%. Weight 54kg. Clinically dehydrated. UEC: Na 133 K 3.1 Cl 94 â€” hypochloraemic hypokalaemia. Urine ketones +++. USS foetal wellbeing: normal foetal movements, heart rate 156bpm, appropriate for dates.",
+        assessment: "Hyperemesis gravidarum with metabolic disturbance â€” hypochloraemic hypokalaemia. Foetal wellbeing confirmed on USS. Dehydration secondary to vomiting.",
+        plan: "IV Hartmann's solution for rehydration. IV Thiamine to prevent Wernicke encephalopathy. IV Ondansetron and Metoclopramide for antiemesis. Folate supplementation. Strict fluid balance. Daily UEC. Dietitian referral. Advance diet as tolerated â€” start with clear fluids and small sips.",
       },
     },
     {
@@ -810,9 +810,9 @@ const aishaAlHassan: Patient = {
       clinician: "Dr Fatima Malik",
       note: {
         subjective: "Nausea improving with IV antiemetics. Tolerating small sips of water and clear fluids. Vomiting reduced to 2 episodes in last 24 hours. Feeling more rested. Husband very supportive.",
-        objective: "HR 96 BP 102/64. Urine ketones +. UEC: Na 137 K 3.6 — improving. Weight 54.2kg. Foetal heart tones confirmed with Doppler 158bpm.",
-        assessment: "Hyperemesis gravidarum — improving with IV rehydration and antiemetics. Electrolytes correcting. Foetal wellbeing maintained.",
-        plan: "Continue IV antiemetics. Transition to oral when tolerating adequate fluids. Advance diet slowly — clear fluids to light diet. Continue IV Hartmann's. Recheck UEC tomorrow. Discuss discharge when oral intake established. Community midwife follow-up arranged.",
+        objective: "HR 96 BP 102/64. Urine ketones +. UEC: Na 137 K 3.6 â€” improving. Weight 54.2kg. Foetal heart tones confirmed with Doppler 158bpm.",
+        assessment: "Hyperemesis gravidarum â€” improving with IV rehydration and antiemetics. Electrolytes correcting. Foetal wellbeing maintained.",
+        plan: "Continue IV antiemetics. Transition to oral when tolerating adequate fluids. Advance diet slowly â€” clear fluids to light diet. Continue IV Hartmann's. Recheck UEC tomorrow. Discuss discharge when oral intake established. Community midwife follow-up arranged.",
       },
     },
   ],
@@ -827,7 +827,7 @@ export const supportingPatients: Patient[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// ASTRID NYGAARD — Hero Patient
+// ASTRID NYGAARD â€” Hero Patient
 // ---------------------------------------------------------------------------
 
 const astridMedications: Medication[] = [
@@ -844,7 +844,7 @@ const astridDemoStages: DemoStage[] = [
   {
     stageNumber: 1,
     label: "Pre-Admission",
-    wxccStage: "Stage 1 — Pre Admission Enrolment",
+    wxccStage: "Stage 1 â€” Pre Admission Enrolment",
     status: "Pre-Admission",
     latestVitals: { timestamp: "2026-04-22T10:00:00", systolicBP: 122, diastolicBP: 78, heartRate: 68, respiratoryRate: 14, temperature: 36.7, oxygenSaturation: 99, ewsScore: 0, painScore: 3 },
     newEncounter: {
@@ -855,10 +855,10 @@ const astridDemoStages: DemoStage[] = [
       department: "Orthopaedics Pre-Admission Clinic",
       clinician: "Dr Rachel Kim",
       note: {
-        subjective: "38yo female presenting for pre-admission assessment prior to elective right TKR scheduled 25/04/2026. Reports right knee pain 3/10 at rest, 7/10 on weight-bearing. Long-standing OA. No relevant cardiac or respiratory history. NKDA.",
-        objective: "Wt 72kg Ht 168cm BMI 25.5. Obs stable. Airway assessment unremarkable. 12-lead ECG sinus rhythm. Pre-op bloods ordered: FBC UEC coags. CXR ordered.",
-        assessment: "38yo female fit for elective right TKR. Low anaesthetic risk. ASA Grade 1. Pre-op bloods and CXR pending.",
-        plan: "Proceed with TKR as scheduled 25/04/2026. NBM from midnight 24/04. Pre-admission form completed and sent via Webex Connect. Review bloods prior to admission.",
+        subjective: "Referral received from Dr Peter Walsh (Carlton Medical Centre) for elective right total knee replacement. 38yo female with long-standing right knee osteoarthritis, pain 7/10 on weight-bearing. No relevant cardiac or respiratory history. NKDA. Patient history and medication record imported from GP referral.",
+        objective: "Patient record created from GP referral documentation. Allergies, current medications, and past medical history reviewed and confirmed against referral letter. Pre-admission health questionnaire sent to patient via Webex Connect for self-completion prior to clinic review.",
+        assessment: "Referral accepted. Elective right TKR appropriate. Pre-admission questionnaire dispatched. Awaiting patient response before scheduling pre-anaesthetic assessment.",
+        plan: "Patient to complete pre-admission questionnaire via Webex Connect link. On return of questionnaire, schedule pre-anaesthetic assessment and confirm procedure date. Pre-op bloods and CXR to be ordered at clinic.",
       },
     },
     activeMedicationIds: [],
@@ -867,7 +867,7 @@ const astridDemoStages: DemoStage[] = [
   {
     stageNumber: 2,
     label: "Procedure Scheduled",
-    wxccStage: "Stage 2 — Appointment Scheduling & Reminders",
+    wxccStage: "Stage 2 â€” Appointment Scheduling & Reminders",
     status: "Scheduled",
     latestVitals: { timestamp: "2026-04-22T10:00:00", systolicBP: 122, diastolicBP: 78, heartRate: 68, respiratoryRate: 14, temperature: 36.7, oxygenSaturation: 99, ewsScore: 0, painScore: 3 },
     newEncounter: {
@@ -890,7 +890,7 @@ const astridDemoStages: DemoStage[] = [
   {
     stageNumber: 3,
     label: "Admitted",
-    wxccStage: "Stage 3 — Arrival Coordination",
+    wxccStage: "Stage 3 â€” Arrival Coordination",
     status: "Admitted",
     latestVitals: { timestamp: "2026-04-25T07:30:00", systolicBP: 118, diastolicBP: 74, heartRate: 72, respiratoryRate: 14, temperature: 36.8, oxygenSaturation: 99, ewsScore: 0, painScore: 4 },
     newEncounter: {
@@ -902,7 +902,7 @@ const astridDemoStages: DemoStage[] = [
       clinician: "Dr Rachel Kim",
       note: {
         subjective: "Patient arrived Day Surgery Unit 07:15. Confirmed NBM since midnight. Surgical consent obtained for right TKR with Dr Rachel Kim. Husband Lars present in waiting room.",
-        objective: "Obs stable. IV access 18G L antecubital fossa. NBM confirmed. ID band applied. Surgical site marked — right knee. Pre-op checklist complete. Cefazolin 2g IV given 07:45.",
+        objective: "Obs stable. IV access 18G L antecubital fossa. NBM confirmed. ID band applied. Surgical site marked â€” right knee. Pre-op checklist complete. Cefazolin 2g IV given 07:45.",
         assessment: "Ready for theatre. Pre-op checklist complete. Wayfinding SMS sent to patient and family via Webex Connect.",
         plan: "Transfer to OR Suite 3 at 08:00. Family updated via Webex Connect automated message.",
       },
@@ -913,7 +913,7 @@ const astridDemoStages: DemoStage[] = [
   {
     stageNumber: 4,
     label: "In Procedure",
-    wxccStage: "Stage 4 — Family Updates During Surgery",
+    wxccStage: "Stage 4 â€” Family Updates During Surgery",
     status: "In Procedure",
     latestVitals: { timestamp: "2026-04-25T09:15:00", systolicBP: 102, diastolicBP: 64, heartRate: 56, respiratoryRate: 10, temperature: 36.2, oxygenSaturation: 99, ewsScore: 2, painScore: 0 },
     newEncounter: {
@@ -936,7 +936,7 @@ const astridDemoStages: DemoStage[] = [
   {
     stageNumber: 5,
     label: "Ready for Discharge",
-    wxccStage: "Stage 5 — Take-Home Instruction Delivery",
+    wxccStage: "Stage 5 â€” Take-Home Instruction Delivery",
     status: "Ready for Discharge",
     latestVitals: { timestamp: "2026-04-25T14:30:00", systolicBP: 124, diastolicBP: 80, heartRate: 74, respiratoryRate: 16, temperature: 36.9, oxygenSaturation: 98, ewsScore: 1, painScore: 3 },
     newEncounter: {
@@ -948,7 +948,7 @@ const astridDemoStages: DemoStage[] = [
       clinician: "Dr Rachel Kim",
       note: {
         subjective: "Patient recovered well post right TKR. Pain 3/10 at rest, controlled on oral analgesia. Tolerating fluids and light diet. Mobilised 10m with physiotherapist and walking frame. Wound dry. Voiding. Ready for discharge.",
-        objective: "Obs stable. NV obs right leg intact — sensation and movement preserved, cap refill <2s. Wound: clean, sutures intact, mild periincisional swelling, nil excessive warmth. Hb 112 post-op (pre-op 138). Physiotherapy clearance obtained.",
+        objective: "Obs stable. NV obs right leg intact â€” sensation and movement preserved, cap refill <2s. Wound: clean, sutures intact, mild periincisional swelling, nil excessive warmth. Hb 112 post-op (pre-op 138). Physiotherapy clearance obtained.",
         assessment: "Meets all discharge criteria post right TKR. Wound satisfactory. Mobility appropriate for discharge to home. Discharge instructions sent via Webex Connect.",
         plan: "Discharge home with husband Lars. Prescriptions provided: Oxycodone, Paracetamol, Celecoxib, Enoxaparin 14 days. F/U Dr Kim 6 weeks 06/05/2026 09:30. Emergency contact 13 HEALTH or ED if: fever >38.5, wound redness/discharge, calf swelling, or severe uncontrolled pain.",
       },
@@ -959,7 +959,7 @@ const astridDemoStages: DemoStage[] = [
   {
     stageNumber: 6,
     label: "Discharged",
-    wxccStage: "Stage 6 — Post Discharge Check-Up",
+    wxccStage: "Stage 6 â€” Post Discharge Check-Up",
     status: "Discharged",
     latestVitals: { timestamp: "2026-04-25T15:45:00", systolicBP: 120, diastolicBP: 76, heartRate: 70, respiratoryRate: 15, temperature: 37.0, oxygenSaturation: 99, ewsScore: 0, painScore: 2 },
     newEncounter: {
@@ -970,7 +970,7 @@ const astridDemoStages: DemoStage[] = [
       department: "Orthopaedic Outpatients",
       clinician: "Dr Rachel Kim",
       note: {
-        subjective: "Post-discharge check-up initiated via Webex Connect AI agent 48hrs post-discharge. Patient reports pain 3/10 managed on oral analgesia, wound appearance normal — mild bruising, no discharge, no fever. Medication compliant. Mobilising at home with frame.",
+        subjective: "Post-discharge check-up initiated via Webex Connect AI agent 48hrs post-discharge. Patient reports pain 3/10 managed on oral analgesia, wound appearance normal â€” mild bruising, no discharge, no fever. Medication compliant. Mobilising at home with frame.",
         objective: "Remote AI-assisted assessment. No red flags reported. Patient denies fever, excessive swelling, wound discharge, or chest pain/SOB. Enoxaparin administered correctly by husband.",
         assessment: "Satisfactory post-operative recovery at home. No complications identified. Responses within expected range. Survey auto-documented in EMR via Webex Connect.",
         plan: "Continue current medications. Post-discharge survey results filed. F/U appointment confirmed 06/05/2026 09:30 with Dr Kim. Reminder sent via Webex Connect. Patient advised to present to ED if red flag symptoms develop.",
@@ -1077,7 +1077,7 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 4",
     reminderSent: false,
   },
-  // Dr Sarah Nguyen — Cardiology Outpatients
+  // Dr Sarah Nguyen â€” Cardiology Outpatients
   {
     id: "apt-sn-1",
     patientId: "margaret-thompson",
@@ -1130,7 +1130,7 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 12",
     reminderSent: true,
   },
-  // Dr Rachel Kim — Orthopaedics
+  // Dr Rachel Kim â€” Orthopaedics
   {
     id: "apt-rk-1",
     patientId: "james-moretti",
@@ -1157,7 +1157,7 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 4",
     reminderSent: true,
   },
-  // Dr Patricia Lam — Endocrinology
+  // Dr Patricia Lam â€” Endocrinology
   {
     id: "apt-pl-1",
     patientId: "robert-adeyemi",
@@ -1184,11 +1184,11 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 7",
     reminderSent: false,
   },
-  // Dr Emma Walsh — Emergency Medicine
+  // Dr Emma Walsh â€” Emergency Medicine
   {
     id: "apt-ew-1",
     patientId: "thomas-sullivan",
-    type: "ED Review — Chest Pain Workup",
+    type: "ED Review â€” Chest Pain Workup",
     department: "Emergency Medicine",
     clinician: "Dr Emma Walsh",
     scheduledDate: "2026-04-24",
@@ -1198,7 +1198,7 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Resus Bay 1",
     reminderSent: true,
   },
-  // Dr Simon Burke — General Surgery
+  // Dr Simon Burke â€” General Surgery
   {
     id: "apt-sb-1",
     patientId: "priya-krishnamurthy",
@@ -1212,7 +1212,7 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 9",
     reminderSent: false,
   },
-  // Dr Michael Torres — Respiratory Medicine
+  // Dr Michael Torres â€” Respiratory Medicine
   {
     id: "apt-mt-1",
     patientId: "isabelle-dupont",
@@ -1226,7 +1226,7 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 6",
     reminderSent: true,
   },
-  // Dr William Patel — Respiratory Medicine
+  // Dr William Patel â€” Respiratory Medicine
   {
     id: "apt-wp-1",
     patientId: "william-grant",
@@ -1253,11 +1253,11 @@ export const APPOINTMENTS: Appointment[] = [
     room: "Room 8",
     reminderSent: true,
   },
-  // Dr Fatima Malik — Obstetrics
+  // Dr Fatima Malik â€” Obstetrics
   {
     id: "apt-fm-1",
     patientId: "aisha-al-hassan",
-    type: "Obstetric Review — Hyperemesis Follow-Up",
+    type: "Obstetric Review â€” Hyperemesis Follow-Up",
     department: "Obstetric Outpatients",
     clinician: "Dr Fatima Malik",
     scheduledDate: "2026-04-27",
@@ -1297,7 +1297,7 @@ export const APPOINTMENTS: Appointment[] = [
   {
     id: "apt-wp-3",
     patientId: "sandra-okonkwo",
-    type: "Infectious Diseases Consult — MRSA",
+    type: "Infectious Diseases Consult â€” MRSA",
     department: "Intensive Care",
     clinician: "Dr William Patel",
     scheduledDate: "2026-04-24",
@@ -1310,7 +1310,7 @@ export const APPOINTMENTS: Appointment[] = [
   {
     id: "apt-sb-2",
     patientId: "james-moretti",
-    type: "Physiotherapy — Gait & Mobility Assessment",
+    type: "Physiotherapy â€” Gait & Mobility Assessment",
     department: "Allied Health",
     clinician: "Dr Simon Burke",
     scheduledDate: "2026-04-25",
