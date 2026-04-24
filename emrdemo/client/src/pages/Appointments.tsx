@@ -37,7 +37,7 @@ const PRIORITY_STYLES: Record<string, string> = {
 };
 
 export default function Appointments() {
-  const { currentStage } = useDemoStage();
+  const { currentStage, hasStarted } = useDemoStage();
   const [clinician, setClinician] = useState("All Clinicians");
   const [status, setStatus] = useState("All");
   const [priority, setPriority] = useState("All");
@@ -58,18 +58,38 @@ export default function Appointments() {
     return () => clearTimeout(t);
   }, [currentStage, heroPatient]);
 
-  const appointments = useMemo(() => {
-    return APPOINTMENTS.map(apt => {
-      if (heroPatient?.isHeroPatient && heroPatient.demoStages) {
-        const stage = heroPatient.demoStages[currentStage];
-        const update = stage.appointmentUpdates.find(u => u.id === apt.id);
-        if (update) {
-          return { ...apt, status: update.status, reminderSent: update.reminderSent };
-        }
-      }
-      return apt;
+  // For each hero appointment, compute the first stage index it becomes relevant
+  const heroAptFirstStage = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!heroPatient?.demoStages) return map;
+    heroPatient.demoStages.forEach((stage, idx) => {
+      stage.appointmentUpdates.forEach(u => {
+        if (!map.has(u.id)) map.set(u.id, idx);
+      });
     });
-  }, [currentStage, heroPatient]);
+    return map;
+  }, [heroPatient]);
+
+  const appointments = useMemo(() => {
+    return APPOINTMENTS
+      .filter(apt => {
+        if (apt.patientId !== HERO_PATIENT_ID) return true;
+        // Hide Astrid's appointments until the stage they first appear AND hasStarted
+        // Stage 1 (index 1) = Appointment Scheduling — first stage where appointment makes sense
+        const firstStage = heroAptFirstStage.get(apt.id) ?? 0;
+        return hasStarted && currentStage >= Math.max(firstStage, 1);
+      })
+      .map(apt => {
+        if (heroPatient?.isHeroPatient && heroPatient.demoStages) {
+          const stage = heroPatient.demoStages[currentStage];
+          const update = stage.appointmentUpdates.find(u => u.id === apt.id);
+          if (update) {
+            return { ...apt, status: update.status, reminderSent: update.reminderSent };
+          }
+        }
+        return apt;
+      });
+  }, [currentStage, hasStarted, heroPatient, heroAptFirstStage]);
 
   const filtered = useMemo(() => {
     return appointments
@@ -80,6 +100,11 @@ export default function Appointments() {
         return matchesClinician && matchesStatus && matchesPriority;
       })
       .sort((a, b) => {
+        // Hero patient's appointments always sort first
+        const aIsHero = a.patientId === HERO_PATIENT_ID;
+        const bIsHero = b.patientId === HERO_PATIENT_ID;
+        if (aIsHero && !bIsHero) return -1;
+        if (!aIsHero && bIsHero) return 1;
         const dateA = `${a.scheduledDate}T${a.scheduledTime}`;
         const dateB = `${b.scheduledDate}T${b.scheduledTime}`;
         return dateA.localeCompare(dateB);
