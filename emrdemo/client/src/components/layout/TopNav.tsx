@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import logoDark from "@/assets/logo_darkbackground.png";
 
 export default function TopNav() {
   const [time, setTime] = useState(() => formatTime(new Date()));
@@ -13,6 +14,8 @@ export default function TopNav() {
   return (
     <header className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0" style={{ backgroundColor: "var(--sidebar)" }}>
       <div className="flex items-center gap-3">
+        <img src={logoDark} alt="ArchiTech Hospital" className="h-7 w-auto" />
+        <div className="w-px h-5 shrink-0" style={{ backgroundColor: "var(--sidebar-border)" }} />
         <div className="flex flex-col">
           <span className="text-sm font-bold tracking-tight" style={{ color: "var(--sidebar-foreground)" }}>
             HealthCore

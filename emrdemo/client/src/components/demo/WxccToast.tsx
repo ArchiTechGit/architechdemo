@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageSquare, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useDemoStage, STAGE_NOTIFICATIONS } from "@/contexts/DemoStageContext";
+import webexLogo from "@/assets/logo-webex.svg";
 
 const DISMISS_MS = 7000;
 
@@ -38,9 +39,9 @@ export default function WxccToast() {
             className="flex items-center gap-2.5 px-4 py-2.5"
             style={{ backgroundColor: "#05C3DD" }}
           >
-            <MessageSquare className="w-4 h-4 text-white shrink-0" />
+            <img src={webexLogo} alt="Webex" className="h-4 w-auto shrink-0 brightness-0 invert" />
             <span className="text-sm font-bold text-white tracking-wide">
-              Webex Contact Center
+              Contact Center
             </span>
             <span className="ml-auto text-[11px] text-white/70 font-mono uppercase tracking-widest">
               automated
