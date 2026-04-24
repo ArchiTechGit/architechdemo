@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Check, ChevronRight, RotateCcw } from "lucide-react";
+import { Check, ChevronRight, RotateCcw, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDemoStage, STAGE_CONFIG } from "@/contexts/DemoStageContext";
 
@@ -8,6 +8,7 @@ export default function DemoStageControl() {
   const { currentStage, hasStarted, isConfirming, advance, reset } = useDemoStage();
   const [, setLocation] = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
+  const autoCollapseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isLast = hasStarted && currentStage >= 5;
   const config = STAGE_CONFIG[currentStage];
@@ -32,6 +33,17 @@ export default function DemoStageControl() {
     setLocation("/patients");
     setIsExpanded(false);
   }, [reset, setLocation]);
+
+  // Auto-expand console for 8 seconds after each stage advance
+  useEffect(() => {
+    if (!isConfirming) return;
+    setIsExpanded(true);
+    if (autoCollapseRef.current) clearTimeout(autoCollapseRef.current);
+    autoCollapseRef.current = setTimeout(() => setIsExpanded(false), 8000);
+    return () => {
+      if (autoCollapseRef.current) clearTimeout(autoCollapseRef.current);
+    };
+  }, [isConfirming]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -77,8 +89,16 @@ export default function DemoStageControl() {
                 ✓ Journey Complete
               </p>
               <p className="text-[10px] mt-1 leading-snug" style={{ color: "#64748B" }}>
-                Demo complete. Click ↺ to reset.
+                All 6 stages done. View the journey summary or reset.
               </p>
+              <button
+                onClick={() => setLocation("/summary")}
+                className="mt-2 w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold rounded py-1 transition-opacity hover:opacity-80"
+                style={{ backgroundColor: "#15803D", color: "#fff" }}
+              >
+                <Map className="w-3 h-3" />
+                View Summary
+              </button>
             </>
           ) : !hasStarted ? (
             <>
@@ -145,6 +165,17 @@ export default function DemoStageControl() {
             <ChevronRight className="w-3 h-3" style={{ color: isLast ? "#15803D" : "#64748B" }} />
           )}
         </button>
+
+        {/* View Summary shortcut when complete */}
+        {isLast && (
+          <button
+            onClick={() => setLocation("/summary")}
+            className="flex items-center justify-center w-5 h-5 rounded-full transition-opacity cursor-pointer hover:bg-green-100"
+            title="View journey summary"
+          >
+            <Map className="w-3 h-3" style={{ color: "#15803D" }} />
+          </button>
+        )}
 
         {/* Reset button */}
         {currentStage > 0 && (

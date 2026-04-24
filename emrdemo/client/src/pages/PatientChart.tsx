@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,15 +56,44 @@ function useChartPatient(id: string | undefined): Patient | null {
 export default function PatientChart() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { recommendedTab } = useDemoStage();
+  const { currentStage, recommendedTab } = useDemoStage();
   const patient = useChartPatient(id);
   const [activeTab, setActiveTab] = useState("overview");
+  const [newEncounterIds, setNewEncounterIds] = useState<Set<string>>(new Set());
+  const [newMedicationIds, setNewMedicationIds] = useState<Set<string>>(new Set());
+  const prevStageRef = useRef<number>(-1);
 
   useEffect(() => {
     if (patient?.isHeroPatient && recommendedTab) {
       setActiveTab(recommendedTab);
     }
   }, [recommendedTab, patient?.isHeroPatient]);
+
+  // Compute and show NEW badges for 15 seconds after each stage advance
+  useEffect(() => {
+    if (!patient?.isHeroPatient || prevStageRef.current === currentStage) return;
+    const rawPatient = PATIENTS.find(p => p.isHeroPatient);
+    if (!rawPatient?.demoStages) return;
+
+    const stage = rawPatient.demoStages[currentStage];
+    const prevStage = currentStage > 0 ? rawPatient.demoStages[currentStage - 1] : null;
+
+    const newEnc = new Set([stage.newEncounter.id]);
+    const prevMedIds = new Set(prevStage?.activeMedicationIds ?? []);
+    const newMeds = new Set(
+      stage.activeMedicationIds.filter(mid => !prevMedIds.has(mid))
+    );
+
+    setNewEncounterIds(newEnc);
+    setNewMedicationIds(newMeds);
+    prevStageRef.current = currentStage;
+
+    const t = setTimeout(() => {
+      setNewEncounterIds(new Set());
+      setNewMedicationIds(new Set());
+    }, 15000);
+    return () => clearTimeout(t);
+  }, [currentStage, patient?.isHeroPatient]);
 
   if (!patient) {
     return (
@@ -141,7 +170,7 @@ export default function PatientChart() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <MedicationsList medications={patient.medications.filter(m => m.status === "Active")} />
+                <MedicationsList medications={patient.medications.filter(m => m.status === "Active")} newIds={newMedicationIds} />
               </CardContent>
             </Card>
 
@@ -176,7 +205,7 @@ export default function PatientChart() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <MedicationsList medications={patient.medications} />
+                <MedicationsList medications={patient.medications} newIds={newMedicationIds} />
               </CardContent>
             </Card>
           </div>
@@ -192,7 +221,7 @@ export default function PatientChart() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <EncounterHistory encounters={patient.encounters} />
+                <EncounterHistory encounters={patient.encounters} newIds={newEncounterIds} />
               </CardContent>
             </Card>
           </div>

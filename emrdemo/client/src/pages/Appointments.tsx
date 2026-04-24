@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Bell, BellOff } from "lucide-react";
@@ -41,8 +41,22 @@ export default function Appointments() {
   const [clinician, setClinician] = useState("All Clinicians");
   const [status, setStatus] = useState("All");
   const [priority, setPriority] = useState("All");
+  const [flashIds, setFlashIds] = useState<Set<string>>(new Set());
+  const prevStageRef = useRef<number>(-1);
 
   const heroPatient = PATIENTS.find(p => p.id === HERO_PATIENT_ID);
+
+  // Flash Astrid's appointments when their stage changes
+  useEffect(() => {
+    if (prevStageRef.current === currentStage) return;
+    if (!heroPatient?.demoStages) return;
+    const stage = heroPatient.demoStages[currentStage];
+    const ids = new Set(stage.appointmentUpdates.map(u => u.id));
+    setFlashIds(ids);
+    const t = setTimeout(() => setFlashIds(new Set()), 2500);
+    prevStageRef.current = currentStage;
+    return () => clearTimeout(t);
+  }, [currentStage, heroPatient]);
 
   const appointments = useMemo(() => {
     return APPOINTMENTS.map(apt => {
@@ -119,13 +133,21 @@ export default function Appointments() {
 
       {/* Appointment list */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-        {filtered.map(apt => (
+        {filtered.map(apt => {
+          const isHero = apt.patientId === HERO_PATIENT_ID;
+          const isFlashing = flashIds.has(apt.id);
+          return (
           <div
             key={apt.id}
             className={cn(
-              "bg-card border rounded p-4 flex items-center gap-4",
-              apt.priority === "Urgent" && "border-l-4 border-l-amber-400",
-              apt.priority === "Emergency" && "border-l-4 border-l-red-500",
+              "border rounded p-4 flex items-center gap-4 transition-colors duration-700",
+              isFlashing
+                ? "bg-green-50 border-l-4 border-l-emerald-400"
+                : isHero
+                ? "bg-card border-l-4 border-l-cyan-400"
+                : "bg-card",
+              !isHero && apt.priority === "Urgent" && "border-l-4 border-l-amber-400",
+              !isHero && apt.priority === "Emergency" && "border-l-4 border-l-red-500",
             )}
           >
             {/* Date/Time block */}
@@ -165,7 +187,8 @@ export default function Appointments() {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {filtered.length === 0 && (
           <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">

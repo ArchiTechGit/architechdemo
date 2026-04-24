@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface EncounterHistoryProps {
   encounters: Encounter[];
+  newIds?: Set<string>;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -19,7 +20,7 @@ const TYPE_COLORS: Record<string, string> = {
   Outpatient:    "text-gray-600 bg-gray-50 border-gray-200",
 };
 
-export default function EncounterHistory({ encounters }: EncounterHistoryProps) {
+export default function EncounterHistory({ encounters, newIds }: EncounterHistoryProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const sorted = [...encounters].sort((a, b) => b.date.localeCompare(a.date));
 
@@ -31,9 +32,10 @@ export default function EncounterHistory({ encounters }: EncounterHistoryProps) 
     <div className="divide-y divide-border">
       {sorted.map(enc => {
         const isOpen = expanded === enc.id;
+        const isNew = newIds?.has(enc.id) ?? false;
         const typeStyle = TYPE_COLORS[enc.type] ?? TYPE_COLORS["Ward Round"];
         return (
-          <div key={enc.id}>
+          <div key={enc.id} className={cn(isNew && "bg-emerald-50/60 transition-colors duration-1000")}>
             <button
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-secondary/40",
@@ -45,6 +47,12 @@ export default function EncounterHistory({ encounters }: EncounterHistoryProps) 
               <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded border uppercase tracking-wide shrink-0", typeStyle)}>
                 {enc.type}
               </span>
+              {isNew && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest shrink-0"
+                  style={{ backgroundColor: "#05C3DD22", color: "#0891B2", border: "1px solid #06B6D444" }}>
+                  NEW
+                </span>
+              )}
               <span className="text-sm font-medium">{new Date(enc.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</span>
               <span className="text-xs text-muted-foreground">{enc.department}</span>
               <span className="text-xs text-muted-foreground ml-auto">{enc.clinician}</span>

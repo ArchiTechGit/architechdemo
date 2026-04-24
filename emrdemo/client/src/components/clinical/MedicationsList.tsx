@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface MedicationsListProps {
   medications: Medication[];
+  newIds?: Set<string>;
 }
 
 const FREQ_LABELS: Record<string, string> = {
@@ -43,19 +44,21 @@ const STATUS_STYLES: Record<string, string> = {
   PRN:       "bg-blue-50 text-blue-700 border-blue-200",
 };
 
-export default function MedicationsList({ medications }: MedicationsListProps) {
+export default function MedicationsList({ medications, newIds }: MedicationsListProps) {
   if (medications.length === 0) {
     return <p className="text-sm text-muted-foreground p-4">No medications recorded.</p>;
   }
 
   return (
     <div className="divide-y divide-border">
-      {medications.map(med => (
+      {medications.map(med => {
+        const isNew = newIds?.has(med.id) ?? false;
+        return (
         <div
           key={med.id}
           className={cn(
-            "flex items-center gap-4 px-4 py-2.5 text-sm border-l-2",
-            med.isHighAlert ? "border-l-amber-400 bg-amber-50/30" : "border-l-transparent"
+            "flex items-center gap-4 px-4 py-2.5 text-sm border-l-2 transition-colors duration-1000",
+            isNew ? "border-l-cyan-400 bg-emerald-50/60" : med.isHighAlert ? "border-l-amber-400 bg-amber-50/30" : "border-l-transparent"
           )}
         >
           <div className="flex-1 min-w-0">
@@ -63,6 +66,12 @@ export default function MedicationsList({ medications }: MedicationsListProps) {
               <span className="font-semibold">{med.name}</span>
               {med.brandName && (
                 <span className="text-[11px] text-muted-foreground">({med.brandName})</span>
+              )}
+              {isNew && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest"
+                  style={{ backgroundColor: "#05C3DD22", color: "#0891B2", border: "1px solid #06B6D444" }}>
+                  NEW
+                </span>
               )}
               {med.isHighAlert && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border"
@@ -80,7 +89,8 @@ export default function MedicationsList({ medications }: MedicationsListProps) {
             {med.status}
           </Badge>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
