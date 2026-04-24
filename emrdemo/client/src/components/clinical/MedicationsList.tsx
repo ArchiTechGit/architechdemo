@@ -7,6 +7,35 @@ interface MedicationsListProps {
   medications: Medication[];
 }
 
+const FREQ_LABELS: Record<string, string> = {
+  BD: "Twice daily",
+  TDS: "Three times daily",
+  QID: "Four times daily",
+  Mane: "Every morning",
+  Nocte: "Every night",
+  "Once daily": "Once daily",
+  "Continuous infusion": "Continuous infusion",
+  PRN: "As needed",
+  STAT: "Immediately (once)",
+};
+
+const ROUTE_LABELS: Record<string, string> = {
+  SC: "Injection (SC)",
+  IV: "IV drip",
+  IM: "Injection (IM)",
+  Oral: "By mouth",
+  Topical: "Topical",
+  Inhaled: "Inhaled",
+};
+
+function expandFreq(freq: string) {
+  return FREQ_LABELS[freq] ?? freq;
+}
+
+function expandRoute(route: string) {
+  return ROUTE_LABELS[route] ?? route;
+}
+
 const STATUS_STYLES: Record<string, string> = {
   Active:    "bg-green-50 text-green-700 border-green-200",
   "On Hold": "bg-amber-50 text-amber-700 border-amber-200",
@@ -44,7 +73,7 @@ export default function MedicationsList({ medications }: MedicationsListProps) {
               )}
             </div>
             <div className="text-xs text-muted-foreground mt-0.5">
-              {med.dose} · {med.frequency} · {med.route} · Prescriber: {med.prescriber}
+              {med.dose} · {expandFreq(med.frequency)} · {expandRoute(med.route)} · Prescriber: {med.prescriber}
             </div>
           </div>
           <Badge variant="outline" className={cn("text-[10px] shrink-0", STATUS_STYLES[med.status] ?? STATUS_STYLES.Active)}>

@@ -5,20 +5,27 @@ import { cn } from "@/lib/utils";
 import { useDemoStage, STAGE_CONFIG } from "@/contexts/DemoStageContext";
 
 export default function DemoStageControl() {
-  const { currentStage, isConfirming, advance, reset } = useDemoStage();
+  const { currentStage, hasStarted, isConfirming, advance, reset } = useDemoStage();
   const [, setLocation] = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const isLast = currentStage >= 5;
+  const isLast = hasStarted && currentStage >= 5;
   const config = STAGE_CONFIG[currentStage];
 
   const handleAdvance = useCallback(() => {
     if (isLast || isConfirming) return;
+    if (!hasStarted) {
+      // First advance: enrol the patient, navigate to patient list
+      advance();
+      setLocation(STAGE_CONFIG[0].path);
+      setIsExpanded(false);
+      return;
+    }
     const nextStage = currentStage + 1;
     advance();
     setLocation(STAGE_CONFIG[nextStage].path);
     setIsExpanded(false);
-  }, [isLast, isConfirming, currentStage, advance, setLocation]);
+  }, [isLast, isConfirming, hasStarted, currentStage, advance, setLocation]);
 
   const handleReset = useCallback(() => {
     reset();
@@ -73,6 +80,18 @@ export default function DemoStageControl() {
                 Demo complete. Click ↺ to reset.
               </p>
             </>
+          ) : !hasStarted ? (
+            <>
+              <p className="text-[11px] font-semibold" style={{ color: "#1E293B" }}>
+                Pre-Enrolment
+              </p>
+              <p className="text-[10px] mt-0.5" style={{ color: "#64748B" }}>
+                Patient not yet in system
+              </p>
+              <p className="text-[10px] mt-1.5 leading-snug" style={{ color: "#475569" }}>
+                Press › to trigger Stage 1 — WXCC will enrol Astrid into the system
+              </p>
+            </>
           ) : (
             <>
               <p className="text-[11px] font-semibold" style={{ color: "#1E293B" }}>
@@ -100,7 +119,7 @@ export default function DemoStageControl() {
           className="text-[10px] font-mono tabular-nums hover:opacity-80 transition-opacity cursor-pointer"
           style={{ color: isLast ? "#15803D" : "#64748B" }}
         >
-          {isLast ? "✓ Complete" : config.label}
+          {isLast ? "✓ Complete" : hasStarted ? config.label : "Pre-Enrolment"}
         </button>
 
         {/* Divider */}

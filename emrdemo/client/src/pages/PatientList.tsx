@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import AppShell from "@/components/layout/AppShell";
 import StatusBadge from "@/components/clinical/StatusBadge";
 import { PATIENTS } from "@/lib/data";
-import type { Patient } from "@/types";
 import { cn } from "@/lib/utils";
 import { useDemoStage } from "@/contexts/DemoStageContext";
 
@@ -25,28 +24,38 @@ const CLINICIANS = [
   "Dr Sarah Nguyen",
 ];
 
-function ewsBadge(score: number) {
+function riskBadge(score: number) {
   const color = score >= 4 ? "text-red-600 font-bold" : score >= 2 ? "text-amber-600 font-semibold" : "text-green-600";
-  return <span className={cn("font-mono tabular-nums", color)}>{score}</span>;
+  const label = score >= 4 ? "High" : score >= 2 ? "Med" : "Low";
+  return (
+    <span className={cn("text-xs", color)}>
+      {label} <span className="font-mono">({score})</span>
+    </span>
+  );
 }
 
 export default function PatientList() {
   const [, navigate] = useLocation();
-  const { currentStage } = useDemoStage();
+  const { currentStage, hasStarted } = useDemoStage();
   const [search, setSearch] = useState("");
   const [ward, setWard] = useState("All Wards");
   const [clinician, setClinician] = useState("All Clinicians");
 
-  // Apply demo stage to Astrid's status in the list
   const patients = useMemo(() => {
-    return PATIENTS.map(p => {
-      if (p.isHeroPatient && p.demoStages) {
-        const stage = p.demoStages[currentStage];
-        return { ...p, admissionStatus: stage.status, ewsScore: stage.latestVitals.ewsScore };
-      }
-      return p;
-    });
-  }, [currentStage]);
+    return PATIENTS
+      .filter(p => {
+        // Hide Astrid until Stage 1 fires (WXCC enrols her)
+        if (p.isHeroPatient && !hasStarted) return false;
+        return true;
+      })
+      .map(p => {
+        if (p.isHeroPatient && p.demoStages) {
+          const stage = p.demoStages[currentStage];
+          return { ...p, admissionStatus: stage.status, ewsScore: stage.latestVitals.ewsScore };
+        }
+        return p;
+      });
+  }, [currentStage, hasStarted]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -69,7 +78,7 @@ export default function PatientList() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search name, MRN, diagnosis..."
+            placeholder="Search by name, condition..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-8 h-9 text-sm"
@@ -92,7 +101,7 @@ export default function PatientList() {
           </SelectContent>
         </Select>
         <span className="text-xs text-muted-foreground ml-auto">
-          {filtered.length} of {patients.length} patients
+          {filtered.length} patient{filtered.length !== 1 ? "s" : ""}
         </span>
       </div>
 
@@ -101,13 +110,13 @@ export default function PatientList() {
         <Table>
           <TableHeader className="sticky top-0 bg-secondary z-10">
             <TableRow className="h-9 text-[11px] uppercase tracking-widest">
-              <TableHead className="w-48 pl-4">Patient / MRN</TableHead>
-              <TableHead className="w-28">DOB / Age</TableHead>
+              <TableHead className="w-48 pl-4">Patient</TableHead>
+              <TableHead className="w-28">Age</TableHead>
               <TableHead className="w-24">Ward / Bed</TableHead>
-              <TableHead>Primary Diagnosis</TableHead>
-              <TableHead className="w-16 text-center">EWS</TableHead>
+              <TableHead>Condition</TableHead>
+              <TableHead className="w-28 text-center">Risk Level</TableHead>
               <TableHead className="w-40">Status</TableHead>
-              <TableHead className="w-40">Clinician</TableHead>
+              <TableHead className="w-40">Doctor</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,21 +131,21 @@ export default function PatientList() {
               >
                 <TableCell className="pl-4 font-medium">
                   <div>{patient.firstName} {patient.lastName}</div>
-                  <div className="font-mono text-[11px] text-muted-foreground">{patient.mrn}</div>
+                  <div className="font-mono text-[11px] text-muted-foreground">ID {patient.mrn}</div>
                 </TableCell>
                 <TableCell>
-                  <div className="text-xs">{new Date(patient.dob).toLocaleDateString("en-AU")}</div>
-                  <div className="text-[11px] text-muted-foreground">{patient.age}y {patient.sex[0]}</div>
+                  <div className="text-xs">{patient.age} years</div>
+                  <div className="text-[11px] text-muted-foreground">{patient.sex}</div>
                 </TableCell>
                 <TableCell>
                   <div className="font-semibold">{patient.ward}</div>
-                  <div className="text-[11px] text-muted-foreground">{patient.bedNumber}</div>
+                  <div className="text-[11px] text-muted-foreground">Bed {patient.bedNumber}</div>
                 </TableCell>
                 <TableCell className="text-sm">
                   {patient.diagnoses[0]?.shortName ?? "—"}
                 </TableCell>
                 <TableCell className="text-center">
-                  {ewsBadge(patient.ewsScore)}
+                  {riskBadge(patient.ewsScore)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={patient.admissionStatus} />
@@ -149,7 +158,18 @@ export default function PatientList() {
           </TableBody>
         </Table>
 
-        {filtered.length === 0 && (
+        {filtered.length === 0 && !hasStarted && (
+          <div className="flex flex-col items-center justify-center h-40 gap-2">
+            <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
+              Patient not yet in the system
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Press › to trigger Stage 1 — Pre Admission Enrolment
+            </p>
+          </div>
+        )}
+
+        {filtered.length === 0 && hasStarted && (
           <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
             No patients match the current filters.
           </div>

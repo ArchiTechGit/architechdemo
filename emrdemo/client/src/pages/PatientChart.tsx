@@ -3,16 +3,14 @@ import { useParams, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import AppShell from "@/components/layout/AppShell";
 import PatientHeader from "@/components/clinical/PatientHeader";
 import AllergyBanner from "@/components/clinical/AllergyBanner";
 import VitalsSummary from "@/components/clinical/VitalsSummary";
-import VitalsChart from "@/components/clinical/VitalsChart";
 import DiagnosisList from "@/components/clinical/DiagnosisList";
 import MedicationsList from "@/components/clinical/MedicationsList";
 import EncounterHistory from "@/components/clinical/EncounterHistory";
-import { PATIENTS, HERO_PATIENT_ID } from "@/lib/data";
+import { PATIENTS } from "@/lib/data";
 import { useDemoStage } from "@/contexts/DemoStageContext";
 import type { Patient, VitalReading, Encounter, Medication } from "@/types";
 
@@ -25,19 +23,13 @@ function useChartPatient(id: string | undefined): Patient | null {
 
     if (!patient.isHeroPatient || !patient.demoStages) return patient;
 
-    // Hero patient: overlay current demo stage data
     const stage = patient.demoStages[currentStage];
 
-    // Build vitals: base vitals + stage vitals
     const vitals: VitalReading[] = [...patient.vitals];
     if (!vitals.find(v => v.timestamp === stage.latestVitals.timestamp)) {
       vitals.push(stage.latestVitals);
     }
 
-    // Build encounters: base encounters + any new encounter from this stage and prior stages
-    const stageEncounterIds = new Set(
-      patient.demoStages.slice(0, currentStage + 1).map(s => s.newEncounter.id)
-    );
     const encounters: Encounter[] = [
       ...patient.encounters,
       ...patient.demoStages
@@ -46,7 +38,6 @@ function useChartPatient(id: string | undefined): Patient | null {
         .filter(e => !patient.encounters.find(pe => pe.id === e.id)),
     ];
 
-    // Build medications: only those active in current stage
     const medications: Medication[] = stage.activeMedicationIds.length > 0
       ? patient.medications.filter(m => stage.activeMedicationIds.includes(m.id))
       : patient.medications;
@@ -67,7 +58,7 @@ export default function PatientChart() {
   const [, navigate] = useLocation();
   const { recommendedTab } = useDemoStage();
   const patient = useChartPatient(id);
-  const [activeTab, setActiveTab] = useState("summary");
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (patient?.isHeroPatient && recommendedTab) {
@@ -88,8 +79,6 @@ export default function PatientChart() {
     );
   }
 
-  const latestVitals = patient.vitals[patient.vitals.length - 1];
-
   return (
     <AppShell>
       {/* Back button */}
@@ -109,23 +98,23 @@ export default function PatientChart() {
       {/* Sticky allergy banner */}
       <AllergyBanner allergies={patient.allergies} />
 
-      {/* Tabs */}
+      {/* 3 tabs: Overview, Medications, Visit History */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="shrink-0 rounded-none border-b bg-card px-4 justify-start h-10 gap-1">
-          <TabsTrigger value="summary" className="text-xs h-8">Summary</TabsTrigger>
+          <TabsTrigger value="overview" className="text-xs h-8">Overview</TabsTrigger>
           <TabsTrigger value="medications" className="text-xs h-8">Medications</TabsTrigger>
-          <TabsTrigger value="vitals" className="text-xs h-8">Vitals</TabsTrigger>
-          <TabsTrigger value="encounters" className="text-xs h-8">Encounters</TabsTrigger>
-          <TabsTrigger value="details" className="text-xs h-8">Details</TabsTrigger>
+          <TabsTrigger value="history" className="text-xs h-8">Visit History</TabsTrigger>
         </TabsList>
 
-        {/* Summary Tab */}
-        <TabsContent value="summary" className="flex-1 overflow-y-auto m-0">
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="flex-1 overflow-y-auto m-0">
           <div className="p-4 grid grid-cols-2 gap-4">
             {/* Vitals snapshot */}
             <Card className="col-span-2">
               <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Latest Vitals</CardTitle>
+                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Current Vitals
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <VitalsSummary vitals={patient.vitals} />
@@ -135,7 +124,9 @@ export default function PatientChart() {
             {/* Diagnoses */}
             <Card>
               <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Problem List</CardTitle>
+                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Conditions
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <DiagnosisList diagnoses={patient.diagnoses} />
@@ -145,10 +136,31 @@ export default function PatientChart() {
             {/* Active Medications snapshot */}
             <Card>
               <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Active Medications</CardTitle>
+                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Current Medications
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <MedicationsList medications={patient.medications.filter(m => m.status === "Active")} />
+              </CardContent>
+            </Card>
+
+            {/* Patient info summary */}
+            <Card className="col-span-2">
+              <CardHeader className="py-2 px-4 border-b">
+                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Patient Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 grid grid-cols-4 gap-4 text-sm">
+                <InfoField label="Doctor" value={patient.treatingClinician} />
+                <InfoField label="Ward / Bed" value={`${patient.ward} · Bed ${patient.bedNumber}`} />
+                <InfoField label="Admitted" value={patient.admissionDate} />
+                <InfoField label="Risk Level" value={`${patient.ewsScore >= 4 ? "High" : patient.ewsScore >= 2 ? "Medium" : "Low"} (Score ${patient.ewsScore})`} />
+                <InfoField label="Blood Type" value={patient.bloodType} />
+                <InfoField label="Date of Birth" value={new Date(patient.dob).toLocaleDateString("en-AU")} />
+                <InfoField label="Next of Kin" value={`${patient.nextOfKin.name} (${patient.nextOfKin.relationship})`} />
+                <InfoField label="Next of Kin Phone" value={patient.nextOfKin.phone} />
               </CardContent>
             </Card>
           </div>
@@ -159,7 +171,9 @@ export default function PatientChart() {
           <div className="p-4">
             <Card>
               <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Medication Chart</CardTitle>
+                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Medication Chart
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <MedicationsList medications={patient.medications} />
@@ -168,121 +182,17 @@ export default function PatientChart() {
           </div>
         </TabsContent>
 
-        {/* Vitals Tab */}
-        <TabsContent value="vitals" className="flex-1 overflow-y-auto m-0">
-          <div className="p-4 flex flex-col gap-4">
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Vitals Trend</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <VitalsChart vitals={patient.vitals} />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Latest Readings</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <VitalsSummary vitals={patient.vitals} />
-                {latestVitals?.glucoseBSL !== undefined && (
-                  <div className="px-4 py-2 border-t text-sm">
-                    <span className="text-muted-foreground">BSL: </span>
-                    <span className="font-semibold">{latestVitals.glucoseBSL} mmol/L</span>
-                  </div>
-                )}
-                {latestVitals && (
-                  <div className="px-4 py-2 border-t text-xs text-muted-foreground">
-                    Pain Score: <span className="font-semibold text-foreground">{latestVitals.painScore}/10</span>
-                    <span className="ml-4">Recorded: {new Date(latestVitals.timestamp).toLocaleString("en-AU")}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Encounters Tab */}
-        <TabsContent value="encounters" className="flex-1 overflow-y-auto m-0">
+        {/* Visit History Tab */}
+        <TabsContent value="history" className="flex-1 overflow-y-auto m-0">
           <div className="p-4">
             <Card>
               <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Encounter History</CardTitle>
+                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Visit History
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <EncounterHistory encounters={patient.encounters} />
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Details Tab */}
-        <TabsContent value="details" className="flex-1 overflow-y-auto m-0">
-          <div className="p-4 grid grid-cols-2 gap-4">
-            {/* Demographics */}
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Demographics</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 grid grid-cols-2 gap-3 text-sm">
-                <Field label="Full Name" value={`${patient.firstName} ${patient.lastName}`} />
-                <Field label="Date of Birth" value={new Date(patient.dob).toLocaleDateString("en-AU")} />
-                <Field label="Age" value={`${patient.age} years`} />
-                <Field label="Sex" value={patient.sex} />
-                <Field label="Blood Type" value={patient.bloodType} />
-                <Field label="Phone" value={patient.phone} />
-                <Field label="Address" value={patient.address} mono={false} className="col-span-2" />
-              </CardContent>
-            </Card>
-
-            {/* Identifiers */}
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Identifiers</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 grid grid-cols-1 gap-3 text-sm">
-                <Field label="MRN" value={patient.mrn} mono />
-                <Field label="Medicare Number" value={patient.medicareNumber} mono />
-                <Field label="IHI" value={patient.ihi} mono />
-              </CardContent>
-            </Card>
-
-            {/* Next of Kin */}
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Next of Kin</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 grid grid-cols-2 gap-3 text-sm">
-                <Field label="Name" value={patient.nextOfKin.name} />
-                <Field label="Relationship" value={patient.nextOfKin.relationship} />
-                <Field label="Phone" value={patient.nextOfKin.phone} />
-              </CardContent>
-            </Card>
-
-            {/* GP */}
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">General Practitioner</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 grid grid-cols-2 gap-3 text-sm">
-                <Field label="Name" value={patient.gp.name} />
-                <Field label="Practice" value={patient.gp.practice} />
-                <Field label="Phone" value={patient.gp.phone} />
-              </CardContent>
-            </Card>
-
-            {/* Clinical */}
-            <Card>
-              <CardHeader className="py-2 px-4 border-b">
-                <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">Clinical Details</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 grid grid-cols-2 gap-3 text-sm">
-                <Field label="Department" value={patient.department} />
-                <Field label="Ward / Bed" value={`${patient.ward} / ${patient.bedNumber}`} />
-                <Field label="Treating Clinician" value={patient.treatingClinician} />
-                <Field label="Admission Date" value={patient.admissionDate} />
-                <Field label="Falls Risk" value={patient.fallsRisk} />
-                <Field label="EWS Score" value={String(patient.ewsScore)} />
               </CardContent>
             </Card>
           </div>
@@ -292,11 +202,11 @@ export default function PatientChart() {
   );
 }
 
-function Field({ label, value, mono, className }: { label: string; value: string; mono?: boolean; className?: string }) {
+function InfoField({ label, value }: { label: string; value: string }) {
   return (
-    <div className={className}>
+    <div>
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">{label}</p>
-      <p className={mono ? "font-mono font-medium" : "font-medium"}>{value}</p>
+      <p className="font-medium">{value}</p>
     </div>
   );
 }

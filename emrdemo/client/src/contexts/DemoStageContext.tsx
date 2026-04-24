@@ -3,58 +3,67 @@ import { createContext, useContext, useState, useCallback, useRef, type ReactNod
 export interface StageConfig {
   label: string;
   wxccStage: string;
+  phase: string;
   hint: string;
   path: string;
   tab: string | null;
 }
 
+// The 6 WXCC workflow stages. Index 0 = Stage 1.
 export const STAGE_CONFIG: StageConfig[] = [
   {
-    label: "S1 Pre-Admission",
+    label: "Stage 1 of 6",
     wxccStage: "Pre Admission Enrolment",
-    hint: "Patient list — Astrid is Pre-Admission, allergies logged",
+    phase: "Pre Admission",
+    hint: "Patient list — Astrid is now enrolled, allergies and history logged",
     path: "/patients",
     tab: null,
   },
   {
-    label: "S2 Scheduled",
+    label: "Stage 2 of 6",
     wxccStage: "Appointment Scheduling & Reminders",
-    hint: "Appointments — TKR booking appears, reminder sent",
+    phase: "Pre Admission",
+    hint: "Appointments — procedure booking appears, reminder sent to patient",
     path: "/appointments",
     tab: null,
   },
   {
-    label: "S3 Admitted",
+    label: "Stage 3 of 6",
     wxccStage: "Arrival Coordination",
-    hint: "Astrid's chart → Summary — admitted, initial vitals",
+    phase: "Day of Surgery",
+    hint: "Astrid's chart — admitted, ward assigned, initial vitals recorded",
     path: "/patients/astrid-nygaard",
-    tab: "summary",
+    tab: "overview",
   },
   {
-    label: "S4 In Procedure",
+    label: "Stage 4 of 6",
     wxccStage: "Family Updates During Surgery",
-    hint: "Astrid's chart → Encounters — OR note, sedation meds",
+    phase: "Day of Surgery",
+    hint: "Astrid's chart — surgery underway, family notified automatically",
     path: "/patients/astrid-nygaard",
-    tab: "encounters",
+    tab: "history",
   },
   {
-    label: "S5 Ready D/C",
+    label: "Stage 5 of 6",
     wxccStage: "Take-Home Instruction Delivery",
-    hint: "Astrid's chart → Medications — discharge medications",
+    phase: "Discharge & Recovery",
+    hint: "Astrid's chart — discharge medications listed, instructions sent",
     path: "/patients/astrid-nygaard",
     tab: "medications",
   },
   {
-    label: "S6 Discharged",
+    label: "Stage 6 of 6",
     wxccStage: "Post Discharge Check-Up",
-    hint: "Appointments — follow-up confirmed, reminder sent",
+    phase: "Discharge & Recovery",
+    hint: "Appointments — follow-up confirmed, post-discharge check-in sent",
     path: "/appointments",
     tab: null,
   },
 ];
 
 interface DemoStageContextValue {
-  currentStage: number;
+  currentStage: number;       // 0-5 (maps to STAGE_CONFIG index)
+  hasStarted: boolean;        // false = pre-enrolment, patient not yet in system
   isConfirming: boolean;
   recommendedTab: string | null;
   advance: () => void;
@@ -65,11 +74,21 @@ const DemoStageContext = createContext<DemoStageContextValue | null>(null);
 
 export function DemoStageProvider({ children }: { children: ReactNode }) {
   const [currentStage, setCurrentStage] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [recommendedTab, setRecommendedTab] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const advance = useCallback(() => {
+    if (!hasStarted) {
+      // First advance: enrol the patient (Stage 1 fires)
+      setHasStarted(true);
+      setRecommendedTab(STAGE_CONFIG[0].tab);
+      setIsConfirming(true);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setIsConfirming(false), 1500);
+      return;
+    }
     setCurrentStage(prev => {
       const next = Math.min(prev + 1, 5);
       setRecommendedTab(STAGE_CONFIG[next].tab);
@@ -78,17 +97,18 @@ export function DemoStageProvider({ children }: { children: ReactNode }) {
     setIsConfirming(true);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => setIsConfirming(false), 1500);
-  }, []);
+  }, [hasStarted]);
 
   const reset = useCallback(() => {
     setCurrentStage(0);
+    setHasStarted(false);
     setIsConfirming(false);
     setRecommendedTab(null);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
 
   return (
-    <DemoStageContext.Provider value={{ currentStage, isConfirming, recommendedTab, advance, reset }}>
+    <DemoStageContext.Provider value={{ currentStage, hasStarted, isConfirming, recommendedTab, advance, reset }}>
       {children}
     </DemoStageContext.Provider>
   );
