@@ -159,9 +159,9 @@ export default function Appointments() {
                 {apt.status}
               </Badge>
               {apt.reminderSent ? (
-                <Bell className="w-3.5 h-3.5 text-green-500" title="Reminder sent" />
+                <Bell className="w-3.5 h-3.5 text-green-500" aria-label="Reminder sent" />
               ) : (
-                <BellOff className="w-3.5 h-3.5 text-muted-foreground" title="Reminder not sent" />
+                <BellOff className="w-3.5 h-3.5 text-muted-foreground" aria-label="Reminder not sent" />
               )}
             </div>
           </div>
