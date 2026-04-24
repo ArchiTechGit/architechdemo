@@ -76,11 +76,28 @@ AppShell: flex flex-col h-screen overflow-hidden
 ## Data
 
 **12 patients** — varied acuity, Australian clinical format:
-Margaret Thompson, Robert Adeyemi, Isabelle Dupont, Daniel Kowalczyk, Evelyn Nakamura, Thomas Sullivan, Priya Krishnamurthy, William Grant, Sandra Okonkwo, James Moretti, Aisha Al-Hassan, Bruce Macfarlane.
+Margaret Thompson, Robert Adeyemi, Isabelle Dupont, Daniel Kowalczyk, Evelyn Nakamura, Thomas Sullivan, Priya Krishnamurthy, William Grant, Sandra Okonkwo, James Moretti, Aisha Al-Hassan, **Astrid Nygaard** (replaces Bruce Macfarlane).
+
+**Hero patient: Astrid Nygaard** — 38yo, Right total knee replacement (TKR), elective. Day Surgery Unit. Her chart is the demo stage — all other patients exist to make the list look real.
 
 **20 appointments** across 7 days.
 
 Australian standards: Medicare `2847 63910 1`, IHI `8003 XXXX XXXX XXXX`, drug frequency `BD/TDS/Mane/Nocte`, routes `SC/IV/IM/Oral`, vitals in °C/mmHg/kg/cm/bpm.
+
+---
+
+## Demo Journey — Astrid Nygaard
+
+Astrid's chart advances through 6 pre-staged states, one per WXCC workflow stage. A subtle floating pill (bottom-right corner, ~36px, low contrast) shows the presenter the current stage number and a single `›` advance button. On click it briefly shows `✓` for 1.5s then returns to normal — confirming the stage fired. Not readable from the audience's seats.
+
+| Stage | WXCC Demo Stage | EMR Status | What Changes in Astrid's Chart |
+|---|---|---|---|
+| 1 | Pre Admission Enrolment | Registered / Pre-Admission | Patient in list. Status: Pre-Admission. Triage note entered. Allergies and medical history logged. No procedure date yet. |
+| 2 | Appointment Scheduling & Reminders | Procedure Scheduled | Status: Scheduled. TKR appointment in Appointments screen, `reminderSent: false` → `true`. Date/room populated. |
+| 3 | Arrival Coordination | Admitted | Status: Admitted. Admission note in Encounters. Initial vitals appear. Ward and bed assigned (Day Surgery). |
+| 4 | Family Updates During Surgery | In Procedure | Status: In Procedure. OR note in Encounters. Vitals updated (anaesthesia-appropriate). Sedation medications shown. Family contact flagged. |
+| 5 | Take-Home Instruction Delivery | Ready for Discharge | Status: Ready for Discharge. Discharge summary in Encounters. Discharge medications listed. Follow-up appointment created. EWS = 0. |
+| 6 | Post Discharge Check-Up | Discharged | Status: Discharged. Final encounter note. Post-discharge follow-up appointment confirmed. `reminderSent` flips to `true`. |
 
 ---
 
