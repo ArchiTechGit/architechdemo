@@ -1,5 +1,6 @@
 import { Router, Route, Switch, Redirect } from "wouter";
 import { DemoStageProvider } from "@/contexts/DemoStageContext";
+import DemoStageControl from "@/components/demo/DemoStageControl";
 import PatientList from "@/pages/PatientList";
 import PatientChart from "@/pages/PatientChart";
 import Appointments from "@/pages/Appointments";
@@ -16,6 +17,7 @@ export default function App() {
           <Route component={() => <Redirect to="/patients" />} />
         </Switch>
       </Router>
+      <DemoStageControl />
     </DemoStageProvider>
   );
 }
