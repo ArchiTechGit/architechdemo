@@ -1003,31 +1003,30 @@ export default function Home() {
                     <button
                       onClick={() => setActiveStepperStage(stage.id)}
                       className="flex flex-col items-center gap-2 flex-shrink-0 group"
-                      style={{ width: "clamp(72px, 10vw, 148px)" }}
+                      style={{ width: 88 }}
                     >
                       {/* Circle */}
                       <div
                         className="rounded-full flex items-center justify-center transition-all duration-300 relative z-10"
                         style={{
-                          width: "clamp(48px, 8vw, 120px)",
-                          height: "clamp(48px, 8vw, 120px)",
+                          width: 56, height: 56,
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
                           border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
-                          boxShadow: isTriggered ? "0 0 18px rgba(0,169,145,0.35)" : isActive ? `0 0 18px ${sc.accentGlow}` : "none",
+                          boxShadow: isTriggered ? "0 0 16px rgba(0,169,145,0.35)" : isActive ? `0 0 16px ${sc.accentGlow}` : "none",
                         }}
                       >
                         {isTriggered ? (
-                          <Check style={{ width: "clamp(20px, 3.5vw, 52px)", height: "clamp(20px, 3.5vw, 52px)" }} className="text-[#00A991]" />
+                          <Check style={{ width: 22, height: 22 }} className="text-[#00A991]" />
                         ) : isActive && SIcon ? (
-                          <SIcon style={{ width: "clamp(20px, 3.5vw, 52px)", height: "clamp(20px, 3.5vw, 52px)", color: sc.accent }} className="transition-colors duration-300" />
+                          <SIcon style={{ width: 22, height: 22, color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
-                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(16px, 2.8vw, 44px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
+                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: 20, color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
                         )}
                       </div>
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(10px, 1.4vw, 20px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.5)", maxWidth: "clamp(60px, 10vw, 180px)" }}
+                        style={{ fontSize: 11, color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.5)", maxWidth: 84 }}
                       >
                         {stage.label}
                       </span>
@@ -1037,7 +1036,7 @@ export default function Home() {
                     {idx < JOURNEY_STAGES.length - 1 && (
                       <div
                         className="flex-1 self-start relative overflow-hidden"
-                        style={{ marginTop: "calc(clamp(48px, 8vw, 120px) / 2 - 1.5px)", height: "3px", borderRadius: "2px", background: "rgba(255,255,255,0.08)" }}
+                        style={{ marginTop: 26, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.08)" }}
                       >
                         <div
                           className="absolute inset-0 transition-all duration-500 origin-left"
