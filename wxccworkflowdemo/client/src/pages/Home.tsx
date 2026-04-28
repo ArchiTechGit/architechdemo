@@ -1237,24 +1237,6 @@ export default function Home() {
                               <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                             </div>
                           )}
-                          {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
-                            <div className="flex flex-col items-end gap-1">
-                              <div className="flex items-center gap-1.5">
-                                <div className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: "#fff", border: "1px solid rgba(200,16,46,0.35)" }}>
-                                  <img src={epicLogoUrl} alt="Epic" style={{ height: 18, width: "auto", maxWidth: 52, objectFit: "contain" }} />
-                                </div>
-                                <div className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: "#fff", border: "1px solid rgba(199,70,52,0.35)" }}>
-                                  <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 22, width: "auto", maxWidth: 72, objectFit: "contain" }} />
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span className="text-[8px] font-semibold uppercase tracking-[0.15em]" style={{ color: "rgba(255,255,255,0.3)" }}>via</span>
-                                <div className="flex items-center px-2 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
-                                  <span className="text-[10px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                           {isTriggered && (
                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
                               <Check className="w-3 h-3 text-[#00A991]" />
@@ -1304,6 +1286,23 @@ export default function Home() {
                             <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {/* EMR integrates-with strip — Stage 04 */}
+                    {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
+                      <div className="mt-3 pt-2.5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono mb-2" style={{ color: "rgba(255,255,255,0.25)" }}>Integrates with</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center px-3 py-2 rounded-lg" style={{ background: "#fff", border: "1px solid rgba(200,16,46,0.3)" }}>
+                            <img src={epicLogoUrl} alt="Epic" style={{ height: 24, width: "auto", maxWidth: 64, objectFit: "contain" }} />
+                          </div>
+                          <div className="flex items-center justify-center px-3 py-2 rounded-lg" style={{ background: "#fff", border: "1px solid rgba(199,70,52,0.3)" }}>
+                            <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 28, width: "auto", maxWidth: 88, objectFit: "contain" }} />
+                          </div>
+                          <div className="flex items-center justify-center px-3 py-2 rounded-lg" style={{ background: "rgba(255,152,0,0.1)", border: "1px solid rgba(255,152,0,0.35)" }}>
+                            <span className="text-[11px] font-black tracking-wide" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
+                          </div>
+                        </div>
                       </div>
                     )}
                     {/* HL7 / EMR system event feed — Stage 04 */}
