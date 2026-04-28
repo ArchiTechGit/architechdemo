@@ -1213,11 +1213,11 @@ export default function Home() {
                             </div>
                           )}
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(5,195,221,0.12)", border: "1px solid rgba(5,195,221,0.35)", backdropFilter: "blur(8px)" }}>
-                              <Bot className="w-3.5 h-3.5" style={{ color: "#05C3DD" }} />
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)" }}>
+                              <Bot className="w-5 h-5 flex-shrink-0" style={{ color: "#05C3DD", filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
-                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#05C3DD" }}>AI Agent</span>
-                                <span className="text-[8px] font-semibold tracking-[0.12em] uppercase leading-none mt-0.5" style={{ color: "rgba(5,195,221,0.5)" }}>Webex Connect</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#05C3DD", textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
+                                <span className="text-[8.5px] font-bold tracking-[0.14em] uppercase leading-none mt-0.5" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
                               </div>
                             </div>
                           )}
