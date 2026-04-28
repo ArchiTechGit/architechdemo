@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Activity, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
+import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
 import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
@@ -1210,6 +1210,15 @@ export default function Home() {
                                   <span className="text-[8.5px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
                                 </div>
                               )}
+                            </div>
+                          )}
+                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(5,195,221,0.12)", border: "1px solid rgba(5,195,221,0.35)", backdropFilter: "blur(8px)" }}>
+                              <Bot className="w-3.5 h-3.5" style={{ color: "#05C3DD" }} />
+                              <div className="flex flex-col">
+                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#05C3DD" }}>AI Agent</span>
+                                <span className="text-[8px] font-semibold tracking-[0.12em] uppercase leading-none mt-0.5" style={{ color: "rgba(5,195,221,0.5)" }}>Webex Connect</span>
+                              </div>
                             </div>
                           )}
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
