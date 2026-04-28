@@ -1179,8 +1179,8 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
-                            <Button onClick={() => triggerWorkflow(stage.id, "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
-                              Start Meeting
+                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                              Start Instant Video Appointment
                             </Button>
                           )}
                           <button
