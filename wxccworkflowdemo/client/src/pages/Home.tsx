@@ -979,7 +979,7 @@ export default function Home() {
                               </div>
                               {(activePhoneStage.phoneMessages || [activePhoneStage.phoneMessage]).map((msg, mi) => (
                                 <div key={mi} className="bg-slate-100 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                                  <p className="text-slate-800 leading-snug text-xs" style={{ whiteSpace: "pre-line" }}>{interpolate(msg)}</p>
+                                  <p className="text-slate-800 leading-snug text-xs break-all" style={{ whiteSpace: "pre-line" }}>{interpolate(msg)}</p>
                                 </div>
                               ))}
                             </div>
