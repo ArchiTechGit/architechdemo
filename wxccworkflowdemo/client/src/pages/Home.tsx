@@ -1073,7 +1073,7 @@ export default function Home() {
               <div className="space-y-2.5">
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Meeting Host Mobile</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Hospital Mobile</span>
                 </label>
                 <Input
                   id="demo-mobile"
