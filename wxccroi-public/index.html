@@ -871,7 +871,7 @@ function renderResults() {
       ${R.rows.map(r => `
         <div class="breakdown-row">
           <div class="breakdown-name">${r.w.name}</div>
-          <div class="breakdown-mins">${r.w.mins} min saved / separation</div>
+          <div class="breakdown-mins">${r.w.mins} min / separation &nbsp;·&nbsp; ${Math.round(r.annualHours).toLocaleString('en-AU')} hrs / yr</div>
           <div class="breakdown-val">$${Math.round(r.annualSaving).toLocaleString('en-AU')} / yr</div>
         </div>
       `).join('')}
