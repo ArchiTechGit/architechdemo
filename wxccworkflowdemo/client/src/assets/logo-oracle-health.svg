@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" role="img">
+  <title>Oracle Health</title>
+  <!-- Oracle wordmark: bold italic serif, brand red #C74634 -->
+  <text x="2" y="28" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-style="italic" font-weight="700" fill="#C74634" letter-spacing="0.5">ORACLE</text>
+  <!-- "Health" sublabel in lighter red -->
+  <text x="2" y="39" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="600" fill="#C74634" letter-spacing="1.5" opacity="0.85">HEALTH</text>
+</svg>

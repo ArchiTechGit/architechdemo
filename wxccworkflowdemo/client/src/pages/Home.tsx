@@ -8,8 +8,8 @@ import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
 import webexLogoUrl from "@/assets/logo-webex.svg";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
-import epicLogoUrl from "@/assets/epic_logo.jpeg";
-import oracleHealthLogoUrl from "@/assets/cerner_logo.jpeg";
+import epicLogoUrl from "@/assets/epic_logo.png";
+import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -297,31 +297,6 @@ export default function Home() {
   }, []);
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const [screensaverActive, setScreensaverActive] = useState(false);
-  const [ssStatIdx, setSsStatIdx] = useState(0);
-  const ssTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const reset = () => {
-      setScreensaverActive(false);
-      if (ssTimerRef.current) clearTimeout(ssTimerRef.current);
-      ssTimerRef.current = setTimeout(() => setScreensaverActive(true), 120000);
-    };
-    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"] as const;
-    events.forEach(e => window.addEventListener(e, reset, { passive: true }));
-    reset();
-    return () => {
-      events.forEach(e => window.removeEventListener(e, reset));
-      if (ssTimerRef.current) clearTimeout(ssTimerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!screensaverActive) return;
-    setSsStatIdx(0);
-    const id = setInterval(() => setSsStatIdx(i => (i + 1) % IMPACT_STATS.length), 10000);
-    return () => clearInterval(id);
-  }, [screensaverActive]);
 
   const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -489,95 +464,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* ── Screensaver overlay ── */}
-      {screensaverActive && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden select-none" style={{ background: "#020810", cursor: "none" }}>
-
-          {/* ── Central content ── */}
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 2, paddingBottom: "100px" }}>
-
-            {/* Event label */}
-            <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.45em", textTransform: "uppercase", color: "rgba(5,195,221,0.55)", fontFamily: "'JetBrains Mono', monospace", marginBottom: "32px" }}>
-              Digital Health Festival · 2026
-            </div>
-
-            {/* ArchiTech logo */}
-            <img src={logoUrl} alt="ArchiTech" style={{ width: "clamp(220px, 22vw, 360px)", mixBlendMode: "screen", marginBottom: "20px" }} />
-
-            {/* Demo identity headline */}
-            <div style={{ textAlign: "center", marginBottom: "24px" }}>
-              <div style={{ fontSize: "clamp(29px, 4.55vw, 68px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1.05, textShadow: "0 0 40px rgba(5,195,221,0.4), 0 2px 8px rgba(0,0,0,0.8)" }}>
-                Digital Front Door
-              </div>
-              <div style={{ fontSize: "clamp(17px, 2.6vw, 36px)", fontWeight: 700, color: "#05C3DD", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: "6px", textShadow: "0 0 20px rgba(5,195,221,0.6)" }}>
-                Patient Experience Demonstration
-              </div>
-            </div>
-
-            {/* Journey visual — 6 steps */}
-            <div style={{ display: "flex", alignItems: "flex-start", marginBottom: "28px", gap: 0 }}>
-              {JOURNEY_STAGES.map((stage, idx) => {
-                const Icon = STAGE_META[idx].icon;
-                return (
-                  <div key={stage.id} style={{ display: "flex", alignItems: "center" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-                      <div style={{ width: "clamp(56px, 6vw, 90px)", height: "clamp(56px, 6vw, 90px)", borderRadius: "50%", background: "rgba(5,195,221,0.12)", border: "1.5px solid rgba(5,195,221,0.45)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 18px rgba(5,195,221,0.25)" }}>
-                        <Icon style={{ width: "clamp(26px, 3vw, 44px)", height: "clamp(26px, 3vw, 44px)", color: "#05C3DD" }} />
-                      </div>
-                      <span style={{ fontSize: "clamp(11px, 1vw, 15px)", fontWeight: 700, color: "rgba(255,255,255,0.65)", textAlign: "center", maxWidth: "clamp(72px, 8vw, 112px)", lineHeight: 1.25 }}>{stage.label}</span>
-                    </div>
-                    {idx < JOURNEY_STAGES.length - 1 && (
-                      <div style={{ width: "clamp(16px, 2.5vw, 40px)", height: "1px", background: "linear-gradient(90deg, rgba(5,195,221,0.45), rgba(5,195,221,0.15))", marginBottom: "28px", flexShrink: 0 }} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Cycling stat */}
-            <div key={ssStatIdx} style={{ textAlign: "center", marginBottom: "28px" }}>
-              <div style={{ fontSize: "clamp(88px, 16vw, 200px)", fontWeight: 900, color: "#05C3DD", lineHeight: 1, letterSpacing: "-0.03em", textShadow: "0 0 80px rgba(5,195,221,0.5), 0 0 160px rgba(5,195,221,0.2)" }}>
-                {IMPACT_STATS[ssStatIdx].hero}
-              </div>
-              <div style={{ fontSize: "clamp(15px, 2.2vw, 26px)", fontWeight: 700, color: "rgba(255,255,255,0.82)", maxWidth: "700px", lineHeight: 1.35, marginTop: "12px", padding: "0 24px" }}>
-                {IMPACT_STATS[ssStatIdx].headline}
-              </div>
-              <div style={{ fontSize: "clamp(12px, 1.4vw, 18px)", color: "rgba(255,255,255,0.5)", maxWidth: "600px", lineHeight: 1.5, marginTop: "10px", padding: "0 24px" }}>
-                {IMPACT_STATS[ssStatIdx].body}{" "}
-                <span style={{ color: "#ffffff", fontWeight: 700 }}>{IMPACT_STATS[ssStatIdx].highlight}</span>
-                {" "}<span style={{ color: "rgba(255,255,255,0.35)" }}>{IMPACT_STATS[ssStatIdx].tail}</span>
-              </div>
-            </div>
-
-            {/* Dot progress indicators */}
-            <div style={{ display: "flex", gap: "10px", marginBottom: "36px" }}>
-              {IMPACT_STATS.map((_, i) => (
-                <div key={i} style={{ width: i === ssStatIdx ? "28px" : "7px", height: "7px", borderRadius: "4px", background: i === ssStatIdx ? "#05C3DD" : "rgba(255,255,255,0.18)", transition: "width 0.4s ease, background 0.4s ease", boxShadow: i === ssStatIdx ? "0 0 10px rgba(5,195,221,0.7)" : "none" }} />
-              ))}
-            </div>
-
-            {/* Subtitle */}
-            <div style={{ fontSize: "clamp(11px, 1.2vw, 15px)", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: "'JetBrains Mono', monospace", marginBottom: "48px" }}>
-              Patient Experience Journey · Powered by Webex Contact Center
-            </div>
-
-            {/* Ask for demo badge */}
-            <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 1.5vw, 20px)", background: "rgba(5,195,221,0.1)", border: "2px solid rgba(5,195,221,0.55)", borderRadius: "100px", padding: "clamp(14px, 2vh, 22px) clamp(32px, 4vw, 60px)" }}>
-              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0 }} />
-              <span style={{ fontSize: "clamp(22px, 3.5vw, 48px)", fontWeight: 900, color: "white", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1, whiteSpace: "nowrap" }}>
-                Ask us for a live demo
-              </span>
-              <div style={{ width: "clamp(10px, 1.2vw, 14px)", height: "clamp(10px, 1.2vw, 14px)", borderRadius: "50%", background: "#05C3DD", boxShadow: "0 0 12px rgba(5,195,221,1)", flexShrink: 0 }} />
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div style={{ position: "absolute", bottom: "28px", left: 0, right: 0, textAlign: "center", fontSize: "12px", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "#05C3DD", fontFamily: "'JetBrains Mono', monospace" }}>
-            Move to explore
-          </div>
-
-        </div>
-      )}
 
       {/* Header */}
       <div className="h-16 bg-[#080f19] border-b border-white/[0.06] flex items-center px-6 md:px-10 justify-between" style={{ boxShadow: "0 1px 0 rgba(5,195,221,0.08), 0 4px 24px rgba(0,0,0,0.4)" }}>
@@ -1237,6 +1123,19 @@ export default function Home() {
                               <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                             </div>
                           )}
+                          {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
+                            <div className="flex flex-col items-end gap-1.5">
+                              <div className="flex items-center gap-2">
+                                <img src={epicLogoUrl} alt="Epic" style={{ height: 32, width: "auto", maxWidth: 80, objectFit: "contain" }} />
+                                <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 36, width: "auto", maxWidth: 96, objectFit: "contain" }} />
+                              </div>
+                              <div className="flex items-center justify-end">
+                                <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
+                                  <span className="text-[10px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           {isTriggered && (
                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
                               <Check className="w-3 h-3 text-[#00A991]" />
@@ -1286,23 +1185,6 @@ export default function Home() {
                             <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
                           </div>
                         ))}
-                      </div>
-                    )}
-                    {/* EMR integrates-with strip — Stage 04 */}
-                    {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
-                      <div className="mt-3 pt-2.5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono mb-2" style={{ color: "rgba(255,255,255,0.25)" }}>Integrates with</p>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center justify-center px-3 py-2 rounded-lg" style={{ background: "#fff", border: "1px solid rgba(200,16,46,0.3)" }}>
-                            <img src={epicLogoUrl} alt="Epic" style={{ height: 24, width: "auto", maxWidth: 64, objectFit: "contain" }} />
-                          </div>
-                          <div className="flex items-center justify-center px-3 py-2 rounded-lg" style={{ background: "#fff", border: "1px solid rgba(199,70,52,0.3)" }}>
-                            <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 28, width: "auto", maxWidth: 88, objectFit: "contain" }} />
-                          </div>
-                          <div className="flex items-center justify-center px-3 py-2 rounded-lg" style={{ background: "rgba(255,152,0,0.1)", border: "1px solid rgba(255,152,0,0.35)" }}>
-                            <span className="text-[11px] font-black tracking-wide" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
-                          </div>
-                        </div>
                       </div>
                     )}
                     {/* HL7 / EMR system event feed — Stage 04 */}
