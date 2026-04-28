@@ -8,6 +8,8 @@ import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
 import webexLogoUrl from "@/assets/logo-webex.svg";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
+import epicLogoUrl from "@/assets/epic_logo.jpeg";
+import oracleHealthLogoUrl from "@/assets/cerner_logo.jpeg";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -276,6 +278,7 @@ export default function Home() {
   const [phoneScreen, setPhoneScreen] = useState<"home" | "sms">("home");
   const [phoneNotif, setPhoneNotif] = useState(false);
   const notifTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerGenerationRef = useRef(0);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
@@ -386,6 +389,7 @@ export default function Home() {
   const triggerWorkflow = async (workflowId: string, workflowLabel: string, webhookUrl: string) => {
     if (!validateInputs()) return;
     setLoadingStage(workflowId);
+    const generation = triggerGenerationRef.current;
     const now = new Date();
     const appointmentDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     appointmentDate.setMinutes(appointmentDate.getMinutes() >= 30 ? 60 : 0, 0, 0);
@@ -410,6 +414,7 @@ export default function Home() {
       } else {
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
+      if (triggerGenerationRef.current !== generation) return;
       setTriggeredStages((prev) => new Set([...prev, workflowId]));
       setLastTriggeredStage(workflowId);
       setPhonePulse(true);
@@ -466,7 +471,9 @@ export default function Home() {
     setThreadReveal({});
     setExpandedStages(new Set());
     setWayfindingOpen(false);
+    triggerGenerationRef.current += 1;
     if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
+    notifTimerRef.current = null;
     setPhoneScreen("home");
     setPhoneNotif(false);
     setPatientName("");
@@ -1222,14 +1229,20 @@ export default function Home() {
                             </div>
                           )}
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
-                            <div className="flex items-center gap-1.5">
-                              <div className="flex flex-col items-center justify-center px-3 rounded-md" style={{ background: "rgba(5,195,221,0.12)", border: "1px solid rgba(5,195,221,0.4)", height: 44 }}>
-                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#05C3DD" }}>EMR · EHR · PHR</span>
-                                <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.5)" }}>Integration</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: "#fff", border: "1px solid rgba(200,16,46,0.35)" }}>
+                                  <img src={epicLogoUrl} alt="Epic" style={{ height: 18, width: "auto", maxWidth: 52, objectFit: "contain" }} />
+                                </div>
+                                <div className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: "#fff", border: "1px solid rgba(199,70,52,0.35)" }}>
+                                  <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 22, width: "auto", maxWidth: 72, objectFit: "contain" }} />
+                                </div>
                               </div>
-                              <div className="flex flex-col items-center justify-center px-3 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)", height: 44 }}>
-                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR</span>
-                                <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none mt-1" style={{ color: "rgba(255,167,38,0.5)" }}>R4</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[8px] font-semibold uppercase tracking-[0.15em]" style={{ color: "rgba(255,255,255,0.3)" }}>via</span>
+                                <div className="flex items-center px-2 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
+                                  <span className="text-[10px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -1247,7 +1260,7 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
-                            <Button onClick={() => triggerWorkflow("PATIENT_MEETING", "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                            <Button onClick={() => triggerWorkflow(stage.id, "Start Meeting", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Meeting
                             </Button>
                           )}
