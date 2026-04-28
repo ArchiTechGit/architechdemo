@@ -13,6 +13,7 @@ import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 
 interface JourneyStage {
   id: string;
@@ -279,6 +280,7 @@ export default function Home() {
   const [phoneNotif, setPhoneNotif] = useState(false);
   const notifTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const triggerGenerationRef = useRef(0);
+  const phoneRef = useRef<HTMLDivElement>(null);
   const [stageStepReveal, setStageStepReveal] = useState<Record<string, number>>({});
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
@@ -392,6 +394,15 @@ export default function Home() {
       if (triggerGenerationRef.current !== generation) return;
       setTriggeredStages((prev) => new Set([...prev, workflowId]));
       setLastTriggeredStage(workflowId);
+      const easterEggName = patientName.trim().toUpperCase();
+      if (easterEggName === "CISCO" || easterEggName === "WEBEX") {
+        const rect = phoneRef.current?.getBoundingClientRect();
+        const origin = rect
+          ? { x: (rect.left + rect.width / 2) / window.innerWidth, y: (rect.top + rect.height * 0.4) / window.innerHeight }
+          : { x: 0.5, y: 0.5 };
+        confetti({ particleCount: 180, spread: 70, origin, colors: ["#05C3DD", "#00A991", "#ffffff", "#FFD700", "#FF6B6B"], startVelocity: 45, gravity: 0.9, scalar: 1.1 });
+        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: ["#05C3DD", "#00A991", "#ffffff"], startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
+      }
       setPhonePulse(true);
       if (phoneScreen === "home") {
         setPhoneNotif(true);
@@ -678,6 +689,7 @@ export default function Home() {
                 {/* Corner accent */}
                 <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(5,195,221,0.2) 50%, transparent 90%)" }} />
                 <div
+                  ref={phoneRef}
                   className="relative z-10"
                   style={{
                     width: "100%",
