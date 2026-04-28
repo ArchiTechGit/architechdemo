@@ -842,8 +842,18 @@ export default function Home() {
                           </div>
                         )}
 
-                        <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex-shrink-0">
+                        <div className="bg-slate-100 px-3 py-2 border-b border-slate-200 flex-shrink-0 flex items-center justify-between">
                           <p className="font-semibold text-slate-700 text-xs">Messages</p>
+                          <button
+                            onClick={() => setPhoneScreen("home")}
+                            style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.08)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+                            aria-label="Go to home screen"
+                          >
+                            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                              <path d="M1 5.5L5.5 1.5L10 5.5" stroke="#475569" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M2.5 4.5V9.5H4.5V7H6.5V9.5H8.5V4.5" stroke="#475569" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
                         </div>
                         <div className="flex-1 p-4 overflow-hidden">
                           {activePhoneStage && activePhoneStage.conversationThread && (threadReveal[activePhoneStage.id] ?? 0) > 0 ? (
