@@ -140,8 +140,8 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 5",
     label: "Take-Home Instruction Delivery",
     image: "/wxccworkflowdemo/dist/workflow-images/discharge-instructions.png",
-    currentState: "Nurse hands patient printed sheets. Patient loses them.",
-    automationOpportunity: "Personalised discharge instructions (wound care, activity restrictions, red flags) sent via SMS with embedded video links. \"Here's how to change your dressing\" with 90-second demo video specific to their surgical site.",
+    currentState: "Nurse hands patient printed sheets. Patient loses them. Each surgical episode generates ~12 pages of paper instructions — all single use, all landfill.",
+    automationOpportunity: "Personalised discharge instructions delivered digitally via SMS — zero paper, zero printing, zero plastic folders. Embedded video links replace printed diagrams. No physical waste, no lost instructions.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
     phoneAction: "View Discharge Instructions →",
@@ -1226,6 +1226,15 @@ export default function Home() {
                                 <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#05C3DD", textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
                                 <span className="text-[8.5px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
                               </div>
+                            </div>
+                          )}
+                          {stage.id === "PATIENT_DISCHARGE_INSTRUCTIONS" && (
+                            <div className="flex flex-col items-center justify-center px-3 py-2 rounded-md gap-0.5" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)" }}>
+                              <div className="flex items-center gap-1.5">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7 2 3 7 3 12c0 2.5 1 4.8 2.6 6.5C7 20.1 9.4 21 12 21s5-0.9 6.4-2.5C20 16.8 21 14.5 21 12c0-5-4-10-9-10z" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1.5"/><path d="M12 21V12M12 12C12 12 8 9 6 6M12 12c0 0 4-3 6-6" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
+                              </div>
+                              <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                             </div>
                           )}
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
