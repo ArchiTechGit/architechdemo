@@ -175,6 +175,18 @@
     .pain-callout-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(198,80,80,0.85); margin-bottom: 10px; }
     .pain-tag { font-size: 12px; color: rgba(220,120,120,0.9); background: rgba(198,40,40,0.08); border: 1px solid rgba(198,40,40,0.18); border-radius: 4px; padding: 3px 10px; }
 
+    /* ── Thank-you screen ── */
+    .thankyou-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 48px 24px; }
+    .ty-logo { height: 32px; margin-bottom: 48px; }
+    .ty-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(0,169,145,0.12); border: 2px solid rgba(0,169,145,0.4); display: flex; align-items: center; justify-content: center; font-size: 28px; color: #00A991; margin: 0 auto 28px; }
+    .ty-title { font-size: 32px; font-weight: 700; color: #E8F0F8; margin: 0 0 20px; line-height: 1.2; }
+    .ty-title span { color: #05C3DD; }
+    .ty-body { font-size: 16px; color: #8FA3BA; max-width: 480px; line-height: 1.7; margin: 0 auto 12px; }
+    .ty-sub { font-size: 13px; color: #4A607A; max-width: 420px; margin: 0 auto 40px; }
+    .ty-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .btn-restart-ty { background: none; border: 1px solid rgba(5,195,221,0.2); color: #4A607A; padding: 12px 24px; border-radius: 6px; font-size: 14px; cursor: pointer; font-family: 'Roboto', sans-serif; transition: all 0.2s; }
+    .btn-restart-ty:hover { border-color: rgba(5,195,221,0.4); color: #8FA3BA; }
+
     /* ── Webhook status ── */
     .webhook-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 12px; border-radius: 4px; margin-bottom: 20px; }
     .webhook-status.success { background: rgba(0,169,145,0.1); color: #00A991; border: 1px solid rgba(0,169,145,0.25); }
@@ -266,14 +278,17 @@
 
   <!-- ══ RESULTS ══ -->
   <div id="screen-results" class="screen">
-    <div class="results-topnav">
-      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" /></a>
-      <div class="results-actions">
-        <button class="btn-print" onclick="window.print()">Print / Save PDF</button>
-        <button class="btn-restart" onclick="restart()">Start Over</button>
+    <div class="thankyou-wrap">
+      <a href="/"><img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" class="ty-logo" /></a>
+      <div class="ty-icon">✓</div>
+      <h1 class="ty-title">Thanks, <span id="ty-name">we've got your details</span>.</h1>
+      <p class="ty-body">Your responses have been received. One of our team will review your answers and be in touch with a personalised summary and next steps shortly.</p>
+      <p class="ty-sub">In the meantime, feel free to explore the demo environment or reach out directly if you have questions.</p>
+      <div class="ty-actions">
+        <a href="/" class="btn-primary">Back to Demos</a>
+        <button class="btn-restart-ty" onclick="restart()">Start Over</button>
       </div>
     </div>
-    <div class="results-body" id="results-body"></div>
   </div>
 
   <script>
@@ -516,7 +531,7 @@
     // PAYLOAD
     // ─────────────────────────────────────────────────────────────────
     function buildPayload() {
-      return {
+      const data = {
         timestamp: new Date().toISOString(),
         contact: { name: answers.contactName||'', title: answers.contactTitle||'', email: answers.contactEmail||'', phone: answers.contactPhone||'' },
         organisation: { name: answers.orgName||'', industry: answers.industry||'', size: answers.orgSize||'', sites: answers.numSites||'' },
@@ -528,6 +543,84 @@
         technical: { deployment: answers.deploymentModel||'', compliance: answers.complianceReqs||[], itCapacity: answers.itCapacity||'' },
         project: { timeline: answers.timeline||'', budget: answers.budget||'', stakeholders: answers.stakeholders||[], evalStage: answers.evalStage||'' },
       };
+      try { data.emailHtml = buildEmailHtml(data); } catch(e) { console.error('buildEmailHtml failed:', e); data.emailHtml = ''; }
+      return data;
+    }
+
+    function buildEmailHtml(d) {
+      var score     = calcReadiness(d);
+      var profile   = readinessProfile(score);
+      var narrative = generateNarrative(d);
+      var date      = new Date(d.timestamp).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' });
+      var sc        = profile.color || '#00A991';
+
+      var TD_LABEL = 'style="padding:6px 12px 6px 0;font-size:12px;color:#6B7A8D;white-space:nowrap;vertical-align:top"';
+      var TD_VAL   = 'style="padding:6px 0;font-size:13px;color:#1A2B3C;vertical-align:top"';
+      var TD_TAGS  = 'style="padding:6px 0"';
+
+      function cell(label, value) {
+        if (!value) return '';
+        return '<tr><td ' + TD_LABEL + '>' + label + '</td><td ' + TD_VAL + '>' + value + '</td></tr>';
+      }
+      function tags(arr) {
+        if (!arr || !arr.length) return '<span style="color:#aaa;font-size:12px">—</span>';
+        return arr.map(function(t) { return '<span style="display:inline-block;background:#E8F4F8;color:#00788A;border-radius:4px;padding:2px 10px;font-size:11px;margin:2px 3px 2px 0">' + t + '</span>'; }).join('');
+      }
+      function section(title, content) {
+        return '<tr><td style="padding:0"><div style="margin:0 0 16px">'
+          + '<div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#00A991;padding:10px 20px;background:#F0FAFA;border-left:3px solid #00A991">' + title + '</div>'
+          + '<div style="padding:12px 20px;background:#fff;border:1px solid #E5EDF3;border-top:none">' + content + '</div>'
+          + '</div></td></tr>';
+      }
+      function tableWrap(rows) { return '<table cellpadding="0" cellspacing="0">' + rows + '</table>'; }
+      function tagRow(label, arr) { return '<tr><td ' + TD_LABEL + '>' + label + '</td><td ' + TD_TAGS + '>' + tags(arr) + '</td></tr>'; }
+
+      var contactRows = cell('Name', d.contact.name) + cell('Title', d.contact.title) + cell('Email', d.contact.email) + cell('Phone', d.contact.phone);
+      var orgRows     = cell('Name', d.organisation.name) + cell('Industry', d.organisation.industry) + cell('Size', d.organisation.size) + cell('Sites', d.organisation.sites);
+      var ccRows      = cell('Platform', d.currentState.platform) + cell('Agents', d.currentState.agents) + cell('Supervisors', d.currentState.supervisors) + cell('Daily Volume', d.currentState.dailyVolume) + cell('Contract Expiry', d.currentState.contractExpiry);
+      var chanRows    = tagRow('Current', d.channels.current) + tagRow('Desired', d.channels.desired);
+      var goalRows    = tagRow('Primary Goals', d.goals.primary) + (d.goals.successMetric ? cell('Success Metric', d.goals.successMetric) : '');
+      var intRows     = tagRow('CRM / Clinical', d.integrations.crm) + tagRow('Collaboration', d.integrations.collaboration) + (d.integrations.other ? cell('Other Systems', d.integrations.other) : '');
+      var techRows    = cell('Deployment Model', d.technical.deployment) + cell('IT Capacity', d.technical.itCapacity) + tagRow('Compliance', d.technical.compliance);
+      var projRows    = cell('Timeline', d.project.timeline) + cell('Budget', d.project.budget) + cell('Evaluation Stage', d.project.evalStage) + tagRow('Stakeholders', d.project.stakeholders);
+
+      var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        + '<body style="margin:0;padding:0;background:#F2F5F8;font-family:Arial,Helvetica,sans-serif">'
+        + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#F2F5F8;padding:32px 0"><tr><td align="center">'
+        + '<table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%">'
+
+        + '<tr><td style="background:#0A1628;padding:28px 32px;border-radius:8px 8px 0 0">'
+        + '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
+        + '<td><span style="font-size:18px;font-weight:700;color:#fff">WxCC Discovery Assessment</span><br><span style="font-size:12px;color:#8FA3BA">' + date + '</span></td>'
+        + '<td align="right" style="vertical-align:middle">'
+        + '<div style="display:inline-block;border:2px solid ' + sc + ';border-radius:50%;width:60px;height:60px;text-align:center;line-height:1">'
+        + '<div style="margin-top:12px;font-size:22px;font-weight:700;color:' + sc + '">' + score + '</div>'
+        + '<div style="font-size:8px;color:' + sc + '">/100</div></div>'
+        + '<div style="font-size:11px;font-weight:700;color:' + sc + ';margin-top:4px;text-align:center">' + profile.label + '</div>'
+        + '</td></tr></table></td></tr>'
+
+        + '<tr><td style="background:#eaf9fb;border:1px solid #c5eef4;border-top:none;padding:16px 32px">'
+        + '<p style="margin:0;font-size:13px;color:#1A2B3C;line-height:1.7">' + narrative + '</p></td></tr>'
+
+        + '<tr><td style="padding-top:16px"><table width="100%" cellpadding="0" cellspacing="0">'
+        + section('Contact',                tableWrap(contactRows))
+        + section('Organisation',           tableWrap(orgRows))
+        + section('Current Contact Centre', tableWrap(ccRows))
+        + section('Channels',               tableWrap(chanRows))
+        + (d.painPoints && d.painPoints.length ? section('Pain Points', '<div style="margin-top:4px">' + tags(d.painPoints) + '</div>') : '')
+        + section('Goals & Priorities',     tableWrap(goalRows))
+        + section('Integrations',           tableWrap(intRows))
+        + section('Technical Requirements', tableWrap(techRows))
+        + section('Project Details',        tableWrap(projRows))
+        + '</table></td></tr>'
+
+        + '<tr><td style="background:#0A1628;padding:20px 32px;border-radius:0 0 8px 8px;text-align:center">'
+        + '<p style="margin:0;font-size:11px;color:#4A607A">Generated by ArchiTech WxCC Discovery Tool &nbsp;·&nbsp; ' + date + '</p>'
+        + '</td></tr>'
+
+        + '</table></td></tr></table></body></html>';
+
+      return html;
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -535,20 +628,25 @@
     // ─────────────────────────────────────────────────────────────────
     async function submitAssessment() {
       showScreen('screen-submitting');
-      const payload = buildPayload();
-      let webhookResult = 'skipped';
+      let payload;
+      try { payload = buildPayload(); } catch(e) { console.error('buildPayload failed:', e); payload = { contact:{}, organisation:{}, currentState:{}, channels:{current:[],desired:[]}, painPoints:[], integrations:{crm:[],collaboration:[],other:''}, goals:{primary:[],successMetric:''}, technical:{compliance:[]}, project:{stakeholders:[]}, timestamp: new Date().toISOString() }; }
       if (WEBHOOK_URL) {
-        try { const res = await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }); webhookResult = res.ok ? 'success' : 'error'; }
-        catch(e) { webhookResult = 'error'; }
+        try { await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }); }
+        catch(e) { console.error('Webhook failed:', e); }
       }
-      renderResults(payload, webhookResult);
+      renderResults(payload);
       showScreen('screen-results');
     }
 
     // ─────────────────────────────────────────────────────────────────
     // RENDER RESULTS
     // ─────────────────────────────────────────────────────────────────
-    function renderResults(data, webhookResult) {
+    function renderResults(data) {
+      const firstName = (data.contact.name || '').split(' ')[0];
+      if (firstName) document.getElementById('ty-name').textContent = firstName;
+    }
+
+    function renderResults_unused(data, webhookResult) {
       const body = document.getElementById('results-body');
 
       // Build recommendations with reasons
