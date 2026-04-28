@@ -1412,7 +1412,7 @@ export default function Home() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
           onClick={() => setLightboxImage(null)}
         >
-          <div className="relative max-w-5xl w-full mx-6" onClick={(e) => e.stopPropagation()}>
+          <div className="relative mx-6" style={{ maxWidth: "min(900px, 90vw)" }} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">{lightboxImage.label}</span>
               <button
@@ -1425,7 +1425,8 @@ export default function Home() {
             <img
               src={lightboxImage.src}
               alt={lightboxImage.label}
-              className="w-full h-auto rounded-lg border border-white/10"
+              className="block rounded-lg border border-white/10"
+              style={{ maxWidth: "100%", maxHeight: "75vh", width: "auto", height: "auto", margin: "0 auto" }}
               onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/1200x560/13294B/1A3460?text=${encodeURIComponent(lightboxImage.label)}`; }}
             />
           </div>
