@@ -1242,12 +1242,6 @@ export default function Home() {
                               Start Meeting
                             </Button>
                           )}
-                          {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
-                            <Button onClick={() => triggerWorkflow("PATIENT_POST_DISCHARGE_SURVEY_VOICE", "AI Call", stage.voiceWebhookUrl!)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none flex items-center gap-1.5" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.35)", color: "#00A991" }}>
-                              {loadingStage === "PATIENT_POST_DISCHARGE_SURVEY_VOICE" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Phone className="w-3.5 h-3.5" />}
-                              Call AI →
-                            </Button>
-                          )}
                           <button
                             onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
                             className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
