@@ -67,9 +67,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
     automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Completed forms route to nurse dashboard with color-coded priority. Nurse reviews flagged items only. Simple cases require no callback. Reduces pre-admission appointment from 45 minutes to 10-15 minutes at most.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to collect some health information beforehand. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
+    phoneMessage: "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to complete your enrolment forms. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
     phoneMessages: [
-      "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to collect some health information beforehand. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
+      "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to complete your enrolment forms. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
       "Thanks {NAME}, here is the link to your pre-admission form. https://form.jotform.com/260597744938071\n\nA nurse will review your details before your appointment date. We'll be in touch if we have any questions.",
     ],
     phoneAction: "Complete Pre-Admission Form →",
