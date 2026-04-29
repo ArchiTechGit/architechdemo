@@ -80,7 +80,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 2",
     label: "Appointment Scheduling and Reminders",
     image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
-    currentState: "Manual phone calls from booking clerks, voicemail tag.",
+    currentState: "Booking clerks spend hours each day calling patients to schedule appointments, often leaving voicemails and waiting for callbacks.",
     automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
@@ -101,7 +101,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Arrival Coordination",
     image: "/wxccworkflowdemo/dist/workflow-images/arrival-coordination.png",
     currentState: "Patient arrives, joins queue at admissions desk.",
-    automationOpportunity: "Day of surgery SMS before patient enters hospital carpark. \"When you arrive please proceed to Level 2, Bay 4. For assistance locating, please use this wayfinder URL\".",
+    automationOpportunity: "Day-of SMS sent before the patient reaches the carpark — improving timeliness and reducing admissions congestion. Includes a wayfinding link guiding them directly to their bay, no queue required.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, when you arrive at ArchiTech Hospital please proceed directly to Level 3, Bay C. Need help finding your way? Use this link: https://architechdemo.com/wxccworkflowdemo/dist/wayfinding.html . See you shortly.",
     phoneAction: "Open Wayfinder →",
@@ -109,6 +109,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     systemEvents: [],
     partnerBadge: {
       label: "Cisco Spaces",
+      sublabel: "Powered by",
       logoUrl: ciscoSpacesLogoUrl,
       bg: "rgba(0,169,145,0.12)",
       border: "rgba(0,169,145,0.4)",
@@ -120,7 +121,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Family Updates During Surgery",
     image: "/wxccworkflowdemo/dist/workflow-images/family-surgery-update.png",
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
-    automationOpportunity: "Automated status updates sent to nominated contact. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
+    automationOpportunity: "Automated status updates sent to nominated contact via HL7 integration with the EMR. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessages: [
       "Hi Family Member, this is ArchiTech Hospital. {NAME}'s surgery is underway. We'll update you when there's a change in status. No need to call, we'll contact you.",
@@ -1038,17 +1039,17 @@ export default function Home() {
                         }}
                       >
                         {isTriggered ? (
-                          <Check style={{ width: 22, height: 22 }} className="text-[#00A991]" />
+                          <Check style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)" }} className="text-[#00A991]" />
                         ) : isActive && SIcon ? (
-                          <SIcon style={{ width: 22, height: 22, color: sc.accent }} className="transition-colors duration-300" />
+                          <SIcon style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)", color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
-                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: 20, color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
+                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(18px, 3vw, 44px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
                         )}
                       </div>
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: 11, color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.5)", maxWidth: 84 }}
+                        style={{ fontSize: "clamp(13px, 1.8vw, 24px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
                       >
                         {stage.label}
                       </span>
@@ -1096,7 +1097,7 @@ export default function Home() {
                   }}
                 >
                   {/* Banner */}
-                  <div className="relative overflow-hidden" style={{ height: "168px", background: stageColor.bg }}>
+                  <div className="relative overflow-hidden" style={{ height: "190px", background: stageColor.bg }}>
                     {StageIcon && (
                       <div className="absolute -right-6 -bottom-6 pointer-events-none">
                         <StageIcon style={{ width: "160px", height: "160px", color: stageColor.iconTint }} />
@@ -1109,7 +1110,7 @@ export default function Home() {
                     <div className="absolute inset-0 flex flex-col justify-between p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>{stage.chapter}</span>
+                          <span className="font-mono text-[13px] font-bold px-2 py-1 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>{stage.chapter}</span>
                         </div>
                         <div className="flex items-start gap-1.5">
                           {stage.partnerBadge && (
@@ -1128,18 +1129,18 @@ export default function Home() {
                               />
                               {stage.partnerBadge.sublabel && (
                                 <div className="flex flex-col">
-                                  <span className="text-[11px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
-                                  <span className="text-[8.5px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                                  <span className="text-[13px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
+                                  <span className="text-[10px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
                                 </div>
                               )}
                             </div>
                           )}
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
                             <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
-                              <Bot className="w-4 h-4 flex-shrink-0" style={{ color: "#05C3DD", filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
+                              <Bot className="w-5 h-5 flex-shrink-0" style={{ color: "#05C3DD", filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
-                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#05C3DD", textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
-                                <span className="text-[8.5px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#05C3DD", textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
+                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
                               </div>
                             </div>
                           )}
@@ -1147,9 +1148,9 @@ export default function Home() {
                             <div className="flex flex-col items-center justify-center px-3 py-2 rounded-md gap-0.5" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)" }}>
                               <div className="flex items-center gap-1.5">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7 2 3 7 3 12c0 2.5 1 4.8 2.6 6.5C7 20.1 9.4 21 12 21s5-0.9 6.4-2.5C20 16.8 21 14.5 21 12c0-5-4-10-9-10z" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1.5"/><path d="M12 21V12M12 12C12 12 8 9 6 6M12 12c0 0 4-3 6-6" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                                <span className="text-[11px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
                               </div>
-                              <span className="text-[8px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
+                              <span className="text-[10px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                             </div>
                           )}
                           {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
@@ -1160,22 +1161,22 @@ export default function Home() {
                               </div>
                               <div className="flex items-center justify-end">
                                 <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
-                                  <span className="text-[10px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
+                                  <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
                                 </div>
                               </div>
                             </div>
                           )}
                           {isTriggered && (
                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
-                              <Check className="w-3 h-3 text-[#00A991]" />
-                              <span className="text-[10px] font-bold text-[#00A991] tracking-wide">Sent</span>
+                              <Check className="w-4 h-4 text-[#00A991]" />
+                              <span className="text-[12px] font-bold text-[#00A991] tracking-wide">Sent</span>
                             </div>
                           )}
                         </div>
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <div>
-                          <h3 className="text-xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                          <h3 className="text-3xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
@@ -1201,17 +1202,17 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
-                    <p className="text-[18px] leading-relaxed text-white/60 mb-2">{stage.automationOpportunity}</p>
+                    <p className="text-[20px] leading-relaxed text-white/60 mb-2">{stage.automationOpportunity}</p>
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="text-[15px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
-                      <p className="text-[18px] leading-relaxed text-white/50">{stage.currentState}</p>
+                      <p className="text-[16px] font-bold text-white/25 uppercase tracking-[0.18em] font-mono mb-1">Current State</p>
+                      <p className="text-[20px] leading-relaxed text-white/50">{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
                         {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
                           <div key={step} className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.15)" }}>
                             <span className="w-1.5 h-1.5 rounded-full bg-[#00A991] flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
-                            <span className="text-[10px] text-[#00A991]/70 font-mono">{step}</span>
+                            <span className="text-[12px] text-[#00A991]/70 font-mono">{step}</span>
                           </div>
                         ))}
                       </div>
@@ -1219,12 +1220,12 @@ export default function Home() {
                     {/* HL7 / EMR system event feed — Stage 04 */}
                     {isTriggered && stage.systemEvents.length > 0 && (systemEventReveal[stage.id] ?? 0) > 0 && (
                       <div className="mt-2.5">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
                         <div className="flex flex-col gap-1">
                           {stage.systemEvents.slice(0, systemEventReveal[stage.id] ?? 0).map((evt, i) => (
                             <div key={i} className="flex items-start gap-1.5 px-2 py-1 rounded" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.12)" }}>
                               <span className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0" style={{ background: "#05C3DD", boxShadow: "0 0 4px rgba(5,195,221,0.7)" }} />
-                              <span className="text-[10px] font-mono leading-relaxed" style={{ color: "rgba(5,195,221,0.65)" }}>{evt}</span>
+                              <span className="text-[12px] font-mono leading-relaxed" style={{ color: "rgba(5,195,221,0.65)" }}>{evt}</span>
                             </div>
                           ))}
                         </div>
@@ -1265,11 +1266,11 @@ export default function Home() {
 
             {/* Tech stack */}
             <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap pt-2">
-              <span className="text-[10px] text-white/25 uppercase tracking-[0.18em]">Powered by</span>
+              <span className="text-[12px] text-white/25 uppercase tracking-[0.18em]">Powered by</span>
               {TECH_STACK.map((tech) => (
                 <span
                   key={tech}
-                  className="text-[10px] font-mono"
+                  className="text-[12px] font-mono"
                   style={{
                     color: "rgba(255,255,255,0.3)",
                     border: "1px solid rgba(5,195,221,0.12)",
