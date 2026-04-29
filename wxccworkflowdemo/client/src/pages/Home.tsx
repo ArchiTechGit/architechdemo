@@ -1377,25 +1377,13 @@ export default function Home() {
           </div>
           <div style={{ display: "flex", gap: "clamp(16px, 3vw, 40px)", flexWrap: "wrap", justifyContent: "center" }}>
             <a
-              href="/wxccroi-public/"
-              style={{ display: "flex", alignItems: "center", gap: "14px", padding: "18px 32px", borderRadius: "14px", background: "rgba(5,195,221,0.07)", border: "1px solid rgba(5,195,221,0.35)", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(5,195,221,0.08)" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(5,195,221,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(5,195,221,0.6)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(5,195,221,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(5,195,221,0.35)"; }}
-            >
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#05C3DD", marginBottom: "4px" }}>Step 2</span>
-                <span style={{ fontSize: "clamp(15px, 1.8vw, 22px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.02em" }}>ROI Calculator</span>
-                <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "3px" }}>See your return on investment →</span>
-              </div>
-            </a>
-            <a
               href="/discovery/"
               style={{ display: "flex", alignItems: "center", gap: "14px", padding: "18px 32px", borderRadius: "14px", background: "rgba(0,85,184,0.07)", border: "1px solid rgba(0,85,184,0.35)", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(0,85,184,0.08)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.6)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.35)"; }}
             >
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0055B8", marginBottom: "4px" }}>Step 3</span>
+                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0055B8", marginBottom: "4px" }}>Next Step</span>
                 <span style={{ fontSize: "clamp(15px, 1.8vw, 22px)", fontWeight: 900, color: "#ffffff", letterSpacing: "0.02em" }}>Discovery Assessment</span>
                 <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "3px" }}>Start your discovery conversation →</span>
               </div>
