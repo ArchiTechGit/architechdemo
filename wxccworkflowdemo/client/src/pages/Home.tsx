@@ -583,10 +583,10 @@ export default function Home() {
           <div className="hidden md:block w-px self-stretch" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)" }} />
           {/* Story */}
           <div className="flex-1">
-            <p className="text-xl md:text-2xl font-black text-white mb-3 leading-snug tracking-tight">
+            <p className="text-2xl md:text-3xl font-black text-white mb-3 leading-snug tracking-tight">
               {IMPACT_STATS[statIndex].headline}
             </p>
-            <p className="text-base text-white/65 leading-relaxed">
+            <p className="text-lg text-white/65 leading-relaxed">
               {IMPACT_STATS[statIndex].body}{" "}
               <span className="text-white font-bold" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>{IMPACT_STATS[statIndex].highlight}</span>
               {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
