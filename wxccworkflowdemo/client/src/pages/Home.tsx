@@ -716,7 +716,7 @@ export default function Home() {
 
                   {/* Screen */}
                   <div className="absolute overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
-                    {phoneScreen === "home" ? (
+                    {(phoneScreen === "home" || !activePhoneStage) ? (
                       /* ─── HOME SCREEN ─── */
                       <div className="relative flex flex-col h-full overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2744 0%, #2d1b6e 50%, #0d1a3a 100%)" }}>
                         {/* Status bar – white */}
