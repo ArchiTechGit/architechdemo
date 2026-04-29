@@ -1202,10 +1202,10 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
-                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(16px, 1.4vw, 26px)" }}>{stage.automationOpportunity}</p>
+                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(14px, 1vw, 28px)" }}>{stage.automationOpportunity}</p>
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] font-mono mb-1" style={{ fontSize: "clamp(11px, 1vw, 18px)" }}>Current State</p>
-                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(16px, 1.4vw, 26px)" }}>{stage.currentState}</p>
+                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] font-mono mb-1" style={{ fontSize: "clamp(10px, 0.7vw, 17px)" }}>Current State</p>
+                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(14px, 1vw, 28px)" }}>{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
