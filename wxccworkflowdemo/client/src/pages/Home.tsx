@@ -1115,24 +1115,21 @@ export default function Home() {
                         <div className="flex items-start gap-1.5">
                           {stage.partnerBadge && (
                             <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)", height: 44 }}>
+                              {stage.partnerBadge.sublabel && (
+                                <span className="text-[10px] font-semibold tracking-[0.12em] uppercase leading-none flex-shrink-0" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                              )}
                               <img
                                 src={stage.partnerBadge.logoUrl}
                                 alt={stage.partnerBadge.label}
                                 style={{
                                   height: 28,
                                   width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 36 : 140,
+                                  maxWidth: stage.partnerBadge.sublabel ? 100 : 140,
                                   objectFit: "contain",
                                   filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
                                   flexShrink: 0,
                                 }}
                               />
-                              {stage.partnerBadge.sublabel && (
-                                <div className="flex flex-col">
-                                  <span className="text-[13px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
-                                  <span className="text-[10px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
-                                </div>
-                              )}
                             </div>
                           )}
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
