@@ -1183,13 +1183,13 @@ export default function Home() {
                           )}
                           <button
                             onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
-                            className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
-                            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
+                            className="flex items-center gap-1.5 font-semibold text-sm h-9 px-4 rounded-md shadow-none transition-colors duration-150"
+                            style={{ background: "transparent", border: "1px solid #05C3DD", color: "#05C3DD" }}
                           >
                             <Eye className="w-3 h-3" />
                             Workflow
                           </button>
-                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: "#05C3DD", border: "1px solid #05C3DD", color: "#0a1628" }}>
                             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
                           </Button>
                         </div>
