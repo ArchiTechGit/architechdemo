@@ -730,7 +730,7 @@ export default function Home() {
                     {mobileSpacesDemoPlaying ? (
                       <div className="relative flex flex-col h-full" style={{ background: "#000" }}>
                         <video
-                          src="/wxccworkflowdemo/dist/assets/SpacesMobileDemo.mp4"
+                          src="/wxccworkflowdemo/dist/spacesmobile.mp4"
                           autoPlay
                           playsInline
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -1443,7 +1443,7 @@ export default function Home() {
               </button>
             </div>
             <video
-              src="/wxccworkflowdemo/dist/assets/SpacesDesktopDemo.mp4"
+              src="/wxccworkflowdemo/dist/SpacesDesktopDemo.mp4"
               autoPlay
               controls
               className="block rounded-lg border border-white/10"
