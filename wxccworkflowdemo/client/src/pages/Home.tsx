@@ -286,6 +286,8 @@ export default function Home() {
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
+  const [spacesDemoOpen, setSpacesDemoOpen] = useState(false);
+  const [mobileSpacesDemoPlaying, setMobileSpacesDemoPlaying] = useState(false);
   const [wayfindingOpen, setWayfindingOpen] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
@@ -439,6 +441,13 @@ export default function Home() {
         );
         stepRevealTimeoutsRef.current.push(...threadTimeouts);
       }
+      if (workflowId === "PATIENT_ARRIVAL_WAYFINDING") {
+        const mobileDemoTimeout = setTimeout(() => {
+          if (triggerGenerationRef.current !== generation) return;
+          setMobileSpacesDemoPlaying(true);
+        }, 5500);
+        stepRevealTimeoutsRef.current.push(mobileDemoTimeout);
+      }
       toast.success(`${workflowLabel} sent`, { description: mobileNumber });
     } catch (error) {
       toast.error("Workflow trigger failed", { description: error instanceof Error ? error.message : "Unknown error" });
@@ -463,6 +472,8 @@ export default function Home() {
     notifTimerRef.current = null;
     setPhoneScreen("home");
     setPhoneNotif(false);
+    setMobileSpacesDemoPlaying(false);
+    setSpacesDemoOpen(false);
     setPatientName("");
     setMobileNumber("");
     setDemoMobile("");
@@ -666,7 +677,7 @@ export default function Home() {
         <div className="flex items-center gap-4 mb-8 px-0">
           <div className="flex items-center gap-3">
             <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
-            <span className="text-[13.5px] font-black text-white uppercase tracking-widest">Journey Demonstration</span>
+            <span className="text-[15px] font-black text-white uppercase tracking-widest">Journey Demonstration</span>
           </div>
           <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25), transparent)" }} />
         </div>
@@ -716,7 +727,24 @@ export default function Home() {
 
                   {/* Screen */}
                   <div className="absolute overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
-                    {(phoneScreen === "home" || !activePhoneStage) ? (
+                    {mobileSpacesDemoPlaying ? (
+                      <div className="relative flex flex-col h-full" style={{ background: "#000" }}>
+                        <video
+                          src="/wxccworkflowdemo/dist/assets/SpacesMobileDemo.mp4"
+                          autoPlay
+                          playsInline
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onEnded={() => { setMobileSpacesDemoPlaying(false); setPhoneScreen("home"); }}
+                        />
+                        <button
+                          onClick={() => { setMobileSpacesDemoPlaying(false); setPhoneScreen("home"); }}
+                          style={{ position: "absolute", top: "18px", right: "18px", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.25)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 30, padding: 0 }}
+                          aria-label="Close spaces demo"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1l-8 8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
+                        </button>
+                      </div>
+                    ) : (phoneScreen === "home" || !activePhoneStage) ? (
                       /* ─── HOME SCREEN ─── */
                       <div className="relative flex flex-col h-full overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2744 0%, #2d1b6e 50%, #0d1a3a 100%)" }}>
                         {/* Status bar – white */}
@@ -943,7 +971,7 @@ export default function Home() {
               <div className="space-y-3">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3 h-3 text-primary/40" />
-                  <span className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">Patient Name</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Name</span>
                 </label>
                 <Input
                   id="patient-name"
@@ -951,7 +979,7 @@ export default function Home() {
                   placeholder="Sarah Johnson"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  className="h-11 text-[13px] text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
                   style={{
                     border: "1px solid rgba(255,255,255,0.1)",
                     background: "rgba(0,0,0,0.3)",
@@ -966,7 +994,7 @@ export default function Home() {
               <div className="space-y-2.5">
                 <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
                 </label>
                 <Input
                   id="patient-mobile"
@@ -974,7 +1002,7 @@ export default function Home() {
                   placeholder="+61 2 1234 5678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  className="h-11 text-[13px] text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
                   style={{
                     border: "1px solid rgba(255,255,255,0.1)",
                     background: "rgba(0,0,0,0.3)",
@@ -989,7 +1017,7 @@ export default function Home() {
               <div className="space-y-2.5">
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">Hospital Mobile</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Hospital Mobile</span>
                 </label>
                 <Input
                   id="demo-mobile"
@@ -997,7 +1025,7 @@ export default function Home() {
                   placeholder="+61 4 1234 5678"
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
-                  className="h-11 text-[13px] text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
                   style={{
                     border: "1px solid rgba(255,255,255,0.1)",
                     background: "rgba(0,0,0,0.3)",
@@ -1043,13 +1071,13 @@ export default function Home() {
                         ) : isActive && SIcon ? (
                           <SIcon style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)", color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
-                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(16px, 2.7vw, 40px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
+                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(18px, 3vw, 44px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
                         )}
                       </div>
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(12px, 1.62vw, 22px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
+                        style={{ fontSize: "clamp(13px, 1.8vw, 24px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
                       >
                         {stage.label}
                       </span>
@@ -1115,21 +1143,24 @@ export default function Home() {
                         <div className="flex items-start gap-1.5">
                           {stage.partnerBadge && (
                             <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)", height: 44 }}>
-                              {stage.partnerBadge.sublabel && (
-                                <span className="text-[10px] font-semibold tracking-[0.12em] uppercase leading-none flex-shrink-0" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
-                              )}
                               <img
                                 src={stage.partnerBadge.logoUrl}
                                 alt={stage.partnerBadge.label}
                                 style={{
                                   height: 28,
                                   width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 100 : 140,
+                                  maxWidth: stage.partnerBadge.sublabel ? 36 : 140,
                                   objectFit: "contain",
                                   filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
                                   flexShrink: 0,
                                 }}
                               />
+                              {stage.partnerBadge.sublabel && (
+                                <div className="flex flex-col">
+                                  <span className="text-[13px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
+                                  <span className="text-[10px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                                </div>
+                              )}
                             </div>
                           )}
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
@@ -1173,23 +1204,32 @@ export default function Home() {
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <div>
-                          <h3 className="text-[27px] font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                          <h3 className="text-3xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
-                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[11px] h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
                             </Button>
                           )}
+                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_ARRIVAL_WAYFINDING" || stage.id === "PATIENT_FAMILY_SURGERY_UPDATE") && (
+                            <button
+                              onClick={() => setSpacesDemoOpen(true)}
+                              className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
+                              style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.4)", color: "#00A991" }}
+                            >
+                              Spaces Demo
+                            </button>
+                          )}
                           <button
                             onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
-                            className="flex items-center gap-1.5 font-semibold text-[13px] h-9 px-4 rounded-md shadow-none transition-colors duration-150"
-                            style={{ background: "transparent", border: "1px solid #05C3DD", color: "#05C3DD" }}
+                            className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
+                            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
                           >
                             <Eye className="w-3 h-3" />
                             Workflow
                           </button>
-                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-[13px] h-9 px-5 shadow-none" style={{ background: "#05C3DD", border: "1px solid #05C3DD", color: "#0a1628" }}>
+                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
                             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
                           </Button>
                         </div>
@@ -1199,10 +1239,10 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
-                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(12px, 1.04vw, 25px)" }}>{stage.automationOpportunity}</p>
+                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.automationOpportunity}</p>
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] font-mono mb-1" style={{ fontSize: "clamp(8px, 0.68vw, 14px)" }}>Current State</p>
-                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(12px, 1.04vw, 25px)" }}>{stage.currentState}</p>
+                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] font-mono mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>Current State</p>
+                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
@@ -1391,6 +1431,27 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Spaces Desktop Demo Modal */}
+      {spacesDemoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm" onClick={() => setSpacesDemoOpen(false)}>
+          <div className="relative mx-6" style={{ maxWidth: "min(1200px, 90vw)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">Cisco Spaces Demo</span>
+              <button onClick={() => setSpacesDemoOpen(false)} className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
+                ✕ Close
+              </button>
+            </div>
+            <video
+              src="/wxccworkflowdemo/dist/assets/SpacesDesktopDemo.mp4"
+              autoPlay
+              controls
+              className="block rounded-lg border border-white/10"
+              style={{ maxWidth: "100%", maxHeight: "75vh", width: "100%" }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Voice AI Demo Modal */}
       {voiceModalOpen && (
