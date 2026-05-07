@@ -1216,7 +1216,7 @@ export default function Home() {
                             <button
                               onClick={() => setSpacesDemoOpen(true)}
                               className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
-                              style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.4)", color: "#00A991" }}
+                              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
                             >
                               Spaces Demo
                             </button>
