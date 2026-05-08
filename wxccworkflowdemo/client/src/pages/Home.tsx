@@ -17,6 +17,7 @@ import confetti from "canvas-confetti";
 interface JourneyStage {
   id: string;
   chapter: string;
+  stepperLabel: string;
   sectionHeader?: string;
   label: string;
   currentState: string;
@@ -61,6 +62,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_PRE_ADMISSION_ENROL",
     chapter: "Stage 1",
+    stepperLabel: "Pre Admission",
     label: "Pre Admission Enrolment",
     image: "/wxccworkflowdemo/dist/workflow-images/pre-admission-enrolment.png",
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
@@ -77,6 +79,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_APPOINTMENT_CONFIRM",
     chapter: "Stage 2",
+    stepperLabel: "Scheduling",
     label: "Appointment Scheduling and Reminders",
     image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
     currentState: "Booking clerks spend hours each day calling patients to schedule appointments, often leaving voicemails and waiting for callbacks.",
@@ -97,6 +100,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_ARRIVAL_WAYFINDING",
     chapter: "Stage 3",
+    stepperLabel: "Arrival",
     label: "Arrival Coordination",
     image: "/wxccworkflowdemo/dist/workflow-images/arrival-coordination.png",
     currentState: "Patient arrives, joins queue at admissions desk.",
@@ -117,6 +121,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_FAMILY_SURGERY_UPDATE",
     chapter: "Stage 4",
+    stepperLabel: "Family Updates",
     label: "Family Updates During Surgery",
     image: "/wxccworkflowdemo/dist/workflow-images/family-surgery-update.png",
     currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
@@ -139,6 +144,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_DISCHARGE_INSTRUCTIONS",
     chapter: "Stage 5",
+    stepperLabel: "Take-Home",
     label: "Take-Home Instruction Delivery",
     image: "/wxccworkflowdemo/dist/workflow-images/discharge-instructions.png",
     currentState: "Nurse hands patient printed sheets. Patient loses them. Each surgical episode generates ~12 pages of paper instructions — all single use, all landfill.",
@@ -151,6 +157,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
   {
     id: "PATIENT_POST_DISCHARGE_SURVEY",
     chapter: "Stage 6",
+    stepperLabel: "Post Discharge",
     label: "Post Discharge Check-Up",
     image: "/wxccworkflowdemo/dist/workflow-images/post-discharge-survey.png",
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
@@ -1088,19 +1095,19 @@ export default function Home() {
                         }}
                       >
                         {isTriggered ? (
-                          <Check style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)" }} className="text-success" />
+                          <Check style={{ width: 20, height: 20 }} className="text-success" />
                         ) : isActive && SIcon ? (
-                          <SIcon style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)", color: sc.accent }} className="transition-colors duration-300" />
+                          <SIcon style={{ width: 22, height: 22, color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
-                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(18px, 3vw, 44px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
+                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: 18, color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
                         )}
                       </div>
                       {/* Label */}
                       <span
-                        className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(13px, 1.8vw, 24px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
+                        className="font-bold text-center leading-tight transition-colors duration-300 px-1 text-[12px]"
+                        style={{ color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: 88 }}
                       >
-                        {stage.label}
+                        {stage.stepperLabel}
                       </span>
                     </button>
 
