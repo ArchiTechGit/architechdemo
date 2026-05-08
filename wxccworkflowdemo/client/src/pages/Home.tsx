@@ -302,6 +302,18 @@ export default function Home() {
   }, []);
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (overviewOpen) { setOverviewOpen(false); return; }
+      if (lightboxImage) { setLightboxImage(null); return; }
+      if (spacesDemoOpen) { setSpacesDemoOpen(false); return; }
+      if (voiceModalOpen) { setVoiceModalOpen(false); return; }
+    };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [overviewOpen, lightboxImage, spacesDemoOpen, voiceModalOpen]);
+
 
   const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -465,7 +477,6 @@ export default function Home() {
     setStageStepReveal({});
     setSystemEventReveal({});
     setThreadReveal({});
-    setExpandedStages(new Set());
     setWayfindingOpen(false);
     triggerGenerationRef.current += 1;
     if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
@@ -577,6 +588,8 @@ export default function Home() {
         <div
           className="container mx-auto px-6 md:px-10 py-10 flex items-center gap-8 md:gap-14 relative"
           style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
+          aria-live="polite"
+          aria-atomic="true"
         >
           {/* Hero number */}
           <div className="flex-shrink-0">
@@ -620,15 +633,15 @@ export default function Home() {
       {/* Journey Overview Modal */}
       {overviewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setOverviewOpen(false)}>
-          <div className="relative w-full mx-6" style={{ maxWidth: "1400px" }} onClick={e => e.stopPropagation()}>
+          <div className="relative w-full mx-6" style={{ maxWidth: "1400px" }} role="dialog" aria-modal="true" aria-label="Patient Journey — All 6 Stages" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between mb-7">
               <div className="flex items-center gap-3">
                 <div className="w-[3px] h-7 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
                 <span className="text-[22.5px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
               </div>
-              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-3 py-1.5 rounded transition-colors">
-                ✕ Close
+              <button onClick={() => setOverviewOpen(false)} aria-label="Close overview" className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-3 py-1.5 rounded transition-colors">
+                <span aria-hidden="true">✕</span> Close
               </button>
             </div>
 
@@ -948,6 +961,8 @@ export default function Home() {
                   }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.02)"; }}
+                  onFocus={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.02)"; }}
                 >
                   ↺ Reset & Replay
                 </Button>
@@ -979,7 +994,7 @@ export default function Home() {
                   placeholder="Sarah Johnson"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15"
                   style={{
                     border: "1px solid rgba(255,255,255,0.1)",
                     background: "rgba(0,0,0,0.3)",
@@ -1002,7 +1017,7 @@ export default function Home() {
                   placeholder="+61 2 1234 5678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15"
                   style={{
                     border: "1px solid rgba(255,255,255,0.1)",
                     background: "rgba(0,0,0,0.3)",
@@ -1025,7 +1040,7 @@ export default function Home() {
                   placeholder="+61 4 1234 5678"
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
-                  className="h-11 text-sm text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  className="h-11 text-sm text-foreground placeholder:text-white/15"
                   style={{
                     border: "1px solid rgba(255,255,255,0.1)",
                     background: "rgba(0,0,0,0.3)",
@@ -1385,14 +1400,15 @@ export default function Home() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
           onClick={() => setLightboxImage(null)}
         >
-          <div className="relative mx-6" style={{ maxWidth: "min(900px, 90vw)" }} onClick={(e) => e.stopPropagation()}>
+          <div className="relative mx-6" style={{ maxWidth: "min(900px, 90vw)" }} role="dialog" aria-modal="true" aria-label={lightboxImage?.label ?? "Workflow diagram"} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">{lightboxImage.label}</span>
               <button
                 onClick={() => setLightboxImage(null)}
+                aria-label="Close workflow diagram"
                 className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors"
               >
-                ✕ Close
+                <span aria-hidden="true">✕</span> Close
               </button>
             </div>
             <img
@@ -1415,9 +1431,13 @@ export default function Home() {
           <div style={{ display: "flex", gap: "clamp(16px, 3vw, 40px)", flexWrap: "wrap", justifyContent: "center" }}>
             <a
               href="/discovery/"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ display: "flex", alignItems: "center", gap: "14px", padding: "18px 32px", borderRadius: "14px", background: "rgba(0,85,184,0.07)", border: "1px solid rgba(0,85,184,0.35)", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(0,85,184,0.08)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.6)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.35)"; }}
+              onFocus={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.6)"; }}
+              onBlur={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.35)"; }}
             >
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                 <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0055B8", marginBottom: "4px" }}>Next Step</span>
@@ -1435,11 +1455,11 @@ export default function Home() {
       {/* Spaces Desktop Demo Modal */}
       {spacesDemoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm" onClick={() => setSpacesDemoOpen(false)}>
-          <div className="relative mx-6" style={{ maxWidth: "min(1200px, 90vw)" }} onClick={(e) => e.stopPropagation()}>
+          <div className="relative mx-6" style={{ maxWidth: "min(1200px, 90vw)" }} role="dialog" aria-modal="true" aria-label="Cisco Spaces Demo" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">Cisco Spaces Demo</span>
-              <button onClick={() => setSpacesDemoOpen(false)} className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
-                ✕ Close
+              <button onClick={() => setSpacesDemoOpen(false)} aria-label="Close Cisco Spaces demo" className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
+                <span aria-hidden="true">✕</span> Close
               </button>
             </div>
             <video
@@ -1462,6 +1482,7 @@ export default function Home() {
           <div
             className="relative mx-6 rounded-3xl overflow-hidden"
             style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid rgba(0,169,145,0.35)", boxShadow: "0 0 0 1px rgba(0,169,145,0.1), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(0,169,145,0.08)" }}
+            role="dialog" aria-modal="true" aria-label="Voice AI Demo"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top accent */}
@@ -1488,17 +1509,12 @@ export default function Home() {
               <p className="text-xs text-white/30 mb-5">Powered by Webex AI Agent &amp; Webex Connect</p>
               <button
                 onClick={() => setVoiceModalOpen(false)}
+                aria-label="Close Voice AI demo"
                 className="text-white/40 hover:text-white/70 text-xs font-mono border border-white/10 hover:border-white/25 px-4 py-2 rounded-xl transition-colors"
               >
-                ✕ Close
+                <span aria-hidden="true">✕</span> Close
               </button>
             </div>
-            <style>{`
-              @keyframes ping-slow {
-                0%, 100% { transform: scale(1); opacity: 0.5; }
-                50% { transform: scale(1.15); opacity: 0.15; }
-              }
-            `}</style>
           </div>
         </div>
       )}
