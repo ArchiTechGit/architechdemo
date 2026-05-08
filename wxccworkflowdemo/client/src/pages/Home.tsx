@@ -111,8 +111,8 @@ const JOURNEY_STAGES: JourneyStage[] = [
       label: "Cisco Spaces",
       sublabel: "Powered by",
       logoUrl: ciscoSpacesLogoUrl,
-      bg: "rgba(0,169,145,0.12)",
-      border: "rgba(0,169,145,0.4)",
+      bg: "var(--success-bg)",
+      border: "var(--success-border)",
     },
   },
   {
@@ -188,7 +188,7 @@ const STAGE_META = [
   { icon: Activity, shortDesc: "AI agent initiates conversational check-in 48-72 hours post-discharge. Concerning responses trigger immediate nurse escalation. Critical flags generate emergency protocol alert." },
 ];
 
-const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
+const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "var(--primary)", accentBg: "var(--border)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
 const STAGE_COLORS = [STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR];
 
 const IMPACT_STATS = [
@@ -265,6 +265,17 @@ const IMPACT_STATS = [
 ];
 
 const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
+
+const inputFocusProps = {
+  onFocus: (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.borderColor = "rgba(5,195,221,0.5)";
+    e.currentTarget.style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)";
+  },
+  onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+    e.currentTarget.style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)";
+  },
+};
 const TECH_STACK = ["Webex CC Flow Designer", "Webex Connect", "Calendar API", "EHR Integration"];
 
 export default function Home() {
@@ -415,8 +426,8 @@ export default function Home() {
         const origin = rect
           ? { x: (rect.left + rect.width / 2) / window.innerWidth, y: (rect.top + rect.height * 0.4) / window.innerHeight }
           : { x: 0.5, y: 0.5 };
-        confetti({ particleCount: 180, spread: 70, origin, colors: ["#05C3DD", "#00A991", "#ffffff", "#FFD700", "#FF6B6B"], startVelocity: 45, gravity: 0.9, scalar: 1.1 });
-        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: ["#05C3DD", "#00A991", "#ffffff"], startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
+        confetti({ particleCount: 180, spread: 70, origin, colors: ["#05C3DD", "var(--success)", "#ffffff", "#FFD700", "#FF6B6B"], startVelocity: 45, gravity: 0.9, scalar: 1.1 });
+        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: ["#05C3DD", "var(--success)", "#ffffff"], startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
       }
       setPhonePulse(true);
       if (phoneScreen === "home") {
@@ -532,9 +543,9 @@ export default function Home() {
             <Moon className="w-3.5 h-3.5" />
             <span className="text-[10px] font-bold tracking-widest uppercase">Sleep</span>
           </button>
-          <div className="flex items-center gap-2 border border-[#00A991]/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-            <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-            <span className="text-xs font-bold text-[#00A991] tracking-wider uppercase">Live</span>
+          <div className="flex items-center gap-2 border border-success/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+            <span className="text-xs font-bold text-success tracking-wider uppercase">Live</span>
           </div>
         </div>
       </div>
@@ -655,7 +666,7 @@ export default function Home() {
                 <div key={label} className="flex flex-col gap-4">
                   {/* Section label */}
                   <div className="text-center pb-2" style={{ borderBottom: "1px solid rgba(5,195,221,0.1)" }}>
-                    <span className="text-[18px] font-bold font-mono uppercase tracking-[0.18em]" style={{ color }}>{label}</span>
+                    <span className="text-[18px] font-bold uppercase tracking-[0.18em]" style={{ color }}>{label}</span>
                   </div>
                   {/* Stage cards */}
                   {stages.map((idx) => {
@@ -995,15 +1006,8 @@ export default function Home() {
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    background: "rgba(0,0,0,0.3)",
-                    borderRadius: "10px",
-                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
-                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
+                  style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" }}
+                  {...inputFocusProps}
                 />
               </div>
               <div className="space-y-2.5">
@@ -1018,15 +1022,8 @@ export default function Home() {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    background: "rgba(0,0,0,0.3)",
-                    borderRadius: "10px",
-                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
-                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
+                  style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" }}
+                  {...inputFocusProps}
                 />
               </div>
               <div className="space-y-2.5">
@@ -1041,15 +1038,8 @@ export default function Home() {
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    background: "rgba(0,0,0,0.3)",
-                    borderRadius: "10px",
-                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
-                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
+                  style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" }}
+                  {...inputFocusProps}
                 />
               </div>
             </div>
@@ -1078,11 +1068,11 @@ export default function Home() {
                           width: 56, height: 56,
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
                           border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
-                          boxShadow: isTriggered ? "0 0 16px rgba(0,169,145,0.35)" : isActive ? `0 0 16px ${sc.accentGlow}` : "none",
+                          boxShadow: isTriggered ? "0 0 16px var(--success-glow)" : isActive ? `0 0 16px ${sc.accentGlow}` : "none",
                         }}
                       >
                         {isTriggered ? (
-                          <Check style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)" }} className="text-[#00A991]" />
+                          <Check style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)" }} className="text-success" />
                         ) : isActive && SIcon ? (
                           <SIcon style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)", color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
@@ -1092,7 +1082,7 @@ export default function Home() {
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(13px, 1.8vw, 24px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
+                        style={{ fontSize: "clamp(13px, 1.8vw, 24px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
                       >
                         {stage.label}
                       </span>
@@ -1210,9 +1200,9 @@ export default function Home() {
                             </div>
                           )}
                           {isTriggered && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
-                              <Check className="w-4 h-4 text-[#00A991]" />
-                              <span className="text-[12px] font-bold text-[#00A991] tracking-wide">Sent</span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid var(--success-border)" }}>
+                              <Check className="w-4 h-4 text-success" />
+                              <span className="text-[12px] font-bold text-success tracking-wide">Sent</span>
                             </div>
                           )}
                         </div>
@@ -1256,15 +1246,15 @@ export default function Home() {
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
                     <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.automationOpportunity}</p>
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] font-mono mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>Current State</p>
+                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>Current State</p>
                       <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
                         {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
                           <div key={step} className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.15)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#00A991] flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
-                            <span className="text-[12px] text-[#00A991]/70 font-mono">{step}</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
+                            <span className="text-[12px] text-success/70 font-mono">{step}</span>
                           </div>
                         ))}
                       </div>
@@ -1272,7 +1262,7 @@ export default function Home() {
                     {/* HL7 / EMR system event feed — Stage 04 */}
                     {isTriggered && stage.systemEvents.length > 0 && (systemEventReveal[stage.id] ?? 0) > 0 && (
                       <div className="mt-2.5">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
                         <div className="flex flex-col gap-1">
                           {stage.systemEvents.slice(0, systemEventReveal[stage.id] ?? 0).map((evt, i) => (
                             <div key={i} className="flex items-start gap-1.5 px-2 py-1 rounded" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.12)" }}>
@@ -1293,13 +1283,13 @@ export default function Home() {
               <div
                 className="flex items-center justify-between gap-4 p-5 rounded-2xl"
                 style={{
-                  border: "1px solid rgba(0,169,145,0.4)",
+                  border: "1px solid var(--success-border)",
                   background: "linear-gradient(135deg, rgba(0,169,145,0.08) 0%, rgba(0,169,145,0.04) 100%)",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(0,169,145,0.1), inset 0 1px 0 rgba(0,169,145,0.1)",
                 }}
               >
                 <div>
-                  <p className="text-sm font-black text-[#00A991]" style={{ textShadow: "0 0 16px rgba(0,169,145,0.4)" }}>All stages complete.</p>
+                  <p className="text-sm font-black text-success" style={{ textShadow: "0 0 16px var(--success-border)" }}>All stages complete.</p>
                   <p className="text-xs text-white/40 mt-0.5">Ready to show your impact summary.</p>
                 </div>
                 <Button
@@ -1308,7 +1298,7 @@ export default function Home() {
                   style={{
                     background: "linear-gradient(135deg, #00A991, #16CECC)",
                     color: "#fff",
-                    boxShadow: "0 4px 20px rgba(0,169,145,0.4), 0 0 40px rgba(0,169,145,0.15)",
+                    boxShadow: "0 4px 20px var(--success-border), 0 0 40px rgba(0,169,145,0.15)",
                   }}
                 >
                   View Summary →
@@ -1341,7 +1331,7 @@ export default function Home() {
       {/* Journey Complete — modal */}
       <Dialog open={showCompleteModal} onOpenChange={setShowCompleteModal}>
         <DialogContent
-          className="max-w-lg border-2 border-[#00A991]/50 p-0 overflow-hidden rounded-3xl"
+          className="max-w-lg border-2 border-success/50 p-0 overflow-hidden rounded-3xl"
           aria-labelledby="modal-title"
           style={{
             background: "linear-gradient(160deg, #13294B 0%, #0D1825 60%)",
@@ -1357,11 +1347,11 @@ export default function Home() {
               className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-[#00A991] mb-6"
               style={{ background: "radial-gradient(circle, rgba(0,169,145,0.15) 0%, transparent 70%)", boxShadow: "0 0 40px rgba(0,169,145,0.2)" }}
             >
-              <Check className="w-10 h-10 text-[#00A991]" aria-hidden="true" />
+              <Check className="w-10 h-10 text-success" aria-hidden="true" />
             </div>
 
             <h2 id="modal-title" className="text-4xl font-black text-white mb-2">Journey Complete</h2>
-            <p className="text-[#00A991] font-bold mb-5">Zero phone calls. 100% digital.</p>
+            <p className="text-success font-bold mb-5">Zero phone calls. 100% digital.</p>
             <p className="text-white/75 text-base leading-relaxed max-w-sm mx-auto mb-8">
               Appointment scheduling, pre-admission, surgery prep, recovery check-in — all delivered to the patient's phone. No calls. No staff required to initiate any of it.
             </p>
@@ -1369,7 +1359,7 @@ export default function Home() {
             <Button
               onClick={resetJourney}
               variant="outline"
-              className="inline-flex items-center gap-2 px-7 border-[#00A991]/40 hover:border-[#00A991] text-[#00A991] hover:bg-[#00A991]/10 hover:text-[#00A991] rounded-xl font-bold mb-8 bg-transparent"
+              className="inline-flex items-center gap-2 px-7 border-[#00A991]/40 hover:border-[#00A991] text-success hover:bg-success/10 hover:text-success rounded-xl font-bold mb-8 bg-transparent"
             >
               ↺ Run Another Demo
             </Button>
@@ -1481,7 +1471,7 @@ export default function Home() {
         >
           <div
             className="relative mx-6 rounded-3xl overflow-hidden"
-            style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid rgba(0,169,145,0.35)", boxShadow: "0 0 0 1px rgba(0,169,145,0.1), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(0,169,145,0.08)" }}
+            style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid var(--success-glow)", boxShadow: "0 0 0 1px rgba(0,169,145,0.1), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(0,169,145,0.08)" }}
             role="dialog" aria-modal="true" aria-label="Voice AI Demo"
             onClick={(e) => e.stopPropagation()}
           >
@@ -1491,14 +1481,14 @@ export default function Home() {
               {/* Pulse ring */}
               <div className="inline-flex items-center justify-center mb-6" style={{ position: "relative" }}>
                 <div style={{ position: "absolute", width: "80px", height: "80px", borderRadius: "50%", border: "1px solid rgba(0,169,145,0.2)", animation: "ping-slow 2s ease-in-out infinite" }} />
-                <div style={{ position: "absolute", width: "64px", height: "64px", borderRadius: "50%", border: "1px solid rgba(0,169,145,0.35)", animation: "ping-slow 2s ease-in-out 0.5s infinite" }} />
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.5)", boxShadow: "0 0 24px rgba(0,169,145,0.3)" }}>
-                  <Phone className="w-5 h-5 text-[#00A991]" />
+                <div style={{ position: "absolute", width: "64px", height: "64px", borderRadius: "50%", border: "1px solid var(--success-glow)", animation: "ping-slow 2s ease-in-out 0.5s infinite" }} />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "var(--success-bg)", border: "1px solid rgba(0,169,145,0.5)", boxShadow: "0 0 24px rgba(0,169,145,0.3)" }}>
+                  <Phone className="w-5 h-5 text-success" />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-                <span className="text-xs font-bold text-[#00A991] tracking-widest uppercase">Live AI Agent</span>
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+                <span className="text-xs font-bold text-success tracking-widest uppercase">Live AI Agent</span>
               </div>
               <h3 className="text-xl font-black text-white mb-1">Voice AI Demo</h3>
               <p className="text-xs text-white/40 mb-6">Call this number to experience the AI post-discharge check-in. The AI will guide you through a realistic patient survey conversation.</p>

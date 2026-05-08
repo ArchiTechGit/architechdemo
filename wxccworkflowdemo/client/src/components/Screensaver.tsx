@@ -279,8 +279,8 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
             background: "rgba(5,195,221,0.05)",
           }}
         >
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#00A991", boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#00A991", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--success)", boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--success)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
             Powered by Webex Contact Centre
           </span>
         </div>
