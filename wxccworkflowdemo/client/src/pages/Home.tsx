@@ -534,7 +534,7 @@ export default function Home() {
             <h1 className="text-[13px] font-bold text-white/90 uppercase tracking-widest leading-tight">
               The Digital Front Door — Patient Experience Journey
             </h1>
-            <p className="text-[10px] font-bold text-primary tracking-[0.22em] uppercase mt-0.5" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+            <p className="text-[10px] font-bold text-primary tracking-[0.22em] uppercase mt-0.5">
               [ Live Demonstration ]
             </p>
           </div>
@@ -606,7 +606,7 @@ export default function Home() {
               className="font-black text-primary leading-none"
               style={{
                 fontSize: "clamp(64px, 8vw, 100px)",
-                textShadow: "0 0 40px rgba(5,195,221,0.35), 0 0 80px rgba(5,195,221,0.15)",
+                textShadow: "0 0 40px rgba(5,195,221,0.18)",
                 letterSpacing: "-0.02em",
               }}
             >
@@ -631,7 +631,7 @@ export default function Home() {
             onClick={() => setOverviewOpen(true)}
             className="flex items-center gap-2 group focus-visible:outline-none"
           >
-            <span className="text-[16.5px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+            <span className="text-[16.5px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200">
               Click here to learn about the journey
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
@@ -1172,7 +1172,7 @@ export default function Home() {
                             <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
                               <Bot className="w-5 h-5 flex-shrink-0 text-primary" style={{ filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-black tracking-wide leading-none text-primary" style={{ textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none text-primary">AI Agent</span>
                                 <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
                               </div>
                             </div>
