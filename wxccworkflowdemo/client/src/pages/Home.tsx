@@ -558,7 +558,7 @@ export default function Home() {
       {/* Impact banner */}
       <div
         className="relative border-b border-white/[0.06] overflow-hidden"
-        style={{ background: "#070d15", minHeight: "220px" }}
+        style={{ background: "#070d15", height: "260px" }}
       >
         {/* Layered dramatic gradients */}
         <div
