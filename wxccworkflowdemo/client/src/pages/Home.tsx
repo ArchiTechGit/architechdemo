@@ -595,46 +595,31 @@ export default function Home() {
           <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
         </div>
         <div
-          className="container mx-auto px-6 md:px-10 py-10 flex items-center gap-8 md:gap-14 relative"
+          className="container mx-auto px-6 md:px-10 py-10 relative"
           style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
           aria-live="polite"
           aria-atomic="true"
         >
-          {/* Hero number */}
-          <div className="flex-shrink-0">
-            <span
-              className="font-black text-primary leading-none"
-              style={{
-                fontSize: "clamp(64px, 8vw, 100px)",
-                textShadow: "0 0 40px rgba(5,195,221,0.18)",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {IMPACT_STATS[statIndex].hero}
-            </span>
-          </div>
-          <div className="hidden md:block w-px self-stretch" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)" }} />
-          {/* Story */}
-          <div className="flex-1">
-            <p className="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight tracking-tight">
-              {IMPACT_STATS[statIndex].headline}
-            </p>
-            <p className="text-base md:text-lg text-white/65 leading-relaxed">
-              {IMPACT_STATS[statIndex].body}{" "}
-              <span className="text-white font-bold" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>{IMPACT_STATS[statIndex].highlight}</span>
-              {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
-            </p>
-          </div>
+          <p className="font-bold text-white leading-tight tracking-tight mb-4" style={{ fontSize: "clamp(1.6rem, 3.8vw, 2.8rem)" }}>
+            <span className="text-primary font-black" style={{ letterSpacing: "-0.02em" }}>{IMPACT_STATS[statIndex].hero}</span>
+            {" "}{IMPACT_STATS[statIndex].headline}
+          </p>
+          <p className="text-sm md:text-base text-white/60 leading-relaxed max-w-2xl">
+            {IMPACT_STATS[statIndex].body}{" "}
+            <span className="text-white font-semibold">{IMPACT_STATS[statIndex].highlight}</span>
+            {" "}<span className="text-white/40">{IMPACT_STATS[statIndex].tail}</span>
+          </p>
         </div>
-        <div className="container mx-auto px-6 md:px-10 pb-5 flex justify-end relative">
+        <div className="container mx-auto px-6 md:px-10 pb-6 flex justify-start relative">
           <button
             onClick={() => setOverviewOpen(true)}
-            className="flex items-center gap-2 group focus-visible:outline-none"
+            className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md px-3 py-1.5 transition-all duration-200"
+            style={{ border: "1px solid rgba(5,195,221,0.22)", background: "rgba(5,195,221,0.06)" }}
           >
-            <span className="text-[16.5px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200">
-              Click here to learn about the journey
+            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-primary/80 group-hover:text-white transition-colors duration-200">
+              Patient Journey Overview
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
+            <ChevronDown className="w-3 h-3 text-primary/60 group-hover:text-white transition-colors duration-200 -rotate-90" />
           </button>
         </div>
       </div>
@@ -654,35 +639,65 @@ export default function Home() {
               </button>
             </div>
 
-            {/* 3-column grid — one column per journey phase, 2 stages stacked per column */}
+            {/* 3-column grid — each phase has a distinct visual treatment */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { label: "Pre Admission", color: "rgba(5,195,221,0.55)", stages: [0, 1] },
-                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.55)", stages: [2, 3] },
-                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.55)", stages: [4, 5] },
-              ].map(({ label, color, stages }) => (
-                <div key={label} className="flex flex-col gap-4">
-                  {/* Section label */}
-                  <div className="text-center pb-2" style={{ borderBottom: "1px solid rgba(5,195,221,0.1)" }}>
-                    <span className="text-[18px] font-bold uppercase tracking-[0.18em]" style={{ color }}>{label}</span>
+              {([
+                { label: "Pre Admission", color: "var(--primary)", stages: [0, 1], variant: "feature" as const },
+                { label: "Day-of-Surgery Coordination", color: "#55CAFD", stages: [2, 3], variant: "compact" as const },
+                { label: "Discharge & Recovery", color: "var(--success)", stages: [4, 5], variant: "list" as const },
+              ]).map(({ label, color, stages, variant }) => (
+                <div key={label} className="flex flex-col gap-3">
+                  {/* Phase header */}
+                  <div className={`pb-2 ${variant === "feature" ? "text-left" : "text-center"}`} style={{ borderBottom: `1px solid ${variant === "list" ? "rgba(0,169,145,0.18)" : "rgba(5,195,221,0.1)"}` }}>
+                    <span className={`font-bold uppercase tracking-[0.18em] ${variant === "feature" ? "text-[19px]" : "text-[14px]"}`} style={{ color }}>{label}</span>
                   </div>
-                  {/* Stage cards */}
+                  {/* Stage items */}
                   {stages.map((idx) => {
                     const stage = JOURNEY_STAGES[idx];
                     const sc = STAGE_COLORS[idx];
                     const Icon = STAGE_META[idx].icon;
+
+                    if (variant === "feature") {
+                      return (
+                        <div key={stage.id} className="rounded-xl relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.9) 100%)` }}>
+                          <div className="flex items-start gap-4 p-5">
+                            <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}` }}>
+                              <Icon className="w-5 h-5" style={{ color: sc.accent }} />
+                            </div>
+                            <div className="flex flex-col gap-2 min-w-0">
+                              <span className="font-mono text-[12px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
+                              <h3 className="text-[20px] font-black text-white leading-tight">{stage.label}</h3>
+                              <p className="text-[14px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    if (variant === "compact") {
+                      return (
+                        <div key={stage.id} className="rounded-lg flex items-start gap-3 p-3.5" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.14)" }}>
+                          <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}` }}>
+                            <Icon className="w-4 h-4" style={{ color: "#55CAFD" }} />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-mono text-[11px] font-bold block mb-1" style={{ color: "#55CAFD" }}>{stage.chapter}</span>
+                            <h3 className="text-[16px] font-bold text-white leading-tight mb-1.5">{stage.label}</h3>
+                            <p className="text-[13px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
-                      <div key={stage.id} className="rounded-xl relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.9) 100%)` }}>
-                        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
-                        <div className="flex items-start gap-4 p-5">
-                          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
-                            <Icon className="w-6 h-6" style={{ color: sc.accent }} />
-                          </div>
-                          <div className="flex flex-col gap-2 min-w-0">
-                            <span className="font-mono text-[13px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
-                            <h3 className="text-[22px] font-black text-white leading-tight">{stage.label}</h3>
-                            <p className="text-[16px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
-                          </div>
+                      <div key={stage.id} className="flex items-start gap-3 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(0,169,145,0.1)", border: "1px solid rgba(0,169,145,0.22)" }}>
+                          <Icon className="w-3.5 h-3.5" style={{ color: "var(--success)" }} />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-mono text-[11px] font-bold block mb-0.5" style={{ color: "var(--success)" }}>{stage.chapter}</span>
+                          <h3 className="text-[16px] font-bold text-white/90 leading-tight mb-1">{stage.label}</h3>
+                          <p className="text-[13px] text-white/50 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
                         </div>
                       </div>
                     );
@@ -1041,6 +1056,7 @@ export default function Home() {
                 />
               </div>
             </div>
+            <p className="text-[11px] text-white/30 mt-3.5 leading-relaxed">Enter a patient name and mobile to personalise the live SMS before triggering each stage.</p>
             </div>
 
             {/* Stepper */}
@@ -1067,7 +1083,7 @@ export default function Home() {
                           width: 56, height: 56,
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
                           border: isTriggered ? "2px solid var(--success)" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
-                          boxShadow: isTriggered ? "0 0 16px var(--success-glow)" : isActive ? `0 0 16px ${sc.accentGlow}` : "none",
+                          boxShadow: "none",
                         }}
                       >
                         {isTriggered ? (
