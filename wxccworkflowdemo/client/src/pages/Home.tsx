@@ -1224,11 +1224,9 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3">
-                        <div>
-                          <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
                           {VIDEO_APPT_STAGES.has(stage.id) && (
                             <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
