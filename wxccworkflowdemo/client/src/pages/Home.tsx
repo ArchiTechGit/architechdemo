@@ -557,8 +557,8 @@ export default function Home() {
 
       {/* Impact banner */}
       <div
-        className="relative border-b border-white/[0.06] overflow-hidden"
-        style={{ background: "#070d15", minHeight: "200px" }}
+        className="relative border-b border-white/[0.06] overflow-hidden flex flex-col"
+        style={{ background: "#070d15", height: "320px" }}
       >
         {/* Layered dramatic gradients */}
         <div
@@ -575,27 +575,9 @@ export default function Home() {
         />
         {/* Subtle top accent line */}
         <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.3) 30%, rgba(5,195,221,0.15) 70%, transparent 100%)" }} />
-        {/* Fixed nav controls */}
-        <div className="absolute bottom-5 left-6 md:left-10 flex gap-1.5 items-center z-10">
-          <button onClick={() => advanceStat(-1)} aria-label="Previous stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>‹</button>
-          {IMPACT_STATS.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goToStat(i)}
-              aria-label={`Show stat ${i + 1}`}
-              className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-              style={{
-                width: i === statIndex ? "18px" : "5px",
-                height: "5px",
-                background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
-                boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
-              }}
-            />
-          ))}
-          <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
-        </div>
+        {/* Content — fills available height, clips silently if somehow too long */}
         <div
-          className="container mx-auto px-6 md:px-10 pt-10 pb-3 relative"
+          className="container mx-auto px-6 md:px-10 pt-10 relative flex-1 overflow-hidden"
           style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
           aria-live="polite"
           aria-atomic="true"
@@ -610,7 +592,26 @@ export default function Home() {
             {" "}<span className="text-white/40">{IMPACT_STATS[statIndex].tail}</span>
           </p>
         </div>
-        <div className="container mx-auto px-6 md:px-10 pb-14 flex justify-end relative">
+        {/* Footer — always anchored to bottom, nav dots left + overview button right */}
+        <div className="container mx-auto px-6 md:px-10 pb-5 flex items-center justify-between relative flex-shrink-0">
+          <div className="flex gap-1.5 items-center">
+            <button onClick={() => advanceStat(-1)} aria-label="Previous stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>‹</button>
+            {IMPACT_STATS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToStat(i)}
+                aria-label={`Show stat ${i + 1}`}
+                className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                style={{
+                  width: i === statIndex ? "18px" : "5px",
+                  height: "5px",
+                  background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
+                  boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
+                }}
+              />
+            ))}
+            <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
+          </div>
           <button
             onClick={() => setOverviewOpen(true)}
             className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md px-3 py-1.5 transition-all duration-200"
