@@ -645,11 +645,11 @@ export default function Home() {
               {([
                 { label: "Pre Admission", color: "var(--primary)", stages: [0, 1], variant: "feature" as const },
                 { label: "Day-of-Surgery Coordination", color: "#55CAFD", stages: [2, 3], variant: "compact" as const },
-                { label: "Discharge & Recovery", color: "var(--success)", stages: [4, 5], variant: "list" as const },
+                { label: "Discharge & Recovery", color: "#16CECC", stages: [4, 5], variant: "list" as const },
               ]).map(({ label, color, stages, variant }) => (
                 <div key={label} className="flex flex-col gap-3">
                   {/* Phase header */}
-                  <div className={`pb-2 ${variant === "feature" ? "text-left" : "text-center"}`} style={{ borderBottom: `1px solid ${variant === "list" ? "rgba(0,169,145,0.18)" : "rgba(5,195,221,0.1)"}` }}>
+                  <div className={`pb-2 ${variant === "feature" ? "text-left" : "text-center"}`} style={{ borderBottom: `1px solid ${variant === "list" ? "rgba(22,206,204,0.18)" : "rgba(5,195,221,0.1)"}` }}>
                     <span className={`font-bold uppercase tracking-[0.18em] ${variant === "feature" ? "text-[19px]" : "text-[14px]"}`} style={{ color }}>{label}</span>
                   </div>
                   {/* Stage items */}
@@ -692,11 +692,11 @@ export default function Home() {
 
                     return (
                       <div key={stage.id} className="flex items-start gap-3 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                        <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(0,169,145,0.1)", border: "1px solid rgba(0,169,145,0.22)" }}>
-                          <Icon className="w-3.5 h-3.5" style={{ color: "var(--success)" }} />
+                        <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(22,206,204,0.08)", border: "1px solid rgba(22,206,204,0.2)" }}>
+                          <Icon className="w-3.5 h-3.5" style={{ color: "#16CECC" }} />
                         </div>
                         <div className="min-w-0">
-                          <span className="font-mono text-[11px] font-bold block mb-0.5" style={{ color: "var(--success)" }}>{stage.chapter}</span>
+                          <span className="font-mono text-[11px] font-bold block mb-0.5" style={{ color: "#16CECC" }}>{stage.chapter}</span>
                           <h3 className="text-[16px] font-bold text-white/90 leading-tight mb-1">{stage.label}</h3>
                           <p className="text-[13px] text-white/50 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
                         </div>
