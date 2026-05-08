@@ -2,16 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
-import WorkflowDiagram from "@/components/WorkflowDiagram";
+import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
+import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
+import webexLogoUrl from "@/assets/logo-webex.svg";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
 import epicLogoUrl from "@/assets/epic_logo.png";
 import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
-import webexLogoUrl from "@/assets/logo-webex.svg";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import phoneWallpaperUrl from "@/assets/phone-wallpaper.png";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -39,9 +40,6 @@ interface JourneyStage {
   };
   phoneActionUrl?: string;
   conversationThread?: { role: "ai" | "patient"; text: string }[];
-  keyStat?: { value: string; label: string; whyItMatters: string; source: string };
-  systemIntegrations?: { label: string; logoUrl?: string; filterWhite?: boolean; color?: string }[];
-  systemIntegrationsLabel?: string;
 }
 
 const VOICE_AI_DEMO_NUMBER = "+61 2 0000 0000"; // Replace with real demo number
@@ -68,7 +66,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Pre Admission Enrolment",
     image: "/wxccworkflowdemo/dist/workflow-images/pre-admission-enrolment.png",
     currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
-    automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Nurse reviews flagged items only. Simple cases require no callback. Significantly reduces pre-admission appointment time.",
+    automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Completed forms route to nurse dashboard with color-coded priority. Nurse reviews flagged items only. Simple cases require no callback. Reduces pre-admission appointment from 45 minutes to 10-15 minutes at most.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to complete your enrolment forms. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
     phoneMessages: [
@@ -77,16 +75,6 @@ const JOURNEY_STAGES: JourneyStage[] = [
     ],
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
-    systemIntegrations: [
-      { label: "Digital Intake Forms", color: "#7C6EF5" },
-    ],
-    systemIntegrationsLabel: "Paperless Enrolment",
-    keyStat: {
-      value: "250hrs",
-      label: "of clinical staff time recovered per 1,000 interactions automated",
-      whyItMatters: "Pre-admission phone calls are one of the highest-touch, lowest-value tasks in the patient journey. Connecting this to WxCC means the AI handles data collection automatically — nurses only review flagged cases, not every form.",
-      source: "Regional Health Case Study",
-    },
   },
   {
     id: "PATIENT_APPOINTMENT_CONFIRM",
@@ -99,24 +87,20 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
-    systemIntegrations: [
-      { label: "Cerner Millennium", color: "#E8472A" },
-      { label: "iPM", color: "#4A9EE8" },
-      { label: "WebPAS", color: "#34C97A" },
-    ],
-    systemIntegrationsLabel: "Integration with PAS",
     conversationThread: [
-      { role: "ai", text: "Hi {NAME}, this is ArchiTech Hospital. Your pre-admission appointment is confirmed for Thursday 22 May at 10:30am. Reply YES to confirm or NO if you need to reschedule." },
-      { role: "patient", text: "NO — I can't make that time, I have work." },
-      { role: "ai", text: "No problem at all. Here are the next available slots:\n\n1️⃣ Fri 23 May – 9:00am\n2️⃣ Mon 26 May – 2:00pm\n3️⃣ Tue 27 May – 11:30am\n\nReply 1, 2 or 3 to book." },
-      { role: "patient", text: "2" },
-      { role: "ai", text: "Done! Your appointment is now booked for Monday 26 May at 2:00pm. We'll send a reminder the day before. See you then 👍" },
+      { role: "ai", text: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time." },
+      { role: "patient", text: "This doesn't work for me." },
+      { role: "ai", text: "No problem! How about {DATE2}? We have availability at that time." },
+      { role: "patient", text: "Yep, that looks good." },
+      { role: "ai", text: "Perfect — that's been confirmed. We'll see you on {DATE2}." },
     ],
-    keyStat: {
-      value: "34%",
-      label: "reduction in missed appointments using SMS reminders",
-      whyItMatters: "DNA rates cost public hospitals $125–$800 per missed appointment. An existing scheduling platform sends reminders — but WxCC makes them conversational and two-way, so patients can reschedule instantly rather than simply not showing up.",
-      source: "NSW Behavioural Insights Unit, 2019",
+    partnerBadge: {
+      label: "Webex",
+      sublabel: "Instant Connect",
+      logoUrl: webexLogoUrl,
+      bg: "rgba(0,191,111,0.12)",
+      border: "rgba(0,191,111,0.4)",
+      filterWhite: true,
     },
   },
   {
@@ -131,18 +115,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Open Wayfinder →",
     phoneActionUrl: "/wxccworkflowdemo/dist/wayfinding.html",
     systemEvents: [],
-    keyStat: {
-      value: "19%",
-      label: "reduction in no-shows at St Vincent's Hospital Sydney",
-      whyItMatters: "Admissions congestion starts in the carpark. A day-of SMS with a direct wayfinding link — triggered automatically by WxCC — means patients arrive at the right place without queuing at the admissions desk.",
-      source: "NSW Behavioural Insights Unit, 2016",
-    },
     partnerBadge: {
       label: "Cisco Spaces",
       sublabel: "Powered by",
       logoUrl: ciscoSpacesLogoUrl,
-      bg: "var(--success-bg)",
-      border: "var(--success-border)",
+      bg: "rgba(0,169,145,0.12)",
+      border: "rgba(0,169,145,0.4)",
     },
   },
   {
@@ -160,25 +138,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     ],
     phoneMessage: "Hi Family Member, this is ArchiTech Hospital. {NAME}'s surgery is underway. We'll update you when there's a change in status. No need to call, we'll contact you.",
     phoneAction: "Acknowledge →",
-    keyStat: {
-      value: "30%",
-      label: "of healthcare workforce tasks could be automated using digital technology and AI",
-      whyItMatters: "Family communication during surgery is inconsistent and staff-dependent. Routing EMR status events through WxCC means updates go out the moment the patient's status changes — no manual calls, no forgotten callbacks.",
-      source: "Productivity Commission, May 2024",
-    },
     systemEvents: [
       "HL7 ADT^A03 — Patient discharge event received from Epic EMR",
       "HL7 ORM^O01 — Surgery completion order from OR system",
       "Webex CC flow triggered by EMR event",
       "Family notification dispatched via Webex Connect",
     ],
-    systemIntegrations: [
-      { label: "Epic", logoUrl: epicLogoUrl },
-      { label: "Cerner", logoUrl: oracleHealthLogoUrl },
-      { label: "HL7" },
-      { label: "FHIR R4" },
-    ],
-    systemIntegrationsLabel: "Integration with HL7 / FHIR",
   },
   {
     id: "PATIENT_DISCHARGE_INSTRUCTIONS",
@@ -191,12 +156,6 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
     phoneAction: "View Discharge Instructions →",
     systemEvents: [],
-    keyStat: {
-      value: "80%",
-      label: "of manual effort cut from patient communication workflows",
-      whyItMatters: "Each surgical episode generates ~12 pages of single-use paper — discharge instructions, referral letters, medication summaries — all destined for landfill. Across a mid-sized hospital, that's tonnes of waste and thousands of printing hours annually. WxCC eliminates it entirely: instructions are delivered digitally via SMS the moment the EMR records discharge, referrals route electronically, and embedded video links replace printed diagrams. Better outcomes, better for the planet, zero staff effort.",
-      source: "Regional Health Case Study",
-    },
   },
   {
     id: "PATIENT_POST_DISCHARGE_SURVEY",
@@ -214,12 +173,6 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
-    keyStat: {
-      value: "20x",
-      label: "more cost-effective per interaction than a manual phone call",
-      whyItMatters: "Post-discharge follow-up is frequently skipped because clinical staff don't have capacity. WxCC automates the check-in at scale — catching complications early, reducing ED re-presentations, and doing it at a fraction of the cost of a nurse call.",
-      source: "Regional Health Case Study",
-    },
     conversationThread: [
       { role: "ai", text: "Hi {NAME}, it's been 2 days since your surgery. On a scale of 1–10, how would you rate your pain right now?" },
       { role: "patient", text: "About a 3. Manageable." },
@@ -229,7 +182,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
       { role: "patient", text: "Yes, every 6 hours like they said." },
       { role: "ai", text: "Perfect. One more — any fever, chills, or difficulty breathing since discharge?" },
       { role: "patient", text: "No, feeling okay overall." },
-      { role: "ai", text: "Great news, {NAME}. Your responses look within normal range. A nurse will review this and follow up if anything needs attention. Stay rested and we'll check in again in 48 hours. 💙" },
+      { role: "ai", text: "Great news, John. Your responses look within normal range. A nurse will review this and follow up if anything needs attention. Stay rested and we'll check in again in 48 hours. 💙" },
     ],
   },
 ];
@@ -243,7 +196,7 @@ const STAGE_META = [
   { icon: Activity, shortDesc: "AI agent initiates conversational check-in 48-72 hours post-discharge. Concerning responses trigger immediate nurse escalation. Critical flags generate emergency protocol alert." },
 ];
 
-const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "var(--primary)", accentBg: "var(--border)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
+const STAGE_COLOR = { bg: "linear-gradient(145deg, #091e2e 0%, #0e2e46 55%, #081a28 100%)", accent: "#05C3DD", accentBg: "rgba(5,195,221,0.12)", accentBorder: "rgba(5,195,221,0.38)", accentGlow: "rgba(5,195,221,0.18)", iconTint: "rgba(5,195,221,0.06)" };
 const STAGE_COLORS = [STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR, STAGE_COLOR];
 
 const IMPACT_STATS = [
@@ -252,28 +205,28 @@ const IMPACT_STATS = [
     headline: "More cost-effective per interaction than a manual phone call.",
     body: "Routine patient communications cost $10–$30 each when handled by clinical staff. The same outcome delivered digitally costs",
     highlight: "$0.12–$0.20 per interaction",
-    tail: "Every touchpoint adds to it. So does every site. Source: Regional Health Case Study.",
+    tail: "Every touchpoint adds to it. So does every site.",
   },
   {
     hero: "80%",
     headline: "Of manual effort cut from appointment confirmation.",
     body: "Multiple call attempts, voicemail, manual documentation, follow-up — replaced by a single automated message.",
     highlight: "Confirmed in the Proof of Value.",
-    tail: "No clinical judgment required. No staff time consumed. Source: Regional Health Case Study.",
+    tail: "No clinical judgment required. No staff time consumed.",
   },
   {
     hero: "~$84",
     headline: "In staff cost recovered per patient episode across all four workflows.",
     body: "Appointment scheduling, pre-admission, surgery prep, recovery check-in. At 2,000 surgical cases that returns $168K. At 10,000 cases,",
     highlight: "the saving exceeds $840K annually",
-    tail: "The platform cost stays fixed as volume grows. Source: Regional Health Case Study.",
+    tail: "The platform cost stays fixed as volume grows.",
   },
   {
     hero: "250hrs",
     headline: "Of clinical staff time recovered for every 1,000 interactions automated.",
     body: "At 15 minutes per manual call, every thousand interactions automated returns",
     highlight: "~$14,000 in clinical capacity",
-    tail: "Small facility. Large network. The math scales either way. Source: Regional Health Case Study.",
+    tail: "Small facility. Large network. The math scales either way.",
   },
   {
     hero: "6–20%",
@@ -320,25 +273,6 @@ const IMPACT_STATS = [
 ];
 
 const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
-
-const STEP_REVEAL_DELAYS = [450, 950, 1500] as const;
-const VIDEO_APPT_STAGES = new Set(["PATIENT_APPOINTMENT_CONFIRM", "PATIENT_POST_DISCHARGE_SURVEY"]);
-const VIDEO_APPT_BUTTON_STAGES = new Set(["PATIENT_POST_DISCHARGE_SURVEY"]);
-const SPACES_DEMO_STAGES = new Set(["PATIENT_ARRIVAL_WAYFINDING", "PATIENT_FAMILY_SURGERY_UPDATE"]);
-const CONFETTI_COLORS_1 = ["#05C3DD", "#00A991", "#ffffff", "#FFD700", "#FF6B6B"];
-const CONFETTI_COLORS_2 = ["#05C3DD", "#00A991", "#ffffff"];
-const INPUT_STYLE = { border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" };
-
-const inputFocusProps = {
-  onFocus: (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.borderColor = "rgba(5,195,221,0.5)";
-    e.currentTarget.style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)";
-  },
-  onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-    e.currentTarget.style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)";
-  },
-};
 const TECH_STACK = ["Webex CC Flow Designer", "Webex Connect", "Calendar API", "EHR Integration"];
 
 export default function Home() {
@@ -360,18 +294,13 @@ export default function Home() {
   const [systemEventReveal, setSystemEventReveal] = useState<Record<string, number>>({});
   const [threadReveal, setThreadReveal] = useState<Record<string, number>>({});
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
-  const [spacesDemoOpen, setSpacesDemoOpen] = useState(false);
-  const [mobileSpacesDemoPlaying, setMobileSpacesDemoPlaying] = useState(false);
   const [wayfindingOpen, setWayfindingOpen] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
-  const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string; stageId: string } | null>(null);
-  const displayApptDate = useMemo(() => {
-    const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    d.setMinutes(d.getMinutes() >= 30 ? 60 : 0, 0, 0);
-    return formatHumanDate(d);
-  }, []);
-  const interpolate = (msg: string) => msg.replace(/\{NAME\}/g, patientName.trim() || "Patient").replace(/\{DATE\}/g, displayApptDate);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string } | null>(null);
+  const displayApptDate = formatHumanDate((() => { const d = new Date(Date.now() + 24*60*60*1000); d.setMinutes(d.getMinutes() >= 30 ? 60 : 0, 0, 0); return d; })());
+  const displayApptDate2 = formatHumanDate((() => { const d = new Date(Date.now() + 3*24*60*60*1000); d.setHours(14, 0, 0, 0); return d; })());
+  const interpolate = (msg: string) => msg.replace(/\{NAME\}/g, patientName.trim() || "Patient").replace(/\{DATE\}/g, displayApptDate).replace(/\{DATE2\}/g, displayApptDate2);
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   useEffect(() => {
     const tick = () => setClockTime(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
@@ -380,30 +309,8 @@ export default function Home() {
   }, []);
   const stepRevealTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (overviewOpen) { setOverviewOpen(false); return; }
-      if (lightboxImage) { setLightboxImage(null); return; }
-      if (spacesDemoOpen) { setSpacesDemoOpen(false); return; }
-      if (voiceModalOpen) { setVoiceModalOpen(false); return; }
-    };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [overviewOpen, lightboxImage, spacesDemoOpen, voiceModalOpen]);
-
 
   const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startStatAutoplay = () => {
-    statIntervalRef.current = setInterval(() => {
-      setStatVisible(false);
-      setTimeout(() => {
-        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
-        setStatVisible(true);
-      }, 350);
-    }, 12000);
-  };
 
   const goToStat = (index: number) => {
     setStatVisible(false);
@@ -414,13 +321,26 @@ export default function Home() {
   };
 
   const advanceStat = (dir: 1 | -1) => {
-    goToStat((statIndex + dir + IMPACT_STATS.length) % IMPACT_STATS.length);
+    const next = (statIndex + dir + IMPACT_STATS.length) % IMPACT_STATS.length;
+    goToStat(next);
     if (statIntervalRef.current) clearInterval(statIntervalRef.current);
-    startStatAutoplay();
+    statIntervalRef.current = setInterval(() => {
+      setStatVisible(false);
+      setTimeout(() => {
+        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
+        setStatVisible(true);
+      }, 350);
+    }, 12000);
   };
 
   useEffect(() => {
-    startStatAutoplay();
+    statIntervalRef.current = setInterval(() => {
+      setStatVisible(false);
+      setTimeout(() => {
+        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
+        setStatVisible(true);
+      }, 350);
+    }, 12000);
     return () => { if (statIntervalRef.current) clearInterval(statIntervalRef.current); };
   }, []);
 
@@ -490,8 +410,8 @@ export default function Home() {
         const origin = rect
           ? { x: (rect.left + rect.width / 2) / window.innerWidth, y: (rect.top + rect.height * 0.4) / window.innerHeight }
           : { x: 0.5, y: 0.5 };
-        confetti({ particleCount: 180, spread: 70, origin, colors: CONFETTI_COLORS_1, startVelocity: 45, gravity: 0.9, scalar: 1.1 });
-        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: CONFETTI_COLORS_2, startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
+        confetti({ particleCount: 180, spread: 70, origin, colors: ["#05C3DD", "#00A991", "#ffffff", "#FFD700", "#FF6B6B"], startVelocity: 45, gravity: 0.9, scalar: 1.1 });
+        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: ["#05C3DD", "#00A991", "#ffffff"], startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
       }
       setPhonePulse(true);
       if (phoneScreen === "home") {
@@ -503,12 +423,13 @@ export default function Home() {
         }, 2500);
       }
       setTimeout(() => setPhonePulse(false), 2000);
-      const revealTimeouts = STEP_REVEAL_DELAYS.map((delay, idx) =>
+      const revealTimeouts = [450, 950, 1500].map((delay, idx) =>
         setTimeout(() => {
           setStageStepReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
         }, delay)
       );
       stepRevealTimeoutsRef.current.push(...revealTimeouts);
+      // Reveal HL7 system events sequentially for stages that have them
       const triggeredStage = JOURNEY_STAGES.find((s) => s.id === workflowId);
       if (triggeredStage && triggeredStage.systemEvents.length > 0) {
         const sysTimeouts = triggeredStage.systemEvents.map((_, idx) =>
@@ -518,20 +439,14 @@ export default function Home() {
         );
         stepRevealTimeoutsRef.current.push(...sysTimeouts);
       }
-      if (triggeredStage?.conversationThread?.length) {
+      // Reveal conversational AI thread progressively
+      if (triggeredStage && triggeredStage.conversationThread && triggeredStage.conversationThread.length > 0) {
         const threadTimeouts = triggeredStage.conversationThread.map((_, idx) =>
           setTimeout(() => {
             setThreadReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
           }, 800 + idx * 1800)
         );
         stepRevealTimeoutsRef.current.push(...threadTimeouts);
-      }
-      if (workflowId === "PATIENT_ARRIVAL_WAYFINDING") {
-        const mobileDemoTimeout = setTimeout(() => {
-          if (triggerGenerationRef.current !== generation) return;
-          setMobileSpacesDemoPlaying(true);
-        }, 5500);
-        stepRevealTimeoutsRef.current.push(mobileDemoTimeout);
       }
       toast.success(`${workflowLabel} sent`, { description: mobileNumber });
     } catch (error) {
@@ -550,14 +465,13 @@ export default function Home() {
     setStageStepReveal({});
     setSystemEventReveal({});
     setThreadReveal({});
+    setExpandedStages(new Set());
     setWayfindingOpen(false);
     triggerGenerationRef.current += 1;
     if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
     notifTimerRef.current = null;
     setPhoneScreen("home");
     setPhoneNotif(false);
-    setMobileSpacesDemoPlaying(false);
-    setSpacesDemoOpen(false);
     setPatientName("");
     setMobileNumber("");
     setDemoMobile("");
@@ -591,8 +505,8 @@ export default function Home() {
             <h1 className="text-[13px] font-bold text-white/90 uppercase tracking-widest leading-tight">
               The Digital Front Door — Patient Experience Journey
             </h1>
-            <p className="text-[10px] font-bold text-white/35 tracking-[0.22em] uppercase mt-0.5">
-              Live Demonstration
+            <p className="text-[10px] font-bold text-primary tracking-[0.22em] uppercase mt-0.5" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+              [ Live Demonstration ]
             </p>
           </div>
         </div>
@@ -605,18 +519,25 @@ export default function Home() {
             <Moon className="w-3.5 h-3.5" />
             <span className="text-[10px] font-bold tracking-widest uppercase">Sleep</span>
           </button>
-          <div className="flex items-center gap-2 border border-success/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-            <span className="text-xs font-bold text-success tracking-wider uppercase">Live</span>
+          <div className="flex items-center gap-2 border border-[#00A991]/50 rounded-full px-4 py-1.5" style={{ background: "rgba(0,169,145,0.08)", boxShadow: "0 0 16px rgba(0,169,145,0.15), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+            <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+            <span className="text-xs font-bold text-[#00A991] tracking-wider uppercase">Live</span>
           </div>
         </div>
       </div>
 
       {/* Impact banner */}
       <div
-        className="relative border-b border-white/[0.06] overflow-hidden flex flex-col"
-        style={{ background: "#070d15", height: "320px" }}
+        className="relative border-b border-white/[0.06] overflow-hidden"
+        style={{ background: "#070d15", minHeight: "220px" }}
       >
+        <img
+          src={bgImage}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ opacity: 0.14, mixBlendMode: "luminosity" }}
+        />
         {/* Layered dramatic gradients */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -632,52 +553,64 @@ export default function Home() {
         />
         {/* Subtle top accent line */}
         <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(5,195,221,0.3) 30%, rgba(5,195,221,0.15) 70%, transparent 100%)" }} />
-        {/* Content — fills available height, clips silently if somehow too long */}
-        <div
-          className="container mx-auto px-6 md:px-10 pt-10 relative flex-1 overflow-hidden"
-          style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <p className="font-bold text-white leading-tight tracking-tight mb-4" style={{ fontSize: "clamp(1.6rem, 3.8vw, 2.8rem)" }}>
-            <span className="text-primary font-black" style={{ letterSpacing: "-0.02em" }}>{IMPACT_STATS[statIndex].hero}</span>
-            {" "}{IMPACT_STATS[statIndex].headline}
-          </p>
-          <p className="text-sm md:text-base text-white/60 leading-relaxed max-w-2xl">
-            {IMPACT_STATS[statIndex].body}{" "}
-            <span className="text-white font-semibold">{IMPACT_STATS[statIndex].highlight}</span>
-            {" "}<span className="text-white/40">{IMPACT_STATS[statIndex].tail}</span>
-          </p>
+        {/* Fixed nav controls */}
+        <div className="absolute bottom-5 left-6 md:left-10 flex gap-1.5 items-center z-10">
+          <button onClick={() => advanceStat(-1)} aria-label="Previous stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>‹</button>
+          {IMPACT_STATS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToStat(i)}
+              aria-label={`Show stat ${i + 1}`}
+              className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+              style={{
+                width: i === statIndex ? "18px" : "5px",
+                height: "5px",
+                background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
+                boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
+              }}
+            />
+          ))}
+          <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
         </div>
-        {/* Footer — always anchored to bottom, nav dots left + overview button right */}
-        <div className="container mx-auto px-6 md:px-10 pb-5 flex items-center justify-between relative flex-shrink-0">
-          <div className="flex gap-1.5 items-center">
-            <button onClick={() => advanceStat(-1)} aria-label="Previous stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>‹</button>
-            {IMPACT_STATS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goToStat(i)}
-                aria-label={`Show stat ${i + 1}`}
-                className="rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                style={{
-                  width: i === statIndex ? "18px" : "5px",
-                  height: "5px",
-                  background: i === statIndex ? "rgba(5,195,221,0.9)" : "rgba(255,255,255,0.15)",
-                  boxShadow: i === statIndex ? "0 0 8px rgba(5,195,221,0.6)" : "none",
-                }}
-              />
-            ))}
-            <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
+        <div
+          className="container mx-auto px-6 md:px-10 py-10 flex items-center gap-8 md:gap-14 relative"
+          style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
+        >
+          {/* Hero number */}
+          <div className="flex-shrink-0">
+            <span
+              className="font-black text-primary leading-none"
+              style={{
+                fontSize: "clamp(64px, 8vw, 100px)",
+                textShadow: "0 0 40px rgba(5,195,221,0.35), 0 0 80px rgba(5,195,221,0.15)",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {IMPACT_STATS[statIndex].hero}
+            </span>
           </div>
+          <div className="hidden md:block w-px self-stretch" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)" }} />
+          {/* Story */}
+          <div className="flex-1">
+            <p className="text-2xl md:text-3xl font-black text-white mb-3 leading-snug tracking-tight">
+              {IMPACT_STATS[statIndex].headline}
+            </p>
+            <p className="text-lg text-white/65 leading-relaxed">
+              {IMPACT_STATS[statIndex].body}{" "}
+              <span className="text-white font-bold" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>{IMPACT_STATS[statIndex].highlight}</span>
+              {" "}<span className="text-white/50">{IMPACT_STATS[statIndex].tail}</span>
+            </p>
+          </div>
+        </div>
+        <div className="container mx-auto px-6 md:px-10 pb-5 flex justify-end relative">
           <button
             onClick={() => setOverviewOpen(true)}
-            className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md px-3 py-1.5 transition-all duration-200"
-            style={{ border: "1px solid rgba(5,195,221,0.22)", background: "rgba(5,195,221,0.06)" }}
+            className="flex items-center gap-2 group focus-visible:outline-none"
           >
-            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-primary/80 group-hover:text-white transition-colors duration-200">
-              Patient Journey Overview
+            <span className="text-[16.5px] font-black uppercase tracking-[0.22em] text-primary group-hover:text-white transition-colors duration-200" style={{ textShadow: "0 0 12px rgba(5,195,221,0.5)" }}>
+              Click here to learn about the journey
             </span>
-            <ChevronDown className="w-3 h-3 text-primary/60 group-hover:text-white transition-colors duration-200 -rotate-90" />
+            <ChevronDown className="w-3.5 h-3.5 text-primary group-hover:text-white transition-colors duration-200 -rotate-90" />
           </button>
         </div>
       </div>
@@ -685,77 +618,47 @@ export default function Home() {
       {/* Journey Overview Modal */}
       {overviewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setOverviewOpen(false)}>
-          <div className="relative w-full mx-6 max-h-[90vh] overflow-y-auto rounded-xl" style={{ maxWidth: "1400px" }} role="dialog" aria-modal="true" aria-label="Patient Journey — All 6 Stages" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full mx-6" style={{ maxWidth: "1400px" }} onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between mb-7">
               <div className="flex items-center gap-3">
-                <div className="w-[3px] h-7 rounded-full" style={{ background: "linear-gradient(180deg, var(--primary), rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+                <div className="w-[3px] h-7 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
                 <span className="text-[22.5px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
               </div>
-              <button onClick={() => setOverviewOpen(false)} aria-label="Close overview" className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-3 py-1.5 rounded transition-colors">
-                <span aria-hidden="true">✕</span> Close
+              <button onClick={() => setOverviewOpen(false)} className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-3 py-1.5 rounded transition-colors">
+                ✕ Close
               </button>
             </div>
 
-            {/* 3-column grid — each phase has a distinct visual treatment */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {([
-                { label: "Pre Admission", color: "var(--primary)", stages: [0, 1], variant: "feature" as const },
-                { label: "Day-of-Surgery Coordination", color: "var(--primary)", stages: [2, 3], variant: "feature" as const },
-                { label: "Discharge & Recovery", color: "var(--primary)", stages: [4, 5], variant: "feature" as const },
-              ]).map(({ label, color, stages, variant }) => (
-                <div key={label} className="flex flex-col gap-3">
-                  {/* Phase header */}
-                  <div className={`pb-2 ${variant === "feature" ? "text-left" : "text-center"}`} style={{ borderBottom: "1px solid rgba(5,195,221,0.1)" }}>
-                    <span className={`font-bold uppercase tracking-[0.18em] ${variant === "feature" ? "text-[19px]" : "text-[14px]"}`} style={{ color }}>{label}</span>
+            {/* 3-column grid — one column per journey phase, 2 stages stacked per column */}
+            <div className="grid gap-6" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+              {[
+                { label: "Pre Admission", color: "rgba(5,195,221,0.55)", stages: [0, 1] },
+                { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.55)", stages: [2, 3] },
+                { label: "Discharge & Recovery", color: "rgba(85,202,253,0.55)", stages: [4, 5] },
+              ].map(({ label, color, stages }) => (
+                <div key={label} className="flex flex-col gap-4">
+                  {/* Section label */}
+                  <div className="text-center pb-2" style={{ borderBottom: "1px solid rgba(5,195,221,0.1)" }}>
+                    <span className="text-[18px] font-bold font-mono uppercase tracking-[0.18em]" style={{ color }}>{label}</span>
                   </div>
-                  {/* Stage items */}
+                  {/* Stage cards */}
                   {stages.map((idx) => {
                     const stage = JOURNEY_STAGES[idx];
                     const sc = STAGE_COLORS[idx];
                     const Icon = STAGE_META[idx].icon;
-
-                    if (variant === "feature") {
-                      return (
-                        <div key={stage.id} className="rounded-xl relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.9) 100%)` }}>
-                          <div className="flex items-start gap-4 p-5">
-                            <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}` }}>
-                              <Icon className="w-5 h-5" style={{ color: sc.accent }} />
-                            </div>
-                            <div className="flex flex-col gap-2 min-w-0">
-                              <span className="font-mono text-[12px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
-                              <h3 className="text-[20px] font-black text-white leading-tight">{stage.label}</h3>
-                              <p className="text-[14px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (variant === "compact") {
-                      return (
-                        <div key={stage.id} className="rounded-lg flex items-start gap-3 p-3.5" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.14)" }}>
-                          <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}` }}>
-                            <Icon className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="font-mono text-[11px] font-bold block mb-1" style={{ color: "var(--primary)" }}>{stage.chapter}</span>
-                            <h3 className="text-[16px] font-bold text-white leading-tight mb-1.5">{stage.label}</h3>
-                            <p className="text-[13px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
-                          </div>
-                        </div>
-                      );
-                    }
-
                     return (
-                      <div key={stage.id} className="flex items-start gap-3 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                        <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(5,195,221,0.08)", border: "1px solid rgba(5,195,221,0.2)" }}>
-                          <Icon className="w-3.5 h-3.5" style={{ color: "var(--primary)" }} />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="font-mono text-[11px] font-bold block mb-0.5" style={{ color: "var(--primary)" }}>{stage.chapter}</span>
-                          <h3 className="text-[16px] font-bold text-white/90 leading-tight mb-1">{stage.label}</h3>
-                          <p className="text-[13px] text-white/50 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                      <div key={stage.id} className="rounded-xl relative overflow-hidden" style={{ border: `1px solid ${sc.accentBorder}`, background: `linear-gradient(160deg, ${sc.accentBg} 0%, rgba(8,14,24,0.9) 100%)` }}>
+                        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${sc.accent}55, transparent)` }} />
+                        <div className="flex items-start gap-4 p-5">
+                          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: sc.accentBg, border: `1.5px solid ${sc.accentBorder}`, boxShadow: `0 0 14px ${sc.accentGlow}` }}>
+                            <Icon className="w-6 h-6" style={{ color: sc.accent }} />
+                          </div>
+                          <div className="flex flex-col gap-2 min-w-0">
+                            <span className="font-mono text-[13px] font-bold px-1.5 py-0.5 rounded self-start" style={{ background: sc.accentBg, border: `1px solid ${sc.accentBorder}`, color: sc.accent }}>{stage.chapter}</span>
+                            <h3 className="text-[22px] font-black text-white leading-tight">{stage.label}</h3>
+                            <p className="text-[16px] text-white/60 leading-relaxed">{STAGE_META[idx].shortDesc}</p>
+                          </div>
                         </div>
                       </div>
                     );
@@ -771,8 +674,8 @@ export default function Home() {
       <div className="container mx-auto px-6 md:px-10 py-10">
         <div className="flex items-center gap-4 mb-8 px-0">
           <div className="flex items-center gap-3">
-            <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, var(--primary), rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
-            <span className="text-[15px] font-black text-white uppercase tracking-widest">Journey Demonstration</span>
+            <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+            <span className="text-[13.5px] font-black text-white uppercase tracking-widest">Journey Demonstration</span>
           </div>
           <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25), transparent)" }} />
         </div>
@@ -822,26 +725,9 @@ export default function Home() {
 
                   {/* Screen */}
                   <div className="absolute overflow-hidden" style={{ inset: "10px", borderRadius: "42px" }}>
-                    {mobileSpacesDemoPlaying ? (
-                      <div className="relative flex flex-col h-full" style={{ background: "#000" }}>
-                        <video
-                          src="/wxccworkflowdemo/dist/spacesmobile.mp4"
-                          autoPlay
-                          playsInline
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          onEnded={() => { setMobileSpacesDemoPlaying(false); setPhoneScreen("home"); }}
-                        />
-                        <button
-                          onClick={() => { setMobileSpacesDemoPlaying(false); setPhoneScreen("home"); }}
-                          style={{ position: "absolute", top: "18px", right: "18px", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.25)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 30, padding: 0 }}
-                          aria-label="Close spaces demo"
-                        >
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1l-8 8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
-                        </button>
-                      </div>
-                    ) : (phoneScreen === "home" || !activePhoneStage) ? (
+                    {(phoneScreen === "home" || !activePhoneStage) ? (
                       /* ─── HOME SCREEN ─── */
-                      <div className="relative flex flex-col h-full overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2744 0%, #2d1b6e 50%, #0d1a3a 100%)" }}>
+                      <div className="relative flex flex-col h-full overflow-hidden" style={{ backgroundImage: `url(${phoneWallpaperUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}>
                         {/* Status bar – white */}
                         <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
                           <span className="font-bold" style={{ fontSize: "11px", color: "white" }}>{clockTime}</span>
@@ -995,14 +881,14 @@ export default function Home() {
                           {activePhoneStage && activePhoneStage.conversationThread && (threadReveal[activePhoneStage.id] ?? 0) > 0 ? (
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--primary), #0095A8)" }}>
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #05C3DD, #0095A8)" }}>
                                   <span className="text-white font-bold" style={{ fontSize: "8px" }}>AI</span>
                                 </div>
                                 <span className="text-slate-500" style={{ fontSize: "10px" }}>Webex AI Agent · now</span>
                               </div>
                               {activePhoneStage.conversationThread.slice(0, threadReveal[activePhoneStage.id] ?? 0).map((msg, i) => (
                                 <div key={i} className={`flex ${msg.role === "patient" ? "justify-end" : "justify-start"}`}>
-                                  <div className="rounded-2xl px-2.5 py-1.5" style={{ maxWidth: "82%", background: msg.role === "ai" ? "#f1f5f9" : "var(--primary)", borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined, borderTopRightRadius: msg.role === "patient" ? "4px" : undefined }}>
+                                  <div className="rounded-2xl px-2.5 py-1.5" style={{ maxWidth: "82%", background: msg.role === "ai" ? "#f1f5f9" : "#05C3DD", borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined, borderTopRightRadius: msg.role === "patient" ? "4px" : undefined }}>
                                     <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.role === "ai" ? interpolate(msg.text) : msg.text}</p>
                                   </div>
                                 </div>
@@ -1043,8 +929,6 @@ export default function Home() {
                   }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.02)"; }}
-                  onFocus={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)"; }}
-                  onBlur={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.02)"; }}
                 >
                   ↺ Reset & Replay
                 </Button>
@@ -1064,12 +948,11 @@ export default function Home() {
                 boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
               }}
             >
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="grid grid-cols-3 gap-5">
               <div className="space-y-3">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3 h-3 text-primary/40" />
-                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Name</span>
-                  <span title="Enter the patient's full name. This will be used to personalise the SMS message sent to the patient." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:10,minWidth:'16px',minHeight:'16px',display:'inline-flex'}}>i</span>
+                  <span className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">Patient Name</span>
                 </label>
                 <Input
                   id="patient-name"
@@ -1077,16 +960,22 @@ export default function Home() {
                   placeholder="Sarah Johnson"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={INPUT_STYLE}
-                  {...inputFocusProps}
+                  className="h-11 text-[13px] text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: "10px",
+                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
                 />
               </div>
               <div className="space-y-2.5">
                 <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
-                  <span title="Enter the patient's mobile number in the format 0440123456. This is the number that will receive the SMS." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:10,minWidth:'16px',minHeight:'16px',display:'inline-flex'}}>i</span>
+                  <span className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
                 </label>
                 <Input
                   id="patient-mobile"
@@ -1094,16 +983,22 @@ export default function Home() {
                   placeholder="+61 2 1234 5678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={INPUT_STYLE}
-                  {...inputFocusProps}
+                  className="h-11 text-[13px] text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: "10px",
+                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
                 />
               </div>
               <div className="space-y-2.5">
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Instant Connect Host</span>
-                  <span title="Enter the host's mobile number in the format 0440123456. This number will receive the video call link." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:10,minWidth:'16px',minHeight:'16px',display:'inline-flex'}}>i</span>
+                  <span className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">Hospital Mobile</span>
                 </label>
                 <Input
                   id="demo-mobile"
@@ -1111,18 +1006,23 @@ export default function Home() {
                   placeholder="+61 4 1234 5678"
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
-                  className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={INPUT_STYLE}
-                  {...inputFocusProps}
+                  className="h-11 text-[13px] text-foreground placeholder:text-white/15 focus-visible:ring-0"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: "10px",
+                    boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(5,195,221,0.5)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(5,195,221,0.08)"; }}
+                  onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLInputElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.3)"; }}
                 />
               </div>
             </div>
-
             </div>
 
             {/* Stepper */}
-            <div className="overflow-x-auto -mx-1 px-1 pb-2">
-            <div className="flex items-start min-w-max lg:min-w-0">
+            <div className="flex items-start">
               {JOURNEY_STAGES.map((stage, idx) => {
                 const isActive = activeStepperStage === stage.id;
                 const isTriggered = triggeredStages.has(stage.id);
@@ -1134,7 +1034,7 @@ export default function Home() {
                     {/* Node */}
                     <button
                       onClick={() => setActiveStepperStage(stage.id)}
-                      className="flex flex-col items-center gap-2 flex-shrink-0 group cursor-pointer"
+                      className="flex flex-col items-center gap-2 flex-shrink-0 group"
                       style={{ width: 88 }}
                     >
                       {/* Circle */}
@@ -1143,22 +1043,22 @@ export default function Home() {
                         style={{
                           width: 56, height: 56,
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
-                          border: isTriggered ? "2px solid var(--success)" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
-                          boxShadow: "none",
+                          border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
+                          boxShadow: isTriggered ? "0 0 16px rgba(0,169,145,0.35)" : isActive ? `0 0 16px ${sc.accentGlow}` : "none",
                         }}
                       >
                         {isTriggered ? (
-                          <Check style={{ width: 24, height: 24 }} className="text-success" />
+                          <Check style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)" }} className="text-[#00A991]" />
                         ) : isActive && SIcon ? (
-                          <SIcon style={{ width: 24, height: 24, color: sc.accent }} className="transition-colors duration-300" />
+                          <SIcon style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)", color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
-                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: 20, color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
+                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(16px, 2.7vw, 40px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
                         )}
                       </div>
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(11px, 0.85vw, 14px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: 86, display: "block" }}
+                        style={{ fontSize: "clamp(12px, 1.62vw, 22px)", color: isTriggered ? "#00A991" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
                       >
                         {stage.label}
                       </span>
@@ -1174,7 +1074,7 @@ export default function Home() {
                           className="absolute inset-0 transition-all duration-500 origin-left"
                           style={{
                             borderRadius: "2px",
-                            background: "linear-gradient(90deg, var(--success), var(--primary))",
+                            background: "linear-gradient(90deg, #00A991, #05C3DD)",
                             boxShadow: "0 0 8px rgba(5,195,221,0.5)",
                             transform: segmentTriggered ? "scaleX(1)" : "scaleX(0)",
                           }}
@@ -1184,7 +1084,6 @@ export default function Home() {
                   </React.Fragment>
                 );
               })}
-            </div>
             </div>
 
             {/* Detail panel */}
@@ -1202,166 +1101,130 @@ export default function Home() {
                   className="rounded-2xl overflow-hidden transition-all duration-500"
                   style={{
                     boxShadow: isTriggered
-                      ? `0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)`
+                      ? `0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px ${stageColor.accentBorder}`
                       : `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)`,
                   }}
                 >
                   {/* Banner */}
-                  <div className="relative overflow-hidden" style={{ minHeight: "190px", background: stageColor.bg }}>
+                  <div className="relative overflow-hidden" style={{ height: "190px", background: stageColor.bg }}>
                     {StageIcon && (
                       <div className="absolute -right-6 -bottom-6 pointer-events-none">
                         <StageIcon style={{ width: "160px", height: "160px", color: stageColor.iconTint }} />
                       </div>
                     )}
                     {isTriggered && (
-                      <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 60%)" }} />
+                      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(145deg, ${stageColor.accentBg} 0%, transparent 60%)` }} />
                     )}
                     <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.65) 100%)" }} />
                     <div className="absolute inset-0 flex flex-col justify-between p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[13px] font-bold px-2 py-1 rounded" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.65)" }}>{stage.chapter}</span>
+                          <span className="font-mono text-[13px] font-bold px-2 py-1 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>{stage.chapter}</span>
                         </div>
-                        <div className="flex items-start gap-1">
+                        <div className="flex items-start gap-1.5">
                           {stage.partnerBadge && (
-                            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, height: 36 }}>
+                            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)", height: 44 }}>
+                              {stage.partnerBadge.sublabel && (
+                                <span className="text-[10px] font-semibold tracking-[0.12em] uppercase leading-none flex-shrink-0" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                              )}
                               <img
                                 src={stage.partnerBadge.logoUrl}
                                 alt={stage.partnerBadge.label}
                                 style={{
-                                  height: 22,
+                                  height: 28,
                                   width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 30 : 110,
+                                  maxWidth: stage.partnerBadge.sublabel ? 100 : 140,
                                   objectFit: "contain",
                                   filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
                                   flexShrink: 0,
                                 }}
                               />
-                              {stage.partnerBadge.sublabel && (
-                                <div className="flex flex-col">
-                                  <span className="text-[12px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
-                                  <span className="text-[9px] font-semibold leading-none mt-0.5 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
-                                </div>
-                              )}
                             </div>
                           )}
-                          {VIDEO_APPT_STAGES.has(stage.id) && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", height: 36 }}>
-                              <Bot className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(255,255,255,0.6)" }} />
-                              <div className="flex flex-col">
-                                <span className="text-[12px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>AI Agent</span>
-                                <span className="text-[9px] font-bold tracking-[0.12em] uppercase leading-none mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Cisco AI Studio</span>
-                              </div>
+                          {stage.id === "PATIENT_APPOINTMENT_CONFIRM" && (
+                            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.4)", backdropFilter: "blur(8px)", height: 44 }}>
+                              <span className="text-[10px] font-semibold tracking-[0.12em] uppercase leading-none flex-shrink-0" style={{ color: "rgba(255,255,255,0.45)" }}>Powered by</span>
+                              <img src={ciscoSpacesLogoUrl} alt="Cisco Spaces" style={{ height: 28, width: "auto", maxWidth: 100, objectFit: "contain", flexShrink: 0 }} />
                             </div>
                           )}
-                          {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", height: 36 }}>
-                              <img src={webexLogoUrl} alt="Webex" style={{ height: 14, width: "auto", filter: "brightness(0) invert(1) opacity(0.6)" }} />
+                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
+                              <Bot className="w-5 h-5 flex-shrink-0" style={{ color: "#05C3DD", filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
-                                <span className="text-[12px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>Instant Connect</span>
-                                <span className="text-[9px] font-bold tracking-[0.12em] uppercase leading-none mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Webex</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#05C3DD", textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
+                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
                               </div>
                             </div>
                           )}
                           {stage.id === "PATIENT_DISCHARGE_INSTRUCTIONS" && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)", height: 36 }}>
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7 2 3 7 3 12c0 2.5 1 4.8 2.6 6.5C7 20.1 9.4 21 12 21s5-0.9 6.4-2.5C20 16.8 21 14.5 21 12c0-5-4-10-9-10z" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1.5"/><path d="M12 21V12M12 12C12 12 8 9 6 6M12 12c0 0 4-3 6-6" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                              <div className="flex flex-col">
-                                <span className="text-[12px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
-                                <span className="text-[9px] font-bold tracking-[0.15em] uppercase leading-none mt-0.5" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
+                            <div className="flex flex-col items-center justify-center px-3 py-2 rounded-md gap-0.5" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)" }}>
+                              <div className="flex items-center gap-1.5">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7 2 3 7 3 12c0 2.5 1 4.8 2.6 6.5C7 20.1 9.4 21 12 21s5-0.9 6.4-2.5C20 16.8 21 14.5 21 12c0-5-4-10-9-10z" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1.5"/><path d="M12 21V12M12 12C12 12 8 9 6 6M12 12c0 0 4-3 6-6" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
                               </div>
+                              <span className="text-[10px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                             </div>
                           )}
-                          {stage.systemIntegrations && (
-                            <div className="flex flex-col items-end gap-1">
-                              <div className="flex items-center gap-1">
-                                {stage.systemIntegrations.map((s, i) => (
-                                  <div key={i} className="flex items-center justify-center px-2 py-1 rounded-md" style={{ background: s.color ? `${s.color}18` : "rgba(255,255,255,0.07)", border: `1px solid ${s.color ? `${s.color}55` : "rgba(255,255,255,0.15)"}`, height: 28 }}>
-                                    {s.logoUrl ? (
-                                      <img src={s.logoUrl} alt={s.label} style={{ height: 14, width: "auto", maxWidth: 52, objectFit: "contain", filter: s.filterWhite ? "brightness(0) invert(1)" : undefined }} />
-                                    ) : (
-                                      <span className="text-[10px] font-black tracking-wide" style={{ color: s.color ?? "rgba(255,255,255,0.7)" }}>{s.label}</span>
-                                    )}
-                                  </div>
-                                ))}
+                          {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
+                            <div className="flex flex-col items-end gap-1.5">
+                              <div className="flex items-center gap-2">
+                                <img src={epicLogoUrl} alt="Epic" style={{ height: 32, width: "auto", maxWidth: 80, objectFit: "contain" }} />
+                                <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 36, width: "auto", maxWidth: 96, objectFit: "contain" }} />
                               </div>
-                              {stage.systemIntegrationsLabel && (
-                                <span className="text-[9px] font-semibold tracking-widest uppercase text-white/30">{stage.systemIntegrationsLabel}</span>
-                              )}
+                              <div className="flex items-center justify-end">
+                                <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
+                                  <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
+                                </div>
+                              </div>
                             </div>
                           )}
                           {isTriggered && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid var(--success-border)" }}>
-                              <Check className="w-4 h-4 text-success" />
-                              <span className="text-[12px] font-bold text-success tracking-wide">Sent</span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,169,145,0.15)", border: "1px solid rgba(0,169,145,0.4)" }}>
+                              <Check className="w-4 h-4 text-[#00A991]" />
+                              <span className="text-[12px] font-bold text-[#00A991] tracking-wide">Sent</span>
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        <h3 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
-                            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
-                          </Button>
-                          <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
-                          <button
-                            onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
-                            className="flex items-center font-bold text-xs h-9 px-3 rounded-md transition-all duration-200"
-                            style={{
-                              background: "rgba(255,255,255,0.06)",
-                              border: "1px solid rgba(255,255,255,0.12)",
-                              color: "rgba(255,255,255,0.55)",
-                            }}
-                          >
-                            Behind the Scenes
-                          </button>
-                          {VIDEO_APPT_BUTTON_STAGES.has(stage.id) && (
-                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+                      <div className="flex items-end justify-between gap-3">
+                        <div>
+                          <h3 className="text-[27px] font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
+                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-[11px] h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
                             </Button>
                           )}
-                          {SPACES_DEMO_STAGES.has(stage.id) && (
-                            <button
-                              onClick={() => setSpacesDemoOpen(true)}
-                              className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
-                              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
-                            >
-                              Spaces Demo
-                            </button>
-                          )}
+                          <button
+                            onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
+                            className="flex items-center gap-1.5 font-semibold text-[13px] h-9 px-4 rounded-md shadow-none transition-colors duration-150"
+                            style={{ background: "transparent", border: "1px solid #05C3DD", color: "#05C3DD" }}
+                          >
+                            <Eye className="w-3 h-3" />
+                            Workflow
+                          </button>
+                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-[13px] h-9 px-5 shadow-none" style={{ background: "#05C3DD", border: "1px solid #05C3DD", color: "#0a1628" }}>
+                            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
+                          </Button>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Body */}
-                  <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.automationOpportunity}</p>
-                    {stage.keyStat && (
-                      <div className="rounded-r-lg pl-4 pr-3 py-3 mb-2 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: `3px solid ${stageColor.accent}` }}>
-                        <div className="flex-shrink-0 pt-0.5">
-                          <span className="font-black leading-none" style={{ fontSize: "clamp(20px, 1.8vw, 40px)", color: stageColor.accent }}>{stage.keyStat.value}</span>
-                          <p className="text-white/50 font-semibold mt-0.5" style={{ fontSize: "clamp(10px, 0.75vw, 15px)" }}>{stage.keyStat.label}</p>
-                        </div>
-                        <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
-                        <div>
-                          <span className="inline-block font-black uppercase tracking-widest px-2 py-0.5 rounded mb-1.5" style={{ fontSize: "clamp(8px, 0.6vw, 11px)", background: stageColor.accent, color: "rgba(0,0,0,0.85)" }}>Why this matters</span>
-                          <p className="text-white/80 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
-                          <p className="text-white/25 mt-1" style={{ fontSize: "clamp(9px, 0.65vw, 13px)" }}>Source: {stage.keyStat.source}</p>
-                        </div>
-                      </div>
-                    )}
+                  <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
+                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(12px, 1.04vw, 25px)" }}>{stage.automationOpportunity}</p>
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>How It's Done Today</p>
-                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.currentState}</p>
+                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] font-mono mb-1" style={{ fontSize: "clamp(8px, 0.68vw, 14px)" }}>Current State</p>
+                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(12px, 1.04vw, 25px)" }}>{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
                         {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
                           <div key={step} className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,169,145,0.07)", border: "1px solid rgba(0,169,145,0.15)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
-                            <span className="text-[12px] text-success/70 font-mono">{step}</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#00A991] flex-shrink-0" style={{ boxShadow: "0 0 4px rgba(0,169,145,0.6)" }} />
+                            <span className="text-[12px] text-[#00A991]/70 font-mono">{step}</span>
                           </div>
                         ))}
                       </div>
@@ -1369,11 +1232,11 @@ export default function Home() {
                     {/* HL7 / EMR system event feed — Stage 04 */}
                     {isTriggered && stage.systemEvents.length > 0 && (systemEventReveal[stage.id] ?? 0) > 0 && (
                       <div className="mt-2.5">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono mb-1.5" style={{ color: "rgba(5,195,221,0.4)" }}>EMR Integration Events</p>
                         <div className="flex flex-col gap-1">
                           {stage.systemEvents.slice(0, systemEventReveal[stage.id] ?? 0).map((evt, i) => (
                             <div key={i} className="flex items-start gap-1.5 px-2 py-1 rounded" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.12)" }}>
-                              <span className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0 bg-primary" style={{ boxShadow: "0 0 4px rgba(5,195,221,0.7)" }} />
+                              <span className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0" style={{ background: "#05C3DD", boxShadow: "0 0 4px rgba(5,195,221,0.7)" }} />
                               <span className="text-[12px] font-mono leading-relaxed" style={{ color: "rgba(5,195,221,0.65)" }}>{evt}</span>
                             </div>
                           ))}
@@ -1381,7 +1244,6 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-
                 </div>
               );
             })()}
@@ -1391,22 +1253,22 @@ export default function Home() {
               <div
                 className="flex items-center justify-between gap-4 p-5 rounded-2xl"
                 style={{
-                  border: "1px solid var(--success-border)",
+                  border: "1px solid rgba(0,169,145,0.4)",
                   background: "linear-gradient(135deg, rgba(0,169,145,0.08) 0%, rgba(0,169,145,0.04) 100%)",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(0,169,145,0.1), inset 0 1px 0 rgba(0,169,145,0.1)",
                 }}
               >
                 <div>
-                  <p className="text-sm font-black text-success" style={{ textShadow: "0 0 16px var(--success-border)" }}>All stages complete.</p>
+                  <p className="text-sm font-black text-[#00A991]" style={{ textShadow: "0 0 16px rgba(0,169,145,0.4)" }}>All stages complete.</p>
                   <p className="text-xs text-white/40 mt-0.5">Ready to show your impact summary.</p>
                 </div>
                 <Button
                   onClick={() => setShowCompleteModal(true)}
                   className="flex-shrink-0 font-bold text-sm border-0"
                   style={{
-                    background: "linear-gradient(135deg, var(--success), #16CECC)",
+                    background: "linear-gradient(135deg, #00A991, #16CECC)",
                     color: "#fff",
-                    boxShadow: "0 4px 20px var(--success-border), 0 0 40px rgba(0,169,145,0.15)",
+                    boxShadow: "0 4px 20px rgba(0,169,145,0.4), 0 0 40px rgba(0,169,145,0.15)",
                   }}
                 >
                   View Summary →
@@ -1439,7 +1301,7 @@ export default function Home() {
       {/* Journey Complete — modal */}
       <Dialog open={showCompleteModal} onOpenChange={setShowCompleteModal}>
         <DialogContent
-          className="max-w-lg border-2 border-success/50 p-0 overflow-hidden rounded-3xl"
+          className="max-w-lg border-2 border-[#00A991]/50 p-0 overflow-hidden rounded-3xl"
           aria-labelledby="modal-title"
           style={{
             background: "linear-gradient(160deg, #13294B 0%, #0D1825 60%)",
@@ -1447,19 +1309,19 @@ export default function Home() {
           }}
         >
           {/* Top accent line */}
-          <div className="h-1 bg-gradient-to-r from-success via-primary to-success" />
+          <div className="h-1 bg-gradient-to-r from-[#00A991] via-[#05C3DD] to-[#00A991]" />
 
           <div className="px-10 py-10 text-center">
             {/* Icon */}
             <div
-              className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-success mb-6"
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-[#00A991] mb-6"
               style={{ background: "radial-gradient(circle, rgba(0,169,145,0.15) 0%, transparent 70%)", boxShadow: "0 0 40px rgba(0,169,145,0.2)" }}
             >
-              <Check className="w-10 h-10 text-success" aria-hidden="true" />
+              <Check className="w-10 h-10 text-[#00A991]" aria-hidden="true" />
             </div>
 
             <h2 id="modal-title" className="text-4xl font-black text-white mb-2">Journey Complete</h2>
-            <p className="text-success font-bold mb-5">Zero phone calls. 100% digital.</p>
+            <p className="text-[#00A991] font-bold mb-5">Zero phone calls. 100% digital.</p>
             <p className="text-white/75 text-base leading-relaxed max-w-sm mx-auto mb-8">
               Appointment scheduling, pre-admission, surgery prep, recovery check-in — all delivered to the patient's phone. No calls. No staff required to initiate any of it.
             </p>
@@ -1467,7 +1329,7 @@ export default function Home() {
             <Button
               onClick={resetJourney}
               variant="outline"
-              className="inline-flex items-center gap-2 px-7 border-success/40 hover:border-success text-success hover:bg-success/10 hover:text-success rounded-xl font-bold mb-8 bg-transparent"
+              className="inline-flex items-center gap-2 px-7 border-[#00A991]/40 hover:border-[#00A991] text-[#00A991] hover:bg-[#00A991]/10 hover:text-[#00A991] rounded-xl font-bold mb-8 bg-transparent"
             >
               ↺ Run Another Demo
             </Button>
@@ -1492,13 +1354,31 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox — interactive workflow diagram */}
+      {/* Lightbox */}
       {lightboxImage && (
-        <WorkflowDiagram
-          stageId={lightboxImage.stageId}
-          stageLabel={lightboxImage.label}
-          onClose={() => setLightboxImage(null)}
-        />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative mx-6" style={{ maxWidth: "min(900px, 90vw)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">{lightboxImage.label}</span>
+              <button
+                onClick={() => setLightboxImage(null)}
+                className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <img
+              src={lightboxImage.src}
+              alt={lightboxImage.label}
+              className="block rounded-lg border border-white/10"
+              style={{ maxWidth: "100%", maxHeight: "75vh", width: "auto", height: "auto", margin: "0 auto" }}
+              onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/1200x560/13294B/1A3460?text=${encodeURIComponent(lightboxImage.label)}`; }}
+            />
+          </div>
+        </div>
       )}
 
       {/* ── Footer ── */}
@@ -1510,13 +1390,9 @@ export default function Home() {
           <div style={{ display: "flex", gap: "clamp(16px, 3vw, 40px)", flexWrap: "wrap", justifyContent: "center" }}>
             <a
               href="/discovery/"
-              target="_blank"
-              rel="noopener noreferrer"
               style={{ display: "flex", alignItems: "center", gap: "14px", padding: "18px 32px", borderRadius: "14px", background: "rgba(0,85,184,0.07)", border: "1px solid rgba(0,85,184,0.35)", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(0,85,184,0.08)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.6)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.35)"; }}
-              onFocus={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.14)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.6)"; }}
-              onBlur={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,85,184,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,85,184,0.35)"; }}
             >
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                 <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0055B8", marginBottom: "4px" }}>Next Step</span>
@@ -1531,27 +1407,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Spaces Desktop Demo Modal */}
-      {spacesDemoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm" onClick={() => setSpacesDemoOpen(false)}>
-          <div className="relative mx-6" style={{ maxWidth: "min(1200px, 90vw)" }} role="dialog" aria-modal="true" aria-label="Cisco Spaces Demo" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">Cisco Spaces Demo</span>
-              <button onClick={() => setSpacesDemoOpen(false)} aria-label="Close Cisco Spaces demo" className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors">
-                <span aria-hidden="true">✕</span> Close
-              </button>
-            </div>
-            <video
-              src="/wxccworkflowdemo/dist/SpacesDesktopDemo.mp4"
-              autoPlay
-              controls
-              className="block rounded-lg border border-white/10"
-              style={{ maxWidth: "100%", maxHeight: "75vh", width: "100%" }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Voice AI Demo Modal */}
       {voiceModalOpen && (
         <div
@@ -1560,24 +1415,23 @@ export default function Home() {
         >
           <div
             className="relative mx-6 rounded-3xl overflow-hidden"
-            style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid var(--success-glow)", boxShadow: "0 0 0 1px rgba(0,169,145,0.1), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(0,169,145,0.08)" }}
-            role="dialog" aria-modal="true" aria-label="Voice AI Demo"
+            style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid rgba(0,169,145,0.35)", boxShadow: "0 0 0 1px rgba(0,169,145,0.1), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(0,169,145,0.08)" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top accent */}
-            <div style={{ height: "3px", background: "linear-gradient(90deg, var(--success), var(--primary), var(--success))" }} />
+            <div style={{ height: "3px", background: "linear-gradient(90deg, #00A991, #05C3DD, #00A991)" }} />
             <div className="p-8 text-center">
               {/* Pulse ring */}
               <div className="inline-flex items-center justify-center mb-6" style={{ position: "relative" }}>
                 <div style={{ position: "absolute", width: "80px", height: "80px", borderRadius: "50%", border: "1px solid rgba(0,169,145,0.2)", animation: "ping-slow 2s ease-in-out infinite" }} />
-                <div style={{ position: "absolute", width: "64px", height: "64px", borderRadius: "50%", border: "1px solid var(--success-glow)", animation: "ping-slow 2s ease-in-out 0.5s infinite" }} />
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "var(--success-bg)", border: "1px solid rgba(0,169,145,0.5)", boxShadow: "0 0 24px rgba(0,169,145,0.3)" }}>
-                  <Phone className="w-5 h-5 text-success" />
+                <div style={{ position: "absolute", width: "64px", height: "64px", borderRadius: "50%", border: "1px solid rgba(0,169,145,0.35)", animation: "ping-slow 2s ease-in-out 0.5s infinite" }} />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(0,169,145,0.12)", border: "1px solid rgba(0,169,145,0.5)", boxShadow: "0 0 24px rgba(0,169,145,0.3)" }}>
+                  <Phone className="w-5 h-5 text-[#00A991]" />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-                <span className="text-xs font-bold text-success tracking-widest uppercase">Live AI Agent</span>
+                <span className="w-2 h-2 rounded-full bg-[#00A991] animate-pulse" style={{ boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
+                <span className="text-xs font-bold text-[#00A991] tracking-widest uppercase">Live AI Agent</span>
               </div>
               <h3 className="text-xl font-black text-white mb-1">Voice AI Demo</h3>
               <p className="text-xs text-white/40 mb-6">Call this number to experience the AI post-discharge check-in. The AI will guide you through a realistic patient survey conversation.</p>
@@ -1588,12 +1442,17 @@ export default function Home() {
               <p className="text-xs text-white/30 mb-5">Powered by Webex AI Agent &amp; Webex Connect</p>
               <button
                 onClick={() => setVoiceModalOpen(false)}
-                aria-label="Close Voice AI demo"
                 className="text-white/40 hover:text-white/70 text-xs font-mono border border-white/10 hover:border-white/25 px-4 py-2 rounded-xl transition-colors"
               >
-                <span aria-hidden="true">✕</span> Close
+                ✕ Close
               </button>
             </div>
+            <style>{`
+              @keyframes ping-slow {
+                0%, 100% { transform: scale(1); opacity: 0.5; }
+                50% { transform: scale(1.15); opacity: 0.15; }
+              }
+            `}</style>
           </div>
         </div>
       )}
