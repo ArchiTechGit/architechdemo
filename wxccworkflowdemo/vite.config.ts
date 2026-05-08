@@ -167,6 +167,19 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-radix": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-slot",
+          ],
+          "vendor-ui": ["lucide-react", "sonner", "clsx", "tailwind-merge", "class-variance-authority"],
+        },
+      },
+    },
   },
   server: {
     port: 3000,

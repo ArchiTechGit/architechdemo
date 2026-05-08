@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
-import bgImage from "@/assets/background.jpeg";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
 import webexLogoUrl from "@/assets/logo-webex.svg";
@@ -555,13 +554,6 @@ export default function Home() {
         className="relative border-b border-white/[0.06] overflow-hidden"
         style={{ background: "#070d15", minHeight: "220px" }}
       >
-        <img
-          src={bgImage}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ opacity: 0.14, mixBlendMode: "luminosity" }}
-        />
         {/* Layered dramatic gradients */}
         <div
           className="absolute inset-0 pointer-events-none"
