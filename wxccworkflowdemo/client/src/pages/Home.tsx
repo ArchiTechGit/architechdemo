@@ -10,7 +10,7 @@ import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
 import epicLogoUrl from "@/assets/epic_logo.png";
 import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -265,6 +265,13 @@ const IMPACT_STATS = [
 
 const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
 
+const STEP_REVEAL_DELAYS = [450, 950, 1500] as const;
+const VIDEO_APPT_STAGES = new Set(["PATIENT_APPOINTMENT_CONFIRM", "PATIENT_POST_DISCHARGE_SURVEY"]);
+const SPACES_DEMO_STAGES = new Set(["PATIENT_APPOINTMENT_CONFIRM", "PATIENT_ARRIVAL_WAYFINDING", "PATIENT_FAMILY_SURGERY_UPDATE"]);
+const CONFETTI_COLORS_1 = ["#05C3DD", "#00A991", "#ffffff", "#FFD700", "#FF6B6B"];
+const CONFETTI_COLORS_2 = ["#05C3DD", "#00A991", "#ffffff"];
+const INPUT_STYLE = { border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" };
+
 const inputFocusProps = {
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => {
     e.currentTarget.style.borderColor = "rgba(5,195,221,0.5)";
@@ -302,7 +309,11 @@ export default function Home() {
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string } | null>(null);
-  const displayApptDate = formatHumanDate((() => { const d = new Date(Date.now() + 24*60*60*1000); d.setMinutes(d.getMinutes() >= 30 ? 60 : 0, 0, 0); return d; })());
+  const displayApptDate = useMemo(() => {
+    const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    d.setMinutes(d.getMinutes() >= 30 ? 60 : 0, 0, 0);
+    return formatHumanDate(d);
+  }, []);
   const interpolate = (msg: string) => msg.replace(/\{NAME\}/g, patientName.trim() || "Patient").replace(/\{DATE\}/g, displayApptDate);
   const [clockTime, setClockTime] = useState(() => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   useEffect(() => {
@@ -327,6 +338,16 @@ export default function Home() {
 
   const statIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const startStatAutoplay = () => {
+    statIntervalRef.current = setInterval(() => {
+      setStatVisible(false);
+      setTimeout(() => {
+        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
+        setStatVisible(true);
+      }, 350);
+    }, 12000);
+  };
+
   const goToStat = (index: number) => {
     setStatVisible(false);
     setTimeout(() => {
@@ -336,26 +357,13 @@ export default function Home() {
   };
 
   const advanceStat = (dir: 1 | -1) => {
-    const next = (statIndex + dir + IMPACT_STATS.length) % IMPACT_STATS.length;
-    goToStat(next);
+    goToStat((statIndex + dir + IMPACT_STATS.length) % IMPACT_STATS.length);
     if (statIntervalRef.current) clearInterval(statIntervalRef.current);
-    statIntervalRef.current = setInterval(() => {
-      setStatVisible(false);
-      setTimeout(() => {
-        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
-        setStatVisible(true);
-      }, 350);
-    }, 12000);
+    startStatAutoplay();
   };
 
   useEffect(() => {
-    statIntervalRef.current = setInterval(() => {
-      setStatVisible(false);
-      setTimeout(() => {
-        setStatIndex((i) => (i + 1) % IMPACT_STATS.length);
-        setStatVisible(true);
-      }, 350);
-    }, 12000);
+    startStatAutoplay();
     return () => { if (statIntervalRef.current) clearInterval(statIntervalRef.current); };
   }, []);
 
@@ -425,8 +433,8 @@ export default function Home() {
         const origin = rect
           ? { x: (rect.left + rect.width / 2) / window.innerWidth, y: (rect.top + rect.height * 0.4) / window.innerHeight }
           : { x: 0.5, y: 0.5 };
-        confetti({ particleCount: 180, spread: 70, origin, colors: ["#05C3DD", "var(--success)", "#ffffff", "#FFD700", "#FF6B6B"], startVelocity: 45, gravity: 0.9, scalar: 1.1 });
-        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: ["#05C3DD", "var(--success)", "#ffffff"], startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
+        confetti({ particleCount: 180, spread: 70, origin, colors: CONFETTI_COLORS_1, startVelocity: 45, gravity: 0.9, scalar: 1.1 });
+        setTimeout(() => confetti({ particleCount: 80, spread: 100, origin, colors: CONFETTI_COLORS_2, startVelocity: 25, gravity: 0.7, scalar: 0.9 }), 350);
       }
       setPhonePulse(true);
       if (phoneScreen === "home") {
@@ -438,13 +446,12 @@ export default function Home() {
         }, 2500);
       }
       setTimeout(() => setPhonePulse(false), 2000);
-      const revealTimeouts = [450, 950, 1500].map((delay, idx) =>
+      const revealTimeouts = STEP_REVEAL_DELAYS.map((delay, idx) =>
         setTimeout(() => {
           setStageStepReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
         }, delay)
       );
       stepRevealTimeoutsRef.current.push(...revealTimeouts);
-      // Reveal HL7 system events sequentially for stages that have them
       const triggeredStage = JOURNEY_STAGES.find((s) => s.id === workflowId);
       if (triggeredStage && triggeredStage.systemEvents.length > 0) {
         const sysTimeouts = triggeredStage.systemEvents.map((_, idx) =>
@@ -454,8 +461,7 @@ export default function Home() {
         );
         stepRevealTimeoutsRef.current.push(...sysTimeouts);
       }
-      // Reveal conversational AI thread progressively
-      if (triggeredStage && triggeredStage.conversationThread && triggeredStage.conversationThread.length > 0) {
+      if (triggeredStage?.conversationThread?.length) {
         const threadTimeouts = triggeredStage.conversationThread.map((_, idx) =>
           setTimeout(() => {
             setThreadReveal((prev) => ({ ...prev, [workflowId]: idx + 1 }));
@@ -998,7 +1004,7 @@ export default function Home() {
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" }}
+                  style={INPUT_STYLE}
                   {...inputFocusProps}
                 />
               </div>
@@ -1014,7 +1020,7 @@ export default function Home() {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" }}
+                  style={INPUT_STYLE}
                   {...inputFocusProps}
                 />
               </div>
@@ -1030,7 +1036,7 @@ export default function Home() {
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
-                  style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" }}
+                  style={INPUT_STYLE}
                   {...inputFocusProps}
                 />
               </div>
@@ -1162,7 +1168,7 @@ export default function Home() {
                               )}
                             </div>
                           )}
-                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
+                          {VIDEO_APPT_STAGES.has(stage.id) && (
                             <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
                               <Bot className="w-5 h-5 flex-shrink-0 text-primary" style={{ filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
@@ -1206,12 +1212,12 @@ export default function Home() {
                           <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
-                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
+                          {VIDEO_APPT_STAGES.has(stage.id) && (
                             <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
                             </Button>
                           )}
-                          {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_ARRIVAL_WAYFINDING" || stage.id === "PATIENT_FAMILY_SURGERY_UPDATE") && (
+                          {SPACES_DEMO_STAGES.has(stage.id) && (
                             <button
                               onClick={() => setSpacesDemoOpen(true)}
                               className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
