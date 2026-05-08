@@ -644,11 +644,11 @@ export default function Home() {
       {/* Journey Overview Modal */}
       {overviewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setOverviewOpen(false)}>
-          <div className="relative w-full mx-6" style={{ maxWidth: "1400px" }} role="dialog" aria-modal="true" aria-label="Patient Journey — All 6 Stages" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full mx-6 max-h-[90vh] overflow-y-auto rounded-xl" style={{ maxWidth: "1400px" }} role="dialog" aria-modal="true" aria-label="Patient Journey — All 6 Stages" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between mb-7">
               <div className="flex items-center gap-3">
-                <div className="w-[3px] h-7 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+                <div className="w-[3px] h-7 rounded-full" style={{ background: "linear-gradient(180deg, var(--primary), rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
                 <span className="text-[22.5px] font-black text-white uppercase tracking-widest">Patient Journey — All 6 Stages</span>
               </div>
               <button onClick={() => setOverviewOpen(false)} aria-label="Close overview" className="text-white/40 hover:text-white text-[18px] font-mono border border-white/15 hover:border-white/35 px-3 py-1.5 rounded transition-colors">
@@ -657,7 +657,7 @@ export default function Home() {
             </div>
 
             {/* 3-column grid — one column per journey phase, 2 stages stacked per column */}
-            <div className="grid gap-6" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 { label: "Pre Admission", color: "rgba(5,195,221,0.55)", stages: [0, 1] },
                 { label: "Day-of-Surgery Coordination", color: "rgba(85,202,253,0.55)", stages: [2, 3] },
@@ -700,7 +700,7 @@ export default function Home() {
       <div className="container mx-auto px-6 md:px-10 py-10">
         <div className="flex items-center gap-4 mb-8 px-0">
           <div className="flex items-center gap-3">
-            <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, #05C3DD, rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
+            <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(180deg, var(--primary), rgba(5,195,221,0.4))", boxShadow: "0 0 8px rgba(5,195,221,0.5)" }} />
             <span className="text-[15px] font-black text-white uppercase tracking-widest">Journey Demonstration</span>
           </div>
           <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(5,195,221,0.25), transparent)" }} />
@@ -924,14 +924,14 @@ export default function Home() {
                           {activePhoneStage && activePhoneStage.conversationThread && (threadReveal[activePhoneStage.id] ?? 0) > 0 ? (
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #05C3DD, #0095A8)" }}>
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--primary), #0095A8)" }}>
                                   <span className="text-white font-bold" style={{ fontSize: "8px" }}>AI</span>
                                 </div>
                                 <span className="text-slate-500" style={{ fontSize: "10px" }}>Webex AI Agent · now</span>
                               </div>
                               {activePhoneStage.conversationThread.slice(0, threadReveal[activePhoneStage.id] ?? 0).map((msg, i) => (
                                 <div key={i} className={`flex ${msg.role === "patient" ? "justify-end" : "justify-start"}`}>
-                                  <div className="rounded-2xl px-2.5 py-1.5" style={{ maxWidth: "82%", background: msg.role === "ai" ? "#f1f5f9" : "#05C3DD", borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined, borderTopRightRadius: msg.role === "patient" ? "4px" : undefined }}>
+                                  <div className="rounded-2xl px-2.5 py-1.5" style={{ maxWidth: "82%", background: msg.role === "ai" ? "#f1f5f9" : "var(--primary)", borderTopLeftRadius: msg.role === "ai" ? "4px" : undefined, borderTopRightRadius: msg.role === "patient" ? "4px" : undefined }}>
                                     <p className="leading-snug" style={{ fontSize: "10px", color: msg.role === "ai" ? "#1e293b" : "#fff" }}>{msg.role === "ai" ? interpolate(msg.text) : msg.text}</p>
                                   </div>
                                 </div>
@@ -993,7 +993,7 @@ export default function Home() {
                 boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
               }}
             >
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div className="space-y-3">
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3 h-3 text-primary/40" />
@@ -1046,7 +1046,8 @@ export default function Home() {
             </div>
 
             {/* Stepper */}
-            <div className="flex items-start">
+            <div className="overflow-x-auto -mx-1 px-1 pb-2">
+            <div className="flex items-start min-w-max lg:min-w-0">
               {JOURNEY_STAGES.map((stage, idx) => {
                 const isActive = activeStepperStage === stage.id;
                 const isTriggered = triggeredStages.has(stage.id);
@@ -1067,7 +1068,7 @@ export default function Home() {
                         style={{
                           width: 56, height: 56,
                           background: isTriggered ? "rgba(0,169,145,0.15)" : isActive ? sc.accentBg : "rgba(255,255,255,0.04)",
-                          border: isTriggered ? "2px solid #00A991" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
+                          border: isTriggered ? "2px solid var(--success)" : isActive ? `2px solid ${sc.accent}` : "2px solid rgba(255,255,255,0.12)",
                           boxShadow: isTriggered ? "0 0 16px var(--success-glow)" : isActive ? `0 0 16px ${sc.accentGlow}` : "none",
                         }}
                       >
@@ -1098,7 +1099,7 @@ export default function Home() {
                           className="absolute inset-0 transition-all duration-500 origin-left"
                           style={{
                             borderRadius: "2px",
-                            background: "linear-gradient(90deg, #00A991, #05C3DD)",
+                            background: "linear-gradient(90deg, var(--success), var(--primary))",
                             boxShadow: "0 0 8px rgba(5,195,221,0.5)",
                             transform: segmentTriggered ? "scaleX(1)" : "scaleX(0)",
                           }}
@@ -1108,6 +1109,7 @@ export default function Home() {
                   </React.Fragment>
                 );
               })}
+            </div>
             </div>
 
             {/* Detail panel */}
@@ -1130,7 +1132,7 @@ export default function Home() {
                   }}
                 >
                   {/* Banner */}
-                  <div className="relative overflow-hidden" style={{ height: "190px", background: stageColor.bg }}>
+                  <div className="relative overflow-hidden" style={{ minHeight: "190px", background: stageColor.bg }}>
                     {StageIcon && (
                       <div className="absolute -right-6 -bottom-6 pointer-events-none">
                         <StageIcon style={{ width: "160px", height: "160px", color: stageColor.iconTint }} />
@@ -1170,9 +1172,9 @@ export default function Home() {
                           )}
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
                             <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
-                              <Bot className="w-5 h-5 flex-shrink-0" style={{ color: "#05C3DD", filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
+                              <Bot className="w-5 h-5 flex-shrink-0 text-primary" style={{ filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#05C3DD", textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none text-primary" style={{ textShadow: "0 0 12px rgba(5,195,221,0.6)" }}>AI Agent</span>
                                 <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
                               </div>
                             </div>
@@ -1207,11 +1209,11 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-end justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3">
                         <div>
-                          <h3 className="text-3xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
+                          <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                           {(stage.id === "PATIENT_APPOINTMENT_CONFIRM" || stage.id === "PATIENT_POST_DISCHARGE_SURVEY") && (
                             <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
@@ -1266,7 +1268,7 @@ export default function Home() {
                         <div className="flex flex-col gap-1">
                           {stage.systemEvents.slice(0, systemEventReveal[stage.id] ?? 0).map((evt, i) => (
                             <div key={i} className="flex items-start gap-1.5 px-2 py-1 rounded" style={{ background: "rgba(5,195,221,0.04)", border: "1px solid rgba(5,195,221,0.12)" }}>
-                              <span className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0" style={{ background: "#05C3DD", boxShadow: "0 0 4px rgba(5,195,221,0.7)" }} />
+                              <span className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0 bg-primary" style={{ boxShadow: "0 0 4px rgba(5,195,221,0.7)" }} />
                               <span className="text-[12px] font-mono leading-relaxed" style={{ color: "rgba(5,195,221,0.65)" }}>{evt}</span>
                             </div>
                           ))}
@@ -1296,7 +1298,7 @@ export default function Home() {
                   onClick={() => setShowCompleteModal(true)}
                   className="flex-shrink-0 font-bold text-sm border-0"
                   style={{
-                    background: "linear-gradient(135deg, #00A991, #16CECC)",
+                    background: "linear-gradient(135deg, var(--success), #16CECC)",
                     color: "#fff",
                     boxShadow: "0 4px 20px var(--success-border), 0 0 40px rgba(0,169,145,0.15)",
                   }}
@@ -1339,12 +1341,12 @@ export default function Home() {
           }}
         >
           {/* Top accent line */}
-          <div className="h-1 bg-gradient-to-r from-[#00A991] via-[#05C3DD] to-[#00A991]" />
+          <div className="h-1 bg-gradient-to-r from-success via-primary to-success" />
 
           <div className="px-10 py-10 text-center">
             {/* Icon */}
             <div
-              className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-[#00A991] mb-6"
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-success mb-6"
               style={{ background: "radial-gradient(circle, rgba(0,169,145,0.15) 0%, transparent 70%)", boxShadow: "0 0 40px rgba(0,169,145,0.2)" }}
             >
               <Check className="w-10 h-10 text-success" aria-hidden="true" />
@@ -1359,7 +1361,7 @@ export default function Home() {
             <Button
               onClick={resetJourney}
               variant="outline"
-              className="inline-flex items-center gap-2 px-7 border-[#00A991]/40 hover:border-[#00A991] text-success hover:bg-success/10 hover:text-success rounded-xl font-bold mb-8 bg-transparent"
+              className="inline-flex items-center gap-2 px-7 border-success/40 hover:border-success text-success hover:bg-success/10 hover:text-success rounded-xl font-bold mb-8 bg-transparent"
             >
               ↺ Run Another Demo
             </Button>
@@ -1476,7 +1478,7 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top accent */}
-            <div style={{ height: "3px", background: "linear-gradient(90deg, #00A991, #05C3DD, #00A991)" }} />
+            <div style={{ height: "3px", background: "linear-gradient(90deg, var(--success), var(--primary), var(--success))" }} />
             <div className="p-8 text-center">
               {/* Pulse ring */}
               <div className="inline-flex items-center justify-center mb-6" style={{ position: "relative" }}>
