@@ -610,7 +610,7 @@ export default function Home() {
             {" "}<span className="text-white/40">{IMPACT_STATS[statIndex].tail}</span>
           </p>
         </div>
-        <div className="container mx-auto px-6 md:px-10 pb-6 flex justify-start relative">
+        <div className="container mx-auto px-6 md:px-10 pb-6 flex justify-end relative">
           <button
             onClick={() => setOverviewOpen(true)}
             className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md px-3 py-1.5 transition-all duration-200"
