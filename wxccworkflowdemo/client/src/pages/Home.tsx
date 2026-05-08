@@ -558,7 +558,7 @@ export default function Home() {
       {/* Impact banner */}
       <div
         className="relative border-b border-white/[0.06] overflow-hidden"
-        style={{ background: "#070d15", height: "260px" }}
+        style={{ background: "#070d15", minHeight: "200px" }}
       >
         {/* Layered dramatic gradients */}
         <div
@@ -595,7 +595,7 @@ export default function Home() {
           <button onClick={() => advanceStat(1)} aria-label="Next stat" className="w-5 h-5 flex items-center justify-center text-white/25 hover:text-primary transition-colors" style={{ fontSize: "12px" }}>›</button>
         </div>
         <div
-          className="container mx-auto px-6 md:px-10 py-10 relative"
+          className="container mx-auto px-6 md:px-10 pt-10 pb-3 relative"
           style={{ opacity: statVisible ? 1 : 0, transform: statVisible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
           aria-live="polite"
           aria-atomic="true"
@@ -610,7 +610,7 @@ export default function Home() {
             {" "}<span className="text-white/40">{IMPACT_STATS[statIndex].tail}</span>
           </p>
         </div>
-        <div className="container mx-auto px-6 md:px-10 pb-6 flex justify-end relative">
+        <div className="container mx-auto px-6 md:px-10 pb-14 flex justify-end relative">
           <button
             onClick={() => setOverviewOpen(true)}
             className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md px-3 py-1.5 transition-all duration-200"
