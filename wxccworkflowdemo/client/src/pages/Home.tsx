@@ -76,11 +76,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
     systemIntegrations: [
-      { label: "Cerner Millennium", color: "#E8472A" },
-      { label: "iPM", color: "#4A9EE8" },
-      { label: "WebPAS", color: "#34C97A" },
+      { label: "Digital Intake Forms", color: "#7C6EF5" },
     ],
-    systemIntegrationsLabel: "Integration with PAS",
+    systemIntegrationsLabel: "Paperless Enrolment",
     keyStat: {
       value: "250hrs",
       label: "of clinical staff time recovered per 1,000 interactions automated",
@@ -99,6 +97,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
+    systemIntegrations: [
+      { label: "Cerner Millennium", color: "#E8472A" },
+      { label: "iPM", color: "#4A9EE8" },
+      { label: "WebPAS", color: "#34C97A" },
+    ],
+    systemIntegrationsLabel: "Integration with PAS",
     conversationThread: [
       { role: "ai", text: "Hi {NAME}, this is ArchiTech Hospital. Your pre-admission appointment is confirmed for Thursday 22 May at 10:30am. Reply YES to confirm or NO if you need to reschedule." },
       { role: "patient", text: "NO — I can't make that time, I have work." },
