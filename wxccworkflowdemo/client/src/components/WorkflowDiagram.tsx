@@ -18,49 +18,50 @@ const NW = 108;
 const NH = 54;
 
 const NODES = [
-  { id: "pas",             label: "PAS System",      sublabel: "Cerner · iPM · WebPAS", cx: 145, cy: 72,  color: "#E8472A" },
-  { id: "emr",             label: "EMR",              sublabel: "Epic · Oracle Health",  cx: 715, cy: 72,  color: "#34C97A" },
-  { id: "webex-connect",   label: "Webex Connect",    sublabel: "Cisco",                 cx: 145, cy: 212, color: "#05C3DD" },
-  { id: "webex-cc",        label: "Webex CC",         sublabel: "Contact Centre",        cx: 430, cy: 212, color: "#05C3DD" },
-  { id: "ai-agent",        label: "AI Agent",          sublabel: "Cisco AI",              cx: 715, cy: 212, color: "#7C6EF5" },
-  { id: "patient-device",  label: "Patient",          sublabel: "Mobile Device",         cx: 145, cy: 358, color: "#F59E0B" },
-  { id: "family-device",   label: "Family",           sublabel: "Mobile Device",         cx: 430, cy: 358, color: "#F59E0B" },
-  { id: "nurse-dashboard", label: "Workflow Complete", sublabel: "or Nurse Escalation",   cx: 715, cy: 358, color: "#10B981" },
-  { id: "digital-form",    label: "Digital Form",     sublabel: "Web Form",              cx: 145, cy: 472, color: "#7C6EF5" },
-  { id: "cisco-spaces",    label: "Cisco Spaces",     sublabel: "Wayfinding",            cx: 350, cy: 472, color: "#05C3DD" },
-  { id: "form-platform",   label: "Form Platform",   sublabel: "e.g. JotForm",     cx: 560, cy: 418, color: "#F97316" },
-  { id: "appt-confirmed",  label: "Appt. Confirmed", sublabel: "Booking Finalised", cx: 715, cy: 472, color: "#10B981" },
-  { id: "clinical-event",  label: "Clinical Event",  sublabel: "Status Change",     cx: 430, cy: 110, color: "#64748B" },
+  { id: "pas",            label: "PAS System",       sublabel: "Cerner · iPM · WebPAS", cx: 160, cy: 72,  color: "#E8472A" },
+  { id: "clinical-event", label: "Clinical Event",   sublabel: "Status Change",         cx: 560, cy: 72,  color: "#64748B" },
+  { id: "emr",            label: "EMR",               sublabel: "Epic · Oracle Health",  cx: 730, cy: 72,  color: "#34C97A" },
+  { id: "webex-connect",  label: "Webex Connect",     sublabel: "Cisco",                 cx: 160, cy: 220, color: "#05C3DD" },
+  { id: "webex-cc",       label: "Webex CC",          sublabel: "Contact Centre",        cx: 430, cy: 220, color: "#05C3DD" },
+  { id: "ai-agent",       label: "AI Agent",          sublabel: "Cisco AI",              cx: 730, cy: 220, color: "#7C6EF5" },
+  { id: "patient-device", label: "Patient",           sublabel: "Mobile Device",         cx: 160, cy: 370, color: "#F59E0B" },
+  { id: "family-device",  label: "Family",            sublabel: "Mobile Device",         cx: 430, cy: 370, color: "#F59E0B" },
+  { id: "nurse-dashboard",label: "Workflow Complete", sublabel: "or Nurse Escalation",   cx: 730, cy: 370, color: "#10B981" },
+  { id: "digital-form",   label: "Digital Form",      sublabel: "Web Form",              cx: 160, cy: 490, color: "#7C6EF5" },
+  { id: "cisco-spaces",   label: "Cisco Spaces",      sublabel: "Wayfinding",            cx: 320, cy: 490, color: "#05C3DD" },
+  { id: "form-platform",  label: "Form Platform",     sublabel: "e.g. JotForm",          cx: 510, cy: 490, color: "#F97316" },
+  { id: "appt-confirmed", label: "Appt. Confirmed",   sublabel: "Booking Finalised",     cx: 680, cy: 490, color: "#10B981" },
 ];
 
-// All connector paths — each path travels FROM source edge TO dest edge
+// Connector paths — FROM source edge TO dest edge (only used connectors)
 const CONNECTOR_PATHS: Record<string, string> = {
-  "pas-wxc":       "M 145 99 L 145 185",
-  "pas-emr":       "M 199 72 L 661 72",
-  "wxc-wxcc":      "M 199 212 L 376 212",
-  "wxcc-agent":    "M 484 212 L 661 212",
-  "wxc-patient":   "M 145 239 L 145 331",
-  "patient-form":  "M 145 385 L 145 445",
-  "form-agent":    "M 199 472 Q 500 472 715 239",
-  "agent-nurse":   "M 715 239 L 715 331",
-  "wxcc-family":   "M 430 239 L 430 331",
-  "emr-wxcc":      "M 715 99 Q 598 158 484 212",
-  "form-spaces":   "M 199 472 L 296 472",
-  "wxcc-wxc":          "M 376 215 L 199 215",
-  "patient-agent":     "M 199 352 Q 460 295 661 215",
-  "form-to-platform":  "M 199 472 Q 350 450 506 418",
-  "platform-to-nurse": "M 614 418 Q 664 400 715 331",
-  "agent-to-emr":      "M 715 185 L 715 99",
-  "platform-to-appt":  "M 614 425 Q 665 448 661 445",
-  "appt-to-workflow":  "M 715 445 L 715 385",
-  "patient-spaces":    "M 199 358 Q 248 415 296 472",
-  "wxcc-to-pas":       "M 376 209 Q 258 138 199 99",
-  "agent-to-pas":      "M 661 209 Q 430 95 199 72",
-  "spaces-to-workflow":"M 404 472 Q 560 420 661 385",
-  "clinical-to-emr":   "M 484 110 Q 572 90 661 72",
-  "wxc-to-family":     "M 199 212 Q 290 285 376 358",
-  "emr-to-wxc":        "M 661 72 Q 430 140 199 212",
-  "agent-to-wxcc":     "M 661 209 L 484 209",
+  // Vertical left column
+  "pas-wxc":          "M 160 99 L 160 193",
+  "wxc-patient":      "M 160 247 L 160 343",
+  "patient-form":     "M 160 397 L 160 463",
+  // Bottom row horizontal
+  "form-to-platform": "M 214 490 L 456 490",
+  "platform-to-appt": "M 564 490 L 626 490",
+  // Vertical right column
+  "agent-to-emr":     "M 730 193 L 730 99",
+  "agent-nurse":      "M 730 247 L 730 343",
+  // Appt Confirmed up to Workflow Complete
+  "appt-to-workflow": "M 707 463 Q 730 435 730 397",
+  // Diagonals patient → AI Agent and back to PAS
+  "patient-agent":    "M 214 364 Q 470 304 676 227",
+  "agent-to-pas":     "M 676 217 Q 430 95 214 72",
+  // Patient → Cisco Spaces (Stage 3)
+  "patient-spaces":   "M 214 370 Q 240 430 266 490",
+  "spaces-to-workflow":"M 374 490 Q 540 435 676 397",
+  // Stage 4: Clinical Event chain
+  "clinical-to-emr":  "M 614 72 L 676 72",
+  "emr-wxcc":         "M 730 99 Q 600 162 484 220",
+  "wxcc-wxc":         "M 376 223 L 214 223",
+  "wxc-to-family":    "M 214 220 Q 295 295 376 370",
+  // Stage 5: EMR direct to Webex Connect
+  "emr-to-wxc":       "M 676 72 Q 430 145 214 220",
+  // Stage 6: AI Agent outcomes
+  "agent-to-wxcc":    "M 676 217 L 484 217",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -190,8 +191,8 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "The family member receives a real-time update on their phone — they know exactly what's happening without calling the hospital.",
     },
     {
-      activeNodes: ["clinical-event", "emr", "webex-connect", "family-device"],
-      activeConnectors: ["clinical-to-emr", "emr-wxcc", "wxc-to-family"],
+      activeNodes: ["clinical-event", "emr", "webex-cc", "webex-connect", "family-device"],
+      activeConnectors: ["clinical-to-emr", "emr-wxcc", "wxcc-wxc", "wxc-to-family"],
       narration: "Each EMR milestone fires another automated message — patient in recovery, then ready for visitors — all without any staff involvement.",
     },
     {
@@ -416,7 +417,7 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
         {/* SVG Diagram */}
         <div className="px-4 pt-4">
           <svg
-            viewBox="0 0 860 528"
+            viewBox="0 0 860 544"
             style={{ width: "100%", display: "block" }}
             xmlns="http://www.w3.org/2000/svg"
           >
