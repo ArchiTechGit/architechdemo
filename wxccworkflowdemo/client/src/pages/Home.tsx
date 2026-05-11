@@ -173,7 +173,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "80%",
       label: "of manual effort cut from patient communication workflows",
-      whyItMatters: "Printed discharge instructions get lost — and the nurse call to follow up takes more time than the discharge itself. WxCC delivers personalised instructions via SMS the moment the EMR records discharge, with no staff intervention required.",
+      whyItMatters: "Each surgical episode generates ~12 pages of single-use paper — all destined for landfill. Across a mid-sized hospital, that's tonnes of waste annually. WxCC eliminates it entirely: instructions are delivered digitally via SMS the moment the EMR records discharge, with embedded video links replacing printed diagrams. Better for patients, better for the planet, and zero staff effort.",
       source: "Regional Health Case Study",
     },
   },
