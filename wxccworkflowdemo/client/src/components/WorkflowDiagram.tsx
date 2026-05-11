@@ -28,6 +28,7 @@ const NODES = [
   { id: "nurse-dashboard", label: "Nurse Dashboard",  sublabel: "Staff Portal",          cx: 715, cy: 358, color: "#10B981" },
   { id: "digital-form",    label: "Digital Form",     sublabel: "Web Form",              cx: 145, cy: 472, color: "#7C6EF5" },
   { id: "cisco-spaces",    label: "Cisco Spaces",     sublabel: "Wayfinding",            cx: 350, cy: 472, color: "#05C3DD" },
+  { id: "form-platform",  label: "Form Platform",    sublabel: "e.g. JotForm",           cx: 560, cy: 418, color: "#F97316" },
 ];
 
 // All connector paths — each path travels FROM source edge TO dest edge
@@ -43,8 +44,10 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "wxcc-family":   "M 430 239 L 430 331",
   "emr-wxcc":      "M 715 99 Q 598 158 484 212",
   "form-spaces":   "M 199 472 L 296 472",
-  "wxcc-wxc":      "M 376 215 L 199 215",
-  "patient-agent": "M 199 352 Q 460 295 661 215",
+  "wxcc-wxc":          "M 376 215 L 199 215",
+  "patient-agent":     "M 199 352 Q 460 295 661 215",
+  "form-to-platform":  "M 199 472 Q 350 450 506 418",
+  "platform-to-nurse": "M 614 418 Q 664 400 715 331",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -70,14 +73,14 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "The patient completes the digital intake form in around 5 minutes from their own device, at their own time.",
     },
     {
-      activeNodes: ["digital-form", "ai-agent"],
-      activeConnectors: ["form-agent"],
-      narration: "Cisco AI Studio analyses the responses, automatically flagging any clinical concerns for nurse review.",
+      activeNodes: ["digital-form", "form-platform"],
+      activeConnectors: ["form-to-platform"],
+      narration: "The completed form is submitted to the form platform, which processes the patient's responses and delivers results back to the facility — ready for booking confirmation or clinical escalation.",
     },
     {
-      activeNodes: ["ai-agent", "nurse-dashboard"],
-      activeConnectors: ["agent-nurse"],
-      narration: "The nurse reviews only flagged cases on the dashboard — routine responses are processed automatically. If issues are found, they call the patient directly.",
+      activeNodes: ["form-platform", "nurse-dashboard", "pas"],
+      activeConnectors: ["platform-to-nurse"],
+      narration: "Routine responses confirm the appointment automatically in the PAS. Flagged cases are escalated to the nurse dashboard for clinical review before the booking is finalised.",
     },
   ],
 
@@ -105,7 +108,7 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     {
       activeNodes: ["webex-cc", "ai-agent"],
       activeConnectors: ["wxcc-agent"],
-      narration: "Complex or ambiguous replies are handled by Cisco AI Studio — selecting the best available slot without staff involvement.",
+      narration: "Cisco AI Studio selects the best available slot through a standard conversational experience — with direct integration to the PAS so the booking is confirmed without staff involvement.",
     },
     {
       activeNodes: ["webex-cc", "pas"],
