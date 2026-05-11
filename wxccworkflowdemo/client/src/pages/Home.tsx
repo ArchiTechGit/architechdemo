@@ -1126,17 +1126,17 @@ export default function Home() {
                         }}
                       >
                         {isTriggered ? (
-                          <Check style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)" }} className="text-success" />
+                          <Check style={{ width: 24, height: 24 }} className="text-success" />
                         ) : isActive && SIcon ? (
-                          <SIcon style={{ width: "clamp(24px, 4vw, 60px)", height: "clamp(24px, 4vw, 60px)", color: sc.accent }} className="transition-colors duration-300" />
+                          <SIcon style={{ width: 24, height: 24, color: sc.accent }} className="transition-colors duration-300" />
                         ) : (
-                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: "clamp(18px, 3vw, 44px)", color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
+                          <span className="font-black tabular-nums transition-colors duration-300" style={{ fontSize: 20, color: isActive ? sc.accent : "rgba(255,255,255,0.22)", lineHeight: 1 }}>{idx + 1}</span>
                         )}
                       </div>
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(13px, 1.8vw, 24px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: "clamp(80px, 12vw, 200px)" }}
+                        style={{ fontSize: "clamp(10px, 0.75vw, 13px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: 86, display: "block" }}
                       >
                         {stage.label}
                       </span>
