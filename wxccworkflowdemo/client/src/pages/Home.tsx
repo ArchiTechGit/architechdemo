@@ -8,7 +8,6 @@ import qrUrl from "@/assets/qr-architech.png";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
 import epicLogoUrl from "@/assets/epic_logo.png";
 import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
-import oracleHealthSvgUrl from "@/assets/logo-oracle-health.svg";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -77,7 +76,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
     systemIntegrations: [
-      { label: "Cerner", logoUrl: oracleHealthSvgUrl, filterWhite: true },
+      { label: "Cerner Millennium" },
       { label: "iPM" },
       { label: "WebPAS" },
     ],
