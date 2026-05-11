@@ -1222,16 +1222,16 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-[13px] font-bold px-2 py-1 rounded" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.65)" }}>{stage.chapter}</span>
                         </div>
-                        <div className="flex items-start gap-1.5">
+                        <div className="flex items-start gap-1">
                           {stage.partnerBadge && (
-                            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, backdropFilter: "blur(8px)", height: 44 }}>
+                            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: stage.partnerBadge.bg, border: `1px solid ${stage.partnerBadge.border}`, height: 36 }}>
                               <img
                                 src={stage.partnerBadge.logoUrl}
                                 alt={stage.partnerBadge.label}
                                 style={{
-                                  height: 28,
+                                  height: 22,
                                   width: "auto",
-                                  maxWidth: stage.partnerBadge.sublabel ? 36 : 140,
+                                  maxWidth: stage.partnerBadge.sublabel ? 30 : 110,
                                   objectFit: "contain",
                                   filter: stage.partnerBadge.filterWhite ? "brightness(0) invert(1)" : undefined,
                                   flexShrink: 0,
@@ -1239,54 +1239,54 @@ export default function Home() {
                               />
                               {stage.partnerBadge.sublabel && (
                                 <div className="flex flex-col">
-                                  <span className="text-[13px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
-                                  <span className="text-[10px] font-semibold leading-none mt-1 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
+                                  <span className="text-[12px] font-black text-white tracking-wide leading-none">{stage.partnerBadge.label}</span>
+                                  <span className="text-[9px] font-semibold leading-none mt-0.5 tracking-[0.12em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>{stage.partnerBadge.sublabel}</span>
                                 </div>
                               )}
                             </div>
                           )}
                           {VIDEO_APPT_STAGES.has(stage.id) && (
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", height: 44 }}>
-                              <Bot className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(255,255,255,0.6)" }} />
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", height: 36 }}>
+                              <Bot className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(255,255,255,0.6)" }} />
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>AI Agent</span>
-                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Cisco AI Studio</span>
+                                <span className="text-[12px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>AI Agent</span>
+                                <span className="text-[9px] font-bold tracking-[0.12em] uppercase leading-none mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Cisco AI Studio</span>
                               </div>
                             </div>
                           )}
                           {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", height: 44 }}>
-                              <img src={webexLogoUrl} alt="Webex" style={{ height: 18, width: "auto", filter: "brightness(0) invert(1) opacity(0.6)" }} />
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", height: 36 }}>
+                              <img src={webexLogoUrl} alt="Webex" style={{ height: 14, width: "auto", filter: "brightness(0) invert(1) opacity(0.6)" }} />
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>Instant Connect</span>
-                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Webex</span>
+                                <span className="text-[12px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>Instant Connect</span>
+                                <span className="text-[9px] font-bold tracking-[0.12em] uppercase leading-none mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Webex</span>
                               </div>
                             </div>
                           )}
                           {stage.id === "PATIENT_DISCHARGE_INSTRUCTIONS" && (
-                            <div className="flex flex-col items-center justify-center px-3 py-2 rounded-md gap-0.5" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)" }}>
-                              <div className="flex items-center gap-1.5">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7 2 3 7 3 12c0 2.5 1 4.8 2.6 6.5C7 20.1 9.4 21 12 21s5-0.9 6.4-2.5C20 16.8 21 14.5 21 12c0-5-4-10-9-10z" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1.5"/><path d="M12 21V12M12 12C12 12 8 9 6 6M12 12c0 0 4-3 6-6" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)", height: 36 }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7 2 3 7 3 12c0 2.5 1 4.8 2.6 6.5C7 20.1 9.4 21 12 21s5-0.9 6.4-2.5C20 16.8 21 14.5 21 12c0-5-4-10-9-10z" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1.5"/><path d="M12 21V12M12 12C12 12 8 9 6 6M12 12c0 0 4-3 6-6" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                              <div className="flex flex-col">
+                                <span className="text-[12px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
+                                <span className="text-[9px] font-bold tracking-[0.15em] uppercase leading-none mt-0.5" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                               </div>
-                              <span className="text-[10px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
                             </div>
                           )}
                           {stage.systemIntegrations && (
-                            <div className="flex flex-col items-end gap-1.5">
-                              <div className="flex items-center gap-1.5">
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1">
                                 {stage.systemIntegrations.map((s, i) => (
-                                  <div key={i} className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: s.color ? `${s.color}18` : "rgba(255,255,255,0.07)", border: `1px solid ${s.color ? `${s.color}55` : "rgba(255,255,255,0.15)"}`, height: 32 }}>
+                                  <div key={i} className="flex items-center justify-center px-2 py-1 rounded-md" style={{ background: s.color ? `${s.color}18` : "rgba(255,255,255,0.07)", border: `1px solid ${s.color ? `${s.color}55` : "rgba(255,255,255,0.15)"}`, height: 28 }}>
                                     {s.logoUrl ? (
-                                      <img src={s.logoUrl} alt={s.label} style={{ height: 16, width: "auto", maxWidth: 60, objectFit: "contain", filter: s.filterWhite ? "brightness(0) invert(1)" : undefined }} />
+                                      <img src={s.logoUrl} alt={s.label} style={{ height: 14, width: "auto", maxWidth: 52, objectFit: "contain", filter: s.filterWhite ? "brightness(0) invert(1)" : undefined }} />
                                     ) : (
-                                      <span className="text-[11px] font-black tracking-wide" style={{ color: s.color ?? "rgba(255,255,255,0.7)" }}>{s.label}</span>
+                                      <span className="text-[10px] font-black tracking-wide" style={{ color: s.color ?? "rgba(255,255,255,0.7)" }}>{s.label}</span>
                                     )}
                                   </div>
                                 ))}
                               </div>
                               {stage.systemIntegrationsLabel && (
-                                <span className="text-[10px] font-semibold tracking-widest uppercase text-white/35">{stage.systemIntegrationsLabel}</span>
+                                <span className="text-[9px] font-semibold tracking-widest uppercase text-white/30">{stage.systemIntegrationsLabel}</span>
                               )}
                             </div>
                           )}
