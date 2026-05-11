@@ -28,8 +28,9 @@ const NODES = [
   { id: "nurse-dashboard", label: "Workflow Complete", sublabel: "or Nurse Escalation",   cx: 715, cy: 358, color: "#10B981" },
   { id: "digital-form",    label: "Digital Form",     sublabel: "Web Form",              cx: 145, cy: 472, color: "#7C6EF5" },
   { id: "cisco-spaces",    label: "Cisco Spaces",     sublabel: "Wayfinding",            cx: 350, cy: 472, color: "#05C3DD" },
-  { id: "form-platform",       label: "Form Platform",      sublabel: "e.g. JotForm",    cx: 560, cy: 418, color: "#F97316" },
-  { id: "appt-confirmed",      label: "Appt. Confirmed",    sublabel: "Booking Finalised", cx: 715, cy: 472, color: "#10B981" },
+  { id: "form-platform",   label: "Form Platform",   sublabel: "e.g. JotForm",     cx: 560, cy: 418, color: "#F97316" },
+  { id: "appt-confirmed",  label: "Appt. Confirmed", sublabel: "Booking Finalised", cx: 715, cy: 472, color: "#10B981" },
+  { id: "clinical-event",  label: "Clinical Event",  sublabel: "Status Change",     cx: 430, cy: 110, color: "#64748B" },
 ];
 
 // All connector paths — each path travels FROM source edge TO dest edge
@@ -55,6 +56,11 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "patient-spaces":    "M 199 358 Q 248 415 296 472",
   "wxcc-to-pas":       "M 376 209 Q 258 138 199 99",
   "agent-to-pas":      "M 661 209 Q 430 95 199 72",
+  "spaces-to-workflow":"M 404 472 Q 560 420 661 385",
+  "clinical-to-emr":   "M 484 110 Q 572 90 661 72",
+  "wxc-to-family":     "M 199 212 Q 290 285 376 358",
+  "emr-to-wxc":        "M 661 72 Q 430 140 199 212",
+  "agent-to-wxcc":     "M 661 209 L 484 209",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -156,22 +162,22 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "Cisco Spaces powers indoor navigation, guiding the patient directly to their bay using the hospital's existing Wi-Fi infrastructure.",
     },
     {
-      activeNodes: ["nurse-dashboard"],
-      activeConnectors: [],
+      activeNodes: ["cisco-spaces", "nurse-dashboard"],
+      activeConnectors: ["spaces-to-workflow"],
       narration: "Workflow complete. The patient has arrived at the correct location — no queue, no staff coordination required.",
     },
   ],
 
   PATIENT_FAMILY_SURGERY_UPDATE: [
     {
-      activeNodes: ["emr"],
-      activeConnectors: [],
-      narration: "The EMR records a clinical status change — patient entering theatre, moving to recovery, or ready for family visitors.",
+      activeNodes: ["clinical-event", "emr"],
+      activeConnectors: ["clinical-to-emr"],
+      narration: "A clinical status event is recorded in the EMR — patient entering theatre, moving to recovery, or ready for family visitors.",
     },
     {
       activeNodes: ["emr", "webex-cc"],
       activeConnectors: ["emr-wxcc"],
-      narration: "A Webex CC flow receives the HL7 event from the EMR and initiates the family notification workflow automatically.",
+      narration: "The HL7 event triggers a Webex CC flow, initiating the family notification workflow automatically.",
     },
     {
       activeNodes: ["webex-cc", "webex-connect"],
@@ -179,13 +185,13 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "Webex Connect prepares a personalised status update SMS for the nominated family contact.",
     },
     {
-      activeNodes: ["webex-connect", "webex-cc", "family-device"],
-      activeConnectors: ["wxcc-family"],
+      activeNodes: ["webex-connect", "family-device"],
+      activeConnectors: ["wxc-to-family"],
       narration: "The family member receives a real-time update on their phone — they know exactly what's happening without calling the hospital.",
     },
     {
-      activeNodes: ["emr", "webex-cc", "family-device"],
-      activeConnectors: ["emr-wxcc", "wxcc-family"],
+      activeNodes: ["clinical-event", "emr", "webex-connect", "family-device"],
+      activeConnectors: ["clinical-to-emr", "emr-wxcc", "wxc-to-family"],
       narration: "Each EMR milestone fires another automated message — patient in recovery, then ready for visitors — all without any staff involvement.",
     },
     {
@@ -199,32 +205,22 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     {
       activeNodes: ["emr"],
       activeConnectors: [],
-      narration: "Discharge is recorded in the EMR — immediately triggering the automated instruction delivery workflow.",
+      narration: "Discharge is recorded in the EMR — immediately triggering the personalised instruction delivery workflow.",
     },
     {
-      activeNodes: ["emr", "webex-cc"],
-      activeConnectors: ["emr-wxcc"],
-      narration: "Webex Contact Centre receives the discharge event via HL7 and initiates personalised instruction generation.",
-    },
-    {
-      activeNodes: ["webex-cc", "webex-connect"],
-      activeConnectors: ["wxcc-wxc"],
-      narration: "Webex Connect assembles a custom SMS with procedure-specific wound care guides, medication summaries, and red flag criteria.",
+      activeNodes: ["emr", "webex-connect"],
+      activeConnectors: ["emr-to-wxc"],
+      narration: "Webex Connect receives the discharge event and assembles personalised instructions — wound care guides, medication summaries, and red flag criteria specific to the patient's procedure.",
     },
     {
       activeNodes: ["webex-connect", "patient-device"],
       activeConnectors: ["wxc-patient"],
-      narration: "The patient receives their instructions on their phone — embedded video links replace printed diagrams. Zero paper, zero printing, zero lost instructions.",
-    },
-    {
-      activeNodes: ["patient-device", "emr"],
-      activeConnectors: [],
-      narration: "Patient acknowledgements are logged back to the EMR automatically — giving the care team a complete audit trail with no manual entry.",
+      narration: "The patient receives their instructions via SMS — embedded video links replace printed diagrams. Zero paper, zero printing, zero lost instructions.",
     },
     {
       activeNodes: ["nurse-dashboard"],
       activeConnectors: [],
-      narration: "Workflow complete. Instructions delivered, acknowledged, and documented — no staff involvement from discharge to audit trail.",
+      narration: "Workflow complete. Instructions delivered and documented — no staff involvement required.",
     },
   ],
 
@@ -250,9 +246,19 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "The AI Agent processes the complete survey — understanding context, tone, and clinical relevance without the patient needing to follow a rigid script.",
     },
     {
-      activeNodes: ["ai-agent", "emr", "nurse-dashboard", "webex-cc"],
-      activeConnectors: ["agent-to-emr", "agent-nurse"],
-      narration: "If all clear, the AI Agent updates the EMR automatically. Concerning responses trigger escalation to the clinical team. In serious cases, a Webex Instant Connect task is passed to a Webex CC agent for emergency triage.",
+      activeNodes: ["ai-agent", "emr"],
+      activeConnectors: ["agent-to-emr"],
+      narration: "If all clear, the AI Agent updates the EMR automatically — no staff action required.",
+    },
+    {
+      activeNodes: ["ai-agent", "webex-cc"],
+      activeConnectors: ["agent-to-wxcc"],
+      narration: "Or, if urgent escalation is required, the AI Agent passes a Webex Instant Connect task to a Webex CC agent for immediate clinical triage.",
+    },
+    {
+      activeNodes: ["nurse-dashboard"],
+      activeConnectors: [],
+      narration: "Workflow complete. Routine cases close automatically — escalations route directly to the clinical team.",
     },
   ],
 };
