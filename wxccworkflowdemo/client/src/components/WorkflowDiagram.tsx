@@ -52,6 +52,8 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "agent-to-emr":      "M 715 185 L 715 99",
   "platform-to-appt":  "M 614 425 Q 665 448 661 445",
   "appt-to-workflow":  "M 715 445 L 715 385",
+  "patient-spaces":    "M 199 358 Q 248 415 296 472",
+  "wxcc-to-pas":       "M 376 209 Q 258 138 199 99",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -79,12 +81,12 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     {
       activeNodes: ["digital-form", "form-platform"],
       activeConnectors: ["form-to-platform"],
-      narration: "The completed form is submitted to the form platform, which processes the patient's responses and delivers results back to the facility — ready for booking confirmation or clinical escalation.",
+      narration: "The completed form is submitted to the form platform for processing.",
     },
     {
       activeNodes: ["form-platform", "appt-confirmed"],
       activeConnectors: ["platform-to-appt"],
-      narration: "The form platform delivers results back to the facility. Routine responses confirm the appointment automatically — flagged cases are held for clinical review before the booking is finalised.",
+      narration: "The form platform processes the patient's responses — routine cases confirm the appointment automatically, flagged cases are held for clinical review before the booking is finalised.",
     },
     {
       activeNodes: ["appt-confirmed", "nurse-dashboard"],
@@ -110,19 +112,24 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "The patient receives the SMS and can confirm, reschedule, or cancel by simply replying — no phone queue needed.",
     },
     {
-      activeNodes: ["patient-device", "webex-cc"],
+      activeNodes: ["patient-device", "webex-connect", "webex-cc"],
       activeConnectors: ["wxc-wxcc"],
       narration: "Patient replies route through Webex Contact Centre, which manages the two-way conversation and rescheduling logic automatically.",
     },
     {
       activeNodes: ["webex-cc", "ai-agent"],
       activeConnectors: ["wxcc-agent"],
-      narration: "Cisco AI Studio selects the best available slot through a standard conversational experience — with direct integration to the PAS so the booking is confirmed without staff involvement.",
+      narration: "The AI Agent handles complex or ambiguous replies — selecting the best available slot through a standard conversational experience with direct PAS integration.",
     },
     {
       activeNodes: ["webex-cc", "pas"],
-      activeConnectors: ["pas-wxc"],
-      narration: "Confirmed bookings sync back to the PAS in real time. Automated reminders fire at 7 days, 3 days, and 1 day before the appointment.",
+      activeConnectors: ["wxcc-to-pas"],
+      narration: "Confirmed bookings sync back to the PAS in real time. Automated reminders are scheduled at 7 days, 3 days, and 1 day before the appointment.",
+    },
+    {
+      activeNodes: ["nurse-dashboard"],
+      activeConnectors: [],
+      narration: "Workflow complete. The appointment is locked in, reminders are set, and no clinical staff time was consumed.",
     },
   ],
 
@@ -144,8 +151,13 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     },
     {
       activeNodes: ["patient-device", "cisco-spaces"],
-      activeConnectors: ["patient-form", "form-spaces"],
+      activeConnectors: ["patient-spaces"],
       narration: "Cisco Spaces powers indoor navigation, guiding the patient directly to their bay using the hospital's existing Wi-Fi infrastructure.",
+    },
+    {
+      activeNodes: ["nurse-dashboard"],
+      activeConnectors: [],
+      narration: "Workflow complete. The patient has arrived at the correct location — no queue, no staff coordination required.",
     },
   ],
 
@@ -166,7 +178,7 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "Webex Connect prepares a personalised status update SMS for the nominated family contact.",
     },
     {
-      activeNodes: ["webex-connect", "family-device"],
+      activeNodes: ["webex-connect", "webex-cc", "family-device"],
       activeConnectors: ["wxcc-family"],
       narration: "The family member receives a real-time update on their phone — they know exactly what's happening without calling the hospital.",
     },
@@ -174,6 +186,11 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       activeNodes: ["emr", "webex-cc", "family-device"],
       activeConnectors: ["emr-wxcc", "wxcc-family"],
       narration: "Each EMR milestone fires another automated message — patient in recovery, then ready for visitors — all without any staff involvement.",
+    },
+    {
+      activeNodes: ["nurse-dashboard"],
+      activeConnectors: [],
+      narration: "Workflow complete. The family is kept informed at every stage — no phone calls, no waiting, no staff coordination required.",
     },
   ],
 
@@ -200,8 +217,13 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     },
     {
       activeNodes: ["patient-device", "emr"],
-      activeConnectors: ["emr-wxcc"],
+      activeConnectors: [],
       narration: "Patient acknowledgements are logged back to the EMR automatically — giving the care team a complete audit trail with no manual entry.",
+    },
+    {
+      activeNodes: ["nurse-dashboard"],
+      activeConnectors: [],
+      narration: "Workflow complete. Instructions delivered, acknowledged, and documented — no staff involvement from discharge to audit trail.",
     },
   ],
 
@@ -219,17 +241,17 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     {
       activeNodes: ["patient-device", "ai-agent"],
       activeConnectors: ["patient-agent"],
-      narration: "The patient's responses flow to the AI Agent, which conducts the full discharge survey — asking about pain levels, wound condition, medication adherence, and red flag symptoms.",
+      narration: "The patient's responses flow to the AI Agent, which conducts the full discharge survey in natural language.",
     },
     {
       activeNodes: ["ai-agent"],
       activeConnectors: [],
-      narration: "The AI Agent processes the complete survey in natural language — understanding context, tone, and clinical relevance without the patient needing to follow a rigid script.",
+      narration: "The AI Agent processes the complete survey — understanding context, tone, and clinical relevance without the patient needing to follow a rigid script.",
     },
     {
       activeNodes: ["ai-agent", "emr", "nurse-dashboard", "webex-cc"],
       activeConnectors: ["agent-to-emr", "agent-nurse"],
-      narration: "If all clear, the AI Agent updates the EMR automatically — no staff action required. Concerning responses trigger a summary to the nursing team for escalation. In serious cases, a Webex Instant Connect task is passed to a Webex CC agent for emergency triage.",
+      narration: "If all clear, the AI Agent updates the EMR automatically. Concerning responses trigger escalation to the clinical team. In serious cases, a Webex Instant Connect task is passed to a Webex CC agent for emergency triage.",
     },
   ],
 };
