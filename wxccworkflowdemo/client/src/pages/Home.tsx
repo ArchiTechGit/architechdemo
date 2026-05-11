@@ -37,6 +37,7 @@ interface JourneyStage {
   };
   phoneActionUrl?: string;
   conversationThread?: { role: "ai" | "patient"; text: string }[];
+  keyStat?: { value: string; label: string; whyItMatters: string; source: string };
 }
 
 const VOICE_AI_DEMO_NUMBER = "+61 2 0000 0000"; // Replace with real demo number
@@ -72,6 +73,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     ],
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
+    keyStat: {
+      value: "250hrs",
+      label: "of clinical staff time recovered per 1,000 interactions automated",
+      whyItMatters: "Pre-admission phone calls are one of the highest-touch, lowest-value tasks in the patient journey. Connecting this to WxCC means the AI handles data collection automatically — nurses only review flagged cases, not every form.",
+      source: "Regional Health Case Study",
+    },
   },
   {
     id: "PATIENT_APPOINTMENT_CONFIRM",
@@ -84,6 +91,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
+    keyStat: {
+      value: "34%",
+      label: "reduction in missed appointments using SMS reminders",
+      whyItMatters: "DNA rates cost public hospitals $125–$800 per missed appointment. An existing scheduling platform sends reminders — but WxCC makes them conversational and two-way, so patients can reschedule instantly rather than simply not showing up.",
+      source: "NSW Behavioural Insights Unit, 2019",
+    },
     partnerBadge: {
       label: "Cisco Spaces",
       sublabel: "Powered by",
@@ -104,6 +117,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Open Wayfinder →",
     phoneActionUrl: "/wxccworkflowdemo/dist/wayfinding.html",
     systemEvents: [],
+    keyStat: {
+      value: "19%",
+      label: "reduction in no-shows at St Vincent's Hospital Sydney",
+      whyItMatters: "Admissions congestion starts in the carpark. A day-of SMS with a direct wayfinding link — triggered automatically by WxCC — means patients arrive at the right place without queuing at the admissions desk.",
+      source: "NSW Behavioural Insights Unit, 2016",
+    },
     partnerBadge: {
       label: "Cisco Spaces",
       sublabel: "Powered by",
@@ -127,6 +146,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     ],
     phoneMessage: "Hi Family Member, this is ArchiTech Hospital. {NAME}'s surgery is underway. We'll update you when there's a change in status. No need to call, we'll contact you.",
     phoneAction: "Acknowledge →",
+    keyStat: {
+      value: "30%",
+      label: "of healthcare workforce tasks could be automated using digital technology and AI",
+      whyItMatters: "Family communication during surgery is inconsistent and staff-dependent. Routing EMR status events through WxCC means updates go out the moment the patient's status changes — no manual calls, no forgotten callbacks.",
+      source: "Productivity Commission, May 2024",
+    },
     systemEvents: [
       "HL7 ADT^A03 — Patient discharge event received from Epic EMR",
       "HL7 ORM^O01 — Surgery completion order from OR system",
@@ -145,6 +170,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
     phoneAction: "View Discharge Instructions →",
     systemEvents: [],
+    keyStat: {
+      value: "80%",
+      label: "of manual effort cut from patient communication workflows",
+      whyItMatters: "Printed discharge instructions get lost — and the nurse call to follow up takes more time than the discharge itself. WxCC delivers personalised instructions via SMS the moment the EMR records discharge, with no staff intervention required.",
+      source: "Regional Health Case Study",
+    },
   },
   {
     id: "PATIENT_POST_DISCHARGE_SURVEY",
@@ -162,6 +193,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, this is ArchiTech Hospital checking in. It's been 2 days since your surgery. We have a few quick questions — should only take 2-3 minutes. Ready? Reply YES to start or NO to stop.",
     phoneAction: "Share How You're Feeling →",
     systemEvents: [],
+    keyStat: {
+      value: "20x",
+      label: "more cost-effective per interaction than a manual phone call",
+      whyItMatters: "Post-discharge follow-up is frequently skipped because clinical staff don't have capacity. WxCC automates the check-in at scale — catching complications early, reducing ED re-presentations, and doing it at a fraction of the cost of a nurse call.",
+      source: "Regional Health Case Study",
+    },
     conversationThread: [
       { role: "ai", text: "Hi {NAME}, it's been 2 days since your surgery. On a scale of 1–10, how would you rate your pain right now?" },
       { role: "patient", text: "About a 3. Manageable." },
@@ -1261,6 +1298,20 @@ export default function Home() {
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
                     <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.automationOpportunity}</p>
+                    {stage.keyStat && (
+                      <div className="rounded-lg px-3 py-2.5 mb-2 flex gap-3 items-start" style={{ background: `${stageColor.accentBg}`, border: `1px solid ${stageColor.accentBorder}` }}>
+                        <div className="flex-shrink-0 pt-0.5">
+                          <span className="font-black leading-none" style={{ fontSize: "clamp(18px, 1.6vw, 36px)", color: stageColor.accent }}>{stage.keyStat.value}</span>
+                          <p className="text-white/50 font-semibold mt-0.5" style={{ fontSize: "clamp(10px, 0.75vw, 15px)" }}>{stage.keyStat.label}</p>
+                        </div>
+                        <div style={{ width: "1px", alignSelf: "stretch", background: stageColor.accentBorder, flexShrink: 0 }} />
+                        <div>
+                          <p className="font-bold uppercase tracking-widest mb-1" style={{ fontSize: "clamp(8px, 0.6vw, 12px)", color: stageColor.accent }}>Why this matters</p>
+                          <p className="text-white/70 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
+                          <p className="text-white/25 mt-1" style={{ fontSize: "clamp(9px, 0.65vw, 13px)" }}>Source: {stage.keyStat.source}</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                       <p className="font-bold text-white/60 uppercase tracking-[0.18em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>Current State</p>
                       <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.currentState}</p>
