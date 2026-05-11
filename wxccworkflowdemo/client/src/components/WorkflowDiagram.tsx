@@ -322,6 +322,7 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
   const [paused, setPaused] = useState(false);
   const [ballKey, setBallKey] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const step = steps[stepIdx];
   const isLast = stepIdx === steps.length - 1;
@@ -353,6 +354,15 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
     timerRef.current = setTimeout(advance, dur);
     return clearTimer;
   }, [stepIdx, paused, isLast, advance, step]);
+
+  // Trigger ball animations imperatively — SVG animateMotion with begin="indefinite"
+  // doesn't auto-start; we call beginElement() after the DOM updates each step.
+  useEffect(() => {
+    if (!svgRef.current) return;
+    svgRef.current.querySelectorAll<SVGAnimationElement>("animateMotion").forEach((el) => {
+      el.beginElement();
+    });
+  }, [ballKey]);
 
   const handlePause = () => {
     setPaused((p) => {
@@ -419,6 +429,7 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
         {/* SVG Diagram */}
         <div className="px-4 pt-4">
           <svg
+            ref={svgRef}
             viewBox="0 0 860 544"
             style={{ width: "100%", display: "block" }}
             xmlns="http://www.w3.org/2000/svg"
@@ -452,7 +463,7 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
                   )}
                   {active && (
                     <circle key={`ball-${id}-${ballKey}`} r={5.5} fill="#05C3DD" style={{ filter: "drop-shadow(0 0 6px #05C3DDaa)" }}>
-                      <animateMotion dur={BALL_DUR} repeatCount="1" fill="freeze">
+                      <animateMotion dur={BALL_DUR} begin="indefinite" repeatCount="1" fill="freeze">
                         <mpath href={`#cp-${id}`} />
                       </animateMotion>
                     </circle>
