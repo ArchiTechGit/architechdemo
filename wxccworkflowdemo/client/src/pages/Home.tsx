@@ -1316,6 +1316,10 @@ export default function Home() {
                             </button>
                           )}
                           <div className="flex items-center gap-2">
+                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
+                            </Button>
+                            <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
                             <button
                               onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
                               className="flex items-center font-bold text-xs h-9 px-3 rounded-md transition-all duration-200"
@@ -1327,10 +1331,6 @@ export default function Home() {
                             >
                               Behind the Scenes
                             </button>
-                            <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
-                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
-                              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
-                            </Button>
                           </div>
                         </div>
                       </div>
