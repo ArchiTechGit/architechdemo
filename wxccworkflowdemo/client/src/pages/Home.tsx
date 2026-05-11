@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
+import WorkflowDiagram from "@/components/WorkflowDiagram";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
@@ -363,7 +364,7 @@ export default function Home() {
   const [wayfindingOpen, setWayfindingOpen] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
-  const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string } | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string; stageId: string } | null>(null);
   const displayApptDate = useMemo(() => {
     const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
     d.setMinutes(d.getMinutes() >= 30 ? 60 : 0, 0, 0);
@@ -1305,7 +1306,7 @@ export default function Home() {
                             </button>
                           )}
                           <button
-                            onClick={() => setLightboxImage({ src: stage.image, label: stage.label })}
+                            onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
                             className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
                             style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
                           >
@@ -1476,32 +1477,13 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox */}
+      {/* Lightbox — interactive workflow diagram */}
       {lightboxImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
-          onClick={() => setLightboxImage(null)}
-        >
-          <div className="relative mx-6" style={{ maxWidth: "min(900px, 90vw)" }} role="dialog" aria-modal="true" aria-label={lightboxImage?.label ?? "Workflow diagram"} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-white/50 uppercase tracking-widest font-mono">{lightboxImage.label}</span>
-              <button
-                onClick={() => setLightboxImage(null)}
-                aria-label="Close workflow diagram"
-                className="text-white/40 hover:text-white text-xs font-mono border border-white/15 hover:border-white/35 px-2.5 py-1 rounded transition-colors"
-              >
-                <span aria-hidden="true">✕</span> Close
-              </button>
-            </div>
-            <img
-              src={lightboxImage.src}
-              alt={lightboxImage.label}
-              className="block rounded-lg border border-white/10"
-              style={{ maxWidth: "100%", maxHeight: "75vh", width: "auto", height: "auto", margin: "0 auto" }}
-              onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/1200x560/13294B/1A3460?text=${encodeURIComponent(lightboxImage.label)}`; }}
-            />
-          </div>
-        </div>
+        <WorkflowDiagram
+          stageId={lightboxImage.stageId}
+          stageLabel={lightboxImage.label}
+          onClose={() => setLightboxImage(null)}
+        />
       )}
 
       {/* ── Footer ── */}
