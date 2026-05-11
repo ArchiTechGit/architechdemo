@@ -22,7 +22,7 @@ const NODES = [
   { id: "emr",             label: "EMR",              sublabel: "Epic · Oracle Health",  cx: 715, cy: 72,  color: "#34C97A" },
   { id: "webex-connect",   label: "Webex Connect",    sublabel: "Cisco",                 cx: 145, cy: 212, color: "#05C3DD" },
   { id: "webex-cc",        label: "Webex CC",         sublabel: "Contact Centre",        cx: 430, cy: 212, color: "#05C3DD" },
-  { id: "ai-agent",        label: "Cisco AI Studio",  sublabel: "AI Agent",              cx: 715, cy: 212, color: "#7C6EF5" },
+  { id: "ai-agent",        label: "AI Agent",          sublabel: "Cisco AI",              cx: 715, cy: 212, color: "#7C6EF5" },
   { id: "patient-device",  label: "Patient",          sublabel: "Mobile Device",         cx: 145, cy: 358, color: "#F59E0B" },
   { id: "family-device",   label: "Family",           sublabel: "Mobile Device",         cx: 430, cy: 358, color: "#F59E0B" },
   { id: "nurse-dashboard", label: "Nurse Dashboard",  sublabel: "Staff Portal",          cx: 715, cy: 358, color: "#10B981" },
@@ -48,6 +48,7 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "patient-agent":     "M 199 352 Q 460 295 661 215",
   "form-to-platform":  "M 199 472 Q 350 450 506 418",
   "platform-to-nurse": "M 614 418 Q 664 400 715 331",
+  "agent-to-emr":      "M 715 185 L 715 99",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -138,11 +139,6 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       activeConnectors: ["patient-form", "form-spaces"],
       narration: "Cisco Spaces powers indoor navigation, guiding the patient directly to their bay using the hospital's existing Wi-Fi infrastructure.",
     },
-    {
-      activeNodes: ["cisco-spaces", "nurse-dashboard"],
-      activeConnectors: ["form-agent", "agent-nurse"],
-      narration: "As the patient checks in via wayfinding, a location event notifies the nurse dashboard — staff know the patient is on their way before they arrive.",
-    },
   ],
 
   PATIENT_FAMILY_SURGERY_UPDATE: [
@@ -215,17 +211,17 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     {
       activeNodes: ["patient-device", "ai-agent"],
       activeConnectors: ["patient-agent"],
-      narration: "Cisco AI Studio analyses the responses in real time, categorising each reply as routine, flagged, or critical.",
+      narration: "The patient's responses flow to the AI Agent, which conducts the full discharge survey — asking about pain levels, wound condition, medication adherence, and red flag symptoms.",
     },
     {
-      activeNodes: ["ai-agent", "emr"],
-      activeConnectors: ["emr-wxcc"],
-      narration: "Routine responses are auto-documented in the EMR — zero staff effort, complete clinical record.",
+      activeNodes: ["ai-agent"],
+      activeConnectors: [],
+      narration: "The AI Agent processes the complete survey in natural language — understanding context, tone, and clinical relevance without the patient needing to follow a rigid script.",
     },
     {
-      activeNodes: ["ai-agent", "nurse-dashboard"],
-      activeConnectors: ["agent-nurse"],
-      narration: "Concerning responses trigger immediate escalation to the nurse dashboard with pre-populated context — the nurse calls the patient within minutes.",
+      activeNodes: ["ai-agent", "emr", "nurse-dashboard", "webex-cc"],
+      activeConnectors: ["agent-to-emr", "agent-nurse"],
+      narration: "If all clear, the AI Agent updates the EMR automatically — no staff action required. Concerning responses trigger a summary to the nursing team for escalation. In serious cases, a Webex Instant Connect task is passed to a Webex CC agent for emergency triage.",
     },
   ],
 };
