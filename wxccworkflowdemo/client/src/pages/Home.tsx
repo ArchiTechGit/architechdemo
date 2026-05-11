@@ -591,8 +591,8 @@ export default function Home() {
             <h1 className="text-[13px] font-bold text-white/90 uppercase tracking-widest leading-tight">
               The Digital Front Door — Patient Experience Journey
             </h1>
-            <p className="text-[10px] font-bold text-primary tracking-[0.22em] uppercase mt-0.5">
-              [ Live Demonstration ]
+            <p className="text-[10px] font-bold text-white/35 tracking-[0.22em] uppercase mt-0.5">
+              Live Demonstration
             </p>
           </div>
         </div>
@@ -1069,7 +1069,7 @@ export default function Home() {
                 <label htmlFor="patient-name" className="flex items-center gap-2 cursor-pointer">
                   <User className="w-3 h-3 text-primary/40" />
                   <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Name</span>
-                  <span title="Enter the patient's full name. This will be used to personalise the SMS message sent to the patient." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
+                  <span title="Enter the patient's full name. This will be used to personalise the SMS message sent to the patient." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:10,minWidth:'16px',minHeight:'16px',display:'inline-flex'}}>i</span>
                 </label>
                 <Input
                   id="patient-name"
@@ -1086,7 +1086,7 @@ export default function Home() {
                 <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
                   <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
-                  <span title="Enter the patient's mobile number in the format 0440123456. This is the number that will receive the SMS." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
+                  <span title="Enter the patient's mobile number in the format 0440123456. This is the number that will receive the SMS." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:10,minWidth:'16px',minHeight:'16px',display:'inline-flex'}}>i</span>
                 </label>
                 <Input
                   id="patient-mobile"
@@ -1103,7 +1103,7 @@ export default function Home() {
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
                   <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Instant Connect Host</span>
-                  <span title="Enter the host's mobile number in the format 0440123456. This number will receive the video call link." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
+                  <span title="Enter the host's mobile number in the format 0440123456. This number will receive the video call link." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:10,minWidth:'16px',minHeight:'16px',display:'inline-flex'}}>i</span>
                 </label>
                 <Input
                   id="demo-mobile"
@@ -1134,7 +1134,7 @@ export default function Home() {
                     {/* Node */}
                     <button
                       onClick={() => setActiveStepperStage(stage.id)}
-                      className="flex flex-col items-center gap-2 flex-shrink-0 group"
+                      className="flex flex-col items-center gap-2 flex-shrink-0 group cursor-pointer"
                       style={{ width: 88 }}
                     >
                       {/* Circle */}
@@ -1339,7 +1339,7 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.automationOpportunity}</p>
+                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.automationOpportunity}</p>
                     {stage.keyStat && (
                       <div className="rounded-r-lg pl-4 pr-3 py-3 mb-2 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: `3px solid ${stageColor.accent}` }}>
                         <div className="flex-shrink-0 pt-0.5">
@@ -1355,8 +1355,8 @@ export default function Home() {
                       </div>
                     )}
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>How It's Done Today</p>
-                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.currentState}</p>
+                      <p className="font-bold text-white/60 uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>How It's Done Today</p>
+                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">

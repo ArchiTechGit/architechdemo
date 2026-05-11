@@ -306,7 +306,7 @@ function NodeBox({ id, active }: { id: string; active: boolean }) {
         y={node.cy + 11}
         textAnchor="middle"
         fill={active ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.16)"}
-        fontSize={8.5}
+        fontSize={10}
         fontFamily="system-ui, -apple-system, sans-serif"
         style={{ transition: "fill 0.35s ease" }}
       >
@@ -419,10 +419,10 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-white/35 hover:text-white/80 transition-colors"
-            style={{ fontSize: "18px", lineHeight: 1, padding: "2px 6px" }}
+            className="text-white/35 hover:text-white/80 transition-colors cursor-pointer"
+            style={{ fontSize: "18px", lineHeight: 1, padding: "4px 8px" }}
           >
-            ×
+            ✕
           </button>
         </div>
 
@@ -511,7 +511,7 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
             <div className="flex items-center gap-1.5 ml-auto">
               <button
                 onClick={handleRestart}
-                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md transition-colors"
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md transition-colors cursor-pointer hover:text-white/70"
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }}
               >
                 <RotateCcw className="w-3 h-3" />
@@ -519,7 +519,7 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
               </button>
               <button
                 onClick={handlePause}
-                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md transition-colors"
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md transition-colors cursor-pointer hover:opacity-80"
                 style={{ background: "rgba(5,195,221,0.1)", border: "1px solid rgba(5,195,221,0.25)", color: "#05C3DD" }}
               >
                 {paused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
