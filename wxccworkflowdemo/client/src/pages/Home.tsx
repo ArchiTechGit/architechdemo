@@ -1251,11 +1251,10 @@ export default function Home() {
                           )}
                           {VIDEO_APPT_STAGES.has(stage.id) && (
                             <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
-                              <img src={ciscoSpacesLogoUrl} alt="Cisco" style={{ height: 16, width: "auto", maxWidth: 52, objectFit: "contain", filter: "brightness(0) invert(1)", flexShrink: 0, opacity: 0.85 }} />
-                              <Bot className="w-4 h-4 flex-shrink-0 text-primary" style={{ filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
+                              <Bot className="w-5 h-5 flex-shrink-0 text-primary" style={{ filter: "drop-shadow(0 0 6px rgba(5,195,221,0.8))" }} />
                               <div className="flex flex-col">
                                 <span className="text-[13px] font-black tracking-wide leading-none text-primary">AI Agent</span>
-                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex Connect</span>
+                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Cisco AI Studio</span>
                               </div>
                             </div>
                           )}
