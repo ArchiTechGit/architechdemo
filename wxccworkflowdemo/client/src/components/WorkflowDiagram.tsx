@@ -25,7 +25,7 @@ const NODES = [
   { id: "ai-agent",        label: "AI Agent",          sublabel: "Cisco AI",              cx: 715, cy: 212, color: "#7C6EF5" },
   { id: "patient-device",  label: "Patient",          sublabel: "Mobile Device",         cx: 145, cy: 358, color: "#F59E0B" },
   { id: "family-device",   label: "Family",           sublabel: "Mobile Device",         cx: 430, cy: 358, color: "#F59E0B" },
-  { id: "nurse-dashboard", label: "Nurse Dashboard",  sublabel: "Staff Portal",          cx: 715, cy: 358, color: "#10B981" },
+  { id: "nurse-dashboard", label: "Workflow Complete", sublabel: "or Nurse Escalation",   cx: 715, cy: 358, color: "#10B981" },
   { id: "digital-form",    label: "Digital Form",     sublabel: "Web Form",              cx: 145, cy: 472, color: "#7C6EF5" },
   { id: "cisco-spaces",    label: "Cisco Spaces",     sublabel: "Wayfinding",            cx: 350, cy: 472, color: "#05C3DD" },
   { id: "form-platform",  label: "Form Platform",    sublabel: "e.g. JotForm",           cx: 560, cy: 418, color: "#F97316" },
