@@ -174,6 +174,8 @@ const JOURNEY_STAGES: JourneyStage[] = [
       "Family notification dispatched via Webex Connect",
     ],
     systemIntegrations: [
+      { label: "Epic", logoUrl: epicLogoUrl },
+      { label: "Cerner", logoUrl: oracleHealthLogoUrl },
       { label: "HL7" },
       { label: "FHIR R4" },
     ],
