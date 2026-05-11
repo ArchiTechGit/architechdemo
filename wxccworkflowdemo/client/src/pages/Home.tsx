@@ -173,6 +173,11 @@ const JOURNEY_STAGES: JourneyStage[] = [
       "Webex CC flow triggered by EMR event",
       "Family notification dispatched via Webex Connect",
     ],
+    systemIntegrations: [
+      { label: "HL7" },
+      { label: "FHIR R4" },
+    ],
+    systemIntegrationsLabel: "Integration with HL7 / FHIR",
   },
   {
     id: "PATIENT_DISCHARGE_INSTRUCTIONS",
@@ -1254,19 +1259,6 @@ export default function Home() {
                                 <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#22c55e" }}>PAPERLESS</span>
                               </div>
                               <span className="text-[10px] font-bold tracking-[0.15em] uppercase leading-none" style={{ color: "rgba(34,197,94,0.55)" }}>Zero Waste</span>
-                            </div>
-                          )}
-                          {stage.id === "PATIENT_FAMILY_SURGERY_UPDATE" && (
-                            <div className="flex flex-col items-end gap-1.5">
-                              <div className="flex items-center gap-2">
-                                <img src={epicLogoUrl} alt="Epic" style={{ height: 32, width: "auto", maxWidth: 80, objectFit: "contain" }} />
-                                <img src={oracleHealthLogoUrl} alt="Oracle Cerner" style={{ height: 36, width: "auto", maxWidth: 96, objectFit: "contain" }} />
-                              </div>
-                              <div className="flex items-center justify-end">
-                                <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-md" style={{ background: "rgba(255,152,0,0.12)", border: "1px solid rgba(255,152,0,0.4)" }}>
-                                  <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
-                                </div>
-                              </div>
                             </div>
                           )}
                           {stage.systemIntegrations && (
