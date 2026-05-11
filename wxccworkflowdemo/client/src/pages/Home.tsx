@@ -1020,7 +1020,7 @@ export default function Home() {
                 <label htmlFor="patient-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
                   <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Patient Mobile</span>
-                  <span title="Enter the patient's mobile number in Australian format, e.g. +61 4 1234 5678. This is the number that will receive the SMS." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
+                  <span title="Enter the patient's mobile number in the format 0440123456. This is the number that will receive the SMS." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
                 </label>
                 <Input
                   id="patient-mobile"
@@ -1037,7 +1037,7 @@ export default function Home() {
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
                   <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Instant Connect Host</span>
-                  <span title="Enter the mobile number of the Webex Instant Connect host (e.g. the clinician or demo presenter). This number will receive the video call link." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
+                  <span title="Enter the host's mobile number in the format 0440123456. This number will receive the video call link." className="w-3.5 h-3.5 rounded-full border border-white/20 text-white/30 flex items-center justify-center text-[9px] font-bold cursor-help leading-none select-none hover:border-white/40 hover:text-white/50 transition-colors" style={{fontSize:9,minWidth:'14px',minHeight:'14px',display:'inline-flex'}}>i</span>
                 </label>
                 <Input
                   id="demo-mobile"
@@ -1051,7 +1051,7 @@ export default function Home() {
                 />
               </div>
             </div>
-            <p className="text-[11px] text-white/30 mt-3.5 leading-relaxed">Enter a patient name and mobile to personalise the live SMS before triggering each stage.</p>
+
             </div>
 
             {/* Stepper */}
