@@ -1202,7 +1202,7 @@ export default function Home() {
                   className="rounded-2xl overflow-hidden transition-all duration-500"
                   style={{
                     boxShadow: isTriggered
-                      ? `0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px ${stageColor.accentBorder}`
+                      ? `0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)`
                       : `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)`,
                   }}
                 >
@@ -1214,13 +1214,13 @@ export default function Home() {
                       </div>
                     )}
                     {isTriggered && (
-                      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(145deg, ${stageColor.accentBg} 0%, transparent 60%)` }} />
+                      <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 60%)" }} />
                     )}
                     <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.65) 100%)" }} />
                     <div className="absolute inset-0 flex flex-col justify-between p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[13px] font-bold px-2 py-1 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>{stage.chapter}</span>
+                          <span className="font-mono text-[13px] font-bold px-2 py-1 rounded" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.65)" }}>{stage.chapter}</span>
                         </div>
                         <div className="flex items-start gap-1.5">
                           {stage.partnerBadge && (
@@ -1246,20 +1246,20 @@ export default function Home() {
                             </div>
                           )}
                           {VIDEO_APPT_STAGES.has(stage.id) && (
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", height: 44 }}>
-                              <Bot className="w-5 h-5 flex-shrink-0 text-primary" />
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", height: 44 }}>
+                              <Bot className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(255,255,255,0.6)" }} />
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-black tracking-wide leading-none text-primary">AI Agent</span>
-                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Cisco AI Studio</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>AI Agent</span>
+                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Cisco AI Studio</span>
                               </div>
                             </div>
                           )}
                           {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", height: 44 }}>
-                              <img src={webexLogoUrl} alt="Webex" style={{ height: 18, width: "auto", filter: "brightness(0) invert(1)" }} />
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", height: 44 }}>
+                              <img src={webexLogoUrl} alt="Webex" style={{ height: 18, width: "auto", filter: "brightness(0) invert(1) opacity(0.6)" }} />
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-black tracking-wide leading-none text-primary">Instant Connect</span>
-                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex</span>
+                                <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.8)" }}>Instant Connect</span>
+                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Webex</span>
                               </div>
                             </div>
                           )}
@@ -1320,10 +1320,9 @@ export default function Home() {
                               onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
                               className="flex items-center font-bold text-xs h-9 px-3 rounded-md transition-all duration-200"
                               style={{
-                                background: stageColor.accentBg,
-                                border: `1px solid ${stageColor.accentBorder}`,
-                                color: stageColor.accent,
-                                boxShadow: `0 0 10px ${stageColor.accentGlow}`,
+                                background: "rgba(255,255,255,0.06)",
+                                border: "1px solid rgba(255,255,255,0.12)",
+                                color: "rgba(255,255,255,0.55)",
                               }}
                             >
                               Behind the Scenes
@@ -1339,7 +1338,7 @@ export default function Home() {
                   </div>
 
                   {/* Body */}
-                  <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
+                  <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                     <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.automationOpportunity}</p>
                     {stage.keyStat && (
                       <div className="rounded-r-lg pl-4 pr-3 py-3 mb-2 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: `3px solid ${stageColor.accent}` }}>

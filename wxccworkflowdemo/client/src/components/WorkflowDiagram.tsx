@@ -390,9 +390,9 @@ export default function WorkflowDiagram({ stageId, stageLabel, onClose }: Workfl
         style={{
           width: "min(920px, 94vw)",
           background: "linear-gradient(160deg, #07111e 0%, #0b1c30 100%)",
-          border: "1px solid rgba(5,195,221,0.2)",
+          border: "1px solid rgba(255,255,255,0.12)",
           borderRadius: "16px",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 60px rgba(5,195,221,0.06)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 40px rgba(0,0,0,0.3)",
         }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
