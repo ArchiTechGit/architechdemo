@@ -54,6 +54,7 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "appt-to-workflow":  "M 715 445 L 715 385",
   "patient-spaces":    "M 199 358 Q 248 415 296 472",
   "wxcc-to-pas":       "M 376 209 Q 258 138 199 99",
+  "agent-to-pas":      "M 661 209 Q 430 95 199 72",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -99,32 +100,32 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
     {
       activeNodes: ["pas"],
       activeConnectors: [],
-      narration: "An appointment booking is created or updated in the PAS system — or triggered automatically by a completed pre-admission form.",
+      narration: "An appointment booking is created in the PAS system, triggering the automated scheduling workflow.",
     },
     {
       activeNodes: ["pas", "webex-connect"],
       activeConnectors: ["pas-wxc"],
-      narration: "Webex Connect receives the event and prepares a personalised appointment confirmation SMS.",
+      narration: "Webex Connect receives the event and prepares a personalised SMS to initiate the scheduling conversation with the patient.",
     },
     {
       activeNodes: ["webex-connect", "patient-device"],
       activeConnectors: ["wxc-patient"],
-      narration: "The patient receives the SMS and can confirm, reschedule, or cancel by simply replying — no phone queue needed.",
+      narration: "The patient receives the SMS and is invited to confirm or reschedule their appointment by simply replying.",
     },
     {
-      activeNodes: ["patient-device", "webex-connect", "webex-cc"],
-      activeConnectors: ["wxc-wxcc"],
-      narration: "Patient replies route through Webex Contact Centre, which manages the two-way conversation and rescheduling logic automatically.",
+      activeNodes: ["patient-device", "ai-agent"],
+      activeConnectors: ["patient-agent"],
+      narration: "The AI Agent takes over the conversation — handling replies, offering alternative slots, and managing the full scheduling flow without any staff involvement.",
     },
     {
-      activeNodes: ["webex-cc", "ai-agent"],
-      activeConnectors: ["wxcc-agent"],
-      narration: "The AI Agent handles complex or ambiguous replies — selecting the best available slot through a standard conversational experience with direct PAS integration.",
+      activeNodes: ["ai-agent"],
+      activeConnectors: [],
+      narration: "The AI Agent conducts an ongoing natural language conversation until the patient confirms a suitable appointment time.",
     },
     {
-      activeNodes: ["webex-cc", "pas"],
-      activeConnectors: ["wxcc-to-pas"],
-      narration: "Confirmed bookings sync back to the PAS in real time. Automated reminders are scheduled at 7 days, 3 days, and 1 day before the appointment.",
+      activeNodes: ["ai-agent", "pas"],
+      activeConnectors: ["agent-to-pas"],
+      narration: "The confirmed booking is written back to the PAS in real time. Automated reminders are scheduled at 7 days, 3 days, and 1 day before the appointment.",
     },
     {
       activeNodes: ["nurse-dashboard"],
