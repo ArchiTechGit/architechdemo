@@ -1241,7 +1241,7 @@ export default function Home() {
                             style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
                           >
                             <Eye className="w-3 h-3" />
-                            Workflow
+                            Behind the Scenes
                           </button>
                           <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
                             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
