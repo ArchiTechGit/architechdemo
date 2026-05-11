@@ -62,6 +62,8 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "emr-to-wxc":       "M 676 72 Q 430 145 214 220",
   // Stage 6: AI Agent outcomes
   "agent-to-wxcc":    "M 676 217 L 484 217",
+  // AI Agent → Patient (Stage 2 confirmation)
+  "agent-to-patient": "M 676 227 Q 430 304 214 364",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -130,9 +132,9 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "The AI Agent conducts an ongoing natural language conversation until the patient confirms a suitable appointment time.",
     },
     {
-      activeNodes: ["ai-agent", "pas"],
-      activeConnectors: ["agent-to-pas"],
-      narration: "The confirmed booking is written back to the PAS in real time. Automated reminders are scheduled at 7 days, 3 days, and 1 day before the appointment.",
+      activeNodes: ["ai-agent", "pas", "patient-device"],
+      activeConnectors: ["agent-to-pas", "agent-to-patient"],
+      narration: "The confirmed booking is written back to the PAS in real time, and a confirmation SMS is sent to the patient. Automated reminders are scheduled at 7 days, 3 days, and 1 day before the appointment.",
     },
     {
       activeNodes: ["nurse-dashboard"],
