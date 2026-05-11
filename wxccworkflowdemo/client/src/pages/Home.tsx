@@ -84,6 +84,13 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
+    partnerBadge: {
+      label: "Cisco Spaces",
+      sublabel: "Powered by",
+      logoUrl: ciscoSpacesLogoUrl,
+      bg: "var(--success-bg)",
+      border: "var(--success-border)",
+    },
   },
   {
     id: "PATIENT_ARRIVAL_WAYFINDING",
