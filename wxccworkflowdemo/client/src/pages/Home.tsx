@@ -1136,7 +1136,7 @@ export default function Home() {
                       {/* Label */}
                       <span
                         className="font-bold text-center leading-tight transition-colors duration-300 px-1"
-                        style={{ fontSize: "clamp(10px, 0.75vw, 13px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: 86, display: "block" }}
+                        style={{ fontSize: "clamp(11px, 0.85vw, 14px)", color: isTriggered ? "var(--success)" : isActive ? sc.accent : "rgba(255,255,255,0.85)", maxWidth: 86, display: "block" }}
                       >
                         {stage.label}
                       </span>
