@@ -1299,15 +1299,15 @@ export default function Home() {
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: `1px solid ${stageColor.accentBorder}` }}>
                     <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.automationOpportunity}</p>
                     {stage.keyStat && (
-                      <div className="rounded-lg px-3 py-2.5 mb-2 flex gap-3 items-start" style={{ background: `${stageColor.accentBg}`, border: `1px solid ${stageColor.accentBorder}` }}>
+                      <div className="rounded-r-lg pl-4 pr-3 py-3 mb-2 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: `3px solid ${stageColor.accent}` }}>
                         <div className="flex-shrink-0 pt-0.5">
-                          <span className="font-black leading-none" style={{ fontSize: "clamp(18px, 1.6vw, 36px)", color: stageColor.accent }}>{stage.keyStat.value}</span>
+                          <span className="font-black leading-none" style={{ fontSize: "clamp(20px, 1.8vw, 40px)", color: stageColor.accent }}>{stage.keyStat.value}</span>
                           <p className="text-white/50 font-semibold mt-0.5" style={{ fontSize: "clamp(10px, 0.75vw, 15px)" }}>{stage.keyStat.label}</p>
                         </div>
-                        <div style={{ width: "1px", alignSelf: "stretch", background: stageColor.accentBorder, flexShrink: 0 }} />
+                        <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
                         <div>
-                          <p className="font-bold uppercase tracking-widest mb-1" style={{ fontSize: "clamp(8px, 0.6vw, 12px)", color: stageColor.accent }}>Why this matters</p>
-                          <p className="text-white/70 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
+                          <span className="inline-block font-black uppercase tracking-widest px-2 py-0.5 rounded mb-1.5" style={{ fontSize: "clamp(8px, 0.6vw, 11px)", background: stageColor.accent, color: "rgba(0,0,0,0.85)" }}>Why this matters</span>
+                          <p className="text-white/80 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
                           <p className="text-white/25 mt-1" style={{ fontSize: "clamp(9px, 0.65vw, 13px)" }}>Source: {stage.keyStat.source}</p>
                         </div>
                       </div>
