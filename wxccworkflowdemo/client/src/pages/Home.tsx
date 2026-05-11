@@ -700,8 +700,8 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {([
                 { label: "Pre Admission", color: "var(--primary)", stages: [0, 1], variant: "feature" as const },
-                { label: "Day-of-Surgery Coordination", color: "var(--primary)", stages: [2, 3], variant: "compact" as const },
-                { label: "Discharge & Recovery", color: "var(--primary)", stages: [4, 5], variant: "list" as const },
+                { label: "Day-of-Surgery Coordination", color: "var(--primary)", stages: [2, 3], variant: "feature" as const },
+                { label: "Discharge & Recovery", color: "var(--primary)", stages: [4, 5], variant: "feature" as const },
               ]).map(({ label, color, stages, variant }) => (
                 <div key={label} className="flex flex-col gap-3">
                   {/* Phase header */}
