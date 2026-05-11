@@ -116,13 +116,6 @@ const JOURNEY_STAGES: JourneyStage[] = [
       whyItMatters: "DNA rates cost public hospitals $125–$800 per missed appointment. An existing scheduling platform sends reminders — but WxCC makes them conversational and two-way, so patients can reschedule instantly rather than simply not showing up.",
       source: "NSW Behavioural Insights Unit, 2019",
     },
-    partnerBadge: {
-      label: "Cisco Spaces",
-      sublabel: "Powered by",
-      logoUrl: ciscoSpacesLogoUrl,
-      bg: "var(--success-bg)",
-      border: "var(--success-border)",
-    },
   },
   {
     id: "PATIENT_ARRIVAL_WAYFINDING",
@@ -328,7 +321,8 @@ const FLOW_STEPS = ["Webhook received", "Flow initiated", "SMS dispatched"];
 
 const STEP_REVEAL_DELAYS = [450, 950, 1500] as const;
 const VIDEO_APPT_STAGES = new Set(["PATIENT_APPOINTMENT_CONFIRM", "PATIENT_POST_DISCHARGE_SURVEY"]);
-const SPACES_DEMO_STAGES = new Set(["PATIENT_APPOINTMENT_CONFIRM", "PATIENT_ARRIVAL_WAYFINDING", "PATIENT_FAMILY_SURGERY_UPDATE"]);
+const VIDEO_APPT_BUTTON_STAGES = new Set(["PATIENT_POST_DISCHARGE_SURVEY"]);
+const SPACES_DEMO_STAGES = new Set(["PATIENT_ARRIVAL_WAYFINDING", "PATIENT_FAMILY_SURGERY_UPDATE"]);
 const CONFETTI_COLORS_1 = ["#05C3DD", "#00A991", "#ffffff", "#FFD700", "#FF6B6B"];
 const CONFETTI_COLORS_2 = ["#05C3DD", "#00A991", "#ffffff"];
 const INPUT_STYLE = { border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", borderRadius: "10px", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.3)", transition: "border-color 0.2s ease" };
@@ -1296,7 +1290,7 @@ export default function Home() {
                       <div className="flex flex-col gap-2">
                         <h3 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         <div className="flex items-center gap-2 flex-wrap">
-                          {VIDEO_APPT_STAGES.has(stage.id) && (
+                          {VIDEO_APPT_BUTTON_STAGES.has(stage.id) && (
                             <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
                             </Button>
