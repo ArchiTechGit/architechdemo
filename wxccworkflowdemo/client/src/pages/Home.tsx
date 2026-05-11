@@ -230,7 +230,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
       { role: "patient", text: "Yes, every 6 hours like they said." },
       { role: "ai", text: "Perfect. One more — any fever, chills, or difficulty breathing since discharge?" },
       { role: "patient", text: "No, feeling okay overall." },
-      { role: "ai", text: "Great news, John. Your responses look within normal range. A nurse will review this and follow up if anything needs attention. Stay rested and we'll check in again in 48 hours. 💙" },
+      { role: "ai", text: "Great news, {NAME}. Your responses look within normal range. A nurse will review this and follow up if anything needs attention. Stay rested and we'll check in again in 48 hours. 💙" },
     ],
   },
 ];
