@@ -8,6 +8,7 @@ import qrUrl from "@/assets/qr-architech.png";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
 import epicLogoUrl from "@/assets/epic_logo.png";
 import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
+import oracleHealthSvgUrl from "@/assets/logo-oracle-health.svg";
 import wayfindingMapUrl from "@/assets/wayfinding-map.png";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -38,6 +39,8 @@ interface JourneyStage {
   phoneActionUrl?: string;
   conversationThread?: { role: "ai" | "patient"; text: string }[];
   keyStat?: { value: string; label: string; whyItMatters: string; source: string };
+  systemIntegrations?: { label: string; logoUrl?: string; filterWhite?: boolean }[];
+  systemIntegrationsLabel?: string;
 }
 
 const VOICE_AI_DEMO_NUMBER = "+61 2 0000 0000"; // Replace with real demo number
@@ -73,6 +76,12 @@ const JOURNEY_STAGES: JourneyStage[] = [
     ],
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
+    systemIntegrations: [
+      { label: "Cerner", logoUrl: oracleHealthSvgUrl, filterWhite: true },
+      { label: "iPM" },
+      { label: "WebPAS" },
+    ],
+    systemIntegrationsLabel: "Integration with PAS",
     keyStat: {
       value: "250hrs",
       label: "of clinical staff time recovered per 1,000 interactions automated",
@@ -1259,6 +1268,24 @@ export default function Home() {
                                   <span className="text-[13px] font-black tracking-wide leading-none" style={{ color: "#FFA726" }}>HL7 FHIR R4</span>
                                 </div>
                               </div>
+                            </div>
+                          )}
+                          {stage.systemIntegrations && (
+                            <div className="flex flex-col items-end gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                {stage.systemIntegrations.map((s, i) => (
+                                  <div key={i} className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", height: 32 }}>
+                                    {s.logoUrl ? (
+                                      <img src={s.logoUrl} alt={s.label} style={{ height: 16, width: "auto", maxWidth: 60, objectFit: "contain", filter: s.filterWhite ? "brightness(0) invert(1)" : undefined }} />
+                                    ) : (
+                                      <span className="text-[11px] font-black tracking-wide text-white/70">{s.label}</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              {stage.systemIntegrationsLabel && (
+                                <span className="text-[10px] font-semibold tracking-widest uppercase text-white/35">{stage.systemIntegrationsLabel}</span>
+                              )}
                             </div>
                           )}
                           {isTriggered && (
