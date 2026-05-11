@@ -38,7 +38,7 @@ interface JourneyStage {
   phoneActionUrl?: string;
   conversationThread?: { role: "ai" | "patient"; text: string }[];
   keyStat?: { value: string; label: string; whyItMatters: string; source: string };
-  systemIntegrations?: { label: string; logoUrl?: string; filterWhite?: boolean }[];
+  systemIntegrations?: { label: string; logoUrl?: string; filterWhite?: boolean; color?: string }[];
   systemIntegrationsLabel?: string;
 }
 
@@ -76,9 +76,9 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Complete Pre-Admission Form →",
     systemEvents: [],
     systemIntegrations: [
-      { label: "Cerner Millennium" },
-      { label: "iPM" },
-      { label: "WebPAS" },
+      { label: "Cerner Millennium", color: "#E8472A" },
+      { label: "iPM", color: "#4A9EE8" },
+      { label: "WebPAS", color: "#34C97A" },
     ],
     systemIntegrationsLabel: "Integration with PAS",
     keyStat: {
@@ -1267,11 +1267,11 @@ export default function Home() {
                             <div className="flex flex-col items-end gap-1.5">
                               <div className="flex items-center gap-1.5">
                                 {stage.systemIntegrations.map((s, i) => (
-                                  <div key={i} className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", height: 32 }}>
+                                  <div key={i} className="flex items-center justify-center px-2.5 py-1.5 rounded-md" style={{ background: s.color ? `${s.color}18` : "rgba(255,255,255,0.07)", border: `1px solid ${s.color ? `${s.color}55` : "rgba(255,255,255,0.15)"}`, height: 32 }}>
                                     {s.logoUrl ? (
                                       <img src={s.logoUrl} alt={s.label} style={{ height: 16, width: "auto", maxWidth: 60, objectFit: "contain", filter: s.filterWhite ? "brightness(0) invert(1)" : undefined }} />
                                     ) : (
-                                      <span className="text-[11px] font-black tracking-wide text-white/70">{s.label}</span>
+                                      <span className="text-[11px] font-black tracking-wide" style={{ color: s.color ?? "rgba(255,255,255,0.7)" }}>{s.label}</span>
                                     )}
                                   </div>
                                 ))}
