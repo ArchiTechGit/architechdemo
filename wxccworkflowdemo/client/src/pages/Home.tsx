@@ -91,6 +91,13 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
+    conversationThread: [
+      { role: "ai", text: "Hi {NAME}, this is ArchiTech Hospital. Your pre-admission appointment is confirmed for Thursday 22 May at 10:30am. Reply YES to confirm or NO if you need to reschedule." },
+      { role: "patient", text: "NO — I can't make that time, I have work." },
+      { role: "ai", text: "No problem at all. Here are the next available slots:\n\n1️⃣ Fri 23 May – 9:00am\n2️⃣ Mon 26 May – 2:00pm\n3️⃣ Tue 27 May – 11:30am\n\nReply 1, 2 or 3 to book." },
+      { role: "patient", text: "2" },
+      { role: "ai", text: "Done! Your appointment is now booked for Monday 26 May at 2:00pm. We'll send a reminder the day before. See you then 👍" },
+    ],
     keyStat: {
       value: "34%",
       label: "reduction in missed appointments using SMS reminders",
