@@ -230,6 +230,12 @@
   50%       { transform: scale(1.15); opacity: 0.15; }
 }
 
+@keyframes bts-shimmer {
+  0%   { transform: translateX(-120%); }
+  60%  { transform: translateX(120%); }
+  100% { transform: translateX(120%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

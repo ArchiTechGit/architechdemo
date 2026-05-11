@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
+import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Cpu, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
 import WorkflowDiagram from "@/components/WorkflowDiagram";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
@@ -1305,14 +1305,6 @@ export default function Home() {
                               Spaces Demo
                             </button>
                           )}
-                          <button
-                            onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
-                            className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
-                            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
-                          >
-                            <Eye className="w-3 h-3" />
-                            Behind the Scenes
-                          </button>
                           <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
                             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
                           </Button>
@@ -1367,6 +1359,33 @@ export default function Home() {
                       </div>
                     )}
                   </div>
+
+                  {/* Behind the Scenes footer strip */}
+                  <button
+                    onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
+                    className="w-full flex items-center justify-between px-5 py-3 relative overflow-hidden group"
+                    style={{
+                      borderTop: `1px solid ${stageColor.accentBorder}`,
+                      background: `linear-gradient(90deg, ${stageColor.accentBg} 0%, rgba(8,14,24,0) 60%)`,
+                      borderBottomLeftRadius: "inherit",
+                      borderBottomRightRadius: "inherit",
+                    }}
+                  >
+                    {/* Shimmer sweep */}
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: `linear-gradient(90deg, transparent 0%, ${stageColor.accent}22 50%, transparent 100%)`,
+                        animation: "bts-shimmer 3.5s ease-in-out infinite",
+                      }}
+                    />
+                    <div className="flex items-center gap-2.5 relative z-10">
+                      <Cpu className="w-4 h-4 flex-shrink-0" style={{ color: stageColor.accent }} />
+                      <span className="font-black text-sm uppercase tracking-widest" style={{ color: stageColor.accent }}>Behind the Scenes</span>
+                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent }}>Interactive</span>
+                    </div>
+                    <span className="relative z-10 text-xs font-mono transition-transform duration-200 group-hover:translate-x-1" style={{ color: stageColor.accent }}>See how this works →</span>
+                  </button>
                 </div>
               );
             })()}
