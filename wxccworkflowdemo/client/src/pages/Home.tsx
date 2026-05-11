@@ -1301,6 +1301,21 @@ export default function Home() {
                       <div className="flex flex-col gap-2">
                         <h3 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         <div className="flex items-center gap-2 flex-wrap">
+                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
+                          </Button>
+                          <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
+                          <button
+                            onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
+                            className="flex items-center font-bold text-xs h-9 px-3 rounded-md transition-all duration-200"
+                            style={{
+                              background: "rgba(255,255,255,0.06)",
+                              border: "1px solid rgba(255,255,255,0.12)",
+                              color: "rgba(255,255,255,0.55)",
+                            }}
+                          >
+                            Behind the Scenes
+                          </button>
                           {VIDEO_APPT_BUTTON_STAGES.has(stage.id) && (
                             <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
@@ -1315,23 +1330,6 @@ export default function Home() {
                               Spaces Demo
                             </button>
                           )}
-                          <div className="flex items-center gap-2">
-                            <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
-                              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
-                            </Button>
-                            <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
-                            <button
-                              onClick={() => setLightboxImage({ src: stage.image, label: stage.label, stageId: stage.id })}
-                              className="flex items-center font-bold text-xs h-9 px-3 rounded-md transition-all duration-200"
-                              style={{
-                                background: "rgba(255,255,255,0.06)",
-                                border: "1px solid rgba(255,255,255,0.12)",
-                                color: "rgba(255,255,255,0.55)",
-                              }}
-                            >
-                              Behind the Scenes
-                            </button>
-                          </div>
                         </div>
                       </div>
                     </div>
