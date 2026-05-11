@@ -173,7 +173,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "80%",
       label: "of manual effort cut from patient communication workflows",
-      whyItMatters: "Each surgical episode generates ~12 pages of single-use paper — all destined for landfill. Across a mid-sized hospital, that's tonnes of waste annually. WxCC eliminates it entirely: instructions are delivered digitally via SMS the moment the EMR records discharge, with embedded video links replacing printed diagrams. Better for patients, better for the planet, and zero staff effort.",
+      whyItMatters: "Each surgical episode generates ~12 pages of single-use paper — discharge instructions, referral letters, medication summaries — all destined for landfill. Across a mid-sized hospital, that's tonnes of waste and thousands of printing hours annually. WxCC eliminates it entirely: instructions are delivered digitally via SMS the moment the EMR records discharge, referrals route electronically, and embedded video links replace printed diagrams. Better outcomes, better for the planet, zero staff effort.",
       source: "Regional Health Case Study",
     },
   },
