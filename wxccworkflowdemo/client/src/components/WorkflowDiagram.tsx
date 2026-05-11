@@ -267,7 +267,7 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
 };
 
 const DEFAULT_DURATION = 3200;
-const BALL_DUR = "2.8s";
+const BALL_DUR = "2.0s";
 
 function NodeBox({ id, active }: { id: string; active: boolean }) {
   const node = NODES.find((n) => n.id === id)!;
