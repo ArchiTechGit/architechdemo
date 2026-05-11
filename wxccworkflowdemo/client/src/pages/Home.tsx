@@ -1313,7 +1313,7 @@ export default function Home() {
                       </div>
                     )}
                     <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>Current State</p>
+                      <p className="font-bold text-white/60 uppercase tracking-[0.18em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>How It's Done Today</p>
                       <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.15vw, 28px)" }}>{stage.currentState}</p>
                     </div>
                     {isTriggered && revealedSteps > 0 && (
