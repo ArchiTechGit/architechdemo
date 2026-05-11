@@ -1254,6 +1254,15 @@ export default function Home() {
                               </div>
                             </div>
                           )}
+                          {stage.id === "PATIENT_POST_DISCHARGE_SURVEY" && (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(5,195,221,0.22) 0%, rgba(5,195,221,0.10) 100%)", border: "1px solid rgba(5,195,221,0.6)", backdropFilter: "blur(8px)", boxShadow: "0 0 16px rgba(5,195,221,0.25), inset 0 1px 0 rgba(5,195,221,0.2)", height: 44 }}>
+                              <img src={webexLogoUrl} alt="Webex" style={{ height: 18, width: "auto", filter: "brightness(0) invert(1)" }} />
+                              <div className="flex flex-col">
+                                <span className="text-[13px] font-black tracking-wide leading-none text-primary">Instant Connect</span>
+                                <span className="text-[10px] font-bold tracking-[0.12em] uppercase leading-none mt-1" style={{ color: "rgba(5,195,221,0.6)" }}>Webex</span>
+                              </div>
+                            </div>
+                          )}
                           {stage.id === "PATIENT_DISCHARGE_INSTRUCTIONS" && (
                             <div className="flex flex-col items-center justify-center px-3 py-2 rounded-md gap-0.5" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.4)" }}>
                               <div className="flex items-center gap-1.5">
@@ -1293,8 +1302,7 @@ export default function Home() {
                         <h3 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         <div className="flex items-center gap-2 flex-wrap">
                           {VIDEO_APPT_BUTTON_STAGES.has(stage.id) && (
-                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="flex items-center gap-2 font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
-                              <img src={webexLogoUrl} alt="Webex" className="h-3.5 w-auto opacity-70" />
+                            <Button onClick={() => triggerWorkflow(stage.id, "Start Instant Video Appointment", stage.webhookUrl)} disabled={!!loadingStage} className="font-medium text-xs h-9 px-4 shadow-none" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
                               Start Instant Video Appointment
                             </Button>
                           )}
