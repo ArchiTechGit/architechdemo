@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Activity, Bot, CalendarDays, Check, ChevronDown, ClipboardList, Eye, FileText, Loader2, MapPin, Moon, Phone, User, Users } from "lucide-react";
 import logoUrl from "@/assets/logo_darkbackground.png";
 import qrUrl from "@/assets/qr-architech.png";
-import webexLogoUrl from "@/assets/logo-webex.svg";
 import ciscoSpacesLogoUrl from "@/assets/logo-cisco-spaces.svg";
 import epicLogoUrl from "@/assets/epic_logo.png";
 import oracleHealthLogoUrl from "@/assets/Cerner_logo.png";
@@ -85,14 +84,6 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
-    partnerBadge: {
-      label: "Webex",
-      sublabel: "Instant Connect",
-      logoUrl: webexLogoUrl,
-      bg: "rgba(0,191,111,0.12)",
-      border: "rgba(0,191,111,0.4)",
-      filterWhite: true,
-    },
   },
   {
     id: "PATIENT_ARRIVAL_WAYFINDING",
@@ -196,28 +187,28 @@ const IMPACT_STATS = [
     headline: "More cost-effective per interaction than a manual phone call.",
     body: "Routine patient communications cost $10–$30 each when handled by clinical staff. The same outcome delivered digitally costs",
     highlight: "$0.12–$0.20 per interaction",
-    tail: "Every touchpoint adds to it. So does every site. Source: ArchiTech internal data.",
+    tail: "Every touchpoint adds to it. So does every site. Source: Regional Health Case Study.",
   },
   {
     hero: "80%",
     headline: "Of manual effort cut from appointment confirmation.",
     body: "Multiple call attempts, voicemail, manual documentation, follow-up — replaced by a single automated message.",
     highlight: "Confirmed in the Proof of Value.",
-    tail: "No clinical judgment required. No staff time consumed. Source: ArchiTech internal data.",
+    tail: "No clinical judgment required. No staff time consumed. Source: Regional Health Case Study.",
   },
   {
     hero: "~$84",
     headline: "In staff cost recovered per patient episode across all four workflows.",
     body: "Appointment scheduling, pre-admission, surgery prep, recovery check-in. At 2,000 surgical cases that returns $168K. At 10,000 cases,",
     highlight: "the saving exceeds $840K annually",
-    tail: "The platform cost stays fixed as volume grows. Source: ArchiTech internal data.",
+    tail: "The platform cost stays fixed as volume grows. Source: Regional Health Case Study.",
   },
   {
     hero: "250hrs",
     headline: "Of clinical staff time recovered for every 1,000 interactions automated.",
     body: "At 15 minutes per manual call, every thousand interactions automated returns",
     highlight: "~$14,000 in clinical capacity",
-    tail: "Small facility. Large network. The math scales either way. Source: ArchiTech internal data.",
+    tail: "Small facility. Large network. The math scales either way. Source: Regional Health Case Study.",
   },
   {
     hero: "6–20%",
@@ -1043,7 +1034,7 @@ export default function Home() {
               <div className="space-y-2.5">
                 <label htmlFor="demo-mobile" className="flex items-center gap-2 cursor-pointer">
                   <Phone className="w-3 h-3 text-primary/40" />
-                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Hospital Mobile</span>
+                  <span className="text-sm font-semibold text-white/50 uppercase tracking-wide">Instant Connect Host</span>
                 </label>
                 <Input
                   id="demo-mobile"
