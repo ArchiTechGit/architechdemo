@@ -28,7 +28,8 @@ const NODES = [
   { id: "nurse-dashboard", label: "Workflow Complete", sublabel: "or Nurse Escalation",   cx: 715, cy: 358, color: "#10B981" },
   { id: "digital-form",    label: "Digital Form",     sublabel: "Web Form",              cx: 145, cy: 472, color: "#7C6EF5" },
   { id: "cisco-spaces",    label: "Cisco Spaces",     sublabel: "Wayfinding",            cx: 350, cy: 472, color: "#05C3DD" },
-  { id: "form-platform",  label: "Form Platform",    sublabel: "e.g. JotForm",           cx: 560, cy: 418, color: "#F97316" },
+  { id: "form-platform",       label: "Form Platform",      sublabel: "e.g. JotForm",    cx: 560, cy: 418, color: "#F97316" },
+  { id: "appt-confirmed",      label: "Appt. Confirmed",    sublabel: "Booking Finalised", cx: 715, cy: 472, color: "#10B981" },
 ];
 
 // All connector paths — each path travels FROM source edge TO dest edge
@@ -49,6 +50,8 @@ const CONNECTOR_PATHS: Record<string, string> = {
   "form-to-platform":  "M 199 472 Q 350 450 506 418",
   "platform-to-nurse": "M 614 418 Q 664 400 715 331",
   "agent-to-emr":      "M 715 185 L 715 99",
+  "platform-to-appt":  "M 614 425 Q 665 448 661 445",
+  "appt-to-workflow":  "M 715 445 L 715 385",
 };
 
 const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
@@ -79,9 +82,14 @@ const STAGE_DIAGRAM_DATA: Record<string, DiagramStep[]> = {
       narration: "The completed form is submitted to the form platform, which processes the patient's responses and delivers results back to the facility — ready for booking confirmation or clinical escalation.",
     },
     {
-      activeNodes: ["form-platform", "nurse-dashboard", "pas"],
-      activeConnectors: ["platform-to-nurse"],
-      narration: "Routine responses confirm the appointment automatically in the PAS. Flagged cases are escalated to the nurse dashboard for clinical review before the booking is finalised.",
+      activeNodes: ["form-platform", "appt-confirmed"],
+      activeConnectors: ["platform-to-appt"],
+      narration: "The form platform delivers results back to the facility. Routine responses confirm the appointment automatically — flagged cases are held for clinical review before the booking is finalised.",
+    },
+    {
+      activeNodes: ["appt-confirmed", "nurse-dashboard"],
+      activeConnectors: ["appt-to-workflow"],
+      narration: "The appointment is confirmed and scheduled. The workflow closes automatically — or routes to the clinical team if escalation was required.",
     },
   ],
 
