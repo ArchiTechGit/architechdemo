@@ -842,6 +842,8 @@ export default function Home() {
                     ) : (phoneScreen === "home" || !activePhoneStage) ? (
                       /* ─── HOME SCREEN ─── */
                       <div className="relative flex flex-col h-full overflow-hidden" style={{ backgroundImage: "url('/wxccworkflowdemo/dist/assets/ArchiTech-DHFmobile_Home_wallpaper.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
+                        {/* Dark overlay for readability */}
+                        <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(0,0,0,0.35)", zIndex: 0 }} />
                         {/* Status bar – white */}
                         <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
                           <span className="font-bold" style={{ fontSize: "11px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{clockTime}</span>
