@@ -844,7 +844,7 @@ export default function Home() {
                       <div className="relative flex flex-col h-full overflow-hidden" style={{ backgroundImage: "url('/wxccworkflowdemo/dist/assets/ArchiTech-DHFmobile_Home_wallpaper.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
                         {/* Status bar – white */}
                         <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
-                          <span className="font-bold" style={{ fontSize: "11px", color: "white" }}>{clockTime}</span>
+                          <span className="font-bold" style={{ fontSize: "11px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{clockTime}</span>
                           <div className="flex items-center gap-1.5">
                             <div className="flex items-end gap-px">
                               <div style={{ width: "4px", height: "6px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
@@ -890,8 +890,8 @@ export default function Home() {
 
                         {/* Time + date */}
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "clamp(28px,8%,44px)", paddingBottom: "8px", flexShrink: 0 }}>
-                          <span style={{ fontSize: "clamp(34px,12vw,44px)", fontWeight: 100, color: "white", letterSpacing: "-0.02em", lineHeight: 1 }}>{clockTime}</span>
-                          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", marginTop: "4px" }}>{new Date().toLocaleDateString("en-AU", { weekday: "long", month: "long", day: "numeric" })}</span>
+                          <span style={{ fontSize: "clamp(34px,12vw,44px)", fontWeight: 100, color: "white", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>{clockTime}</span>
+                          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", marginTop: "4px", textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{new Date().toLocaleDateString("en-AU", { weekday: "long", month: "long", day: "numeric" })}</span>
                         </div>
 
                         {/* App grid */}
@@ -916,7 +916,7 @@ export default function Home() {
                         </div>
 
                         {/* Dock */}
-                        <div style={{ margin: "4px 8px 0 8px", padding: "8px 10px", background: "rgba(255,255,255,0.14)", backdropFilter: "blur(20px)", borderRadius: "22px", display: "flex", justifyContent: "space-around", alignItems: "center", flexShrink: 0 }}>
+                        <div style={{ margin: "4px 8px 0 8px", padding: "8px 10px", background: "rgba(0,0,0,0.3)", backdropFilter: "blur(20px)", borderRadius: "22px", display: "flex", justifyContent: "space-around", alignItems: "center", flexShrink: 0 }}>
                           {([
                             { bg: "linear-gradient(135deg,#34c759,#25a244)", label: "Phone", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5.5 3.5C4 3.5 3 4.5 3 6c0 7 7 13 9 13 1.5 0 2.5-1 2.5-2.5V14l-3-1-1 1.5C9 14 6.5 12.5 6 9l1.5-1L6.5 5H5.5z" fill="white"/></svg> },
                             { bg: "linear-gradient(135deg,#34c759,#25a244)", label: "Messages", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6.5l-3.5 2.5V4z" fill="white"/></svg> },
