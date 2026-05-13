@@ -842,28 +842,26 @@ export default function Home() {
                     ) : (phoneScreen === "home" || !activePhoneStage) ? (
                       /* ─── HOME SCREEN ─── */
                       <div className="relative flex flex-col h-full overflow-hidden" style={{ backgroundImage: "url('/wxccworkflowdemo/dist/assets/ArchiTech-DHFmobile_Home_wallpaper.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
-                        {/* Dark overlay for readability */}
-                        <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(0,0,0,0.35)", zIndex: 0 }} />
-                        {/* Status bar – white */}
+                        {/* Status bar – dark */}
                         <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
-                          <span className="font-bold" style={{ fontSize: "11px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{clockTime}</span>
+                          <span className="font-bold" style={{ fontSize: "11px", color: "#1c1c1e" }}>{clockTime}</span>
                           <div className="flex items-center gap-1.5">
                             <div className="flex items-end gap-px">
-                              <div style={{ width: "4px", height: "6px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
-                              <div style={{ width: "4px", height: "8px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
-                              <div style={{ width: "4px", height: "10px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
-                              <div style={{ width: "4px", height: "12px", background: "rgba(255,255,255,0.9)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "6px", background: "rgba(0,0,0,0.8)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "8px", background: "rgba(0,0,0,0.8)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "10px", background: "rgba(0,0,0,0.8)", borderRadius: "1px" }} />
+                              <div style={{ width: "4px", height: "12px", background: "rgba(0,0,0,0.8)", borderRadius: "1px" }} />
                             </div>
                             <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-                              <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="rgba(255,255,255,0.9)"/>
-                              <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                              <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                              <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="rgba(0,0,0,0.8)"/>
+                              <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="rgba(0,0,0,0.8)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                              <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="rgba(0,0,0,0.8)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
                             </svg>
                             <div className="flex items-center gap-px">
-                              <div style={{ width: "18px", height: "10px", border: "1px solid rgba(255,255,255,0.7)", borderRadius: "2px", position: "relative", overflow: "hidden" }}>
-                                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "75%", background: "rgba(255,255,255,0.9)" }} />
+                              <div style={{ width: "18px", height: "10px", border: "1px solid rgba(0,0,0,0.6)", borderRadius: "2px", position: "relative", overflow: "hidden" }}>
+                                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "75%", background: "rgba(0,0,0,0.8)" }} />
                               </div>
-                              <div style={{ width: "2px", height: "5px", background: "rgba(255,255,255,0.7)", borderRadius: "1px" }} />
+                              <div style={{ width: "2px", height: "5px", background: "rgba(0,0,0,0.6)", borderRadius: "1px" }} />
                             </div>
                           </div>
                         </div>
@@ -892,8 +890,8 @@ export default function Home() {
 
                         {/* Time + date */}
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "clamp(28px,8%,44px)", paddingBottom: "8px", flexShrink: 0 }}>
-                          <span style={{ fontSize: "clamp(34px,12vw,44px)", fontWeight: 100, color: "white", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>{clockTime}</span>
-                          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", marginTop: "4px", textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{new Date().toLocaleDateString("en-AU", { weekday: "long", month: "long", day: "numeric" })}</span>
+                          <span style={{ fontSize: "clamp(34px,12vw,44px)", fontWeight: 100, color: "#1c1c1e", letterSpacing: "-0.02em", lineHeight: 1 }}>{clockTime}</span>
+                          <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.65)", marginTop: "4px" }}>{new Date().toLocaleDateString("en-AU", { weekday: "long", month: "long", day: "numeric" })}</span>
                         </div>
 
                         {/* App grid */}
@@ -912,13 +910,13 @@ export default function Home() {
                               <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
                                 {icon}
                               </div>
-                              <span style={{ fontSize: "9px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.7)", textAlign: "center" }}>{label}</span>
+                              <span style={{ fontSize: "9px", color: "#1c1c1e", textAlign: "center" }}>{label}</span>
                             </div>
                           ))}
                         </div>
 
                         {/* Dock */}
-                        <div style={{ margin: "4px 8px 0 8px", padding: "8px 10px", background: "rgba(0,0,0,0.3)", backdropFilter: "blur(20px)", borderRadius: "22px", display: "flex", justifyContent: "space-around", alignItems: "center", flexShrink: 0 }}>
+                        <div style={{ margin: "4px 8px 0 8px", padding: "8px 10px", background: "rgba(255,255,255,0.4)", backdropFilter: "blur(20px)", borderRadius: "22px", display: "flex", justifyContent: "space-around", alignItems: "center", flexShrink: 0 }}>
                           {([
                             { bg: "linear-gradient(135deg,#34c759,#25a244)", label: "Phone", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5.5 3.5C4 3.5 3 4.5 3 6c0 7 7 13 9 13 1.5 0 2.5-1 2.5-2.5V14l-3-1-1 1.5C9 14 6.5 12.5 6 9l1.5-1L6.5 5H5.5z" fill="white"/></svg> },
                             { bg: "linear-gradient(135deg,#34c759,#25a244)", label: "Messages", icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6.5l-3.5 2.5V4z" fill="white"/></svg> },
@@ -929,13 +927,13 @@ export default function Home() {
                               <div style={{ width: "46px", height: "46px", borderRadius: "14px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 10px rgba(0,0,0,0.45)" }}>
                                 {icon}
                               </div>
-                              <span style={{ fontSize: "9px", color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}>{label}</span>
+                              <span style={{ fontSize: "9px", color: "#1c1c1e" }}>{label}</span>
                             </div>
                           ))}
                         </div>
 
                         {/* Home indicator */}
-                        <div style={{ margin: "6px auto 8px", width: "100px", height: "4px", background: "rgba(255,255,255,0.6)", borderRadius: "9999px", flexShrink: 0 }} />
+                        <div style={{ margin: "6px auto 8px", width: "100px", height: "4px", background: "rgba(0,0,0,0.3)", borderRadius: "9999px", flexShrink: 0 }} />
                       </div>
                     ) : (
                       /* ─── SMS SCREEN ─── */
