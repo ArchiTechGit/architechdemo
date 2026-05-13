@@ -841,7 +841,7 @@ export default function Home() {
                       </div>
                     ) : (phoneScreen === "home" || !activePhoneStage) ? (
                       /* ─── HOME SCREEN ─── */
-                      <div className="relative flex flex-col h-full overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2744 0%, #2d1b6e 50%, #0d1a3a 100%)" }}>
+                      <div className="relative flex flex-col h-full overflow-hidden" style={{ backgroundImage: "url('/wxccworkflowdemo/dist/assets/ArchiTech-DHFmobile_Home_wallpaper.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
                         {/* Status bar – white */}
                         <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
                           <span className="font-bold" style={{ fontSize: "11px", color: "white" }}>{clockTime}</span>
@@ -937,27 +937,27 @@ export default function Home() {
                       </div>
                     ) : (
                       /* ─── SMS SCREEN ─── */
-                      <div className="flex flex-col h-full overflow-hidden" style={{ backgroundImage: "url('/wxccworkflowdemo/dist/assets/ArchiTech-DHFmobile_Home_wallpaper.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
+                      <div className="flex flex-col h-full bg-white overflow-hidden">
                         {/* Status bar */}
-                        <div className="flex justify-between items-center px-5 flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
-                          <span className="font-bold" style={{ fontSize: "11px", color: "white" }}>{clockTime}</span>
+                        <div className="flex justify-between items-center px-5 bg-white flex-shrink-0" style={{ paddingTop: "14px", paddingBottom: "4px" }}>
+                          <span className="font-bold" style={{ fontSize: "11px", color: "#13294B" }}>{clockTime}</span>
                           <div className="flex items-center gap-1.5">
                             <div className="flex items-end gap-px">
-                              <div className="w-1 h-1.5 rounded-sm" style={{ background: "rgba(255,255,255,0.9)" }} />
-                              <div className="w-1 h-2 rounded-sm" style={{ background: "rgba(255,255,255,0.9)" }} />
-                              <div className="w-1 h-2.5 rounded-sm" style={{ background: "rgba(255,255,255,0.9)" }} />
-                              <div className="w-1 h-3 rounded-sm" style={{ background: "rgba(255,255,255,0.9)" }} />
+                              <div className="w-1 h-1.5 rounded-sm" style={{ background: "#54565B" }} />
+                              <div className="w-1 h-2 rounded-sm" style={{ background: "#54565B" }} />
+                              <div className="w-1 h-2.5 rounded-sm" style={{ background: "#54565B" }} />
+                              <div className="w-1 h-3 rounded-sm" style={{ background: "#54565B" }} />
                             </div>
                             <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-                              <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="rgba(255,255,255,0.9)"/>
-                              <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                              <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                              <path d="M6.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#54565B"/>
+                              <path d="M3.5 5.5C4.4 4.6 5.4 4 6.5 4s2.1.6 3 1.5" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                              <path d="M1 3C2.7 1.4 4.5.5 6.5.5S10.3 1.4 12 3" stroke="#54565B" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
                             </svg>
                             <div className="flex items-center gap-px">
-                              <div className="rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px", border: "1px solid rgba(255,255,255,0.7)" }}>
-                                <div className="absolute left-0 top-0 bottom-0" style={{ width: "75%", background: "rgba(255,255,255,0.9)" }} />
+                              <div className="rounded-sm relative overflow-hidden" style={{ width: "18px", height: "10px", border: "1px solid #54565B" }}>
+                                <div className="absolute left-0 top-0 bottom-0" style={{ width: "75%", background: "#54565B" }} />
                               </div>
-                              <div className="rounded-sm" style={{ width: "2px", height: "5px", background: "rgba(255,255,255,0.7)" }} />
+                              <div className="rounded-sm" style={{ width: "2px", height: "5px", background: "#54565B" }} />
                             </div>
                           </div>
                         </div>
@@ -978,16 +978,16 @@ export default function Home() {
                           </div>
                         )}
 
-                        <div className="px-3 py-2 flex-shrink-0 flex items-center justify-between" style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                          <p className="font-semibold text-xs" style={{ color: "rgba(255,255,255,0.9)" }}>Messages</p>
+                        <div className="bg-slate-100 px-3 py-2 border-b border-slate-200 flex-shrink-0 flex items-center justify-between">
+                          <p className="font-semibold text-slate-700 text-xs">Messages</p>
                           <button
                             onClick={() => setPhoneScreen("home")}
-                            style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+                            style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.08)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
                             aria-label="Go to home screen"
                           >
                             <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                              <path d="M1 5.5L5.5 1.5L10 5.5" stroke="rgba(255,255,255,0.85)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M2.5 4.5V9.5H4.5V7H6.5V9.5H8.5V4.5" stroke="rgba(255,255,255,0.85)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M1 5.5L5.5 1.5L10 5.5" stroke="#475569" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M2.5 4.5V9.5H4.5V7H6.5V9.5H8.5V4.5" stroke="#475569" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </button>
                         </div>
@@ -1025,7 +1025,7 @@ export default function Home() {
                           ) : null}
                         </div>
                         {/* Home indicator */}
-                        <div className="rounded-full flex-shrink-0" style={{ margin: "6px auto 8px", width: "100px", height: "4px", background: "rgba(255,255,255,0.6)" }} />
+                        <div className="bg-slate-800 rounded-full flex-shrink-0" style={{ margin: "6px auto 8px", width: "100px", height: "4px" }} />
                       </div>
                     )}
                   </div>
