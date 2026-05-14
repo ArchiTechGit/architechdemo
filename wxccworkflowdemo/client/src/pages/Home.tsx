@@ -1337,25 +1337,36 @@ export default function Home() {
 
                   {/* Body */}
                   <div className="px-4 pt-3 pb-2" style={{ background: "rgba(8,14,24,0.97)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                    <p className="leading-relaxed text-white mb-2" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.automationOpportunity}</p>
+
+                    {/* TODAY — Pain */}
+                    <div className="mb-3">
+                      <p className="font-bold uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(239,68,68,0.6)" }}>Today</p>
+                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.currentState}</p>
+                    </div>
+
+                    {/* HOW — Difference */}
+                    <div className="mb-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "10px" }}>
+                      <p className="font-bold uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(6,182,212,0.6)" }}>How</p>
+                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.automationOpportunity}</p>
+                    </div>
+
+                    {/* OUTCOME — Gain */}
                     {stage.keyStat && (
-                      <div className="rounded-r-lg pl-4 pr-3 py-3 mb-2 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: `3px solid ${stageColor.accent}` }}>
-                        <div className="flex-shrink-0 pt-0.5">
-                          <span className="font-black leading-none" style={{ fontSize: "clamp(20px, 1.8vw, 40px)", color: stageColor.accent }}>{stage.keyStat.value}</span>
-                          <p className="text-white/50 font-semibold mt-0.5" style={{ fontSize: "clamp(10px, 0.75vw, 15px)" }}>{stage.keyStat.label}</p>
-                        </div>
-                        <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
-                        <div>
-                          <span className="inline-block font-black uppercase tracking-widest px-2 py-0.5 rounded mb-1.5" style={{ fontSize: "clamp(8px, 0.6vw, 11px)", background: stageColor.accent, color: "rgba(0,0,0,0.85)" }}>Why this matters</span>
-                          <p className="text-white/80 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
-                          <p className="text-white/25 mt-1" style={{ fontSize: "clamp(9px, 0.65vw, 13px)" }}>Source: {stage.keyStat.source}</p>
+                      <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "10px" }} className="mb-2">
+                        <p className="font-bold uppercase tracking-[0.12em] mb-2" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(34,197,94,0.6)" }}>Outcome</p>
+                        <div className="rounded-r-lg pl-4 pr-3 py-3 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: "3px solid #22c55e" }}>
+                          <div className="flex-shrink-0 pt-0.5">
+                            <span className="font-black leading-none" style={{ fontSize: "clamp(20px, 1.8vw, 40px)", color: "#22c55e" }}>{stage.keyStat.value}</span>
+                            <p className="text-white/50 font-semibold mt-0.5" style={{ fontSize: "clamp(10px, 0.75vw, 15px)" }}>{stage.keyStat.label}</p>
+                          </div>
+                          <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
+                          <div>
+                            <p className="text-white/80 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
+                            <p className="text-white/25 mt-1" style={{ fontSize: "clamp(9px, 0.65vw, 13px)" }}>Source: {stage.keyStat.source}</p>
+                          </div>
                         </div>
                       </div>
                     )}
-                    <div className="pt-2 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <p className="font-bold text-white/60 uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)" }}>How It's Done Today</p>
-                      <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.currentState}</p>
-                    </div>
                     {isTriggered && revealedSteps > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-2.5">
                         {FLOW_STEPS.slice(0, revealedSteps).map((step) => (
