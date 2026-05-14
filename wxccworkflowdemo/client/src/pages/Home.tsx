@@ -1340,20 +1340,20 @@ export default function Home() {
 
                     {/* TODAY — Pain */}
                     <div className="mb-3">
-                      <p className="font-bold uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(239,68,68,0.6)" }}>Today</p>
+                      <p className="font-bold uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(239,68,68,0.6)" }}>The Problem</p>
                       <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.currentState}</p>
                     </div>
 
                     {/* HOW — Difference */}
                     <div className="mb-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "10px" }}>
-                      <p className="font-bold uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(6,182,212,0.6)" }}>How</p>
+                      <p className="font-bold uppercase tracking-[0.12em] mb-1" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(6,182,212,0.6)" }}>What Changes</p>
                       <p className="leading-relaxed text-white" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{stage.automationOpportunity}</p>
                     </div>
 
                     {/* OUTCOME — Gain */}
                     {stage.keyStat && (
                       <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "10px" }} className="mb-2">
-                        <p className="font-bold uppercase tracking-[0.12em] mb-2" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(34,197,94,0.6)" }}>Outcome</p>
+                        <p className="font-bold uppercase tracking-[0.12em] mb-2" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(34,197,94,0.6)" }}>The Result</p>
                         <div className="rounded-r-lg pl-4 pr-3 py-3 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: "3px solid #22c55e" }}>
                           <div className="flex-shrink-0 pt-0.5">
                             <span className="font-black leading-none" style={{ fontSize: "clamp(20px, 1.8vw, 40px)", color: "#22c55e" }}>{stage.keyStat.value}</span>
