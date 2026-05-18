@@ -1091,7 +1091,7 @@ export default function Home() {
                 <Input
                   id="patient-mobile"
                   type="tel"
-                  placeholder="+61 2 1234 5678"
+                  placeholder="0212345678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
@@ -1108,7 +1108,7 @@ export default function Home() {
                 <Input
                   id="demo-mobile"
                   type="tel"
-                  placeholder="+61 4 1234 5678"
+                  placeholder="0412345678"
                   value={demoMobile}
                   onChange={(e) => setDemoMobile(e.target.value)}
                   className="h-11 text-sm text-foreground placeholder:text-white/15"
