@@ -243,6 +243,7 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
               justifyContent: "center",
               boxShadow: "0 0 0 8px rgba(5,195,221,0.08), 0 0 20px rgba(5,195,221,0.2)",
               background: "rgba(5,195,221,0.08)",
+              animation: "ss-circle-pulse 2s ease-in-out infinite",
             }}
           >
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
