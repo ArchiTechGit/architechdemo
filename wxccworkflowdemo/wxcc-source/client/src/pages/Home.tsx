@@ -351,7 +351,7 @@ export default function Home() {
                   </div>
                   <Input
                     type="tel"
-                    placeholder="0212345678"
+                    placeholder="0412345678"
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
                     className="h-10 text-sm border border-white/15 focus:border-cyan-400/70 bg-input text-foreground placeholder:text-white/20"
