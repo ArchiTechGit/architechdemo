@@ -181,7 +181,7 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
         <img
           src={logoUrl}
           alt="ArchiTech"
-          style={{ height: "56px", width: "auto", mixBlendMode: "screen", filter: "drop-shadow(0 0 32px rgba(5,195,221,0.5))" }}
+          style={{ height: "196px", width: "auto", mixBlendMode: "screen", filter: "drop-shadow(0 0 32px rgba(5,195,221,0.5))" }}
         />
 
         {/* Title */}
@@ -265,25 +265,6 @@ export default function Screensaver({ idleSeconds = 45 }: ScreensaverProps) {
           </p>
         </div>
 
-        {/* Powered by pill */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-6rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.4rem 1rem",
-            borderRadius: "999px",
-            border: "1px solid rgba(5,195,221,0.2)",
-            background: "rgba(5,195,221,0.05)",
-          }}
-        >
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--success)", boxShadow: "0 0 6px rgba(0,169,145,0.8)" }} />
-          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--success)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
-            Powered by Webex Contact Centre
-          </span>
-        </div>
       </div>
     </div>
   );
