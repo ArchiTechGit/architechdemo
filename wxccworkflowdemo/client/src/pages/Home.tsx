@@ -1556,6 +1556,7 @@ export default function Home() {
             <p className="text-white/60 text-sm font-semibold mb-3 uppercase tracking-widest">Experience this demonstration</p>
             <p className="text-white font-black" style={{ fontSize: "28px", letterSpacing: "0.04em" }}>03 4420 4076</p>
             <p className="text-white/40 text-xs mt-4">Call this number to try the live demo.</p>
+            <p className="text-white/30 text-xs mt-2">Currently using <span className="text-white/50 font-semibold">English (Philippines)</span> — one of many available language packs.</p>
             <button onClick={() => setShowCallPopup(false)} className="mt-6 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors" style={{ color: "rgba(5,195,221,0.7)", border: "1px solid rgba(5,195,221,0.2)", background: "rgba(5,195,221,0.06)" }}>
               Dismiss
             </button>
