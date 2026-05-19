@@ -94,7 +94,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Appointment Scheduling and Reminders",
     image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
     currentState: "Administrative staff or nurses spend hours each day calling patients to schedule appointments, often leaving voicemails and waiting for callbacks.",
-    automationOpportunity: "An AI agent handles the booking over SMS. Patients get a link to pick from available slots, and reminders go out automatically at seven days, three days, and the day before.",
+    automationOpportunity: "An AI agent handles the booking over SMS. Patients can pick available slots through a conversational experience, and reminders go out automatically at seven days, three days, and the day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
@@ -125,7 +125,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Arrival Coordination",
     image: "/wxccworkflowdemo/dist/workflow-images/arrival-coordination.png",
     currentState: "Patient arrives often lost or anxious, unsure where to go, stopping staff for directions to the right ward, bay, or check-in point, adding unnecessary stress to an already difficult day.",
-    automationOpportunity: "The day-of SMS goes out before the patient gets to the carpark. It includes a wayfinding link that takes them directly to their bay. No desk queue, no asking around.",
+    automationOpportunity: "The day-of SMS goes out before the patient gets to the carpark. It includes a wayfinding link that takes them directly to their bay. No desk queue, no asking around. The overall experience is a much more comfortable one.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, when you arrive at ArchiTech Hospital please proceed directly to Level 3, Bay C. Need help finding your way? Use this link: https://architechdemo.com/wxccworkflowdemo/dist/wayfinding.html . See you shortly.",
     phoneAction: "Open Wayfinder →",
@@ -1355,12 +1355,12 @@ export default function Home() {
                       <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "10px" }} className="mb-2">
                         <p className="font-bold uppercase tracking-[0.12em] mb-2" style={{ fontSize: "clamp(9px, 0.75vw, 16px)", color: "rgba(34,197,94,0.6)" }}>The Result</p>
                         <div className="rounded-r-lg pl-4 pr-3 py-3 flex gap-3 items-start" style={{ background: "rgba(0,0,0,0.35)", borderLeft: "3px solid #22c55e" }}>
-                          <div className="flex-shrink-0 pt-0.5">
+                          <div className="flex-shrink-0 pt-0.5" style={{ maxWidth: "clamp(80px, 12vw, 160px)" }}>
                             <span className="font-black leading-none" style={{ fontSize: "clamp(20px, 1.8vw, 40px)", color: "#22c55e" }}>{stage.keyStat.value}</span>
                             <p className="text-white/50 font-semibold mt-0.5" style={{ fontSize: "clamp(10px, 0.75vw, 15px)" }}>{stage.keyStat.label}</p>
                           </div>
                           <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
-                          <div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             <p className="text-white/80 leading-snug" style={{ fontSize: "clamp(11px, 0.9vw, 18px)" }}>{stage.keyStat.whyItMatters}</p>
                             <p className="text-white/25 mt-1" style={{ fontSize: "clamp(9px, 0.65vw, 13px)" }}>Source: {stage.keyStat.source}</p>
                           </div>
