@@ -363,6 +363,7 @@ export default function Home() {
   const [spacesDemoOpen, setSpacesDemoOpen] = useState(false);
   const [mobileSpacesDemoPlaying, setMobileSpacesDemoPlaying] = useState(false);
   const [wayfindingOpen, setWayfindingOpen] = useState(false);
+  const [showCallPopup, setShowCallPopup] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [activeStepperStage, setActiveStepperStage] = useState<string>(JOURNEY_STAGES[0].id);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; label: string; stageId: string } | null>(null);
@@ -1301,7 +1302,7 @@ export default function Home() {
                       <div className="flex flex-col gap-2">
                         <h3 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{stage.label}</h3>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Button onClick={() => triggerWorkflow(stage.id, stage.label, stage.webhookUrl)} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
+                          <Button onClick={() => { triggerWorkflow(stage.id, stage.label, stage.webhookUrl); if (stage.id === "PATIENT_POST_DISCHARGE_SURVEY") setShowCallPopup(true); }} disabled={!!loadingStage} className="font-semibold text-sm h-9 px-5 shadow-none" style={{ background: stageColor.accentBg, border: `1px solid ${stageColor.accentBorder}`, color: stageColor.accent, boxShadow: `0 0 16px ${stageColor.accentGlow}` }}>
                             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send →"}
                           </Button>
                           <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
@@ -1541,6 +1542,26 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Call Popup — Stage 6 */}
+      {showCallPopup && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={() => setShowCallPopup(false)}>
+          <div
+            className="mx-6 rounded-2xl text-center px-8 py-7"
+            style={{ maxWidth: "340px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0e2e46 100%)", border: "1px solid rgba(5,195,221,0.35)", boxShadow: "0 0 60px rgba(0,0,0,0.9), 0 0 40px rgba(5,195,221,0.12)" }}
+            role="dialog" aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ height: "3px", background: "linear-gradient(90deg, var(--primary), rgba(5,195,221,0.3))", marginBottom: "24px", borderRadius: "2px" }} />
+            <p className="text-white/60 text-sm font-semibold mb-3 uppercase tracking-widest">Experience this demonstration</p>
+            <p className="text-white font-black" style={{ fontSize: "28px", letterSpacing: "0.04em" }}>03 4420 4076</p>
+            <p className="text-white/40 text-xs mt-4">Call this number to try the live demo.</p>
+            <button onClick={() => setShowCallPopup(false)} className="mt-6 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors" style={{ color: "rgba(5,195,221,0.7)", border: "1px solid rgba(5,195,221,0.2)", background: "rgba(5,195,221,0.06)" }}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Spaces Desktop Demo Modal */}
       {spacesDemoOpen && (
