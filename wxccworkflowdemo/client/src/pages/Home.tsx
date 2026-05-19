@@ -67,8 +67,8 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 1",
     label: "Pre Admission Enrolment",
     image: "/wxccworkflowdemo/dist/workflow-images/pre-admission-enrolment.png",
-    currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate: 40-50%.",
-    automationOpportunity: "AI agent initiates SMS conversation 2-3 weeks before surgery. Form is distributed and results shared with administration team. Nurse reviews flagged items only. Simple cases require no callback. Significantly reduces pre-admission appointment time.",
+    currentState: "Nurse spends 30-45 minutes on phone collecting medical history, medications, allergies, and social circumstances. Patient often doesn't have details handy. Multiple callbacks required. First-attempt completion rate can be low.",
+    automationOpportunity: "Two to three weeks before surgery, an AI agent kicks off an SMS conversation and sends the form. Results go straight to the admin team. Nurses only look at flagged items. Most straightforward cases don't need a callback at all.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, this is ArchiTech contacting you ahead of your surgery on {DATE}. We need to complete your enrolment forms. It takes about 5 minutes and you can do it right now via web form. Ready to start? Reply YES or NO.",
     phoneMessages: [
@@ -84,7 +84,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "250hrs",
       label: "of clinical staff time recovered per 1,000 interactions automated",
-      whyItMatters: "Pre-admission phone calls are one of the highest-touch, lowest-value tasks in the patient journey. Connecting this to WxCC means the AI handles data collection automatically — nurses only review flagged cases, not every form.",
+      whyItMatters: "Pre-admission phone calls take a lot of time and add very little clinical value. When WxCC handles the data collection, nurses only get involved when something actually needs their attention.",
       source: "Regional Health Case Study",
     },
   },
@@ -93,8 +93,8 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 2",
     label: "Appointment Scheduling and Reminders",
     image: "/wxccworkflowdemo/dist/workflow-images/appointment-scheduling.png",
-    currentState: "Booking clerks spend hours each day calling patients to schedule appointments, often leaving voicemails and waiting for callbacks.",
-    automationOpportunity: "AI agent handles appointment booking via SMS conversation. Patient receives link to select available slots. Automated reminders at 7 days, 3 days, 1 day before.",
+    currentState: "Administrative staff or nurses spend hours each day calling patients to schedule appointments, often leaving voicemails and waiting for callbacks.",
+    automationOpportunity: "An AI agent handles the booking over SMS. Patients get a link to pick from available slots, and reminders go out automatically at seven days, three days, and the day before.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, your pre-admission appointment is booked for {DATE}. If this time doesn't work reply to us here and we will help you book a new time.",
     phoneAction: "Confirm Appointment →",
@@ -115,7 +115,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "34%",
       label: "reduction in missed appointments using SMS reminders",
-      whyItMatters: "DNA rates cost public hospitals $125–$800 per missed appointment. An existing scheduling platform sends reminders — but WxCC makes them conversational and two-way, so patients can reschedule instantly rather than simply not showing up.",
+      whyItMatters: "DNA rates cost public hospitals $125-$800 per missed appointment. Most scheduling tools send reminders, but they're one-way. WxCC makes them conversational, so patients can reschedule on the spot rather than just not showing up.",
       source: "NSW Behavioural Insights Unit, 2019",
     },
   },
@@ -124,8 +124,8 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 3",
     label: "Arrival Coordination",
     image: "/wxccworkflowdemo/dist/workflow-images/arrival-coordination.png",
-    currentState: "Patient arrives, joins queue at admissions desk.",
-    automationOpportunity: "Day-of SMS sent before the patient reaches the carpark — improving timeliness and reducing admissions congestion. Includes a wayfinding link guiding them directly to their bay, no queue required.",
+    currentState: "Patient arrives often lost or anxious, unsure where to go, stopping staff for directions to the right ward, bay, or check-in point, adding unnecessary stress to an already difficult day.",
+    automationOpportunity: "The day-of SMS goes out before the patient gets to the carpark. It includes a wayfinding link that takes them directly to their bay. No desk queue, no asking around.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, when you arrive at ArchiTech Hospital please proceed directly to Level 3, Bay C. Need help finding your way? Use this link: https://architechdemo.com/wxccworkflowdemo/dist/wayfinding.html . See you shortly.",
     phoneAction: "Open Wayfinder →",
@@ -134,7 +134,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "19%",
       label: "reduction in no-shows at St Vincent's Hospital Sydney",
-      whyItMatters: "Admissions congestion starts in the carpark. A day-of SMS with a direct wayfinding link — triggered automatically by WxCC — means patients arrive at the right place without queuing at the admissions desk.",
+      whyItMatters: "Congestion starts in the carpark. A day-of SMS with a direct wayfinding link, triggered automatically, means patients get to the right place without stopping at the admissions desk.",
       source: "NSW Behavioural Insights Unit, 2016",
     },
     partnerBadge: {
@@ -150,7 +150,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 4",
     label: "Family Updates During Surgery",
     image: "/wxccworkflowdemo/dist/workflow-images/family-surgery-update.png",
-    currentState: "Family waits with no information. Surgeon calls them after, if they remember.",
+    currentState: "Family waits with no information. Clinical staff or surgeons need to make phone calls manually if time permits.",
     automationOpportunity: "Automated status updates sent to nominated contact via HL7 integration with the EMR. \"Patient in recovery 12:35pm.\" \"Ready for family visit in ward, Room 5B.\"",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessages: [
@@ -163,7 +163,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "30%",
       label: "of healthcare workforce tasks could be automated using digital technology and AI",
-      whyItMatters: "Family communication during surgery is inconsistent and staff-dependent. Routing EMR status events through WxCC means updates go out the moment the patient's status changes — no manual calls, no forgotten callbacks.",
+      whyItMatters: "Family communication during surgery depends on whether someone remembers to call. When EMR status events route through WxCC, updates go out the moment the patient's status changes. No manual calls, no forgotten callbacks.",
       source: "Productivity Commission, May 2024",
     },
     systemEvents: [
@@ -186,7 +186,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Take-Home Instruction Delivery",
     image: "/wxccworkflowdemo/dist/workflow-images/discharge-instructions.png",
     currentState: "Nurse hands patient printed sheets. Patient loses them. Each surgical episode generates ~12 pages of paper instructions — all single use, all landfill.",
-    automationOpportunity: "Personalised discharge instructions delivered digitally via SMS — zero paper, zero printing, zero plastic folders. Embedded video links replace printed diagrams. No physical waste, no lost instructions.",
+    automationOpportunity: "Discharge instructions go out via SMS, personalised to the patient's procedure. Video links replace printed diagrams. Nothing to carry home, nothing to lose.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: <URL to Wound Care Document>\nMedications: <URL to Medication Care Document>\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
     phoneAction: "View Discharge Instructions →",
@@ -194,7 +194,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "80%",
       label: "of manual effort cut from patient communication workflows",
-      whyItMatters: "Each surgical episode generates ~12 pages of single-use paper — discharge instructions, referral letters, medication summaries — all destined for landfill. Across a mid-sized hospital, that's tonnes of waste and thousands of printing hours annually. WxCC eliminates it entirely: instructions are delivered digitally via SMS the moment the EMR records discharge, referrals route electronically, and embedded video links replace printed diagrams. Better outcomes, better for the planet, zero staff effort.",
+      whyItMatters: "A mid-sized hospital burns through thousands of printed pages per surgical episode — instructions, referral letters, medication summaries — most of which ends up in a folder that gets lost on the way home. When WxCC delivers everything by SMS the moment discharge is recorded, there's no printing, no plastic folders, no nurse chasing patients who missed something. The video links are frankly better than the diagrams anyway.",
       source: "Regional Health Case Study",
     },
   },
@@ -204,7 +204,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     label: "Post Discharge Check-Up",
     image: "/wxccworkflowdemo/dist/workflow-images/post-discharge-survey.png",
     currentState: "Nurses call patients 2-3 days post-discharge with standardised survey questions. High no-answer rate due to daytime calling. Nurse leaves voicemail, patient rarely calls back. Clinical concerns often missed until patient presents to ED.",
-    automationOpportunity: "AI agent sends SMS 48-72 hours post-discharge initiating conversational survey. Asks about pain levels, wound condition, medication adherence, mobility, and red flag symptoms. Routine responses auto-documented in EMR. Concerning responses trigger immediate escalation to nurse with pre-populated context. Critical flags generate emergency protocol alert.",
+    automationOpportunity: "An SMS check-in goes out 48-72 hours after discharge. The AI asks about pain levels, wound condition, medications, mobility, and any red flag symptoms. Routine responses get documented in the EMR automatically. If something looks off, a nurse gets an alert with all the context already filled in.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     voiceWebhookUrl: "https://hooks.au.webexconnect.io/events/ODITZ4C6HA",
     phoneMessages: [
@@ -217,7 +217,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "20x",
       label: "more cost-effective per interaction than a manual phone call",
-      whyItMatters: "Post-discharge follow-up is frequently skipped because clinical staff don't have capacity. WxCC automates the check-in at scale — catching complications early, reducing ED re-presentations, and doing it at a fraction of the cost of a nurse call.",
+      whyItMatters: "Post-discharge follow-up gets skipped more often than it should, because there aren't enough hours in the day. WxCC runs the check-in automatically, catches complications earlier, and costs a fraction of a nurse call. Fewer patients end up back in ED.",
       source: "Regional Health Case Study",
     },
     conversationThread: [
