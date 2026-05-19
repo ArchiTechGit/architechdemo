@@ -188,7 +188,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     currentState: "Nurse hands patient printed sheets. Patient loses them. Each surgical episode generates ~12 pages of paper instructions — all single use, all landfill.",
     automationOpportunity: "Personalised discharge instructions delivered digitally via SMS — zero paper, zero printing, zero plastic folders. Embedded video links replace printed diagrams. No physical waste, no lost instructions.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
-    phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: https://google.com\nMedications: https://google.com\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
+    phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: <URL to Wound Care Document>\nMedications: <URL to Medication Care Document>\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
     phoneAction: "View Discharge Instructions →",
     systemEvents: [],
     keyStat: {
