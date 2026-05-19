@@ -1545,21 +1545,42 @@ export default function Home() {
 
       {/* Call Popup — Stage 6 */}
       {showCallPopup && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={() => setShowCallPopup(false)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setShowCallPopup(false)}>
           <div
-            className="mx-6 rounded-2xl text-center px-8 py-7"
-            style={{ maxWidth: "340px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0e2e46 100%)", border: "1px solid rgba(5,195,221,0.35)", boxShadow: "0 0 60px rgba(0,0,0,0.9), 0 0 40px rgba(5,195,221,0.12)" }}
-            role="dialog" aria-modal="true"
+            className="relative mx-6 rounded-3xl overflow-hidden"
+            style={{ maxWidth: "400px", width: "100%", background: "linear-gradient(160deg, #091e2e 0%, #0a1a26 100%)", border: "1px solid rgba(5,195,221,0.25)", boxShadow: "0 0 0 1px rgba(5,195,221,0.08), 0 40px 80px rgba(0,0,0,0.8), 0 0 80px rgba(5,195,221,0.06)" }}
+            role="dialog" aria-modal="true" aria-label="Call Demo"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ height: "3px", background: "linear-gradient(90deg, var(--primary), rgba(5,195,221,0.3))", marginBottom: "24px", borderRadius: "2px" }} />
-            <p className="text-white/60 text-sm font-semibold mb-3 uppercase tracking-widest">Experience this demonstration</p>
-            <p className="text-white font-black" style={{ fontSize: "28px", letterSpacing: "0.04em" }}>03 4420 4076</p>
-            <p className="text-white/40 text-xs mt-4">Call this number to try the live demo.</p>
-            <p className="text-white/30 text-xs mt-2">Currently using <span className="text-white/50 font-semibold">English (Philippines)</span> — one of many available language packs.</p>
-            <button onClick={() => setShowCallPopup(false)} className="mt-6 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors" style={{ color: "rgba(5,195,221,0.7)", border: "1px solid rgba(5,195,221,0.2)", background: "rgba(5,195,221,0.06)" }}>
-              Dismiss
-            </button>
+            <div style={{ height: "3px", background: "linear-gradient(90deg, var(--primary), rgba(5,195,221,0.3), var(--primary))" }} />
+            <div className="p-8 text-center">
+              <div className="inline-flex items-center justify-center mb-6" style={{ position: "relative" }}>
+                <div style={{ position: "absolute", width: "80px", height: "80px", borderRadius: "50%", border: "1px solid rgba(5,195,221,0.15)", animation: "ping-slow 2s ease-in-out infinite" }} />
+                <div style={{ position: "absolute", width: "64px", height: "64px", borderRadius: "50%", border: "1px solid rgba(5,195,221,0.25)", animation: "ping-slow 2s ease-in-out 0.5s infinite" }} />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(5,195,221,0.08)", border: "1px solid rgba(5,195,221,0.4)", boxShadow: "0 0 24px rgba(5,195,221,0.2)" }}>
+                  <Phone className="w-5 h-5" style={{ color: "var(--primary)" }} />
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--primary)", boxShadow: "0 0 6px rgba(5,195,221,0.8)" }} />
+                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--primary)" }}>Live AI Agent</span>
+              </div>
+              <h3 className="text-xl font-black text-white mb-1">Experience This Demo</h3>
+              <p className="text-xs text-white/40 mb-6">Call this number to try the AI post-discharge check-in — a live, conversational patient survey.</p>
+              <div className="rounded-2xl py-4 px-6 mb-4" style={{ background: "rgba(5,195,221,0.05)", border: "1px solid rgba(5,195,221,0.18)" }}>
+                <p className="text-xs font-mono text-white/30 mb-1 uppercase tracking-wider">Demo number</p>
+                <p className="text-2xl font-black text-white tracking-widest" style={{ textShadow: "0 0 20px rgba(5,195,221,0.25)", fontFamily: "'JetBrains Mono', monospace" }}>03 4420 4076</p>
+              </div>
+              <p className="text-xs text-white/30 mb-1">Currently using <span className="text-white/55 font-semibold">English (Philippines)</span></p>
+              <p className="text-xs text-white/25 mb-6">— one of many available language packs</p>
+              <button
+                onClick={() => setShowCallPopup(false)}
+                aria-label="Close call demo"
+                className="text-white/40 hover:text-white/70 text-xs font-mono border border-white/10 hover:border-white/25 px-4 py-2 rounded-xl transition-colors"
+              >
+                <span aria-hidden="true">✕</span> Close
+              </button>
+            </div>
           </div>
         </div>
       )}
