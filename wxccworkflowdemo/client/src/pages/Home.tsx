@@ -100,7 +100,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     phoneAction: "Confirm Appointment →",
     systemEvents: [],
     systemIntegrations: [
-      { label: "Cerner Millennium", color: "#E8472A" },
+      { label: "Cerner", color: "#E8472A" },
       { label: "iPM", color: "#4A9EE8" },
       { label: "WebPAS", color: "#34C97A" },
     ],
@@ -185,7 +185,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     chapter: "Stage 5",
     label: "Take-Home Instruction Delivery",
     image: "/wxccworkflowdemo/dist/workflow-images/discharge-instructions.png",
-    currentState: "Nurse hands patient printed sheets. Patient loses them. Each surgical episode generates ~12 pages of paper instructions — all single use, all landfill.",
+    currentState: "Nurse hands patient printed sheets. Patient loses them. Each surgical episode generates around 12 pages of paper instructions, all single use, all landfill.",
     automationOpportunity: "Discharge instructions go out via SMS, personalised to the patient's procedure. Video links replace printed diagrams. Nothing to carry home, nothing to lose.",
     webhookUrl: "https://hooks.au.webexconnect.io/events/FV4O2STRLD",
     phoneMessage: "Hi {NAME}, here are your discharge instructions from ArchiTech Hospital. Please save this message.\n\nWound care: <URL to Wound Care Document>\nMedications: <URL to Medication Care Document>\n\nRed flags — contact 13 HEALTH or go to your nearest ED if you experience: high fever, increased redness or swelling at the wound site, discharge that is yellow or foul-smelling, or severe pain not controlled by medication.\n\nQuestions? Call our post-surgical care line. Otherwise we will follow up with you in 2 days time.",
@@ -194,7 +194,7 @@ const JOURNEY_STAGES: JourneyStage[] = [
     keyStat: {
       value: "80%",
       label: "of manual effort cut from patient communication workflows",
-      whyItMatters: "A mid-sized hospital burns through thousands of printed pages per surgical episode — instructions, referral letters, medication summaries — most of which ends up in a folder that gets lost on the way home. When WxCC delivers everything by SMS the moment discharge is recorded, there's no printing, no plastic folders, no nurse chasing patients who missed something. The video links are frankly better than the diagrams anyway.",
+      whyItMatters: "A mid-sized hospital burns through thousands of printed pages per surgical episode: instructions, referral letters, medication summaries. Most of it ends up in a folder that gets lost on the way home. When WxCC delivers everything by SMS the moment discharge is recorded, there's no printing, no plastic folders, no nurse chasing patients who missed something. The video links are frankly better than the diagrams anyway.",
       source: "Regional Health Case Study",
     },
   },
