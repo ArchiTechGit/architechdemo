@@ -1331,6 +1331,17 @@ export default function Home() {
                               Spaces Demo
                             </button>
                           )}
+                          {stage.id === "PATIENT_ARRIVAL_WAYFINDING" && (
+                            <a
+                              href="https://event.ciscospaces.io/himss"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 font-medium text-xs h-9 px-3 rounded-md shadow-none transition-colors duration-150"
+                              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.13)", color: "rgba(255,255,255,0.45)" }}
+                            >
+                              Spaces URL
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>
