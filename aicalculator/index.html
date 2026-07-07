@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/auth.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webex Contact Centre AI Calculator — ArchiTech</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --bg:        #0D1825;
+      --surface-1: #13294B;
+      --surface-2: #1A3460;
+      --surface-3: #1F3D72;
+      --cyan:      #05C3DD;
+      --cyan-dim:  rgba(5,195,221,0.10);
+      --cyan-mid:  rgba(5,195,221,0.25);
+      --text:      #F0F6FC;
+      --muted:     #8FA3BA;
+      --faint:     #4A607A;
+      --border:    rgba(255,255,255,0.07);
+      --negative:  #E05C5C;
+      --font:      'Roboto', sans-serif;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+    .page { max-width: 880px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+    .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
+    .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
+
+    .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
+    .page-desc  { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 36px; max-width: 620px; }
+
+    .section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); margin: 40px 0 6px; }
+    .section-desc { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+
+    .tier-card { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 12px; padding: 22px 22px 8px; margin-bottom: 16px; }
+    .tier-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+    .tier-name { font-size: 15px; font-weight: 600; }
+    .tier-cap  { font-size: 11px; color: var(--faint); letter-spacing: 0.03em; }
+
+    .input-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 16px 0; }
+    @media (max-width: 640px) { .input-row { grid-template-columns: 1fr; } }
+
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .field input {
+      width: 100%; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 15px; font-family: var(--font); padding: 10px 12px;
+    }
+    .field input:focus { outline: none; border-color: var(--cyan-mid); }
+
+    .tier-result { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 14px; padding: 12px 0; font-size: 13px; color: var(--muted); }
+    .tier-result strong { color: var(--cyan); font-size: 15px; }
+
+    .totals { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; }
+    @media (max-width: 640px) { .totals { grid-template-columns: 1fr; } }
+    .total-card { background: var(--cyan-dim); border: 1px solid var(--cyan-mid); border-radius: 12px; padding: 22px; }
+    .total-label { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .total-value { font-size: 34px; font-weight: 700; color: var(--cyan); line-height: 1; }
+    .total-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    details { margin-top: 30px; border: 1px solid var(--border); border-radius: 12px; padding: 4px 20px; background: rgba(255,255,255,0.02); }
+    summary { cursor: pointer; font-size: 13px; font-weight: 600; padding: 14px 0; color: var(--text); }
+    details table { width: 100%; border-collapse: collapse; margin: 10px 0 18px; font-size: 12px; }
+    details th, details td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    details th { color: var(--text); }
+
+    .footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+    .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
+    .footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
+    .footer-note a { color: var(--cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <span class="header-badge">Internal Sizing Tool</span>
+    </div>
+
+    <div class="page-title">Webex Contact Centre AI Calculator</div>
+    <div class="page-desc">
+      Enter a customer's expected voice and digital volumes to work out how many <strong>AI Agent</strong> and
+      <strong>AI Assistant</strong> units are needed for a quote. Costs are intentionally excluded — this tool is
+      for capacity sizing only.
+    </div>
+
+    <!-- AI AGENT -->
+    <div class="section-title">AI Agent</div>
+    <div class="section-desc">Customer-facing automation. Scripted and Autonomous consumption pools are separate — use both if the deployment mixes bot types. A unit's voice and digital capacity can be used in any combination up to the maximum shown.</div>
+
+    <div class="tier-card">
+      <div class="tier-head">
+        <div class="tier-name">Scripted</div>
+        <div class="tier-cap">1 unit = 1,600 voice min OR 4,800 digital sessions (10 msgs), or any mix</div>
+      </div>
+      <div class="input-row">
+        <div class="field"><label>Avg calls / month</label><input type="number" min="0" value="0" id="ag-s-calls" oninput="calc()"></div>
+        <div class="field"><label>Avg minutes / call</label><input type="number" min="0" value="0" id="ag-s-mins" oninput="calc()"></div>
+        <div class="field"><label>Digital sessions / month</label><input type="number" min="0" value="0" id="ag-s-sess" oninput="calc()"></div>
+      </div>
+      <div class="tier-result"><span id="ag-s-detail">0 voice min · 0 sessions</span><strong id="ag-s-units">0 units</strong></div>
+    </div>
+
+    <div class="tier-card">
+      <div class="tier-head">
+        <div class="tier-name">Autonomous</div>
+        <div class="tier-cap">1 unit = 250 voice min OR 200 digital sessions (10 msgs), or any mix</div>
+      </div>
+      <div class="input-row">
+        <div class="field"><label>Avg calls / month</label><input type="number" min="0" value="0" id="ag-a-calls" oninput="calc()"></div>
+        <div class="field"><label>Avg minutes / call</label><input type="number" min="0" value="0" id="ag-a-mins" oninput="calc()"></div>
+        <div class="field"><label>Digital sessions / month</label><input type="number" min="0" value="0" id="ag-a-sess" oninput="calc()"></div>
+      </div>
+      <div class="tier-result"><span id="ag-a-detail">0 voice min · 0 sessions</span><strong id="ag-a-units">0 units</strong></div>
+    </div>
+
+    <!-- AI ASSISTANT -->
+    <div class="section-title">AI Assistant</div>
+    <div class="section-desc">Internal-facing agent assist, transcription, summaries and coaching. Single consumption pool.</div>
+
+    <div class="tier-card">
+      <div class="tier-head">
+        <div class="tier-name">AI Assistant</div>
+        <div class="tier-cap">1 unit = 1,500 voice min OR 1,000 digital sessions, or any mix</div>
+      </div>
+      <div class="input-row">
+        <div class="field"><label>Avg calls / month</label><input type="number" min="0" value="0" id="as-calls" oninput="calc()"></div>
+        <div class="field"><label>Avg minutes / call</label><input type="number" min="0" value="0" id="as-mins" oninput="calc()"></div>
+        <div class="field"><label>Digital sessions / month</label><input type="number" min="0" value="0" id="as-sess" oninput="calc()"></div>
+      </div>
+      <div class="tier-result"><span id="as-detail">0 voice min · 0 sessions</span><strong id="as-units">0 units</strong></div>
+    </div>
+
+    <div class="totals">
+      <div class="total-card">
+        <div class="total-label">AI Agent units required</div>
+        <div class="total-value" id="ag-total">0</div>
+        <div class="total-sub" id="ag-total-sub">0 Scripted + 0 Autonomous</div>
+      </div>
+      <div class="total-card">
+        <div class="total-label">AI Assistant units required</div>
+        <div class="total-value" id="as-total">0</div>
+        <div class="total-sub">Single pool</div>
+      </div>
+    </div>
+
+    <details>
+      <summary>How this is calculated</summary>
+      <table>
+        <tr><th>Pool</th><th>Voice capacity / unit</th><th>Digital capacity / unit</th></tr>
+        <tr><td>AI Agent — Scripted</td><td>1,600 min</td><td>4,800 sessions</td></tr>
+        <tr><td>AI Agent — Autonomous</td><td>250 min</td><td>200 sessions</td></tr>
+        <tr><td>AI Assistant</td><td>1,500 min</td><td>1,000 sessions</td></tr>
+      </table>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;">
+        Voice minutes = avg calls/month × avg minutes/call. A digital session = up to 10 messages.
+        Units required for a pool = the greater of (voice minutes ÷ voice capacity) and (digital sessions ÷ digital capacity), rounded up —
+        each unit covers both dimensions simultaneously, so voice and digital usage share the same unit rather than needing separate units.
+        Scripted and Autonomous are purchased as separate unit pools and are summed for the AI Agent total.
+        Costs and committed-order pricing are deliberately excluded — see the sales deck for RRP.
+      </p>
+    </details>
+
+    <div class="footer">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <div class="footer-note">
+        Internal sizing tool — figures are capacity estimates only, not a quote.
+        <a href="/" target="_self">← Back to demos</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function unitsFor(mins, sessions, capMins, capSessions) {
+      const voiceUnits = capMins > 0 ? mins / capMins : 0;
+      const digitalUnits = capSessions > 0 ? sessions / capSessions : 0;
+      return Math.ceil(Math.max(voiceUnits, digitalUnits));
+    }
+    function num(id) { return Math.max(0, parseFloat(document.getElementById(id).value) || 0); }
+
+    function calc() {
+      // Scripted
+      const sMins = num('ag-s-calls') * num('ag-s-mins');
+      const sSess = num('ag-s-sess');
+      const sUnits = unitsFor(sMins, sSess, 1600, 4800);
+      document.getElementById('ag-s-detail').textContent = `${sMins.toLocaleString()} voice min · ${sSess.toLocaleString()} sessions`;
+      document.getElementById('ag-s-units').textContent = `${sUnits} unit${sUnits === 1 ? '' : 's'}`;
+
+      // Autonomous
+      const aMins = num('ag-a-calls') * num('ag-a-mins');
+      const aSess = num('ag-a-sess');
+      const aUnits = unitsFor(aMins, aSess, 250, 200);
+      document.getElementById('ag-a-detail').textContent = `${aMins.toLocaleString()} voice min · ${aSess.toLocaleString()} sessions`;
+      document.getElementById('ag-a-units').textContent = `${aUnits} unit${aUnits === 1 ? '' : 's'}`;
+
+      document.getElementById('ag-total').textContent = sUnits + aUnits;
+      document.getElementById('ag-total-sub').textContent = `${sUnits} Scripted + ${aUnits} Autonomous`;
+
+      // Assistant
+      const asMins = num('as-calls') * num('as-mins');
+      const asSess = num('as-sess');
+      const asUnits = unitsFor(asMins, asSess, 1500, 1000);
+      document.getElementById('as-detail').textContent = `${asMins.toLocaleString()} voice min · ${asSess.toLocaleString()} sessions`;
+      document.getElementById('as-units').textContent = `${asUnits} unit${asUnits === 1 ? '' : 's'}`;
+      document.getElementById('as-total').textContent = asUnits;
+    }
+    calc();
+  </script>
+</body>
+</html>
