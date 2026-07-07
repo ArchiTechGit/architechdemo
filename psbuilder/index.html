@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/auth.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PS Engagement Builder — ArchiTech</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --bg:        #0D1825;
+      --surface-1: #13294B;
+      --surface-2: #1A3460;
+      --cyan:      #05C3DD;
+      --cyan-dim:  rgba(5,195,221,0.10);
+      --cyan-mid:  rgba(5,195,221,0.25);
+      --text:      #F0F6FC;
+      --muted:     #8FA3BA;
+      --faint:     #4A607A;
+      --border:    rgba(255,255,255,0.07);
+      --font:      'Roboto', sans-serif;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+    .page { max-width: 1040px; margin: 0 auto; padding: 48px 24px 100px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+    .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
+    .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
+
+    .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
+    .page-desc  { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 30px; max-width: 680px; }
+
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+    .toolbar button {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-family: var(--font); font-size: 12px; padding: 9px 16px; border-radius: 7px; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .toolbar button:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    .phase-group { margin-bottom: 8px; }
+    .phase-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--cyan); margin: 34px 0 4px; display: flex; align-items: baseline; gap: 10px;
+    }
+    .phase-sub { font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--faint); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    thead th {
+      text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--faint); padding: 8px 10px; border-bottom: 1px solid var(--border);
+    }
+    tbody td { padding: 9px 10px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    tbody tr.unchecked td { color: var(--faint); }
+    tbody tr.unchecked { opacity: 0.45; }
+
+    .task-cell { max-width: 420px; }
+    .loc-badge { font-size: 10px; padding: 3px 8px; border-radius: 5px; background: rgba(255,255,255,0.05); color: var(--muted); white-space: nowrap; }
+    .loc-badge.site { background: rgba(224,92,92,0.12); color: #e08a8a; }
+
+    input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; }
+    input[type=number].hours-input {
+      width: 60px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--font); font-size: 13px; padding: 5px 7px;
+    }
+    input[type=number].hours-input:focus { outline: none; border-color: var(--cyan-mid); }
+
+    .summary {
+      position: sticky; bottom: 0; margin-top: 40px; background: var(--cyan-dim);
+      border: 1px solid var(--cyan-mid); border-radius: 12px; padding: 22px 24px;
+      display: flex; gap: 32px; flex-wrap: wrap;
+    }
+    .summary-item .summary-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .summary-item .summary-value { font-size: 28px; font-weight: 700; color: var(--cyan); line-height: 1; }
+
+    .footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+    .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
+    .footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
+    .footer-note a { color: var(--cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <span class="header-badge">Internal Sizing Tool · POC</span>
+    </div>
+
+    <div class="page-title">PS Engagement Builder</div>
+    <div class="page-desc">
+      Task catalog seeded from a recent WxCC + AI Agent/Assistant + Dynamics 365 engagement.
+      Untick anything out of scope, adjust hours where this deployment differs, and the totals update live.
+      This is a proof of concept for one engagement pattern — more templates can be added later.
+    </div>
+
+    <div class="toolbar">
+      <button onclick="setAll(true)">Select all</button>
+      <button onclick="setAll(false)">Deselect all</button>
+      <button onclick="resetHours()">Reset hours to defaults</button>
+    </div>
+
+    <div id="table-root"></div>
+
+    <div class="summary">
+      <div class="summary-item">
+        <div class="summary-label">Tasks in scope</div>
+        <div class="summary-value" id="sum-tasks">0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Total business hours</div>
+        <div class="summary-value" id="sum-hours">0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Onsite trips</div>
+        <div class="summary-value" id="sum-trips">0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">≈ Business days (7.5hr)</div>
+        <div class="summary-value" id="sum-days">0</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <div class="footer-note">
+        Internal scoping tool — hours are estimates from a comparable delivery, not a committed quote.
+        <a href="/" target="_self">← Back to demos</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TASKS = [
+      // Kickoff
+      { phase: 'Kickoff', group: '', task: 'Kick Off Session with Stakeholders', location: 'Office', hours: 1, trips: 0 },
+
+      // Design
+      { phase: 'Design', group: 'Workshops', task: 'Workshop 1 — Agent experience and business-as-usual workflow mapping', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Workshops', task: 'Workshop 2 — Knowledge Agent Scripting & Gathering', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Workshops', task: 'Workshop 3 — AI Assistant Use Cases', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Workshops', task: 'Workshop 4 — Dynamics Field Mapping Workshop', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Workshops', task: 'Workshop 5 — Omnichannel Scope Workshop', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Workshops', task: 'Workshop 6 — Spare time for additional workshop', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Review', task: 'WxCC — Existing Environment Review', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Design', group: 'Review', task: 'WxCC — Skills, Team, Queue Design', location: 'Office', hours: 6, trips: 0 },
+      { phase: 'Design', group: 'Sign-off', task: 'Design Documentation & Sign-off', location: 'Office', hours: 8, trips: 0 },
+
+      // Staging
+      { phase: 'Staging', group: '', task: 'WxCC A2Q Process', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Staging', group: '', task: 'Webex Contact Centre tenant provisioning and validation', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Staging', group: '', task: 'SMS asset provisioning', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Staging', group: '', task: 'Webex Connect account and asset setup for digital channels', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Staging', group: '', task: 'Facebook Business Manager / Meta integration setup', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Staging', group: '', task: 'Instagram DM custom channel setup', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Staging', group: '', task: 'Email channel asset setup and mailbox routing', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Staging', group: '', task: 'Dynamics 365 environment access and credentials confirmed', location: 'Office', hours: 4, trips: 0 },
+
+      // Implementation — Core config
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Tenant & Org General Settings', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Site Configuration', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Teams Configuration', location: 'Office', hours: 1, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Queue Configuration', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Skills Based Routing Configuration', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Entry Point Configurations', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)', location: 'Office', hours: 12, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Business hours and holiday treatment configuration', location: 'Office', hours: 1, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Wrap-up code configuration', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Core Configuration', task: 'Agent Desktop layout customisation', location: 'Office', hours: 4, trips: 0 },
+
+      // Implementation — AI Agent
+      { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Knowledge base content sourcing', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'AI Agent build — General/Membership FAQ', location: 'Office', hours: 6, trips: 0 },
+      { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'AI Agent build — Event and Ticketing FAQ', location: 'Office', hours: 6, trips: 0 },
+      { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Intent-based routing configuration', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Knowledge accuracy testing', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Agent Detailed Testing & Remediation', location: 'Office', hours: 4, trips: 0 },
+
+      // Implementation — AI Assistant + Dynamics
+      { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Screen-pop configuration', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Call transcription and summarisation enablement', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Suggested response configuration', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Wrap-up and task automation configuration', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Write-back mapping (notes, summaries, outcomes into Dynamics)', location: 'Office', hours: 6, trips: 0 },
+
+      // Implementation — Omnichannel
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'Web chat widget build (branding, pre-chat form, reason codes)', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'SMS flow configuration', location: 'Office', hours: 5, trips: 0 },
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'Email routing and triage configuration', location: 'Office', hours: 6, trips: 0 },
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'Facebook Messenger integration and testing', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'Instagram DM custom channel integration and testing', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'Quick Button Integration to External SMS Sender API', location: 'Office', hours: 5, trips: 0 },
+      { phase: 'Implementation', group: 'Omnichannel Build', task: 'Quick Button Integration to External SMS Agent Desktop', location: 'Office', hours: 3, trips: 0 },
+
+      // Implementation — Reporting
+      { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Topic analytics configuration', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Analyzer dashboard setup', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Dashboard embedding into Agent Desktop', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Journey Data Service Configuration', location: 'Office', hours: 7, trips: 0 },
+
+      // Implementation — Testing
+      { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Test Plan Document', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Testing — Voice', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Testing — OmniChannel', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Testing — AI Agent', location: 'Office', hours: 4, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Testing — AI Assistant', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'User Acceptance Testing Plan', location: 'Office', hours: 5, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'User Acceptance Testing Execution (assistance)', location: 'Office', hours: 2, trips: 0 },
+      { phase: 'Implementation', group: 'Testing', task: 'Remediations', location: 'Office', hours: 5, trips: 0 },
+
+      // Project Completion & Handover
+      { phase: 'Project Completion & Handover', group: 'Training', task: 'Agent training (desktop, call/chat handling, wrap-up codes) — 2 sessions', location: 'Client Site', hours: 5, trips: 1 },
+      { phase: 'Project Completion & Handover', group: 'Training', task: 'Supervisor training (queue monitoring, reporting)', location: 'Client Site', hours: 5, trips: 1 },
+      { phase: 'Project Completion & Handover', group: 'Training', task: 'Quick Reference Guide development', location: 'Office', hours: 8, trips: 0 },
+      { phase: 'Project Completion & Handover', group: 'Go-Live & Hypercare', task: 'Production cutover', location: 'Office', hours: 3, trips: 0 },
+      { phase: 'Project Completion & Handover', group: 'Go-Live & Hypercare', task: 'Hypercare support period (3 hours per day × 5 days)', location: 'Office', hours: 15, trips: 0 },
+      { phase: 'Project Completion & Handover', group: 'Go-Live & Hypercare', task: 'As-built documentation', location: 'Office', hours: 16, trips: 0 },
+    ];
+
+    TASKS.forEach((t, i) => { t.id = i; t.checked = true; t.defaultHours = t.hours; });
+
+    function render() {
+      const root = document.getElementById('table-root');
+      root.innerHTML = '';
+      const phases = [...new Set(TASKS.map(t => t.phase))];
+
+      phases.forEach(phase => {
+        const wrap = document.createElement('div');
+        wrap.className = 'phase-group';
+
+        const title = document.createElement('div');
+        title.className = 'phase-title';
+        title.textContent = phase;
+        wrap.appendChild(title);
+
+        const table = document.createElement('table');
+        table.innerHTML = `<thead><tr>
+          <th style="width:36px;"></th>
+          <th>Task</th>
+          <th style="width:70px;">Group</th>
+          <th style="width:90px;">Location</th>
+          <th style="width:70px;">Hours</th>
+        </tr></thead>`;
+        const tbody = document.createElement('tbody');
+
+        TASKS.filter(t => t.phase === phase).forEach(t => {
+          const tr = document.createElement('tr');
+          tr.id = `row-${t.id}`;
+          if (!t.checked) tr.classList.add('unchecked');
+          const siteClass = t.location === 'Client Site' ? 'loc-badge site' : 'loc-badge';
+          tr.innerHTML = `
+            <td><input type="checkbox" ${t.checked ? 'checked' : ''} onchange="toggle(${t.id}, this.checked)"></td>
+            <td class="task-cell">${t.task}</td>
+            <td style="color:var(--faint);font-size:11px;">${t.group}</td>
+            <td><span class="${siteClass}">${t.location}${t.trips ? ' · trip' : ''}</span></td>
+            <td><input type="number" min="0" class="hours-input" value="${t.hours}" onchange="setHours(${t.id}, this.value)"></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        root.appendChild(wrap);
+      });
+
+      updateSummary();
+    }
+
+    function toggle(id, checked) {
+      TASKS[id].checked = checked;
+      document.getElementById(`row-${id}`).classList.toggle('unchecked', !checked);
+      updateSummary();
+    }
+    function setHours(id, val) {
+      TASKS[id].hours = Math.max(0, parseFloat(val) || 0);
+      updateSummary();
+    }
+    function setAll(checked) {
+      TASKS.forEach(t => t.checked = checked);
+      render();
+    }
+    function resetHours() {
+      TASKS.forEach(t => t.hours = t.defaultHours);
+      render();
+    }
+
+    function updateSummary() {
+      const active = TASKS.filter(t => t.checked);
+      const totalHours = active.reduce((sum, t) => sum + t.hours, 0);
+      const totalTrips = active.reduce((sum, t) => sum + t.trips, 0);
+      document.getElementById('sum-tasks').textContent = active.length;
+      document.getElementById('sum-hours').textContent = totalHours.toLocaleString();
+      document.getElementById('sum-trips').textContent = totalTrips;
+      document.getElementById('sum-days').textContent = (totalHours / 7.5).toFixed(1);
+    }
+
+    render();
+  </script>
+</body>
+</html>
