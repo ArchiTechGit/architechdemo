@@ -38,7 +38,33 @@
     .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
     .page-desc  { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 30px; max-width: 680px; }
 
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+    /* ─── Step 1: Product picker ─── */
+    .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
+    .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+    @media (max-width: 720px) { .product-grid { grid-template-columns: 1fr; } }
+    .product-card {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px 18px; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none;
+    }
+    .product-card:hover:not(.disabled) { border-color: rgba(5,195,221,0.22); background: rgba(5,195,221,0.03); }
+    .product-card.selected { border-color: var(--cyan); background: var(--cyan-dim); }
+    .product-card.disabled { opacity: 0.4; cursor: not-allowed; }
+    .product-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .product-note { font-size: 11px; color: var(--muted); }
+
+    /* ─── Step 2: Scope type ─── */
+    .scope-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+    @media (max-width: 720px) { .scope-grid { grid-template-columns: 1fr; } }
+    .scope-card {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none;
+    }
+    .scope-card:hover { border-color: rgba(5,195,221,0.22); }
+    .scope-card.selected { border-color: var(--cyan); background: var(--cyan-dim); }
+    .scope-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .scope-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0; }
     .toolbar button {
       background: transparent; border: 1px solid var(--border); color: var(--muted);
       font-family: var(--font); font-size: 12px; padding: 9px 16px; border-radius: 7px; cursor: pointer;
@@ -49,11 +75,16 @@
     .phase-group { margin-bottom: 8px; }
     .phase-title {
       font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--cyan); margin: 34px 0 4px; display: flex; align-items: baseline; gap: 10px;
+      color: var(--cyan); margin: 34px 0 4px;
     }
-    .phase-sub { font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--faint); }
+    .group-title {
+      font-size: 12px; font-weight: 600; color: var(--text); margin: 18px 0 2px; display: flex; align-items: center; gap: 8px;
+    }
+    .group-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+    .group-tag.required { background: rgba(5,195,221,0.15); color: var(--cyan); }
+    .group-tag.optional { background: rgba(255,255,255,0.06); color: var(--muted); }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 4px; }
     thead th {
       text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--faint); padding: 8px 10px; border-bottom: 1px solid var(--border);
@@ -85,6 +116,8 @@
     .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
     .footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
     .footer-note a { color: var(--cyan); text-decoration: none; }
+
+    #task-area { display: none; }
   </style>
 </head>
 <body>
@@ -96,35 +129,44 @@
 
     <div class="page-title">PS Engagement Builder</div>
     <div class="page-desc">
-      Task catalog seeded from a recent WxCC + AI Agent/Assistant + Dynamics 365 engagement.
-      Untick anything out of scope, adjust hours where this deployment differs, and the totals update live.
-      This is a proof of concept for one engagement pattern — more templates can be added later.
+      Pick a product, then an engagement scope. Task groups relevant to that scope appear with sensible
+      defaults ticked — untick anything out of scope and adjust hours from there.
     </div>
 
-    <div class="toolbar">
-      <button onclick="setAll(true)">Select all</button>
-      <button onclick="setAll(false)">Deselect all</button>
-      <button onclick="resetHours()">Reset hours to defaults</button>
+    <div class="section-label">1 · Product</div>
+    <div class="product-grid" id="product-grid"></div>
+
+    <div id="scope-section" style="display:none;">
+      <div class="section-label">2 · Engagement Scope</div>
+      <div class="scope-grid" id="scope-grid"></div>
     </div>
 
-    <div id="table-root"></div>
+    <div id="task-area">
+      <div class="toolbar">
+        <button onclick="setAll(true)">Select all visible</button>
+        <button onclick="setAll(false)">Deselect all visible</button>
+        <button onclick="resetHours()">Reset hours to defaults</button>
+      </div>
 
-    <div class="summary">
-      <div class="summary-item">
-        <div class="summary-label">Tasks in scope</div>
-        <div class="summary-value" id="sum-tasks">0</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Total business hours</div>
-        <div class="summary-value" id="sum-hours">0</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Onsite trips</div>
-        <div class="summary-value" id="sum-trips">0</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">≈ Business days (7.5hr)</div>
-        <div class="summary-value" id="sum-days">0</div>
+      <div id="table-root"></div>
+
+      <div class="summary">
+        <div class="summary-item">
+          <div class="summary-label">Tasks in scope</div>
+          <div class="summary-value" id="sum-tasks">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Total business hours</div>
+          <div class="summary-value" id="sum-hours">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Onsite trips</div>
+          <div class="summary-value" id="sum-trips">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">≈ Business days (7.5hr)</div>
+          <div class="summary-value" id="sum-days">0</div>
+        </div>
       </div>
     </div>
 
@@ -138,11 +180,38 @@
   </div>
 
   <script>
+    const PRODUCTS = [
+      { id: 'wxcc', name: 'Webex Contact Centre', note: 'Available', disabled: false },
+      { id: 'wireless', name: 'Wireless', note: 'Coming soon', disabled: true },
+      { id: 'spaces', name: 'Cisco Spaces', note: 'Coming soon', disabled: true },
+    ];
+
+    const SCOPES = [
+      { id: 'dfd', name: 'Digital Front Door', desc: 'Existing WxCC platform gets an AI Agent, AI Assistant/CRM integration and omnichannel layer added on top.' },
+      { id: 'replacement', name: 'Contact Centre Replacement', desc: 'Straight platform swap — core routing/IVR/agent config only. No AI/digital layer.' },
+      { id: 'greenfield', name: 'Greenfield', desc: 'Brand-new WxCC build from scratch. AI/omnichannel layer available as an optional add-on.' },
+    ];
+
+    // group.gate: null = always visible+checked (baseline).
+    // gate.visible(scopeId) -> bool, gate.defaultChecked(scopeId) -> bool
+    const GROUP_GATES = {
+      'AI Agent Build (Member/Fan Facing)':                       aiOmniGate(),
+      'AI Assistant & Dynamics Integration (Agent Facing)':       aiOmniGate(),
+      'Omnichannel Build':                                        aiOmniGate(),
+      'Reporting & Analytics':                                    { visible: () => true, defaultChecked: () => false },
+    };
+    function aiOmniGate() {
+      return {
+        visible: (scopeId) => scopeId === 'dfd' || scopeId === 'greenfield',
+        defaultChecked: (scopeId) => scopeId === 'dfd', // required for DFD, optional (unticked) for greenfield
+      };
+    }
+
     const TASKS = [
-      // Kickoff
+      // Kickoff — baseline
       { phase: 'Kickoff', group: '', task: 'Kick Off Session with Stakeholders', location: 'Office', hours: 1, trips: 0 },
 
-      // Design
+      // Design — baseline
       { phase: 'Design', group: 'Workshops', task: 'Workshop 1 — Agent experience and business-as-usual workflow mapping', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Design', group: 'Workshops', task: 'Workshop 2 — Knowledge Agent Scripting & Gathering', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Design', group: 'Workshops', task: 'Workshop 3 — AI Assistant Use Cases', location: 'Office', hours: 2, trips: 0 },
@@ -153,7 +222,7 @@
       { phase: 'Design', group: 'Review', task: 'WxCC — Skills, Team, Queue Design', location: 'Office', hours: 6, trips: 0 },
       { phase: 'Design', group: 'Sign-off', task: 'Design Documentation & Sign-off', location: 'Office', hours: 8, trips: 0 },
 
-      // Staging
+      // Staging — baseline
       { phase: 'Staging', group: '', task: 'WxCC A2Q Process', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Staging', group: '', task: 'Webex Contact Centre tenant provisioning and validation', location: 'Office', hours: 3, trips: 0 },
       { phase: 'Staging', group: '', task: 'SMS asset provisioning', location: 'Office', hours: 2, trips: 0 },
@@ -163,7 +232,7 @@
       { phase: 'Staging', group: '', task: 'Email channel asset setup and mailbox routing', location: 'Office', hours: 3, trips: 0 },
       { phase: 'Staging', group: '', task: 'Dynamics 365 environment access and credentials confirmed', location: 'Office', hours: 4, trips: 0 },
 
-      // Implementation — Core config
+      // Implementation — Core config — baseline, all scope types
       { phase: 'Implementation', group: 'Core Configuration', task: 'Tenant & Org General Settings', location: 'Office', hours: 3, trips: 0 },
       { phase: 'Implementation', group: 'Core Configuration', task: 'Site Configuration', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'Core Configuration', task: 'Teams Configuration', location: 'Office', hours: 1, trips: 0 },
@@ -176,7 +245,7 @@
       { phase: 'Implementation', group: 'Core Configuration', task: 'Wrap-up code configuration', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'Core Configuration', task: 'Agent Desktop layout customisation', location: 'Office', hours: 4, trips: 0 },
 
-      // Implementation — AI Agent
+      // Implementation — AI Agent — gated: DFD (required) / Greenfield (optional)
       { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Knowledge base content sourcing', location: 'Office', hours: 4, trips: 0 },
       { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'AI Agent build — General/Membership FAQ', location: 'Office', hours: 6, trips: 0 },
       { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'AI Agent build — Event and Ticketing FAQ', location: 'Office', hours: 6, trips: 0 },
@@ -184,14 +253,14 @@
       { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Knowledge accuracy testing', location: 'Office', hours: 4, trips: 0 },
       { phase: 'Implementation', group: 'AI Agent Build (Member/Fan Facing)', task: 'Agent Detailed Testing & Remediation', location: 'Office', hours: 4, trips: 0 },
 
-      // Implementation — AI Assistant + Dynamics
+      // Implementation — AI Assistant + Dynamics — gated: DFD (required) / Greenfield (optional)
       { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Screen-pop configuration', location: 'Office', hours: 4, trips: 0 },
       { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Call transcription and summarisation enablement', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Suggested response configuration', location: 'Office', hours: 3, trips: 0 },
       { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Wrap-up and task automation configuration', location: 'Office', hours: 4, trips: 0 },
       { phase: 'Implementation', group: 'AI Assistant & Dynamics Integration (Agent Facing)', task: 'Write-back mapping (notes, summaries, outcomes into Dynamics)', location: 'Office', hours: 6, trips: 0 },
 
-      // Implementation — Omnichannel
+      // Implementation — Omnichannel — gated: DFD (required) / Greenfield (optional)
       { phase: 'Implementation', group: 'Omnichannel Build', task: 'Web chat widget build (branding, pre-chat form, reason codes)', location: 'Office', hours: 8, trips: 0 },
       { phase: 'Implementation', group: 'Omnichannel Build', task: 'SMS flow configuration', location: 'Office', hours: 5, trips: 0 },
       { phase: 'Implementation', group: 'Omnichannel Build', task: 'Email routing and triage configuration', location: 'Office', hours: 6, trips: 0 },
@@ -200,13 +269,13 @@
       { phase: 'Implementation', group: 'Omnichannel Build', task: 'Quick Button Integration to External SMS Sender API', location: 'Office', hours: 5, trips: 0 },
       { phase: 'Implementation', group: 'Omnichannel Build', task: 'Quick Button Integration to External SMS Agent Desktop', location: 'Office', hours: 3, trips: 0 },
 
-      // Implementation — Reporting
+      // Implementation — Reporting — visible all scopes, optional (unticked by default)
       { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Topic analytics configuration', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Analyzer dashboard setup', location: 'Office', hours: 3, trips: 0 },
       { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Dashboard embedding into Agent Desktop', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'Reporting & Analytics', task: 'Journey Data Service Configuration', location: 'Office', hours: 7, trips: 0 },
 
-      // Implementation — Testing
+      // Implementation — Testing — baseline
       { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Test Plan Document', location: 'Office', hours: 8, trips: 0 },
       { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Testing — Voice', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'Testing', task: 'Detailed Functional Testing — OmniChannel', location: 'Office', hours: 4, trips: 0 },
@@ -216,7 +285,7 @@
       { phase: 'Implementation', group: 'Testing', task: 'User Acceptance Testing Execution (assistance)', location: 'Office', hours: 2, trips: 0 },
       { phase: 'Implementation', group: 'Testing', task: 'Remediations', location: 'Office', hours: 5, trips: 0 },
 
-      // Project Completion & Handover
+      // Project Completion & Handover — baseline
       { phase: 'Project Completion & Handover', group: 'Training', task: 'Agent training (desktop, call/chat handling, wrap-up codes) — 2 sessions', location: 'Client Site', hours: 5, trips: 1 },
       { phase: 'Project Completion & Handover', group: 'Training', task: 'Supervisor training (queue monitoring, reporting)', location: 'Client Site', hours: 5, trips: 1 },
       { phase: 'Project Completion & Handover', group: 'Training', task: 'Quick Reference Guide development', location: 'Office', hours: 8, trips: 0 },
@@ -225,14 +294,70 @@
       { phase: 'Project Completion & Handover', group: 'Go-Live & Hypercare', task: 'As-built documentation', location: 'Office', hours: 16, trips: 0 },
     ];
 
-    TASKS.forEach((t, i) => { t.id = i; t.checked = true; t.defaultHours = t.hours; });
+    TASKS.forEach((t, i) => { t.id = i; t.defaultHours = t.hours; t.checked = true; });
 
-    function render() {
+    let selectedProduct = null;
+    let selectedScope = null;
+
+    function gateFor(group) { return GROUP_GATES[group] || null; }
+    function groupVisible(group) {
+      const gate = gateFor(group);
+      return gate ? gate.visible(selectedScope) : true; // baseline groups always visible
+    }
+    function groupDefaultChecked(group) {
+      const gate = gateFor(group);
+      return gate ? gate.defaultChecked(selectedScope) : true;
+    }
+
+    function renderProducts() {
+      const root = document.getElementById('product-grid');
+      root.innerHTML = '';
+      PRODUCTS.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card' + (p.disabled ? ' disabled' : '') + (selectedProduct === p.id ? ' selected' : '');
+        card.innerHTML = `<div class="product-name">${p.name}</div><div class="product-note">${p.note}</div>`;
+        if (!p.disabled) card.onclick = () => selectProduct(p.id);
+        root.appendChild(card);
+      });
+    }
+
+    function selectProduct(id) {
+      selectedProduct = id;
+      renderProducts();
+      document.getElementById('scope-section').style.display = 'block';
+      renderScopes();
+    }
+
+    function renderScopes() {
+      const root = document.getElementById('scope-grid');
+      root.innerHTML = '';
+      SCOPES.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'scope-card' + (selectedScope === s.id ? ' selected' : '');
+        card.innerHTML = `<div class="scope-name">${s.name}</div><div class="scope-desc">${s.desc}</div>`;
+        card.onclick = () => selectScope(s.id);
+        root.appendChild(card);
+      });
+    }
+
+    function selectScope(id) {
+      selectedScope = id;
+      renderScopes();
+      // reset every task's checked state to the gate default whenever scope changes
+      TASKS.forEach(t => { t.checked = groupDefaultChecked(t.group); });
+      document.getElementById('task-area').style.display = 'block';
+      renderTasks();
+    }
+
+    function renderTasks() {
       const root = document.getElementById('table-root');
       root.innerHTML = '';
       const phases = [...new Set(TASKS.map(t => t.phase))];
 
       phases.forEach(phase => {
+        const phaseTasks = TASKS.filter(t => t.phase === phase && groupVisible(t.group));
+        if (!phaseTasks.length) return;
+
         const wrap = document.createElement('div');
         wrap.className = 'phase-group';
 
@@ -241,32 +366,48 @@
         title.textContent = phase;
         wrap.appendChild(title);
 
-        const table = document.createElement('table');
-        table.innerHTML = `<thead><tr>
-          <th style="width:36px;"></th>
-          <th>Task</th>
-          <th style="width:70px;">Group</th>
-          <th style="width:90px;">Location</th>
-          <th style="width:70px;">Hours</th>
-        </tr></thead>`;
-        const tbody = document.createElement('tbody');
+        const groups = [...new Set(phaseTasks.map(t => t.group))];
+        groups.forEach(group => {
+          if (group) {
+            const gate = gateFor(group);
+            const gTitle = document.createElement('div');
+            gTitle.className = 'group-title';
+            let tag = '';
+            if (gate) {
+              tag = gate.defaultChecked(selectedScope)
+                ? '<span class="group-tag required">Required for this scope</span>'
+                : '<span class="group-tag optional">Optional add-on</span>';
+            }
+            gTitle.innerHTML = `${group} ${tag}`;
+            wrap.appendChild(gTitle);
+          }
 
-        TASKS.filter(t => t.phase === phase).forEach(t => {
-          const tr = document.createElement('tr');
-          tr.id = `row-${t.id}`;
-          if (!t.checked) tr.classList.add('unchecked');
-          const siteClass = t.location === 'Client Site' ? 'loc-badge site' : 'loc-badge';
-          tr.innerHTML = `
-            <td><input type="checkbox" ${t.checked ? 'checked' : ''} onchange="toggle(${t.id}, this.checked)"></td>
-            <td class="task-cell">${t.task}</td>
-            <td style="color:var(--faint);font-size:11px;">${t.group}</td>
-            <td><span class="${siteClass}">${t.location}${t.trips ? ' · trip' : ''}</span></td>
-            <td><input type="number" min="0" class="hours-input" value="${t.hours}" onchange="setHours(${t.id}, this.value)"></td>
-          `;
-          tbody.appendChild(tr);
+          const table = document.createElement('table');
+          table.innerHTML = `<thead><tr>
+            <th style="width:36px;"></th>
+            <th>Task</th>
+            <th style="width:90px;">Location</th>
+            <th style="width:70px;">Hours</th>
+          </tr></thead>`;
+          const tbody = document.createElement('tbody');
+
+          phaseTasks.filter(t => t.group === group).forEach(t => {
+            const tr = document.createElement('tr');
+            tr.id = `row-${t.id}`;
+            if (!t.checked) tr.classList.add('unchecked');
+            const siteClass = t.location === 'Client Site' ? 'loc-badge site' : 'loc-badge';
+            tr.innerHTML = `
+              <td><input type="checkbox" ${t.checked ? 'checked' : ''} onchange="toggle(${t.id}, this.checked)"></td>
+              <td class="task-cell">${t.task}</td>
+              <td><span class="${siteClass}">${t.location}${t.trips ? ' · trip' : ''}</span></td>
+              <td><input type="number" min="0" class="hours-input" value="${t.hours}" onchange="setHours(${t.id}, this.value)"></td>
+            `;
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          wrap.appendChild(table);
         });
-        table.appendChild(tbody);
-        wrap.appendChild(table);
+
         root.appendChild(wrap);
       });
 
@@ -283,16 +424,16 @@
       updateSummary();
     }
     function setAll(checked) {
-      TASKS.forEach(t => t.checked = checked);
-      render();
+      TASKS.forEach(t => { if (groupVisible(t.group)) t.checked = checked; });
+      renderTasks();
     }
     function resetHours() {
       TASKS.forEach(t => t.hours = t.defaultHours);
-      render();
+      renderTasks();
     }
 
     function updateSummary() {
-      const active = TASKS.filter(t => t.checked);
+      const active = TASKS.filter(t => t.checked && groupVisible(t.group));
       const totalHours = active.reduce((sum, t) => sum + t.hours, 0);
       const totalTrips = active.reduce((sum, t) => sum + t.trips, 0);
       document.getElementById('sum-tasks').textContent = active.length;
@@ -301,7 +442,7 @@
       document.getElementById('sum-days').textContent = (totalHours / 7.5).toFixed(1);
     }
 
-    render();
+    renderProducts();
   </script>
 </body>
 </html>
