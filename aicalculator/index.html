@@ -96,7 +96,7 @@
 
     <!-- AI AGENT -->
     <div class="section-title">AI Agent</div>
-    <div class="section-desc">Customer-facing automation. Scripted and Autonomous consumption pools are separate — use both if the deployment mixes bot types. A unit's voice and digital capacity can be used in any combination up to the maximum shown.</div>
+    <div class="section-desc">Customer-facing automation. Scripted and Autonomous draw from the same pool of AI Agent units (both are the same SKU) — fractional usage from each is combined before rounding up, so leftover capacity in one tier isn't wasted by rounding the other up separately.</div>
 
     <div class="tier-card">
       <div class="tier-head">
@@ -108,7 +108,7 @@
         <div class="field"><label>Avg minutes / call</label><input type="number" min="0" value="0" id="ag-s-mins" oninput="calc()"></div>
         <div class="field"><label>Digital sessions / month</label><input type="number" min="0" value="0" id="ag-s-sess" oninput="calc()"></div>
       </div>
-      <div class="tier-result"><span id="ag-s-detail">0 voice min · 0 sessions</span><strong id="ag-s-units">0 units</strong></div>
+      <div class="tier-result"><span id="ag-s-detail">0 voice min · 0 sessions</span><strong id="ag-s-units">0.00 units</strong></div>
     </div>
 
     <div class="tier-card">
@@ -121,7 +121,7 @@
         <div class="field"><label>Avg minutes / call</label><input type="number" min="0" value="0" id="ag-a-mins" oninput="calc()"></div>
         <div class="field"><label>Digital sessions / month</label><input type="number" min="0" value="0" id="ag-a-sess" oninput="calc()"></div>
       </div>
-      <div class="tier-result"><span id="ag-a-detail">0 voice min · 0 sessions</span><strong id="ag-a-units">0 units</strong></div>
+      <div class="tier-result"><span id="ag-a-detail">0 voice min · 0 sessions</span><strong id="ag-a-units">0.00 units</strong></div>
     </div>
 
     <!-- AI ASSISTANT -->
@@ -145,7 +145,7 @@
       <div class="total-card">
         <div class="total-label">AI Agent units required</div>
         <div class="total-value" id="ag-total">0</div>
-        <div class="total-sub" id="ag-total-sub">0 Scripted + 0 Autonomous</div>
+        <div class="total-sub" id="ag-total-sub">0.00 Scripted + 0.00 Autonomous fraction, merged</div>
       </div>
       <div class="total-card">
         <div class="total-label">AI Assistant units required</div>
@@ -164,9 +164,10 @@
       </table>
       <p style="font-size:12px;color:var(--muted);line-height:1.6;">
         Voice minutes = avg calls/month × avg minutes/call. A digital session = up to 10 messages.
-        Units required for a pool = the greater of (voice minutes ÷ voice capacity) and (digital sessions ÷ digital capacity), rounded up —
+        Fractional unit consumption for a tier = the greater of (voice minutes ÷ voice capacity) and (digital sessions ÷ digital capacity) —
         each unit covers both dimensions simultaneously, so voice and digital usage share the same unit rather than needing separate units.
-        Scripted and Autonomous are purchased as separate unit pools and are summed for the AI Agent total.
+        Scripted and Autonomous are the same AI Agent SKU, so their fractional consumption is summed <em>before</em> rounding up —
+        e.g. 0.3 Scripted + 0.3 Autonomous = 1 unit, not 2. AI Assistant is a separate SKU and is rounded independently.
         Costs and committed-order pricing are deliberately excluded — see the sales deck for RRP.
       </p>
     </details>
@@ -181,10 +182,10 @@
   </div>
 
   <script>
-    function unitsFor(mins, sessions, capMins, capSessions) {
-      const voiceUnits = capMins > 0 ? mins / capMins : 0;
-      const digitalUnits = capSessions > 0 ? sessions / capSessions : 0;
-      return Math.ceil(Math.max(voiceUnits, digitalUnits));
+    function fractionFor(mins, sessions, capMins, capSessions) {
+      const voiceFrac = capMins > 0 ? mins / capMins : 0;
+      const digitalFrac = capSessions > 0 ? sessions / capSessions : 0;
+      return Math.max(voiceFrac, digitalFrac);
     }
     function num(id) { return Math.max(0, parseFloat(document.getElementById(id).value) || 0); }
 
@@ -192,24 +193,26 @@
       // Scripted
       const sMins = num('ag-s-calls') * num('ag-s-mins');
       const sSess = num('ag-s-sess');
-      const sUnits = unitsFor(sMins, sSess, 1600, 4800);
+      const sFrac = fractionFor(sMins, sSess, 1600, 4800);
       document.getElementById('ag-s-detail').textContent = `${sMins.toLocaleString()} voice min · ${sSess.toLocaleString()} sessions`;
-      document.getElementById('ag-s-units').textContent = `${sUnits} unit${sUnits === 1 ? '' : 's'}`;
+      document.getElementById('ag-s-units').textContent = `${sFrac.toFixed(2)} units`;
 
       // Autonomous
       const aMins = num('ag-a-calls') * num('ag-a-mins');
       const aSess = num('ag-a-sess');
-      const aUnits = unitsFor(aMins, aSess, 250, 200);
+      const aFrac = fractionFor(aMins, aSess, 250, 200);
       document.getElementById('ag-a-detail').textContent = `${aMins.toLocaleString()} voice min · ${aSess.toLocaleString()} sessions`;
-      document.getElementById('ag-a-units').textContent = `${aUnits} unit${aUnits === 1 ? '' : 's'}`;
+      document.getElementById('ag-a-units').textContent = `${aFrac.toFixed(2)} units`;
 
-      document.getElementById('ag-total').textContent = sUnits + aUnits;
-      document.getElementById('ag-total-sub').textContent = `${sUnits} Scripted + ${aUnits} Autonomous`;
+      // Scripted + Autonomous share the same SKU: merge fractions, round up once
+      const agTotal = Math.ceil(sFrac + aFrac);
+      document.getElementById('ag-total').textContent = agTotal;
+      document.getElementById('ag-total-sub').textContent = `${sFrac.toFixed(2)} Scripted + ${aFrac.toFixed(2)} Autonomous fraction, merged`;
 
       // Assistant
       const asMins = num('as-calls') * num('as-mins');
       const asSess = num('as-sess');
-      const asUnits = unitsFor(asMins, asSess, 1500, 1000);
+      const asUnits = Math.ceil(fractionFor(asMins, asSess, 1500, 1000));
       document.getElementById('as-detail').textContent = `${asMins.toLocaleString()} voice min · ${asSess.toLocaleString()} sessions`;
       document.getElementById('as-units').textContent = `${asUnits} unit${asUnits === 1 ? '' : 's'}`;
       document.getElementById('as-total').textContent = asUnits;
