@@ -77,7 +77,6 @@
     .check-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .check-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; }
     .check-row span { font-size: 13px; color: var(--text); }
-    .check-row .hrs { font-size: 11px; color: var(--faint); margin-left: auto; }
 
     .btn-primary {
       background: var(--cyan); color: #0D1825; font-size: 14px; font-weight: 700; border: none;
@@ -124,7 +123,8 @@
     <div class="page-title">PS Engagement Builder</div>
     <div class="page-desc">
       Pick a product and engagement scope, answer a short set of scoping questions, then generate a
-      line-by-line task &amp; hours estimate. Baseline tasks common to every WxCC engagement are added automatically.
+      line-by-line task list. Baseline tasks common to every WxCC engagement are added automatically.
+      Effort estimates aren't calculated here — fill hours in manually once tasks are pasted in.
     </div>
 
     <div class="section-label">1 · Product</div>
@@ -142,13 +142,12 @@
     </div>
 
     <div id="output-section" class="step">
-      <div class="section-label">4 · Estimate</div>
+      <div class="section-label">4 · Task List</div>
       <div class="summary">
-        <div class="summary-item"><div class="summary-label">Total hours</div><div class="summary-value" id="sum-hours">0</div></div>
-        <div class="summary-item"><div class="summary-label">≈ Business days (7.5hr)</div><div class="summary-value" id="sum-days">0</div></div>
+        <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
         <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
       </div>
-      <div class="q-sub" style="margin-top:-8px;">Tab-separated, header row included — click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as Phase / Skill Required / Task Type / Description / Onsite Round Trips / Overnight Stays / Finished Document Outputs / Client Effort Estimate / Subcontractor Effort Estimate / R1 Location / R1 Business Hours.</div>
+      <div class="q-sub" style="margin-top:-8px;">Tab-separated, header row included — click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as Phase / Skill Required / Task Type / Description / Onsite Round Trips / Overnight Stays / Finished Document Outputs / Client Effort Estimate / Subcontractor Effort Estimate / R1 Location / R1 Business Hours. Hours column is left blank for you to fill in.</div>
       <textarea id="estimate-output" readonly></textarea>
       <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
       <button class="btn-ghost" onclick="copyEstimate()">Copy to clipboard</button>
@@ -157,7 +156,7 @@
     <div class="footer">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <div class="footer-note">
-        Internal scoping tool — hours are estimates from a comparable delivery, not a committed quote.
+        Internal scoping tool — generates a task list only. Effort hours are not calculated here.
         <a href="/" target="_self">← Back to demos</a>
       </div>
     </div>
@@ -179,32 +178,32 @@
     // ─── Fixed baseline tasks: always included once a scope is picked, no question asked ───
     function baselineTasks() {
       return [
-        { phase: 'Kickoff', task: 'Kick Off Session with Stakeholders', hours: 1, location: 'Office', trips: 0 },
-        { phase: 'Design', task: 'WxCC — Existing Environment Review', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Design', task: 'WxCC — Skills, Team, Queue Design', hours: 6, location: 'Office', trips: 0 },
-        { phase: 'Design', task: 'Design Documentation & Sign-off', hours: 8, location: 'Office', trips: 0 },
-        { phase: 'Staging', task: 'WxCC A2Q Process', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Staging', task: 'Webex Contact Centre tenant provisioning and validation', hours: 3, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Tenant & Org General Settings', hours: 3, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Site Configuration', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Teams Configuration', hours: 1, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Queue Configuration', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Skills Based Routing Configuration', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Entry Point Configurations', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)', hours: 8, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)', hours: 12, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Business hours and holiday treatment configuration', hours: 1, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Wrap-up code configuration', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Agent Desktop layout customisation', hours: 4, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Detailed Functional Test Plan Document', hours: 8, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Detailed Functional Testing — Voice', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'User Acceptance Testing Plan', hours: 5, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'User Acceptance Testing Execution (assistance)', hours: 2, location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Remediations', hours: 5, location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Quick Reference Guide development', hours: 8, location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Production cutover', hours: 3, location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Hypercare support period (3 hours per day × 5 days)', hours: 15, location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'As-built documentation', hours: 16, location: 'Office', trips: 0 },
+        { phase: 'Kickoff', task: 'Kick Off Session with Stakeholders', location: 'Office', trips: 0 },
+        { phase: 'Design', task: 'WxCC — Existing Environment Review', location: 'Office', trips: 0 },
+        { phase: 'Design', task: 'WxCC — Skills, Team, Queue Design', location: 'Office', trips: 0 },
+        { phase: 'Design', task: 'Design Documentation & Sign-off', location: 'Office', trips: 0 },
+        { phase: 'Staging', task: 'WxCC A2Q Process', location: 'Office', trips: 0 },
+        { phase: 'Staging', task: 'Webex Contact Centre tenant provisioning and validation', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Tenant & Org General Settings', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Site Configuration', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Teams Configuration', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Queue Configuration', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Skills Based Routing Configuration', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Entry Point Configurations', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Business hours and holiday treatment configuration', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Wrap-up code configuration', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Agent Desktop layout customisation', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Detailed Functional Test Plan Document', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Detailed Functional Testing — Voice', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'User Acceptance Testing Plan', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'User Acceptance Testing Execution (assistance)', location: 'Office', trips: 0 },
+        { phase: 'Implementation', task: 'Remediations', location: 'Office', trips: 0 },
+        { phase: 'Project Completion & Handover', task: 'Quick Reference Guide development', location: 'Office', trips: 0 },
+        { phase: 'Project Completion & Handover', task: 'Production cutover', location: 'Office', trips: 0 },
+        { phase: 'Project Completion & Handover', task: 'Hypercare support period', location: 'Office', trips: 0 },
+        { phase: 'Project Completion & Handover', task: 'As-built documentation', location: 'Office', trips: 0 },
       ];
     }
 
@@ -217,10 +216,10 @@
       questions.push({
         id: 'workshops', type: 'stepper',
         label: 'How many discovery workshops do you need?',
-        sub: 'Covers agent experience mapping, knowledge scripting, use-case gathering, CRM field mapping, omnichannel scope. ~2 hrs each.',
+        sub: 'Covers agent experience mapping, knowledge scripting, use-case gathering, CRM field mapping, omnichannel scope.',
         min: 0, max: 6, default: 4,
         generate: (n) => Array.from({ length: n }, (_, i) => ({
-          phase: 'Design', task: `Workshop ${i + 1} — discovery session`, hours: 2, location: 'Office', trips: 0,
+          phase: 'Design', task: `Workshop ${i + 1} — discovery session`, location: 'Office', trips: 0,
         })),
       });
 
@@ -229,15 +228,15 @@
         label: 'Which channels need environment staging / provisioning?',
         sub: 'Drives the Staging phase task list.',
         options: [
-          { id: 'sms', label: 'SMS asset provisioning', hours: 2, checked: false },
-          { id: 'webexconnect', label: 'Webex Connect account/asset setup', hours: 2, checked: false },
-          { id: 'facebook', label: 'Facebook Business Manager / Meta setup', hours: 3, checked: false },
-          { id: 'instagram', label: 'Instagram DM custom channel setup', hours: 4, checked: false },
-          { id: 'email', label: 'Email channel asset setup + mailbox routing', hours: 3, checked: false },
-          { id: 'dynamics', label: 'Dynamics 365 environment access confirmed', hours: 4, checked: false, visible: aiVisible },
+          { id: 'sms', label: 'SMS asset provisioning', checked: false },
+          { id: 'webexconnect', label: 'Webex Connect account/asset setup', checked: false },
+          { id: 'facebook', label: 'Facebook Business Manager / Meta setup', checked: false },
+          { id: 'instagram', label: 'Instagram DM custom channel setup', checked: false },
+          { id: 'email', label: 'Email channel asset setup + mailbox routing', checked: false },
+          { id: 'dynamics', label: 'Dynamics 365 environment access confirmed', checked: false, visible: aiVisible },
         ],
         generate: (opts) => opts.filter(o => o.checked && o.visible !== false).map(o => ({
-          phase: 'Staging', task: o.label, hours: o.hours, location: 'Office', trips: 0,
+          phase: 'Staging', task: o.label, location: 'Office', trips: 0,
         })),
       });
 
@@ -245,19 +244,19 @@
         questions.push({
           id: 'agent-domains', type: 'stepper',
           label: 'How many AI Agent knowledge domains / FAQ bots need to be built?',
-          sub: 'e.g. General/Membership FAQ, Event & Ticketing FAQ. ~6 hrs to build + test each. Set to 0 to skip AI Agent entirely.',
+          sub: 'e.g. General/Membership FAQ, Event & Ticketing FAQ. Set to 0 to skip AI Agent entirely.',
           min: 0, max: 6, default: scopeId === 'dfd' ? 2 : 0,
           generate: (n) => {
             if (n === 0) return [];
             const base = [
-              { phase: 'Implementation', task: 'Knowledge base content sourcing', hours: 4, location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Intent-based routing configuration', hours: 8, location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Knowledge accuracy testing', hours: 4, location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Agent Detailed Testing & Remediation', hours: 4, location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Detailed Functional Testing — AI Agent', hours: 4, location: 'Office', trips: 0 },
+              { phase: 'Implementation', task: 'Knowledge base content sourcing', location: 'Office', trips: 0 },
+              { phase: 'Implementation', task: 'Intent-based routing configuration', location: 'Office', trips: 0 },
+              { phase: 'Implementation', task: 'Knowledge accuracy testing', location: 'Office', trips: 0 },
+              { phase: 'Implementation', task: 'Agent Detailed Testing & Remediation', location: 'Office', trips: 0 },
+              { phase: 'Implementation', task: 'Detailed Functional Testing — AI Agent', location: 'Office', trips: 0 },
             ];
             const domains = Array.from({ length: n }, (_, i) => ({
-              phase: 'Implementation', task: `AI Agent build — knowledge domain ${i + 1} FAQ`, hours: 6, location: 'Office', trips: 0,
+              phase: 'Implementation', task: `AI Agent build — knowledge domain ${i + 1} FAQ`, location: 'Office', trips: 0,
             }));
             return base.concat(domains);
           },
@@ -269,15 +268,15 @@
           sub: 'Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to Dynamics.',
           default: scopeId === 'dfd',
           generate: (on) => !on ? [] : [
-            { phase: 'Design', task: 'Workshop — AI Assistant Use Cases', hours: 2, location: 'Office', trips: 0 },
-            { phase: 'Design', task: 'Workshop — Dynamics Field Mapping', hours: 2, location: 'Office', trips: 0 },
-            { phase: 'Staging', task: 'Dynamics 365 environment access and credentials confirmed', hours: 4, location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Screen-pop configuration', hours: 4, location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Call transcription and summarisation enablement', hours: 2, location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Suggested response configuration', hours: 3, location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Wrap-up and task automation configuration', hours: 4, location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Write-back mapping (notes, summaries, outcomes into Dynamics)', hours: 6, location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Detailed Functional Testing — AI Assistant', hours: 3, location: 'Office', trips: 0 },
+            { phase: 'Design', task: 'Workshop — AI Assistant Use Cases', location: 'Office', trips: 0 },
+            { phase: 'Design', task: 'Workshop — Dynamics Field Mapping', location: 'Office', trips: 0 },
+            { phase: 'Staging', task: 'Dynamics 365 environment access and credentials confirmed', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Screen-pop configuration', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Call transcription and summarisation enablement', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Suggested response configuration', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Wrap-up and task automation configuration', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Write-back mapping (notes, summaries, outcomes into Dynamics)', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Detailed Functional Testing — AI Assistant', location: 'Office', trips: 0 },
           ],
         });
 
@@ -286,20 +285,20 @@
           label: 'Which omnichannel channels are in scope for build?',
           sub: 'Each selected channel adds its build + integration task. Selecting any channel also adds an OmniChannel testing pass.',
           options: [
-            { id: 'webchat', label: 'Web chat widget (branding, pre-chat form, reason codes)', hours: 8, checked: scopeId === 'dfd' },
-            { id: 'sms-flow', label: 'SMS flow configuration', hours: 5, checked: scopeId === 'dfd' },
-            { id: 'email-routing', label: 'Email routing and triage configuration', hours: 6, checked: scopeId === 'dfd' },
-            { id: 'fb-messenger', label: 'Facebook Messenger integration and testing', hours: 8, checked: false },
-            { id: 'instagram-dm', label: 'Instagram DM custom channel integration and testing', hours: 8, checked: false },
-            { id: 'qb-api', label: 'Quick Button integration — external SMS sender API', hours: 5, checked: false },
-            { id: 'qb-desktop', label: 'Quick Button integration — external SMS agent desktop', hours: 3, checked: false },
+            { id: 'webchat', label: 'Web chat widget (branding, pre-chat form, reason codes)', checked: scopeId === 'dfd' },
+            { id: 'sms-flow', label: 'SMS flow configuration', checked: scopeId === 'dfd' },
+            { id: 'email-routing', label: 'Email routing and triage configuration', checked: scopeId === 'dfd' },
+            { id: 'fb-messenger', label: 'Facebook Messenger integration and testing', checked: false },
+            { id: 'instagram-dm', label: 'Instagram DM custom channel integration and testing', checked: false },
+            { id: 'qb-api', label: 'Quick Button integration — external SMS sender API', checked: false },
+            { id: 'qb-desktop', label: 'Quick Button integration — external SMS agent desktop', checked: false },
           ],
           generate: (opts) => {
             const selected = opts.filter(o => o.checked);
-            const lines = selected.map(o => ({ phase: 'Implementation', task: o.label, hours: o.hours, location: 'Office', trips: 0 }));
+            const lines = selected.map(o => ({ phase: 'Implementation', task: o.label, location: 'Office', trips: 0 }));
             if (selected.length) {
-              lines.push({ phase: 'Design', task: 'Workshop — Omnichannel Scope', hours: 2, location: 'Office', trips: 0 });
-              lines.push({ phase: 'Implementation', task: 'Detailed Functional Testing — OmniChannel', hours: 4, location: 'Office', trips: 0 });
+              lines.push({ phase: 'Design', task: 'Workshop — Omnichannel Scope', location: 'Office', trips: 0 });
+              lines.push({ phase: 'Implementation', task: 'Detailed Functional Testing — OmniChannel', location: 'Office', trips: 0 });
             }
             return lines;
           },
@@ -311,25 +310,25 @@
         label: 'Which reporting / analytics components are needed?',
         sub: 'Optional on every engagement type.',
         options: [
-          { id: 'topic-analytics', label: 'Topic analytics configuration', hours: 2, checked: false },
-          { id: 'analyzer-dashboard', label: 'Analyzer dashboard setup', hours: 3, checked: false },
-          { id: 'dashboard-embed', label: 'Dashboard embedding into Agent Desktop', hours: 2, checked: false },
-          { id: 'journey-data', label: 'Journey Data Service configuration', hours: 7, checked: false },
+          { id: 'topic-analytics', label: 'Topic analytics configuration', checked: false },
+          { id: 'analyzer-dashboard', label: 'Analyzer dashboard setup', checked: false },
+          { id: 'dashboard-embed', label: 'Dashboard embedding into Agent Desktop', checked: false },
+          { id: 'journey-data', label: 'Journey Data Service configuration', checked: false },
         ],
         generate: (opts) => opts.filter(o => o.checked).map(o => ({
-          phase: 'Implementation', task: o.label, hours: o.hours, location: 'Office', trips: 0,
+          phase: 'Implementation', task: o.label, location: 'Office', trips: 0,
         })),
       });
 
       questions.push({
         id: 'agent-training', type: 'stepper',
         label: 'How many agent training sessions are needed?',
-        sub: '~2.5 hrs per session, delivered at client site.',
+        sub: 'Delivered at client site.',
         min: 0, max: 6, default: 2,
         generate: (n) => n === 0 ? [] : [{
           phase: 'Project Completion & Handover',
           task: `Agent training (desktop, call/chat handling, wrap-up codes) — ${n} session${n === 1 ? '' : 's'}`,
-          hours: n * 2.5, location: 'Client Site', trips: 1,
+          location: 'Client Site', trips: 1,
         }],
       });
 
@@ -339,7 +338,7 @@
         default: true,
         generate: (on) => !on ? [] : [{
           phase: 'Project Completion & Handover', task: 'Supervisor training (queue monitoring, reporting)',
-          hours: 5, location: 'Client Site', trips: 1,
+          location: 'Client Site', trips: 1,
         }],
       });
 
@@ -423,7 +422,6 @@
             <label class="check-row">
               <input type="checkbox" ${o.checked ? 'checked' : ''} onchange="toggleOption('${q.id}','${o.id}', this.checked)">
               <span>${o.label}</span>
-              <span class="hrs">${o.hours}h</span>
             </label>`).join('');
           card.innerHTML = `
             <div class="q-label">${q.label}</div>
@@ -471,23 +469,18 @@
       });
 
       const lines = [tsvRow(SHEET_COLUMNS)];
-      let totalHours = 0, totalTrips = 0;
+      let totalTrips = 0;
 
       tasks.forEach(t => {
         lines.push(tsvRow([
           t.phase, 'Collaboration', 'ArchiTech Activity', t.task,
-          t.trips, 0, 0, '', '', t.location, t.hours,
+          t.trips, 0, 0, '', '', t.location, '',
         ]));
-        totalHours += t.hours;
         totalTrips += t.trips;
       });
 
-      lines.push(tsvRow(['', '', '', '', '', '', '', '', '', '', '']));
-      lines.push(tsvRow(['TOTAL', '', '', '', totalTrips, '', '', '', '', '', totalHours]));
-
       document.getElementById('estimate-output').value = lines.join('\n');
-      document.getElementById('sum-hours').textContent = totalHours.toLocaleString();
-      document.getElementById('sum-days').textContent = (totalHours / 7.5).toFixed(1);
+      document.getElementById('sum-tasks').textContent = tasks.length;
       document.getElementById('sum-trips').textContent = totalTrips;
 
       hide('question-section');
