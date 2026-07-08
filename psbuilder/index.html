@@ -147,7 +147,7 @@
         <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
         <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
       </div>
-      <div class="q-sub" style="margin-top:-8px;">Tab-separated, header row included — click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as Phase / Skill Required / Task Type / Description / Onsite Round Trips / Overnight Stays / Finished Document Outputs / Client Effort Estimate / Subcontractor Effort Estimate / R1 Location / R1 Business Hours. Hours column is left blank for you to fill in.</div>
+      <div class="q-sub" style="margin-top:-8px;">Tab-separated, header row included — click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as Phase / Skill Required / Task Type / Description.</div>
       <textarea id="estimate-output" readonly></textarea>
       <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
       <button class="btn-ghost" onclick="copyEstimate()">Copy to clipboard</button>
@@ -233,7 +233,7 @@
           { id: 'facebook', label: 'Facebook Business Manager / Meta setup', checked: false },
           { id: 'instagram', label: 'Instagram DM custom channel setup', checked: false },
           { id: 'email', label: 'Email channel asset setup + mailbox routing', checked: false },
-          { id: 'dynamics', label: 'Dynamics 365 environment access confirmed', checked: false, visible: aiVisible },
+          { id: 'crm', label: 'CRM environment access confirmed', checked: false, visible: aiVisible },
         ],
         generate: (opts) => opts.filter(o => o.checked && o.visible !== false).map(o => ({
           phase: 'Staging', task: o.label, location: 'Office', trips: 0,
@@ -243,8 +243,8 @@
       if (aiVisible) {
         questions.push({
           id: 'agent-domains', type: 'stepper',
-          label: 'How many AI Agent knowledge domains / FAQ bots need to be built?',
-          sub: 'e.g. General/Membership FAQ, Event & Ticketing FAQ. Set to 0 to skip AI Agent entirely.',
+          label: 'How many AI Agent bots / knowledge domains need to be built?',
+          sub: 'e.g. billing enquiries, product support, appointment booking — one domain per distinct topic area. Set to 0 to skip AI Agent entirely.',
           min: 0, max: 6, default: scopeId === 'dfd' ? 2 : 0,
           generate: (n) => {
             if (n === 0) return [];
@@ -264,18 +264,18 @@
 
         questions.push({
           id: 'ai-assistant', type: 'toggle',
-          label: 'Include AI Assistant + CRM (Dynamics) integration for agents?',
-          sub: 'Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to Dynamics.',
+          label: 'Include AI Assistant + CRM integration for agents?',
+          sub: 'Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to CRM. CRM platform is whatever the customer runs (Dynamics, Salesforce, ServiceNow, etc).',
           default: scopeId === 'dfd',
           generate: (on) => !on ? [] : [
             { phase: 'Design', task: 'Workshop — AI Assistant Use Cases', location: 'Office', trips: 0 },
-            { phase: 'Design', task: 'Workshop — Dynamics Field Mapping', location: 'Office', trips: 0 },
-            { phase: 'Staging', task: 'Dynamics 365 environment access and credentials confirmed', location: 'Office', trips: 0 },
+            { phase: 'Design', task: 'Workshop — CRM Field Mapping', location: 'Office', trips: 0 },
+            { phase: 'Staging', task: 'CRM environment access and credentials confirmed', location: 'Office', trips: 0 },
             { phase: 'Implementation', task: 'Screen-pop configuration', location: 'Office', trips: 0 },
             { phase: 'Implementation', task: 'Call transcription and summarisation enablement', location: 'Office', trips: 0 },
             { phase: 'Implementation', task: 'Suggested response configuration', location: 'Office', trips: 0 },
             { phase: 'Implementation', task: 'Wrap-up and task automation configuration', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Write-back mapping (notes, summaries, outcomes into Dynamics)', location: 'Office', trips: 0 },
+            { phase: 'Implementation', task: 'Write-back mapping (notes, summaries, outcomes into CRM)', location: 'Office', trips: 0 },
             { phase: 'Implementation', task: 'Detailed Functional Testing — AI Assistant', location: 'Office', trips: 0 },
           ],
         });
@@ -450,14 +450,9 @@
     function show(id) { document.getElementById(id).classList.add('active'); }
     function hide(id) { document.getElementById(id).classList.remove('active'); }
 
-    // Matches the source Excel column order exactly, so a select-all + copy pastes
-    // straight into the sheet with each field landing in its own column.
-    const SHEET_COLUMNS = [
-      'Phase', 'Skill Required', 'Task Type', 'Description',
-      'Onsite Round Trips', 'Overnight Stays', 'Finished Document Outputs',
-      'Client Effort Estimate', 'Subcontractor Effort Estimate',
-      'R1 Location', 'R1 Business Hours',
-    ];
+    // Matches the first 4 columns of the source Excel sheet, so a select-all + copy
+    // pastes straight into the sheet with each field landing in its own column.
+    const SHEET_COLUMNS = ['Phase', 'Skill Required', 'Task Type', 'Description'];
 
     function tsvRow(cells) { return cells.join('\t'); }
 
@@ -472,10 +467,7 @@
       let totalTrips = 0;
 
       tasks.forEach(t => {
-        lines.push(tsvRow([
-          t.phase, 'Collaboration', 'ArchiTech Activity', t.task,
-          t.trips, 0, 0, '', '', t.location, '',
-        ]));
+        lines.push(tsvRow([t.phase, 'Collaboration', 'ArchiTech Activity', t.task]));
         totalTrips += t.trips;
       });
 
