@@ -122,27 +122,32 @@
 
     <div class="page-title">PS Engagement Builder</div>
     <div class="page-desc">
-      Pick a product and engagement scope, answer a short set of scoping questions, then generate a
-      line-by-line task list. Baseline tasks common to every WxCC engagement are added automatically.
+      Pick a product, engagement type and engagement scope, answer a short set of scoping questions,
+      then generate a line-by-line task list. Baseline tasks common to every engagement are added automatically.
       Effort estimates aren't calculated here — fill hours in manually once tasks are pasted in.
     </div>
 
     <div class="section-label">1 · Product</div>
     <div class="product-grid" id="product-grid"></div>
 
+    <div id="type-section" class="step">
+      <div class="section-label">2 · Engagement Type</div>
+      <div class="scope-grid" id="type-grid"></div>
+    </div>
+
     <div id="scope-section" class="step">
-      <div class="section-label">2 · Engagement Scope</div>
+      <div class="section-label">3 · Engagement Scope</div>
       <div class="scope-grid" id="scope-grid"></div>
     </div>
 
     <div id="question-section" class="step">
-      <div class="section-label">3 · Scoping Questions</div>
+      <div class="section-label">4 · Scoping Questions</div>
       <div id="question-root"></div>
       <button class="btn-primary" onclick="createEstimate()">Create Estimate →</button>
     </div>
 
     <div id="output-section" class="step">
-      <div class="section-label">4 · Task List</div>
+      <div class="section-label">5 · Task List</div>
       <div class="summary">
         <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
         <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
@@ -169,15 +174,25 @@
       { id: 'spaces', name: 'Cisco Spaces', note: 'Coming soon', disabled: true },
     ];
 
-    const SCOPES = [
-      { id: 'dfd', name: 'Digital Front Door', desc: 'Existing WxCC platform gets an AI Agent, AI Assistant/CRM integration and omnichannel layer added on top.' },
-      { id: 'replacement', name: 'Contact Centre Replacement', desc: 'Straight platform swap — core routing/IVR/agent config only. No AI/digital layer.' },
-      { id: 'greenfield', name: 'Greenfield', desc: 'Brand-new WxCC build from scratch. AI/omnichannel layer available as an optional add-on.' },
+    const TYPES = [
+      { id: 'new', name: 'New / Greenfield', desc: 'Brand-new WxCC deployment, nothing to migrate off.' },
+      { id: 'migration', name: 'Migration', desc: 'Customer is moving off another contact centre platform onto WxCC.' },
     ];
 
-    // ─── Fixed baseline tasks: always included once a scope is picked, no question asked ───
-    function baselineTasks() {
-      return [
+    const SCOPES = [
+      { id: 'dfd', name: 'Digital Front Door', desc: 'Core CC plus an AI Agent, AI Assistant/CRM integration and omnichannel layer.' },
+      { id: 'standard', name: 'Standard Contact Centre', desc: 'Core routing/IVR/queue/agent config only. No AI or digital layer.' },
+    ];
+
+    // ─── Fixed baseline tasks: always included once type + scope are picked, no question asked ───
+    function baselineTasks(typeId) {
+      const migrationTasks = typeId === 'migration' ? [
+        { phase: 'Design', task: 'Legacy platform environment review & migration mapping', location: 'Office', trips: 0 },
+        { phase: 'Staging', task: 'Legacy platform parallel-run validation', location: 'Office', trips: 0 },
+        { phase: 'Project Completion & Handover', task: 'Legacy platform decommission', location: 'Office', trips: 0 },
+      ] : [];
+
+      return migrationTasks.concat([
         { phase: 'Kickoff', task: 'Kick Off Session with Stakeholders', location: 'Office', trips: 0 },
         { phase: 'Design', task: 'WxCC — Existing Environment Review', location: 'Office', trips: 0 },
         { phase: 'Design', task: 'WxCC — Skills, Team, Queue Design', location: 'Office', trips: 0 },
@@ -204,13 +219,13 @@
         { phase: 'Project Completion & Handover', task: 'Production cutover', location: 'Office', trips: 0 },
         { phase: 'Project Completion & Handover', task: 'Hypercare support period', location: 'Office', trips: 0 },
         { phase: 'Project Completion & Handover', task: 'As-built documentation', location: 'Office', trips: 0 },
-      ];
+      ]);
     }
 
     // ─── Questions: each contributes 0+ generated task lines based on the answer ───
     // visible(scopeId) gates whether the question is asked at all.
     function buildQuestions(scopeId) {
-      const aiVisible = scopeId === 'dfd' || scopeId === 'greenfield';
+      const aiVisible = scopeId === 'dfd';
       const questions = [];
 
       questions.push({
@@ -346,6 +361,7 @@
     }
 
     let selectedProduct = null;
+    let selectedType = null;
     let selectedScope = null;
     let questions = [];
 
@@ -364,8 +380,28 @@
     function selectProduct(id) {
       selectedProduct = id;
       renderProducts();
+      show('type-section');
+      renderTypes();
+    }
+
+    function renderTypes() {
+      const root = document.getElementById('type-grid');
+      root.innerHTML = '';
+      TYPES.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'pick-card' + (selectedType === t.id ? ' selected' : '');
+        card.innerHTML = `<div class="pick-name">${t.name}</div><div class="pick-note">${t.desc}</div>`;
+        card.onclick = () => selectType(t.id);
+        root.appendChild(card);
+      });
+    }
+
+    function selectType(id) {
+      selectedType = id;
+      renderTypes();
       show('scope-section');
       renderScopes();
+      if (selectedScope) buildAndShowQuestions();
     }
 
     function renderScopes() {
@@ -383,7 +419,11 @@
     function selectScope(id) {
       selectedScope = id;
       renderScopes();
-      questions = buildQuestions(id);
+      buildAndShowQuestions();
+    }
+
+    function buildAndShowQuestions() {
+      questions = buildQuestions(selectedScope);
       questions.forEach(q => {
         if (q.type === 'stepper') q.value = q.default;
         if (q.type === 'toggle') q.value = q.default;
@@ -457,7 +497,7 @@
     function tsvRow(cells) { return cells.join('\t'); }
 
     function createEstimate() {
-      let tasks = baselineTasks();
+      let tasks = baselineTasks(selectedType);
       questions.forEach(q => {
         if (q.type === 'checklist') tasks = tasks.concat(q.generate(q.options));
         else tasks = tasks.concat(q.generate(q.value));
