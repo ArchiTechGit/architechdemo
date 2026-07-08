@@ -148,6 +148,7 @@
         <div class="summary-item"><div class="summary-label">≈ Business days (7.5hr)</div><div class="summary-value" id="sum-days">0</div></div>
         <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
       </div>
+      <div class="q-sub" style="margin-top:-8px;">Tab-separated, header row included — click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as Phase / Skill Required / Task Type / Description / Onsite Round Trips / Overnight Stays / Finished Document Outputs / Client Effort Estimate / Subcontractor Effort Estimate / R1 Location / R1 Business Hours.</div>
       <textarea id="estimate-output" readonly></textarea>
       <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
       <button class="btn-ghost" onclick="copyEstimate()">Copy to clipboard</button>
@@ -451,6 +452,17 @@
     function show(id) { document.getElementById(id).classList.add('active'); }
     function hide(id) { document.getElementById(id).classList.remove('active'); }
 
+    // Matches the source Excel column order exactly, so a select-all + copy pastes
+    // straight into the sheet with each field landing in its own column.
+    const SHEET_COLUMNS = [
+      'Phase', 'Skill Required', 'Task Type', 'Description',
+      'Onsite Round Trips', 'Overnight Stays', 'Finished Document Outputs',
+      'Client Effort Estimate', 'Subcontractor Effort Estimate',
+      'R1 Location', 'R1 Business Hours',
+    ];
+
+    function tsvRow(cells) { return cells.join('\t'); }
+
     function createEstimate() {
       let tasks = baselineTasks();
       questions.forEach(q => {
@@ -458,26 +470,22 @@
         else tasks = tasks.concat(q.generate(q.value));
       });
 
-      const phases = [...new Set(tasks.map(t => t.phase))];
-      let out = '';
+      const lines = [tsvRow(SHEET_COLUMNS)];
       let totalHours = 0, totalTrips = 0;
 
-      phases.forEach(phase => {
-        const rows = tasks.filter(t => t.phase === phase);
-        const phaseHours = rows.reduce((s, t) => s + t.hours, 0);
-        out += `${phase.toUpperCase()}\n`;
-        rows.forEach(t => {
-          const loc = t.location === 'Client Site' ? '  [Client Site]' : '';
-          out += `  - ${t.task} — ${t.hours}h${loc}\n`;
-        });
-        out += `  Subtotal: ${phaseHours}h\n\n`;
-        totalHours += phaseHours;
-        totalTrips += rows.reduce((s, t) => s + t.trips, 0);
+      tasks.forEach(t => {
+        lines.push(tsvRow([
+          t.phase, 'Collaboration', 'ArchiTech Activity', t.task,
+          t.trips, 0, 0, '', '', t.location, t.hours,
+        ]));
+        totalHours += t.hours;
+        totalTrips += t.trips;
       });
 
-      out += `TOTAL: ${totalHours}h (${(totalHours / 7.5).toFixed(1)} business days) · ${totalTrips} onsite trip${totalTrips === 1 ? '' : 's'}\n`;
+      lines.push(tsvRow(['', '', '', '', '', '', '', '', '', '', '']));
+      lines.push(tsvRow(['TOTAL', '', '', '', totalTrips, '', '', '', '', '', totalHours]));
 
-      document.getElementById('estimate-output').value = out;
+      document.getElementById('estimate-output').value = lines.join('\n');
       document.getElementById('sum-hours').textContent = totalHours.toLocaleString();
       document.getElementById('sum-days').textContent = (totalHours / 7.5).toFixed(1);
       document.getElementById('sum-trips').textContent = totalTrips;
