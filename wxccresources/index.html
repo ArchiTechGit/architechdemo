@@ -192,18 +192,35 @@
     gap: 12px;
     padding: 8px 10px;
     border-radius: 6px;
-    text-decoration: none;
     color: #DDE6F0;
     font-size: 14px;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease;
   }
-  .link-row:hover { background: rgba(5,195,221,0.08); color: #05C3DD; }
+  .link-row:hover { background: rgba(5,195,221,0.06); }
   .link-row .link-name { flex: 1; }
-  .link-row .link-domain {
-    font-size: 11px;
-    color: #3D4F65;
-    white-space: nowrap;
+
+  .link-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(127,143,169,0.25);
+    background: transparent;
+    color: #7F8FA9;
+    text-decoration: none;
+    font-size: 12px;
+    font-family: 'Roboto', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
+  .link-btn:hover { color: #F0F6FC; border-color: rgba(5,195,221,0.4); }
+  .link-btn.open-btn:hover { color: #05C3DD; }
+  .link-btn.copy-btn.copied { color: #05C3DD; border-color: rgba(5,195,221,0.5); }
+  .link-btn svg { flex-shrink: 0; }
 
   mark {
     background: rgba(5,195,221,0.35);
@@ -277,10 +294,6 @@ function highlight(text, q) {
   return escapeHtml(text.slice(0, idx)) + '<mark>' + escapeHtml(text.slice(idx, idx + q.length)) + '</mark>' + escapeHtml(text.slice(idx + q.length));
 }
 
-function domainOf(url) {
-  try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
-}
-
 function totalLinks(cat) {
   return cat.subcategories.reduce((n, sc) => n + sc.links.length, 0);
 }
@@ -324,10 +337,19 @@ function render() {
       if (links.length === 0) return;
       matchedLinks += links.length;
       const linkRows = links.map(l => (
-        '<a class="link-row" href="' + l.url + '" target="_blank" rel="noopener noreferrer">' +
+        '<div class="link-row">' +
           '<span class="link-name">' + highlight(l.name, query) + '</span>' +
-          '<span class="link-domain">' + escapeHtml(domainOf(l.url)) + '</span>' +
-        '</a>'
+          '<span class="link-actions">' +
+            '<a class="link-btn open-btn" href="' + escapeHtml(l.url) + '" target="_blank" rel="noopener noreferrer">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>' +
+              'Open' +
+            '</a>' +
+            '<button type="button" class="link-btn copy-btn" data-url="' + escapeHtml(l.url) + '">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>' +
+              'Copy' +
+            '</button>' +
+          '</span>' +
+        '</div>'
       )).join('');
       subBlocks.push(
         '<div class="subcategory">' +
@@ -365,6 +387,18 @@ function render() {
 
   emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
   searchMeta.textContent = query ? (matchedLinks + ' result' + (matchedLinks === 1 ? '' : 's') + ' for "' + query + '"') : '';
+
+  main.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = btn.getAttribute('data-url');
+      navigator.clipboard.writeText(url).then(() => {
+        const original = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 1500);
+      });
+    });
+  });
 }
 
 function init(data) {
