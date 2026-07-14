@@ -157,7 +157,14 @@
     gap: 10px;
     flex-shrink: 0;
   }
-  .hero-graphic img { width: 190px; max-width: 80%; }
+  .hero-graphic img {
+    width: 190px;
+    height: auto;
+    max-width: 80%;
+    aspect-ratio: 2700 / 826;
+    mix-blend-mode: screen;
+    opacity: 0.9;
+  }
 
   .control-bar {
     border-bottom: 1px solid var(--border);
