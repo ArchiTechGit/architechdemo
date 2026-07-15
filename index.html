@@ -10,54 +10,97 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body { background: #0D1825; color: #F0F6FC; font-family: 'Roboto', sans-serif; display: flex; align-items: center; justify-content: center; }
-    .toc { display: flex; flex-direction: column; gap: 12px; }
+    html, body { min-height: 100%; }
+    body {
+      background: #0D1825;
+      color: #F0F6FC;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      padding: 48px 20px 96px;
+    }
+    .page { display: flex; flex-direction: column; align-items: flex-start; gap: 32px; width: 100%; max-width: 420px; }
+    .brand-logo { width: 100%; max-width: 420px; mix-blend-mode: screen; opacity: 0.9; }
+    .toc { display: flex; flex-direction: column; gap: 12px; width: 100%; }
     .toc-label { font-size: 12px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: #3D4F65; margin-bottom: 8px; }
     .toc-divider { width: 100%; height: 1px; background: rgba(5,195,221,0.10); margin: 4px 0; }
-    .toc-item { display: flex; align-items: center; gap: 16px; text-decoration: none; color: #7F8FA9; font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; transition: color 0.2s ease; padding: 4px 0; }
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: #7F8FA9;
+      font-size: 15px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: color 0.2s ease;
+      padding: 6px 0;
+      min-height: 32px;
+    }
     .toc-item:hover { color: #F0F6FC; }
     .toc-item:focus-visible { outline: 2px solid #05C3DD; outline-offset: 4px; }
-    .toc-num { font-size: 12px; color: #3D4F65; min-width: 20px; }
+    .toc-num { font-size: 12px; color: #3D4F65; min-width: 20px; flex-shrink: 0; }
+    .toc-item span:last-child { overflow-wrap: break-word; }
+
+    .site-footer {
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #3D4F65;
+    }
+    .site-footer a { color: #3D4F65; text-decoration: none; }
+
+    @media (max-width: 480px) {
+      body { padding: 32px 16px 64px; gap: 32px; }
+      .page { gap: 24px; }
+      .toc-item { font-size: 13px; letter-spacing: 0.08em; gap: 12px; }
+      .toc-label { font-size: 11px; letter-spacing: 0.2em; }
+      .site-footer { font-size: 10px; letter-spacing: 0.12em; }
+    }
   </style>
 </head>
 <body>
-  <div style="display:flex;flex-direction:column;align-items:flex-start;gap:32px;">
-    <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" style="width:420px;mix-blend-mode:screen;opacity:0.9;" />
+  <div class="page">
+    <img class="brand-logo" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" width="2700" height="826" />
     <nav class="toc" aria-label="Demos">
-    <div class="toc-label">WxCC Demos</div>
-    <a href="/wxccworkflowdemo/dist/" class="toc-item">
-      <span class="toc-num">01</span>
-      <span>Digital Patient Experience</span>
-    </a>
-    <a href="/discovery/" class="toc-item">
-      <span class="toc-num">02</span>
-      <span>Discovery Assessment</span>
-    </a>
-    <a href="/aicalculator/" class="toc-item">
-      <span class="toc-num">03</span>
-      <span>Webex Contact Centre AI Calculator</span>
-    </a>
-    <a href="/psbuilder/" class="toc-item">
-      <span class="toc-num">04</span>
-      <span>PS Engagement Builder</span>
-    </a>
-    <div class="toc-divider"></div>
-    <div class="toc-label">Partner Demos</div>
-    <a href="https://sairamdgitte.github.io/patient-emr-dashboard/" class="toc-item">
-      <span class="toc-num">01</span>
-      <span>Health Transformation Lab EMR Demo</span>
-    </a>
-    <div class="toc-divider"></div>
-    <div class="toc-label">Webex CC Resources</div>
-    <a href="/wxccresources/" class="toc-item">
-      <span class="toc-num">01</span>
-      <span>WxCC Documentation Hub</span>
-    </a>
-  </nav>
+      <div class="toc-label">WxCC Demos</div>
+      <a href="/wxccworkflowdemo/dist/" class="toc-item">
+        <span class="toc-num">01</span>
+        <span>Digital Patient Experience</span>
+      </a>
+      <a href="/discovery/" class="toc-item">
+        <span class="toc-num">02</span>
+        <span>Discovery Assessment</span>
+      </a>
+      <a href="/aicalculator/" class="toc-item">
+        <span class="toc-num">03</span>
+        <span>Webex Contact Centre AI Calculator</span>
+      </a>
+      <a href="/psbuilder/" class="toc-item">
+        <span class="toc-num">04</span>
+        <span>PS Engagement Builder</span>
+      </a>
+      <div class="toc-divider"></div>
+      <div class="toc-label">Partner Demos</div>
+      <a href="https://sairamdgitte.github.io/patient-emr-dashboard/" class="toc-item">
+        <span class="toc-num">01</span>
+        <span>Health Transformation Lab EMR Demo</span>
+      </a>
+      <div class="toc-divider"></div>
+      <div class="toc-label">Webex CC Resources</div>
+      <a href="/wxccresources/" class="toc-item">
+        <span class="toc-num">01</span>
+        <span>WxCC Documentation Hub</span>
+      </a>
+    </nav>
   </div>
-  <footer style="position:fixed;bottom:24px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#3D4F65;">
-    Engineered by Grant Hansen &middot; <a href="https://architech.net.au" style="color:#3D4F65;text-decoration:none;" target="_blank">architech.net.au</a>
+  <footer class="site-footer">
+    Engineered by Grant Hansen &middot; <a href="https://architech.net.au" target="_blank">architech.net.au</a>
   </footer>
 </body>
 </html>
