@@ -364,7 +364,7 @@
     <div class="hub-inner">
       <div class="hub-left">
         <h1>Webex Contact Center<br/>Documentation Hub</h1>
-        <p class="sub">Your central reference for all WxCC documentation — <b><span id="doc-count">438</span> guides</b> organised across <b><span id="cat-count">9</span> categories</b>.</p>
+        <p class="sub">Your central reference for all WxCC documentation. If anything is missing please reach out to Grant Hansen.</p>
         <div class="search-box">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <label for="search" class="visually-hidden">Search documentation by name, category or subcategory</label>
@@ -579,8 +579,6 @@ function initTheme() {
 
 function init(data) {
   DATA = data;
-  document.getElementById('cat-count').textContent = data.length;
-  document.getElementById('doc-count').textContent = data.reduce((n, c) => n + totalLinks(c), 0);
   populateSelect();
   render();
   document.getElementById('main').addEventListener('click', handleCopyClick);
