@@ -7,234 +7,144 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0B1626;
-      --grid-line: rgba(232,236,241,0.05);
-      --ink: #C7D0DC;
-      --ink-bright: #EDEFF3;
-      --ink-dim: #4C5C72;
-      --blue: #3D7BE0;
-      --cyan: #05C3DD;
-      --stamp: #C6473F;
+      --bg:        #0D1825;
+      --border:    rgba(5, 195, 221, 0.12);
+      --text-1:    #FFFFFF;
+      --text-2:    #7F8FA9;
+      --text-3:    #3D4F65;
+      --cyan:      #05C3DD;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { min-height: 100%; }
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     body {
-      background:
-        repeating-linear-gradient(0deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 40px),
-        repeating-linear-gradient(90deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 40px),
-        var(--bg);
-      color: var(--ink);
-      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: 'Roboto', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 56px;
-      padding: 56px 28px 40px;
-      position: relative;
+      gap: 48px;
+      padding: 48px 20px 96px;
+      animation: fade-in 0.25s ease;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
     }
 
-    .frame-mark {
-      position: fixed;
-      width: 16px;
-      height: 16px;
-      pointer-events: none;
-      opacity: 0.35;
-    }
-    .frame-mark::before, .frame-mark::after {
-      content: '';
-      position: absolute;
-      background: var(--ink-dim);
-    }
-    .frame-mark::before { width: 100%; height: 1px; top: 50%; left: 0; }
-    .frame-mark::after { width: 1px; height: 100%; left: 50%; top: 0; }
-    .frame-mark.tl { top: 18px; left: 18px; }
-    .frame-mark.tr { top: 18px; right: 18px; }
-    .frame-mark.bl { bottom: 18px; left: 18px; }
-    .frame-mark.br { bottom: 18px; right: 18px; }
+    .page { display: flex; flex-direction: column; align-items: flex-start; gap: 32px; width: 100%; max-width: 420px; }
+    .brand-logo { width: 100%; max-width: 420px; height: auto; }
 
-    .page { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: 100%; max-width: 460px; }
-    .brand-logo { width: 100%; max-width: 340px; height: auto; margin: 0 auto 4px; }
-    .dwg-meta {
-      width: 100%;
-      text-align: center;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--ink-dim);
-      margin-bottom: 28px;
-    }
-
-    .toc { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-    .toc-section + .toc-section { margin-top: 22px; }
+    .toc { display: flex; flex-direction: column; gap: 12px; width: 100%; }
     .toc-label {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.22em;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--blue);
-      margin-bottom: 10px;
+      color: var(--text-3);
+      margin-bottom: 8px;
     }
-    .toc-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--grid-line);
-    }
+    .toc-divider { width: 100%; height: 1px; background: var(--border); margin: 4px 0; }
 
     .toc-item {
       display: flex;
-      align-items: baseline;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--ink);
-      padding: 9px 2px;
-      min-height: 32px;
-      border-radius: 2px;
-    }
-    .toc-tag {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      color: var(--ink-dim);
-      flex-shrink: 0;
-      transition: color 0.25s ease;
-    }
-    .toc-leader {
-      flex: 1;
-      height: 0;
-      border-bottom: 1px dashed var(--ink-dim);
-      transform: scaleX(0);
-      transform-origin: left;
-      opacity: 0.5;
-      transition: border-color 0.25s ease, opacity 0.25s ease;
-      animation: draw-leader 0.6s ease forwards;
-      animation-delay: calc(var(--i) * 90ms + 200ms);
-    }
-    .toc-label-text {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      color: var(--ink);
-      transition: color 0.25s ease;
-      overflow-wrap: break-word;
-    }
-    .toc-item:hover .toc-leader,
-    .toc-item:focus-visible .toc-leader { border-color: var(--cyan); opacity: 1; }
-    .toc-item:hover .toc-tag,
-    .toc-item:focus-visible .toc-tag { color: var(--cyan); }
-    .toc-item:hover .toc-label-text,
-    .toc-item:focus-visible .toc-label-text { color: var(--ink-bright); }
-    .toc-item:focus-visible { outline: 1px solid var(--cyan); outline-offset: 3px; }
-
-    @keyframes draw-leader {
-      from { transform: scaleX(0); }
-      to { transform: scaleX(1); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .toc-leader { animation: none; transform: scaleX(1); }
-    }
-
-    .site-footer {
-      display: flex;
       align-items: center;
-      gap: 18px;
-      font-family: 'IBM Plex Mono', monospace;
-      text-align: center;
-      font-size: 10px;
+      gap: 16px;
+      text-decoration: none;
+      color: var(--text-2);
+      font-size: 15px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--ink-dim);
+      transition: color 0.2s ease;
+      padding: 6px 0;
+      min-height: 32px;
     }
-    .site-footer a { color: var(--ink-dim); text-decoration: none; }
-    .site-footer a:hover { color: var(--cyan); }
-    .stamp {
-      border: 1px solid var(--stamp);
-      color: var(--stamp);
-      padding: 3px 7px;
-      transform: rotate(-4deg);
-      letter-spacing: 0.1em;
-      font-size: 9px;
-      opacity: 0.75;
+    .toc-item:hover { color: var(--text-1); }
+    .toc-item:active { transform: scale(0.98); }
+    .toc-item:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+    .toc-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-3);
+      min-width: 20px;
       flex-shrink: 0;
     }
+    .toc-item span:last-child { overflow-wrap: break-word; }
+
+    .site-footer {
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .site-footer a { color: var(--text-3); text-decoration: none; }
+    .site-footer a:hover { color: var(--cyan); }
 
     @media (max-width: 480px) {
-      body { padding: 40px 20px 32px; gap: 40px; }
-      .frame-mark { display: none; }
-      .brand-logo { max-width: 260px; }
-      .toc-label { font-size: 10px; }
-      .toc-label-text { font-size: 13px; }
-      .site-footer { flex-direction: column; gap: 8px; }
+      body { padding: 32px 16px 64px; gap: 32px; }
+      .page { gap: 24px; }
+      .toc-item { font-size: 13px; letter-spacing: 0.08em; gap: 12px; }
+      .toc-label { font-size: 12px; letter-spacing: 0.15em; }
+      .site-footer { font-size: 11px; letter-spacing: 0.12em; }
     }
   </style>
 </head>
 <body>
-  <div class="frame-mark tl"></div>
-  <div class="frame-mark tr"></div>
-  <div class="frame-mark bl"></div>
-  <div class="frame-mark br"></div>
-
-  <div class="page">
-    <img class="brand-logo" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" width="2700" height="826" />
-    <div class="dwg-meta">Dwg No. ARC&#8209;001 &middot; Scale NTS &middot; Rev A</div>
-
+  <main class="page">
+    <h1 class="sr-only">ArchiTech &mdash; technology solved, healthcare evolved</h1>
+    <img class="brand-logo" src="/brand_assets/logo_darkbackground.png" alt="" width="2700" height="826" />
     <nav class="toc" aria-label="Demos">
-      <div class="toc-section">
-        <div class="toc-label">WxCC Demos</div>
-        <a href="/wxccworkflowdemo/dist/" class="toc-item">
-          <span class="toc-tag">RM&#8209;01</span>
-          <span class="toc-leader" style="--i:0"></span>
-          <span class="toc-label-text">Digital Patient Experience</span>
-        </a>
-        <a href="/discovery/" class="toc-item">
-          <span class="toc-tag">RM&#8209;02</span>
-          <span class="toc-leader" style="--i:1"></span>
-          <span class="toc-label-text">Discovery Assessment</span>
-        </a>
-        <a href="/aicalculator/" class="toc-item">
-          <span class="toc-tag">RM&#8209;03</span>
-          <span class="toc-leader" style="--i:2"></span>
-          <span class="toc-label-text">Webex Contact Centre AI Calculator</span>
-        </a>
-        <a href="/psbuilder/" class="toc-item">
-          <span class="toc-tag">RM&#8209;04</span>
-          <span class="toc-leader" style="--i:3"></span>
-          <span class="toc-label-text">PS Engagement Builder</span>
-        </a>
-      </div>
-
-      <div class="toc-section">
-        <div class="toc-label">Partner Demos</div>
-        <a href="https://sairamdgitte.github.io/patient-emr-dashboard/" class="toc-item">
-          <span class="toc-tag">RM&#8209;01</span>
-          <span class="toc-leader" style="--i:4"></span>
-          <span class="toc-label-text">Health Transformation Lab EMR Demo</span>
-        </a>
-      </div>
-
-      <div class="toc-section">
-        <div class="toc-label">Webex CC Resources</div>
-        <a href="/wxccresources/" class="toc-item">
-          <span class="toc-tag">RM&#8209;01</span>
-          <span class="toc-leader" style="--i:5"></span>
-          <span class="toc-label-text">WxCC Documentation Hub</span>
-        </a>
-      </div>
+      <h2 class="toc-label">WxCC Demos</h2>
+      <a href="/wxccworkflowdemo/dist/" class="toc-item">
+        <span class="toc-num">01</span>
+        <span>Digital Patient Experience</span>
+      </a>
+      <a href="/discovery/" class="toc-item">
+        <span class="toc-num">02</span>
+        <span>Discovery Assessment</span>
+      </a>
+      <a href="/aicalculator/" class="toc-item">
+        <span class="toc-num">03</span>
+        <span>Webex Contact Centre AI Calculator</span>
+      </a>
+      <a href="/psbuilder/" class="toc-item">
+        <span class="toc-num">04</span>
+        <span>PS Engagement Builder</span>
+      </a>
+      <div class="toc-divider"></div>
+      <h2 class="toc-label">Partner Demos</h2>
+      <a href="https://sairamdgitte.github.io/patient-emr-dashboard/" class="toc-item">
+        <span class="toc-num">01</span>
+        <span>Health Transformation Lab EMR Demo</span>
+      </a>
+      <div class="toc-divider"></div>
+      <h2 class="toc-label">Webex CC Resources</h2>
+      <a href="/wxccresources/" class="toc-item">
+        <span class="toc-num">01</span>
+        <span>WxCC Documentation Hub</span>
+      </a>
     </nav>
-  </div>
-
+  </main>
   <footer class="site-footer">
-    <span class="stamp">Rev A &middot; 2026</span>
-    <span>Engineered by Grant Hansen &middot; <a href="https://architech.net.au" target="_blank">architech.net.au</a></span>
+    Engineered by Grant Hansen &middot; <a href="https://architech.net.au" target="_blank" rel="noopener noreferrer">architech.net.au</a>
   </footer>
 </body>
 </html>
