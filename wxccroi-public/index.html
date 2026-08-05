@@ -126,7 +126,6 @@
 
     .scenario-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; padding-right: 30px; }
     .scenario-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
-    .scenario-stat { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--cyan); text-transform: uppercase; }
 
     /* ─── Screen 2: Inputs ─── */
     .input-card { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 12px; padding: 28px 24px; }
@@ -157,6 +156,16 @@
     }
     input[type=number]:focus { outline: none; border-color: var(--cyan); }
     .input-unit { font-size: 14px; color: var(--muted); white-space: nowrap; }
+
+    .staff-toggle-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .staff-toggle-btn {
+      flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; cursor: pointer; text-align: left; font-family: var(--font);
+      color: var(--muted); transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .staff-toggle-btn strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 2px; }
+    .staff-toggle-btn span { font-size: 11px; }
+    .staff-toggle-btn.active { border-color: var(--cyan); background: var(--cyan-dim); color: var(--cyan); }
 
     .screen2-summary {
       background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
@@ -436,14 +445,34 @@
 
       <!-- Staff rate -->
       <div class="input-group">
-        <label class="input-label">Average staff hourly cost</label>
-        <div class="input-sublabel">Fully-loaded labour rate — industry benchmark is $60/hr</div>
+        <label class="input-label">Who currently does this work?</label>
+        <div class="input-sublabel">Sets the fully-loaded hourly rate used for savings — still editable below</div>
+        <div class="staff-toggle-row">
+          <button type="button" class="staff-toggle-btn" id="staff-toggle-clinical" onclick="setStaffType('clinical')">
+            <strong>Clinical staff</strong><span>Registered Nurse</span>
+          </button>
+          <button type="button" class="staff-toggle-btn" id="staff-toggle-admin" onclick="setStaffType('admin')">
+            <strong>Admin / contact centre staff</strong><span>Customer Contact Officer</span>
+          </button>
+        </div>
         <div class="slider-row">
           <span class="input-unit">$</span>
-          <input type="number" id="nb-rate" min="20" max="300" value="60"
+          <input type="number" id="nb-rate" min="20" max="300" value="42"
             style="width:120px;"
-            oninput="state.rate = Math.max(20, Number(this.value) || 60)" />
-          <span class="input-unit">/ hr</span>
+            oninput="syncRate(this)" />
+          <span class="input-unit">/ hr fully loaded</span>
+        </div>
+        <div class="sep-ref" id="rate-ref-box">
+          <div class="sep-ref-title" id="rate-ref-title">Clinical staff — Registered Nurse</div>
+          <div class="sep-ref-rows">
+            <div class="sep-ref-row"><span class="sep-ref-label">Award base rate</span><span class="sep-ref-val" id="rate-ref-base">$32.09/hr</span></div>
+            <div class="sep-ref-row"><span class="sep-ref-label">On-cost loading (super, leave, payroll tax — assumption)</span><span class="sep-ref-val">× 1.30</span></div>
+            <div class="sep-ref-row"><span class="sep-ref-label">Fully-loaded default</span><span class="sep-ref-val" id="rate-ref-default">$42/hr</span></div>
+          </div>
+          <div class="sep-ref-source">
+            Award base rate source: <a href="https://www.fairwork.gov.au" target="_blank">Fair Work Ombudsman</a> award pay rates, 2026/27.
+            The 1.30× on-cost loading is a standard Australian employer-cost estimate (super, leave, payroll tax, workers comp) — not a specific citation. Override the $/hr field with your customer's actual fully-loaded rate if known.
+          </div>
         </div>
       </div>
     </div>
@@ -516,7 +545,6 @@ const INDUSTRIES = {
       {
         id: 1, name: 'Appointment Management',
         desc: 'Book, reschedule and cancel 24/7 — no staff involved',
-        stat: '60% reduction in no-shows',
         sms: 2, wx: 2, email: 1, mins: 15,
         replaced: 'Booking, reminder, reschedule and cancel calls',
         tier: 'scripted', // structured menu-driven flow
@@ -524,7 +552,6 @@ const INDUSTRIES = {
       {
         id: 2, name: 'Pre-Visit Preparation',
         desc: 'Intake forms, consent and instructions — replaces manual outbound calls',
-        stat: '80% of manual effort removed',
         sms: 1, wx: 1, email: 1, mins: 13,
         replaced: 'Structured intake call with staff member',
         tier: 'scripted', // structured data collection
@@ -532,7 +559,6 @@ const INDUSTRIES = {
       {
         id: 3, name: 'Care Navigation',
         desc: 'Symptom check, service routing, wait time management — deflects tier-1 volume',
-        stat: '70% cost reduction via self-service',
         sms: 1, wx: 2, email: 1, mins: 10,
         replaced: 'Routing and triage calls',
         tier: 'autonomous', // free-text symptom triage requires conversational AI
@@ -540,7 +566,6 @@ const INDUSTRIES = {
       {
         id: 4, name: 'Proactive Outreach',
         desc: 'Screening reminders, medication refills, care-plan check-ins — replaces manual campaigns',
-        stat: '20× more cost-effective than manual outbound',
         sms: 1, wx: 1, email: 1, mins: 19,
         replaced: 'Manual outbound campaign calls',
         tier: 'scripted', // structured outbound script
@@ -548,7 +573,6 @@ const INDUSTRIES = {
       {
         id: 5, name: 'Post-Visit Follow-Up',
         desc: 'Discharge instructions, medication adherence, outcome surveys — currently manual or not happening',
-        stat: '50–80% reduction in staff time',
         sms: 3, wx: 4, email: 3, mins: 15,
         replaced: 'Discharge calls, follow-ups and outcome surveys',
         tier: 'autonomous', // open-ended adherence conversation
@@ -556,7 +580,6 @@ const INDUSTRIES = {
       {
         id: 6, name: 'Other Workflows',
         desc: 'Have workflows outside these five? Add a general estimate to see how automation compounds.',
-        stat: null,
         sms: 2, wx: 2, email: 2, mins: 13,
         replaced: 'General administrative and coordination tasks',
         tier: 'autonomous', // unknown shape — assume conversational (conservative)
@@ -577,7 +600,6 @@ const INDUSTRIES = {
       {
         id: 1, name: 'Billing & Payment Enquiries',
         desc: 'Balance checks, payment processing and bill explanation — 24/7 self-service',
-        stat: '65% reduction in billing call volume',
         sms: 2, wx: 2, email: 1, mins: 12,
         replaced: 'Billing enquiry calls handled by CSRs',
         tier: 'scripted',
@@ -585,7 +607,6 @@ const INDUSTRIES = {
       {
         id: 2, name: 'Outage & Service Status',
         desc: 'Real-time outage detection, ETA updates and automatic notifications',
-        stat: '90% reduction in outage-related calls',
         sms: 3, wx: 1, email: 1, mins: 8,
         replaced: 'Manual outage status calls',
         tier: 'scripted',
@@ -593,7 +614,6 @@ const INDUSTRIES = {
       {
         id: 3, name: 'Plan & Usage Enquiries',
         desc: 'Usage tracking, plan comparison and upgrade/downgrade requests',
-        stat: '50% self-service resolution rate',
         sms: 1, wx: 2, email: 1, mins: 11,
         replaced: 'Plan enquiry and change calls',
         tier: 'autonomous',
@@ -601,7 +621,6 @@ const INDUSTRIES = {
       {
         id: 4, name: 'Connection & Fault Troubleshooting',
         desc: 'Guided diagnostics for common connectivity issues before escalation',
-        stat: '40% tier-1 deflection',
         sms: 1, wx: 2, email: 1, mins: 14,
         replaced: 'Technical support triage calls',
         tier: 'autonomous',
@@ -609,7 +628,6 @@ const INDUSTRIES = {
       {
         id: 5, name: 'New Connection & Move Requests',
         desc: 'Structured intake for new connections, relocations and installations',
-        stat: '70% of intake handled without staff',
         sms: 1, wx: 1, email: 1, mins: 16,
         replaced: 'New connection/move request calls',
         tier: 'scripted',
@@ -617,7 +635,6 @@ const INDUSTRIES = {
       {
         id: 6, name: 'Proactive Maintenance Alerts',
         desc: 'Scheduled maintenance notices and planned outage reminders',
-        stat: '20× more cost-effective than manual outbound',
         sms: 2, wx: 1, email: 2, mins: 6,
         replaced: 'Manual outbound maintenance notification calls',
         tier: 'scripted',
@@ -638,7 +655,6 @@ const INDUSTRIES = {
       {
         id: 1, name: 'Service Request & Application Status',
         desc: 'Permit, licence and application status checks — 24/7',
-        stat: '60% reduction in status-check calls',
         sms: 1, wx: 2, email: 1, mins: 10,
         replaced: 'Status enquiry calls to service desk',
         tier: 'scripted',
@@ -646,7 +662,6 @@ const INDUSTRIES = {
       {
         id: 2, name: 'Citizen Enquiries & FAQs',
         desc: 'Common policy, eligibility and process questions answered instantly',
-        stat: '55% self-service resolution',
         sms: 1, wx: 2, email: 1, mins: 9,
         replaced: 'General enquiry calls',
         tier: 'autonomous',
@@ -654,7 +669,6 @@ const INDUSTRIES = {
       {
         id: 3, name: 'Appointment & Booking Management',
         desc: 'Book, reschedule and cancel appointments for services and centres',
-        stat: '50% reduction in no-shows',
         sms: 2, wx: 1, email: 1, mins: 13,
         replaced: 'Booking and rescheduling calls',
         tier: 'scripted',
@@ -662,7 +676,6 @@ const INDUSTRIES = {
       {
         id: 4, name: 'Complaint & Case Intake',
         desc: 'Structured intake for complaints and case lodgement with triage',
-        stat: '45% of intake handled without staff',
         sms: 1, wx: 1, email: 2, mins: 17,
         replaced: 'Complaint intake calls with staff',
         tier: 'scripted',
@@ -670,7 +683,6 @@ const INDUSTRIES = {
       {
         id: 5, name: 'Eligibility & Benefits Screening',
         desc: 'Conversational screening to determine eligibility for services or payments',
-        stat: '65% cost reduction via self-service',
         sms: 1, wx: 2, email: 1, mins: 15,
         replaced: 'Eligibility screening calls',
         tier: 'autonomous',
@@ -678,10 +690,64 @@ const INDUSTRIES = {
       {
         id: 6, name: 'Proactive Renewal & Deadline Reminders',
         desc: 'Licence, permit and payment deadline reminders sent automatically',
-        stat: '20× more cost-effective than manual outbound',
         sms: 2, wx: 1, email: 2, mins: 7,
         replaced: 'Manual outbound reminder campaigns',
         tier: 'scripted',
+      },
+    ],
+  },
+
+  agedcare: {
+    label: 'Aged Care', icon: '🏡',
+    desc: 'Resident intake, family communication and care coordination',
+    volumeLabel: 'Annual resident & family interactions',
+    volumeSublabel: 'Used to scale your annual automation volume',
+    subject: 'residents', staffTerm: 'care staff',
+    journeyTitle: 'What does your resident and family journey include?',
+    journeyDesc: 'Select the workflows you want to automate. Each selected workflow will be included in your ROI calculation.',
+    showHealthBenchmark: false,
+    workflows: [
+      {
+        id: 1, name: 'Family Communication & Updates',
+        desc: 'Care updates, visitation scheduling and general enquiries for family members',
+        sms: 2, wx: 2, email: 1, mins: 12,
+        replaced: 'Family update and enquiry calls',
+        tier: 'scripted',
+      },
+      {
+        id: 2, name: 'New Resident Intake & Assessment',
+        desc: 'Structured intake forms, consent and care preference collection ahead of admission',
+        sms: 1, wx: 1, email: 1, mins: 18,
+        replaced: 'Intake call with admissions staff',
+        tier: 'scripted',
+      },
+      {
+        id: 3, name: 'Care Plan & Medication Reminders',
+        desc: 'Automated reminders for care plan reviews, medication schedules and appointments',
+        sms: 2, wx: 1, email: 1, mins: 8,
+        replaced: 'Manual reminder calls to residents and family',
+        tier: 'scripted',
+      },
+      {
+        id: 4, name: 'Incident & Wellbeing Notifications',
+        desc: 'Real-time incident, fall and wellbeing alerts to family and care coordinators',
+        sms: 3, wx: 1, email: 1, mins: 10,
+        replaced: 'Manual incident notification calls',
+        tier: 'scripted',
+      },
+      {
+        id: 5, name: 'Enquiry & Waitlist Management',
+        desc: 'Vacancy enquiries, waitlist updates and tour scheduling for prospective residents',
+        sms: 1, wx: 2, email: 1, mins: 14,
+        replaced: 'Enquiry and waitlist calls',
+        tier: 'autonomous',
+      },
+      {
+        id: 6, name: 'Other Workflows',
+        desc: 'Have workflows outside these five? Add a general estimate to see how automation compounds.',
+        sms: 2, wx: 2, email: 2, mins: 13,
+        replaced: 'General administrative and coordination tasks',
+        tier: 'autonomous',
       },
     ],
   },
@@ -699,7 +765,6 @@ const INDUSTRIES = {
       {
         id: 1, name: 'Appointment & Booking Management',
         desc: 'Book, reschedule and cancel appointments 24/7 — no staff involved',
-        stat: '55% reduction in no-shows',
         sms: 2, wx: 2, email: 1, mins: 14,
         replaced: 'Booking, reminder, reschedule and cancel calls',
         tier: 'scripted',
@@ -707,7 +772,6 @@ const INDUSTRIES = {
       {
         id: 2, name: 'Order & Account Enquiries',
         desc: 'Order status, account balance and general enquiries handled instantly',
-        stat: '60% self-service resolution rate',
         sms: 1, wx: 2, email: 1, mins: 10,
         replaced: 'Account and order status calls',
         tier: 'scripted',
@@ -715,7 +779,6 @@ const INDUSTRIES = {
       {
         id: 3, name: 'Support & Troubleshooting',
         desc: 'Conversational triage and guided troubleshooting before escalation',
-        stat: '40% tier-1 deflection',
         sms: 1, wx: 2, email: 1, mins: 12,
         replaced: 'Support triage calls',
         tier: 'autonomous',
@@ -723,7 +786,6 @@ const INDUSTRIES = {
       {
         id: 4, name: 'Proactive Outreach & Reminders',
         desc: 'Renewal, payment and follow-up reminders sent automatically',
-        stat: '20× more cost-effective than manual outbound',
         sms: 1, wx: 1, email: 1, mins: 8,
         replaced: 'Manual outbound campaign calls',
         tier: 'scripted',
@@ -731,7 +793,6 @@ const INDUSTRIES = {
       {
         id: 5, name: 'Feedback & Post-Interaction Follow-Up',
         desc: 'Automated satisfaction surveys and follow-up after service',
-        stat: '50–80% reduction in staff time',
         sms: 2, wx: 3, email: 2, mins: 11,
         replaced: 'Follow-up and survey calls',
         tier: 'autonomous',
@@ -739,7 +800,6 @@ const INDUSTRIES = {
       {
         id: 6, name: 'Other Workflows',
         desc: 'Have workflows outside these five? Add a general estimate to see how automation compounds.',
-        stat: null,
         sms: 2, wx: 2, email: 2, mins: 13,
         replaced: 'General administrative and coordination tasks',
         tier: 'autonomous',
@@ -760,7 +820,6 @@ const INDUSTRIES = {
       {
         id: 1, name: 'Scheduling & Booking',
         desc: 'Book, reschedule and cancel appointments or services 24/7',
-        stat: 'Proven across Healthcare, Government and General',
         sms: 2, wx: 2, email: 1, mins: 14,
         replaced: 'Booking and scheduling calls',
         tier: 'scripted',
@@ -768,7 +827,6 @@ const INDUSTRIES = {
       {
         id: 2, name: 'Status & Account Enquiries',
         desc: 'Balance, status and account information delivered instantly',
-        stat: 'Proven across Telco, Government and General',
         sms: 1, wx: 2, email: 1, mins: 10,
         replaced: 'Status and account enquiry calls',
         tier: 'scripted',
@@ -776,7 +834,6 @@ const INDUSTRIES = {
       {
         id: 3, name: 'Conversational Triage & Navigation',
         desc: 'Understand free-text requests and route or resolve without a human',
-        stat: 'Proven across Healthcare and Telco',
         sms: 1, wx: 2, email: 1, mins: 11,
         replaced: 'Routing and triage calls',
         tier: 'autonomous',
@@ -784,7 +841,6 @@ const INDUSTRIES = {
       {
         id: 4, name: 'Proactive Outreach & Reminders',
         desc: 'Automated reminders, alerts and outbound notifications',
-        stat: '20× more cost-effective than manual outbound',
         sms: 2, wx: 1, email: 2, mins: 8,
         replaced: 'Manual outbound campaign calls',
         tier: 'scripted',
@@ -792,7 +848,6 @@ const INDUSTRIES = {
       {
         id: 5, name: 'Post-Interaction Follow-Up',
         desc: 'Automated surveys, adherence checks and satisfaction follow-up',
-        stat: '50–80% reduction in staff time',
         sms: 2, wx: 3, email: 2, mins: 13,
         replaced: 'Follow-up and survey calls',
         tier: 'autonomous',
@@ -801,8 +856,25 @@ const INDUSTRIES = {
   },
 };
 
+const STAFF_RATES = {
+  clinical: {
+    label: 'Clinical staff', sub: 'Registered Nurse',
+    baseWage: 32.09, rate: 42,
+  },
+  admin: {
+    label: 'Admin / contact centre staff', sub: 'Customer Contact Officer',
+    baseWage: 27.97, rate: 36,
+  },
+};
+const RATE_ONCOST_MULTIPLIER = 1.30; // super + leave + payroll tax + workers comp — standard AU employer-cost estimate, not a specific citation
+const MARGIN_MULTIPLIER = 1.10; // ArchiTech margin over vendor RRP — applied to all vendor-priced costs (licensing, AI Agent/Assistant units, digital channel usage)
+
+function defaultStaffType(industryKey) {
+  return (industryKey === 'healthcare' || industryKey === 'agedcare') ? 'clinical' : 'admin';
+}
+
 const COSTS = {
-  sms: 0.04, wx: 0.08, email: 0.00,
+  sms: 0.04, wx: 0.10, email: 0.00,
   // WxCC licensing (RRP per seat/port per month)
   licenseStandard: 177.79,
   licensePremium:  262.82,
@@ -810,7 +882,7 @@ const COSTS = {
   // Platform sizing assumptions
   premiumRatio: 0.30,  // 30% Premium, 70% Standard
   ivrRatio:     1.2,   // IVR ports = agent count × 1.2
-  // AI Agent unit pricing (RRP, effective May 2026) — Scripted and Autonomous
+  // AI Agent unit pricing (RRP, effective August 2026) — Scripted and Autonomous
   // draw from the same SKU/price, but Scripted (menu-driven IVR) covers far
   // more volume per unit than Autonomous (free-text conversational AI).
   agentUnitPrice:              154.60,
@@ -821,6 +893,12 @@ const COSTS = {
   // Voice estimation: 30% of monthly separations result in an AI-handled voice call
   voiceCallPct: 0.30,
   voiceAhtSec:  180,                         // 3-minute average handle time
+  // AI Assistant (bundled with Quality Management) — separate SKU from AI Agent,
+  // rounded independently. Not yet wired into calcAll() — usage driver (adoption %
+  // and live-agent AHT) still needs a customer-specific assumption, no vendor benchmark exists.
+  assistantUnitPrice:          102.04,
+  assistantVoiceSec:           1500 * 60,  // 1,500 min per unit
+  assistantDigitalSessions:    1000,       // digital sessions per unit
 };
 
 // ══════════════════════════════════════════
@@ -832,7 +910,8 @@ const state = {
   selected: new Set(),
   agents: 30,
   separations: 8000,
-  rate: 60,
+  staffType: 'clinical',
+  rate: STAFF_RATES.clinical.rate,
 };
 
 function IND() { return INDUSTRIES[state.industry]; }
@@ -843,9 +922,10 @@ function W() { return IND().workflows; }
 // ══════════════════════════════════════════
 
 function calcWorkflow(w, rate) {
-  const digitalCost = (w.sms * COSTS.sms) + (w.wx * COSTS.wx) + (w.email * COSTS.email);
+  const digitalCostRrp = (w.sms * COSTS.sms) + (w.wx * COSTS.wx) + (w.email * COSTS.email);
+  const digitalCost = digitalCostRrp * MARGIN_MULTIPLIER;
   const labourSaved = (w.mins / 60) * rate;
-  return { digitalCost, labourSaved, netPerSep: labourSaved - digitalCost };
+  return { digitalCostRrp, digitalCost, labourSaved, netPerSep: labourSaved - digitalCost };
 }
 
 // ── AI Agent cost calculation — unit-based, split across Scripted and
@@ -869,15 +949,36 @@ function calcAiCosts(selected) {
   const scriptedFrac = Math.max(scriptedVoiceSec / COSTS.agentScriptedVoiceSec, scriptedDigital / COSTS.agentScriptedDigitalSessions);
   const autoFrac      = Math.max(autoVoiceSec / COSTS.agentAutoVoiceSec, autoDigital / COSTS.agentAutoDigitalSessions);
 
-  const agentUnits   = Math.max(1, Math.ceil(scriptedFrac + autoFrac));
-  const totalMonthly = agentUnits * COSTS.agentUnitPrice;
+  const agentUnits      = Math.max(1, Math.ceil(scriptedFrac + autoFrac));
+  const totalMonthlyRrp = agentUnits * COSTS.agentUnitPrice;
+  const totalMonthly    = totalMonthlyRrp * MARGIN_MULTIPLIER;
 
   return {
     voiceCalls, voiceSec, voiceMin: Math.round(voiceSec / 60), digitalSessions,
     scriptedShare, autoShare, scriptedFrac, autoFrac,
     scriptedVoiceMin: Math.round(scriptedVoiceSec / 60), autoVoiceMin: Math.round(autoVoiceSec / 60),
     scriptedDigital: Math.round(scriptedDigital), autoDigital: Math.round(autoDigital),
-    agentUnits, totalMonthly, totalAnnual: totalMonthly * 12,
+    agentUnits, totalMonthlyRrp, totalMonthly, totalAnnual: totalMonthly * 12,
+  };
+}
+
+// ── AI Assistant (bundled with Quality Management) cost calculation — separate
+// SKU from AI Agent, rounded independently. Usage driver: the share of monthly
+// volume NOT handled by AI voice is assumed to go to live agents, all of whose
+// calls get AI Assistant/QM applied (100% coverage, confirmed assumption) at
+// the same 3-minute AHT used for AI-handled calls (confirmed assumption — real
+// live-agent AHT is typically longer; override if you have a real figure).
+// Digital-channel AI Assistant usage is not modelled — voice only.
+function calcAssistantCosts(monthlySeps) {
+  const liveAgentCalls    = Math.round(monthlySeps * (1 - COSTS.voiceCallPct));
+  const liveAgentVoiceSec = liveAgentCalls * COSTS.voiceAhtSec;
+  const assistantFrac     = liveAgentVoiceSec / COSTS.assistantVoiceSec;
+  const assistantUnits    = Math.ceil(assistantFrac);
+  const totalMonthlyRrp   = assistantUnits * COSTS.assistantUnitPrice;
+  const totalMonthly      = totalMonthlyRrp * MARGIN_MULTIPLIER;
+  return {
+    liveAgentCalls, liveAgentVoiceSec, liveAgentVoiceMin: Math.round(liveAgentVoiceSec / 60),
+    assistantFrac, assistantUnits, totalMonthlyRrp, totalMonthly, totalAnnual: totalMonthly * 12,
   };
 }
 
@@ -887,8 +988,9 @@ function calcLicensing() {
   const standard    = concurrent - premium;
   // Each agent includes 2 IVR ports. Additional ports purchased for deployments > 20 agents.
   const ivr         = concurrent > 20 ? concurrent : 0;
-  const monthly     = (standard * COSTS.licenseStandard) + (premium * COSTS.licensePremium) + (ivr * COSTS.licenseIvr);
-  return { concurrent, standard, premium, ivr, monthly };
+  const monthlyRrp  = (standard * COSTS.licenseStandard) + (premium * COSTS.licensePremium) + (ivr * COSTS.licenseIvr);
+  const monthly     = monthlyRrp * MARGIN_MULTIPLIER;
+  return { concurrent, standard, premium, ivr, monthlyRrp, monthly };
 }
 
 function calcAll() {
@@ -896,7 +998,8 @@ function calcAll() {
   const lic = calcLicensing();
   const platformAnnual = lic.monthly * 12;
   const ai = calcAiCosts(selected);
-  const totalCostAnnual = platformAnnual + ai.totalAnnual;
+  const assistant = calcAssistantCosts(state.separations / 12);
+  const totalCostAnnual = platformAnnual + ai.totalAnnual + assistant.totalAnnual;
 
   const rows = selected.map(w => {
     const { digitalCost, labourSaved, netPerSep } = calcWorkflow(w, state.rate);
@@ -913,7 +1016,7 @@ function calcAll() {
   const totalSaving = rows.reduce((s, r) => s + r.annualSaving, 0);
   const totalHours  = rows.reduce((s, r) => s + r.annualHours,  0);
   return {
-    rows, ai, lic,
+    rows, ai, lic, assistant,
     totalSaving,
     netSaving:       totalSaving - totalCostAnnual,
     totalHours,
@@ -928,16 +1031,19 @@ function calcAll() {
 // ANIMATION
 // ══════════════════════════════════════════
 
-function countUp(el, target, { prefix = '', suffix = '', decimals = 0, ms = 1600 } = {}) {
+function countUp(el, target, { prefix = '', suffix = '', decimals = 0, ms = 1600, from = 0 } = {}) {
   const t0 = Date.now();
   (function tick() {
     const p = Math.min((Date.now() - t0) / ms, 1);
     const e = 1 - Math.pow(1 - p, 3);
-    const v = target * e;
+    const v = from + (target - from) * e;
     el.textContent = prefix + (decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString('en-AU')) + suffix;
     if (p < 1) requestAnimationFrame(tick);
   })();
 }
+
+let hasShownResults = false;
+let lastStats = { hero: 0, hours: 0, fte: 0, roi: 0 };
 
 // ══════════════════════════════════════════
 // NAVIGATION
@@ -968,10 +1074,18 @@ function applyIndustryCopy(key) {
 function goToIndustry(key) {
   state.industry = key;
   state.selected = new Set();
+  state.staffType = defaultStaffType(key);
+  state.rate = STAFF_RATES[state.staffType].rate;
   document.getElementById('btn-next-1').disabled = true;
   renderGrid();
   applyIndustryCopy(key);
   goTo(2);
+}
+
+function setStaffType(type) {
+  state.staffType = type;
+  state.rate = STAFF_RATES[type].rate;
+  renderStaffRateSection();
 }
 
 function goTo3() {
@@ -1009,7 +1123,6 @@ function renderGrid() {
       <div class="check-badge">✓</div>
       <div class="scenario-name">${w.name}</div>
       <div class="scenario-desc">${w.desc}</div>
-      ${w.stat ? `<div class="scenario-stat">${w.stat}</div>` : ''}
     </div>
   `).join('');
 }
@@ -1038,7 +1151,17 @@ function renderScreen3() {
   setFill('sl-seps',       state.separations, 1000, 60000);
   document.getElementById('nb-agents').value = state.agents;
   document.getElementById('nb-seps').value   = state.separations;
-  document.getElementById('nb-rate').value   = state.rate;
+  renderStaffRateSection();
+}
+
+function renderStaffRateSection() {
+  const st = STAFF_RATES[state.staffType];
+  document.getElementById('staff-toggle-clinical').classList.toggle('active', state.staffType === 'clinical');
+  document.getElementById('staff-toggle-admin').classList.toggle('active', state.staffType === 'admin');
+  document.getElementById('nb-rate').value = state.rate;
+  document.getElementById('rate-ref-title').textContent = `${st.label} — ${st.sub}`;
+  document.getElementById('rate-ref-base').textContent = `$${st.baseWage.toFixed(2)}/hr`;
+  document.getElementById('rate-ref-default').textContent = `$${st.rate}/hr`;
 }
 
 // ── Agents slider: piecewise scale — left half 5–30, right half 30–300 ──
@@ -1065,6 +1188,12 @@ function syncNumberAgents(el) {
   const sl = document.getElementById('sl-agents');
   sl.value = pos;
   sl.style.setProperty('--fill', pos + '%');
+}
+
+function syncRate(el) {
+  const rate = Math.min(300, Math.max(20, Number(el.value) || 60));
+  state.rate = rate;
+  el.value = rate;
 }
 
 function setFill(id, val, min, max) {
@@ -1143,6 +1272,11 @@ function renderResults() {
         <div class="breakdown-mins">${R.ai.agentUnits} unit${R.ai.agentUnits !== 1 ? 's' : ''} · ${R.ai.voiceMin.toLocaleString('en-AU')} min voice · ${R.ai.digitalSessions.toLocaleString('en-AU')} digital sessions</div>
         <div class="breakdown-val" style="color:var(--negative)">−$${Math.round(R.ai.totalAnnual).toLocaleString('en-AU')} / yr</div>
       </div>
+      <div class="breakdown-row">
+        <div class="breakdown-name">AI Assistant + QM</div>
+        <div class="breakdown-mins">${R.assistant.assistantUnits} unit${R.assistant.assistantUnits !== 1 ? 's' : ''} · ${R.assistant.liveAgentVoiceMin.toLocaleString('en-AU')} min live-agent voice</div>
+        <div class="breakdown-val" style="color:var(--negative)">−$${Math.round(R.assistant.totalAnnual).toLocaleString('en-AU')} / yr</div>
+      </div>
     </div>
 
     <button class="assume-toggle" onclick="toggleAssume()" id="assume-btn">
@@ -1182,14 +1316,14 @@ function renderResults() {
         <p style="font-size:17px;font-weight:700;color:var(--text);margin:32px 0 8px;letter-spacing:-0.01em">Step 2 — What does the platform cost?</p>
         <p style="font-size:15px;color:var(--muted);margin:0 0 14px;line-height:1.7">
           A <strong style="color:var(--text)">${state.agents}-agent</strong> Webex Contact Centre deployment
-          is licensed per concurrent agent seat and IVR port. All rates are RRP.
+          is licensed per concurrent agent seat and IVR port.
         </p>
         <table class="at">
-          <thead><tr><th>Licence</th><th>Qty</th><th>RRP / month</th><th>Monthly cost</th></tr></thead>
+          <thead><tr><th>Licence</th><th>Qty</th><th>$ / month</th><th>Monthly cost</th></tr></thead>
           <tbody>
-            <tr><td>Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${COSTS.licenseStandard.toFixed(2)} RRP</td><td>$${(R.lic.standard * COSTS.licenseStandard).toFixed(2)}</td></tr>
-            <tr><td>Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${COSTS.licensePremium.toFixed(2)} RRP</td><td>$${(R.lic.premium * COSTS.licensePremium).toFixed(2)}</td></tr>
-            ${R.lic.ivr > 0 ? `<tr><td>Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${COSTS.licenseIvr.toFixed(2)} RRP</td><td>$${(R.lic.ivr * COSTS.licenseIvr).toFixed(2)}</td></tr>` : ''}
+            <tr><td>Standard Concurrent Agent</td><td>${R.lic.standard}</td><td>$${(COSTS.licenseStandard * MARGIN_MULTIPLIER).toFixed(2)}</td><td>$${(R.lic.standard * COSTS.licenseStandard * MARGIN_MULTIPLIER).toFixed(2)}</td></tr>
+            <tr><td>Premium Concurrent Agent</td><td>${R.lic.premium}</td><td>$${(COSTS.licensePremium * MARGIN_MULTIPLIER).toFixed(2)}</td><td>$${(R.lic.premium * COSTS.licensePremium * MARGIN_MULTIPLIER).toFixed(2)}</td></tr>
+            ${R.lic.ivr > 0 ? `<tr><td>Additional IVR Ports</td><td>${R.lic.ivr}</td><td>$${(COSTS.licenseIvr * MARGIN_MULTIPLIER).toFixed(2)}</td><td>$${(R.lic.ivr * COSTS.licenseIvr * MARGIN_MULTIPLIER).toFixed(2)}</td></tr>` : ''}
             <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
               <td colspan="3">Total platform cost</td>
               <td>$${R.lic.monthly.toFixed(2)}/mo &nbsp;→&nbsp; <span style="color:var(--negative)">$${Math.round(R.platformAnnual).toLocaleString('en-AU')}/yr</span></td>
@@ -1226,12 +1360,36 @@ function renderResults() {
                 <td style="color:${!scriptedDrives ? 'var(--cyan)' : 'var(--muted)'};font-weight:${!scriptedDrives ? 600 : 400}">${R.ai.autoFrac.toFixed(2)}${!scriptedDrives ? ' ← drives total' : ''}</td>
               </tr>
               <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
-                <td colspan="4">${R.ai.agentUnits} AI Agent unit${R.ai.agentUnits !== 1 ? 's' : ''} × $${COSTS.agentUnitPrice.toFixed(2)}/unit &nbsp;<span style="font-weight:400;font-size:11px;color:var(--muted)">(${R.ai.scriptedFrac.toFixed(2)} + ${R.ai.autoFrac.toFixed(2)} fractions merged, rounded up once)</span></td>
+                <td colspan="4">${R.ai.agentUnits} AI Agent unit${R.ai.agentUnits !== 1 ? 's' : ''} &nbsp;<span style="font-weight:400;font-size:11px;color:var(--muted)">(${R.ai.scriptedFrac.toFixed(2)} + ${R.ai.autoFrac.toFixed(2)} fractions merged, rounded up once)</span></td>
                 <td>$${R.ai.totalMonthly.toFixed(2)}/mo &nbsp;→&nbsp; <span style="color:var(--negative)">$${Math.round(R.ai.totalAnnual).toLocaleString('en-AU')}/yr</span></td>
               </tr>
             </tbody>
           </table>`;
         })()}
+
+        ${/* ── Step 3b: AI Assistant cost ── */''}
+        <p style="font-size:17px;font-weight:700;color:var(--text);margin:32px 0 8px;letter-spacing:-0.01em">Step 3b — What does AI Assistant + Quality Management cost?</p>
+        <p style="font-size:15px;color:var(--muted);margin:0 0 14px;line-height:1.7">
+          AI Assistant (bundled with Quality Management) is a separate unit pool from AI Agent, rounded independently.
+          It applies to calls still handled by a live agent rather than automated — estimated here as the
+          <strong style="color:var(--text)">remaining ${Math.round((1 - COSTS.voiceCallPct) * 100)}% of monthly volume</strong> not already covered by AI voice,
+          at 100% AI Assistant/QM coverage and the same 3-minute AHT used for AI-handled calls
+          <span style="color:var(--faint)">(both are stated assumptions — override if you have real live-agent volume or AHT figures)</span>.
+        </p>
+        <table class="at">
+          <thead><tr><th>Live-agent voice</th><th>Capacity per unit</th><th>Fraction of a unit</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>${R.assistant.liveAgentVoiceMin.toLocaleString('en-AU')} min (${R.assistant.liveAgentCalls.toLocaleString('en-AU')} calls/mo)</td>
+              <td>1,500 min / 1,000 sessions</td>
+              <td>${R.assistant.assistantFrac.toFixed(2)}</td>
+            </tr>
+            <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:600">
+              <td colspan="2">${R.assistant.assistantUnits} AI Assistant unit${R.assistant.assistantUnits !== 1 ? 's' : ''}</td>
+              <td>$${R.assistant.totalMonthly.toFixed(2)}/mo &nbsp;→&nbsp; <span style="color:var(--negative)">$${Math.round(R.assistant.totalAnnual).toLocaleString('en-AU')}/yr</span></td>
+            </tr>
+          </tbody>
+        </table>
 
         ${/* ── Step 4: Net result ── */''}
         <p style="font-size:17px;font-weight:700;color:var(--text);margin:32px 0 8px;letter-spacing:-0.01em">Step 4 — The bottom line</p>
@@ -1240,6 +1398,7 @@ function renderResults() {
             <tr><td>Gross annual saving (staff time recovered)</td><td style="color:var(--cyan);font-weight:600;text-align:right">+ $${Math.round(R.totalSaving).toLocaleString('en-AU')}</td></tr>
             <tr><td>Less: annual platform licensing cost</td><td style="color:var(--negative);text-align:right">− $${Math.round(R.platformAnnual).toLocaleString('en-AU')}</td></tr>
             <tr><td>Less: annual AI Agent cost</td><td style="color:var(--negative);text-align:right">− $${Math.round(R.ai.totalAnnual).toLocaleString('en-AU')}</td></tr>
+            <tr><td>Less: annual AI Assistant + QM cost</td><td style="color:var(--negative);text-align:right">− $${Math.round(R.assistant.totalAnnual).toLocaleString('en-AU')}</td></tr>
             <tr style="border-top:1px solid rgba(5,195,221,0.2);font-weight:700;font-size:15px">
               <td>Net annual saving</td>
               <td style="color:var(--cyan);text-align:right">= $${Math.round(R.netSaving).toLocaleString('en-AU')}</td>
@@ -1248,7 +1407,7 @@ function renderResults() {
         </table>
 
         <div class="assume-note" style="margin-top:20px">
-          Staff time valued at $${state.rate.toFixed(0)}/hr (fully-loaded labour rate). Voice call volume estimated at 30% of monthly volume with a 3-minute average handle time. FTE calculated at 1,920 hours/year. Platform seats: 70% Standard / 30% Premium split. IVR ports included with agent licences${state.agents > 20 ? '; additional ports purchased for deployments above 20 agents' : ''}.
+          Staff time valued at $${state.rate.toFixed(0)}/hr (fully-loaded ${STAFF_RATES[state.staffType].label.toLowerCase()} rate — award base $${STAFF_RATES[state.staffType].baseWage.toFixed(2)}/hr × ${RATE_ONCOST_MULTIPLIER.toFixed(2)} on-cost). Voice call volume estimated at 30% of monthly volume with a 3-minute average handle time. FTE calculated at 1,920 hours/year. Platform seats: 70% Standard / 30% Premium split. IVR ports included with agent licences${state.agents > 20 ? '; additional ports purchased for deployments above 20 agents' : ''}. AI Assistant volume assumes 100% coverage of live-agent-handled calls at the same 3-minute AHT as AI-handled calls — both are stated assumptions, not vendor benchmarks.
           ${ind.showHealthBenchmark ? `<br /><br />Separation benchmarks sourced from
           <a href="https://www.aihw.gov.au/reports-data/myhospitals/sectors/admitted-patients" target="_blank">AIHW Admitted Patient Care</a>
           and <a href="https://vahi.vic.gov.au/reports/victorian-health-services-performance/hospital-admission-and-discharge" target="_blank">VAHI Hospital Data</a>.` : ''}
@@ -1259,12 +1418,16 @@ function renderResults() {
     </div>
   `;
 
-  // Animate after paint
+  // Animate after paint — first reveal is slow and satisfying, recalcs animate from
+  // the previous value and finish fast so live "what if" tweaks don't feel sluggish.
+  const ms = hasShownResults ? 500 : 1800;
   requestAnimationFrame(() => {
-    countUp(document.getElementById('hero'), R.netSaving, { prefix: '$', ms: 1800 });
-    countUp(document.getElementById('st-hours'), R.totalHours, { ms: 1500 });
-    countUp(document.getElementById('st-fte'),   R.fte,        { decimals: 1, suffix: '', ms: 1500 });
-    countUp(document.getElementById('st-roi'),   R.roi,        { decimals: 1, suffix: '×', ms: 1500 });
+    countUp(document.getElementById('hero'), R.netSaving, { prefix: '$', ms, from: lastStats.hero });
+    countUp(document.getElementById('st-hours'), R.totalHours, { ms, from: lastStats.hours });
+    countUp(document.getElementById('st-fte'),   R.fte,        { decimals: 1, suffix: '', ms, from: lastStats.fte });
+    countUp(document.getElementById('st-roi'),   R.roi,        { decimals: 1, suffix: '×', ms, from: lastStats.roi });
+    lastStats = { hero: R.netSaving, hours: R.totalHours, fte: R.fte, roi: R.roi };
+    hasShownResults = true;
   });
 }
 
