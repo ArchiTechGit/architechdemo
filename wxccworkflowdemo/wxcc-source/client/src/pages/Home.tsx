@@ -211,9 +211,9 @@ export default function Home() {
             <p className="text-xs text-white/30">Webex Contact Center · Live Demo</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-green-500/10 border border-green-400/25 rounded-full px-3 py-1.5">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs font-bold text-green-400 tracking-wider uppercase">Live</span>
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-400/25 rounded-full px-3 py-1.5">
+          <span className="w-2 h-2 rounded-full bg-red-400" />
+          <span className="text-xs font-bold text-red-400 tracking-wider uppercase">Not Live</span>
         </div>
       </div>
 
