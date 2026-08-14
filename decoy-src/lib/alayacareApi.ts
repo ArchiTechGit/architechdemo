@@ -5,7 +5,7 @@ import type { CareTeamMember } from './alayacareTypes';
 
 const API_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/alayacare-api/AlayaCare/v1`;
 
-export function useAlayacareResource<T extends { [key: string]: unknown }>(
+export function useAlayacareResource<T extends object>(
   resource: string,
   listParams: Record<string, string> = {},
 ) {
