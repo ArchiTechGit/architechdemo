@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { resetDemoData } from '@/lib/resetDemoData';
 
@@ -39,7 +40,13 @@ export function TopNav() {
         <IconButton title={resetting ? 'Resetting…' : 'Reset demo data'} onClick={handleReset} disabled={resetting}>
           ⚙
         </IconButton>
-        <IconButton title="Help">?</IconButton>
+        <Link
+          href="/dynamics/help"
+          title="API Help"
+          className="flex h-8 w-8 items-center justify-center rounded text-sm hover:bg-white/10"
+        >
+          ?
+        </Link>
         <span className="ml-2 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold">
           AD
         </span>
