@@ -289,7 +289,16 @@ export default function ClientsPage() {
                       onClick={() => selectRow(row)}
                       className={`cursor-pointer border-b last:border-0 hover:bg-blue-50 ${selectedId === row.client_id ? 'bg-blue-50' : ''}`}
                     >
-                      <td className="p-2 whitespace-nowrap">{row.first_name}</td>
+                      <td className="p-2 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${row.client_id}`}
+                            alt=""
+                            className="h-6 w-6 rounded-full bg-blue-50"
+                          />
+                          {row.first_name}
+                        </div>
+                      </td>
                       <td className="p-2 whitespace-nowrap">{row.last_name}</td>
                       <td className="p-2 whitespace-nowrap">{row.birthday}</td>
                       <td className="p-2">
@@ -349,9 +358,17 @@ export default function ClientsPage() {
               >
                 ← Back
               </button>
-              <span className="flex h-12 w-12 items-center justify-center rounded bg-blue-100 text-sm font-semibold text-blue-800">
-                {form.first_name || form.last_name ? initials(form.first_name, form.last_name) : '—'}
-              </span>
+              {selectedId ? (
+                <img
+                  src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${selectedId}`}
+                  alt=""
+                  className="h-12 w-12 rounded bg-blue-50"
+                />
+              ) : (
+                <span className="flex h-12 w-12 items-center justify-center rounded bg-blue-100 text-sm font-semibold text-blue-800">
+                  {form.first_name || form.last_name ? initials(form.first_name, form.last_name) : '—'}
+                </span>
+              )}
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <input className="border-none p-0 text-base font-semibold outline-none" placeholder="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
