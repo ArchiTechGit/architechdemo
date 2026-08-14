@@ -1,20 +1,29 @@
 'use client';
 
 import { useAlayacareResource } from '@/lib/alayacareApi';
-import { DonutChart } from '@/components/DonutChart';
-import { BarList } from '@/components/BarList';
-import { TrendChart } from '@/components/TrendChart';
+import { StatTile } from '@/components/StatTile';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
-const STATUS_COLORS: Record<AlayacareVisit['status'], string> = {
-  scheduled: '#2a78d6',
-  completed: '#1baf7a',
-  cancelled: '#e34948',
-  missed: '#898781',
-};
+function relativeTime(dateStr: string): string {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `About ${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  return `About ${days} day${days === 1 ? '' : 's'} ago`;
+}
 
-function dayLabel(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' });
+function activityMessage(visit: AlayacareVisit, clientName: string): string {
+  switch (visit.status) {
+    case 'completed':
+      return `Visit completed for ${clientName}`;
+    case 'cancelled':
+      return `Visit cancelled for ${clientName}`;
+    case 'missed':
+      return `Visit missed for ${clientName}`;
+    default:
+      return `Visit scheduled for ${clientName}`;
+  }
 }
 
 export default function AlayacareDashboardPage() {
@@ -25,79 +34,58 @@ export default function AlayacareDashboardPage() {
 
   const now = new Date();
 
-  const clientVisitSummary = clients.map((c) => {
-    const clientVisits = visits.filter((v) => v.client_id === c.client_id);
-    const upcoming = clientVisits.filter((v) => v.start_at && new Date(v.start_at) > now && v.status === 'scheduled');
-    return {
-      client: c,
-      visitCount: clientVisits.length,
-      upcomingCount: upcoming.length,
-    };
-  });
+  const scheduledVisits = visits.filter((v) => v.status === 'scheduled').length;
+  const vacantVisits = visits.filter((v) => !v.employee_id).length;
+  const lateVisits = visits.filter((v) => v.status === 'scheduled' && v.start_at && new Date(v.start_at) < now).length;
+  const cancelledVisits = visits.filter((v) => v.status === 'cancelled').length;
+  const activeClients = clients.filter((c) => c.status === 'Active').length;
+  const careTeamSize = new Set(
+    visits.map((v) => v.employee_id).filter((id): id is string => Boolean(id)),
+  ).size;
 
-  const visitsByDay = Object.entries(
-    visits
-      .filter((v): v is AlayacareVisit & { start_at: string } => v.start_at !== null)
-      .reduce<Record<string, number>>((acc, v) => {
-        const key = v.start_at.slice(0, 10);
-        acc[key] = (acc[key] ?? 0) + 1;
-        return acc;
-      }, {}),
-  )
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([key, value]) => ({ label: dayLabel(key), value }));
-
-  const visitsByStatusDonut = (['scheduled', 'completed', 'cancelled', 'missed'] as const).map((status) => ({
-    label: status,
-    value: visits.filter((v) => v.status === status).length,
-    color: STATUS_COLORS[status],
-  }));
-
-  const upcomingList = [...visits]
-    .filter((v) => v.start_at && new Date(v.start_at) > now && v.status === 'scheduled')
-    .sort((a, b) => new Date(a.start_at!).getTime() - new Date(b.start_at!).getTime())
-    .slice(0, 5)
-    .map((v) => ({
-      label: `${clients.find((c) => c.client_id === v.client_id)?.first_name ?? 'Unknown'} — ${dayLabel(v.start_at!)}`,
-      value: 1,
-    }));
+  const activity = [...visits]
+    .sort((a, b) => (a.createdon < b.createdon ? 1 : -1))
+    .slice(0, 8)
+    .map((v) => {
+      const client = clients.find((c) => c.client_id === v.client_id);
+      const clientName = client ? `${client.first_name} ${client.last_name}` : 'Unknown client';
+      return {
+        id: v.alayacare_visit_id,
+        clientName,
+        message: activityMessage(v, clientName),
+        when: relativeTime(v.createdon),
+      };
+    });
 
   return (
     <div className="space-y-4">
       <h1 className="text-lg font-semibold text-gray-700">Live Dashboard</h1>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded border bg-white shadow-sm lg:col-span-2">
-          <div className="border-b px-4 py-3">
-            <h2 className="text-sm font-semibold text-gray-700">Client Visit Summary</h2>
-          </div>
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50 text-left text-gray-500">
-                <th className="p-2 font-medium">Full Name</th>
-                <th className="p-2 font-medium">Postcode</th>
-                <th className="p-2 font-medium">Visit Count</th>
-                <th className="p-2 font-medium">Upcoming Visits</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientVisitSummary.map(({ client, visitCount, upcomingCount }) => (
-                <tr key={client.client_id} className="border-b last:border-0">
-                  <td className="p-2">{client.first_name} {client.last_name}</td>
-                  <td className="p-2">{client.zip}</td>
-                  <td className="p-2">{visitCount}</td>
-                  <td className="p-2">{upcomingCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">KPI&apos;s</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <StatTile label="Scheduled Visits" value={String(scheduledVisits)} tone="purple" />
+          <StatTile label="Vacant Visits" value={String(vacantVisits)} tone="red" />
+          <StatTile label="Late Visits" value={String(lateVisits)} tone="red" />
+          <StatTile label="Cancelled Visits" value={String(cancelledVisits)} tone="red" />
+          <StatTile label="Active Clients" value={String(activeClients)} tone="green" />
+          <StatTile label="Care Team Members" value={String(careTeamSize)} tone="purple" />
         </div>
-        <TrendChart title="Visits per Day" points={visitsByDay} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <DonutChart title="Visits by Status" slices={visitsByStatusDonut} />
-        <BarList title="Next Upcoming Visits" items={upcomingList} formatValue={() => ''} />
+      <div className="rounded border bg-white shadow-sm">
+        <div className="border-b px-4 py-3">
+          <h2 className="text-sm font-semibold text-gray-700">Real Time Activity</h2>
+        </div>
+        <ul className="divide-y text-sm">
+          {activity.map((item) => (
+            <li key={item.id} className="flex items-center justify-between px-4 py-3">
+              <span className="text-gray-700">{item.message}</span>
+              <span className="whitespace-nowrap text-xs text-gray-400">{item.when}</span>
+            </li>
+          ))}
+          {activity.length === 0 && <li className="px-4 py-3 text-gray-500">No recent activity.</li>}
+        </ul>
       </div>
     </div>
   );
