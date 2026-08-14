@@ -3,6 +3,19 @@
 import { useState } from 'react';
 import { useAlayacareResource } from '@/lib/alayacareApi';
 import { StatusBadge } from '@/components/StatusBadge';
+import {
+  IconTag,
+  IconUser,
+  IconPin,
+  IconPhone,
+  IconClipboard,
+  IconReceipt,
+  IconWarningTriangle,
+  IconClock,
+  IconChevronDown,
+  IconSettings,
+  RISK_CATEGORY_ICON_PATHS,
+} from '@/components/AlayacareIcons';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
 type FormState = Omit<AlayacareClient, 'client_id' | 'contacts' | 'createdon' | 'services'> & {
@@ -51,7 +64,12 @@ const SUB_TABS = ['Client List', 'Services List', 'My Client Service List', 'Cli
 // into these without a separate spec -- see CLAUDE.md.
 const RISK_LEVELS = ['High', 'Medium', 'Low'] as const;
 const RISK_TRENDS = ['Up', 'Down', 'Stable'] as const;
-const RISK_FACTOR_ICONS = ['⚠️', '📈', '😣', '📋'];
+const RISK_FACTOR_ICONS = [
+  <IconWarningTriangle key="w" size={14} />,
+  <IconClipboard key="c" size={14} />,
+  <IconClock key="t" size={14} />,
+  <IconUser key="u" size={14} />,
+];
 
 function hashString(value: string): number {
   let hash = 0;
@@ -66,9 +84,10 @@ function cosmeticRisk(clientId: string) {
   const level = RISK_LEVELS[hash % RISK_LEVELS.length];
   const trend = RISK_TRENDS[Math.floor(hash / RISK_LEVELS.length) % RISK_TRENDS.length];
   const daysAgo = (hash % 20) + 1;
+  const reviewedAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
   const factorCount = (hash % 3) + 1;
   const factors = RISK_FACTOR_ICONS.slice(0, factorCount);
-  return { level, trend, daysAgo, factors };
+  return { level, trend, daysAgo, reviewedAt, factors };
 }
 
 function age(birthday: string | null): string {
@@ -80,10 +99,6 @@ function age(birthday: string | null): string {
 function initials(first: string, last: string): string {
   return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 }
-
-// Decorative category icons for the Risks section -- fixed set, not tied to
-// the actual risk text. Matches the reference screenshot's icon row.
-const RISK_CATEGORY_ICONS = ['☀️', '🌱', '🔥', '🐕', '🚩', '🏢'];
 
 export default function ClientsPage() {
   const { rows, loading, error, insert, update, remove } = useAlayacareResource<AlayacareClient>('client-profile');
@@ -172,33 +187,41 @@ export default function ClientsPage() {
             <h2 className="text-sm font-semibold text-gray-700">Client List</h2>
             <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
           </div>
-          <div className="flex flex-wrap gap-2 border-b bg-gray-50 px-4 py-2 text-xs">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded border p-1">
-              <option value="All">All statuses</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-            <select disabled title="Not part of this demo" className="rounded border p-1 text-gray-400">
-              <option>Groups: All</option>
-            </select>
-            <select disabled title="Not part of this demo" className="rounded border p-1 text-gray-400">
-              <option>Tags: All</option>
-            </select>
-            <select disabled title="Not part of this demo" className="rounded border p-1 text-gray-400">
-              <option>Risk Level: All</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-4 py-2 text-xs">
+            {statusFilter === 'All' ? (
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded border p-1">
+                <option value="All">Status: All</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            ) : (
+              <span className="flex items-center gap-1.5 rounded border bg-white px-2 py-1 font-medium text-gray-700">
+                {statusFilter}
+                <button onClick={() => setStatusFilter('All')} title="Clear filter" className="text-gray-400 hover:text-gray-700">✕</button>
+              </span>
+            )}
+            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
+              Groups: All <IconChevronDown size={12} />
+            </span>
+            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
+              Tags: All <IconChevronDown size={12} />
+            </span>
+            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
+              Risk Level: All <IconChevronDown size={12} />
+            </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b bg-gray-50 text-left text-gray-500">
-                  <th className="p-2 font-medium">Name</th>
+                  <th className="p-2 font-medium"><span className="flex items-center gap-1">First Name <IconChevronDown size={11} /></span></th>
+                  <th className="p-2 font-medium"><span className="flex items-center gap-1">Last Name <IconChevronDown size={11} /></span></th>
                   <th className="p-2 font-medium">DOB</th>
                   <th className="p-2 font-medium">Status</th>
                   <th className="p-2 font-medium">Address</th>
-                  <th className="p-2 font-medium">Risk Review</th>
+                  <th className="p-2 font-medium"><span className="flex items-center gap-1">Risk Review <IconChevronDown size={11} /></span></th>
                   <th className="p-2 font-medium">Risk Trend</th>
-                  <th className="p-2 font-medium">Factors</th>
+                  <th className="p-2 font-medium"><span className="flex items-center gap-1">Factors <IconChevronDown size={11} /></span></th>
                 </tr>
               </thead>
               <tbody>
@@ -210,7 +233,8 @@ export default function ClientsPage() {
                       onClick={() => selectRow(row)}
                       className={`cursor-pointer border-b last:border-0 hover:bg-blue-50 ${selectedId === row.client_id ? 'bg-blue-50' : ''}`}
                     >
-                      <td className="p-2 whitespace-nowrap">{row.first_name} {row.last_name}</td>
+                      <td className="p-2 whitespace-nowrap">{row.first_name}</td>
+                      <td className="p-2 whitespace-nowrap">{row.last_name}</td>
                       <td className="p-2 whitespace-nowrap">{row.birthday}</td>
                       <td className="p-2">
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}>
@@ -218,13 +242,20 @@ export default function ClientsPage() {
                         </span>
                       </td>
                       <td className="p-2 whitespace-nowrap text-gray-600">{row.address_line}, {row.city}</td>
-                      <td className="p-2 whitespace-nowrap text-gray-500">{risk.daysAgo}d ago</td>
+                      <td className="p-2 whitespace-nowrap text-gray-500">
+                        <div>{risk.daysAgo === 1 ? 'Yesterday' : `${risk.daysAgo} days ago`}</div>
+                        <div className="text-[10px] text-gray-400">
+                          {risk.reviewedAt.toLocaleDateString()} · by Admin ArchiCare
+                        </div>
+                      </td>
                       <td className="p-2">
                         <span className={`rounded px-2 py-0.5 text-xs font-medium ${risk.level === 'High' ? 'bg-red-100 text-red-800' : risk.level === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
                           {risk.level} · {risk.trend}
                         </span>
                       </td>
-                      <td className="p-2 whitespace-nowrap">{risk.factors.join(' ')}</td>
+                      <td className="p-2">
+                        <div className="flex gap-1 text-gray-500">{risk.factors}</div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -243,7 +274,7 @@ export default function ClientsPage() {
                 <div className="flex items-center gap-2">
                   <input className="border-none p-0 text-base font-semibold outline-none" placeholder="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
                   <input className="border-none p-0 text-base font-semibold outline-none" placeholder="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
-                  <span title="Tagged client">🏷️</span>
+                  <span title="Tagged client" className="text-gray-400"><IconTag size={16} /></span>
                 </div>
                 <span className="text-xs text-gray-400">
                   {selected ? `${age(form.birthday)} yrs, ${form.city || '—'}, ${form.state || '—'}` : 'New client'}
@@ -271,7 +302,9 @@ export default function ClientsPage() {
                 <span className="text-gray-300">›</span>
                 <button disabled title="Not part of this demo" className="rounded border px-2 py-1 text-xs text-gray-300">+</button>
               </div>
-              <button disabled title="Not part of this demo" className="rounded border px-2 py-1 text-xs text-gray-400">⚙ Add Family Portal access</button>
+              <button disabled title="Not part of this demo" className="flex items-center gap-1 rounded border px-2 py-1 text-xs text-gray-400">
+                <IconSettings size={13} /> Add Family Portal access
+              </button>
             </div>
           </div>
 
@@ -301,15 +334,15 @@ export default function ClientsPage() {
             <div className="space-y-4 p-4">
               <div>
                 <div className="mb-2 flex items-center gap-2 font-medium text-gray-700">
-                  <span>👤</span> Client Information
+                  <IconUser size={16} /> Client Information
                 </div>
                 <div className="space-y-1 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <span>📍</span>
+                  <div className="flex items-center gap-1.5">
+                    <IconPin size={15} />
                     <span>{form.address_line}, {form.city} {form.state} {form.zip}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span>📞</span>
+                  <div className="flex items-center gap-1.5">
+                    <IconPhone size={15} />
                     <span>Phone (Main) </span>
                     <input className="rounded border p-1 text-xs" value={form.phone_main ?? ''} onChange={(e) => setForm({ ...form, phone_main: e.target.value })} />
                   </div>
@@ -318,7 +351,7 @@ export default function ClientsPage() {
 
               <div>
                 <div className="mb-2 flex items-center gap-2 font-medium text-gray-700">
-                  <span>📋</span> Risks
+                  <IconClipboard size={16} /> Risks
                 </div>
                 <textarea
                   className="w-full rounded border p-2 text-sm"
@@ -327,16 +360,18 @@ export default function ClientsPage() {
                   value={form.risks ?? ''}
                   onChange={(e) => setForm({ ...form, risks: e.target.value })}
                 />
-                <div className="mt-2 flex gap-2 text-lg">
-                  {RISK_CATEGORY_ICONS.map((icon, i) => (
-                    <span key={i} title="Decorative only">{icon}</span>
+                <div className="mt-2 flex gap-2">
+                  {RISK_CATEGORY_ICON_PATHS.map((icon, i) => (
+                    <span key={i} title="Decorative only" className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-white">
+                      {icon}
+                    </span>
                   ))}
                 </div>
               </div>
 
               <div>
                 <div className="mb-2 flex items-center gap-2 font-medium text-gray-700">
-                  <span>🧾</span> Services
+                  <IconReceipt size={16} /> Services
                 </div>
                 <textarea
                   className="w-full rounded border p-2 text-sm"

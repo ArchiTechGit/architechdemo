@@ -10,7 +10,6 @@ const TABS = [
   { label: 'Visit Reports' },
   { label: 'Forms' },
   { label: 'Client Intake' },
-  { label: 'Marketplace' },
   { label: 'Data Exploration' },
   { label: 'Tasks' },
 ];

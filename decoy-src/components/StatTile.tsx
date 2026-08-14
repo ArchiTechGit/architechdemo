@@ -12,18 +12,23 @@ export function StatTile({
   caption,
   value,
   tone = 'default',
+  icon,
 }: {
   label: string;
   caption?: string;
   value: string;
   tone?: StatTileTone;
+  icon?: React.ReactNode;
 }) {
   const styles = TONE_STYLES[tone];
   return (
     <div className={`rounded border p-4 shadow-sm ${styles.box}`}>
       <div className={`text-[11px] font-bold uppercase tracking-wide ${styles.label}`}>{label}</div>
       {caption && <div className="text-[10px] uppercase tracking-wide text-gray-400">{caption}</div>}
-      <div className={`mt-2 text-2xl font-semibold ${styles.value}`}>{value}</div>
+      <div className={`mt-2 flex items-center gap-2 ${styles.value}`}>
+        {icon && <span className={styles.label}>{icon}</span>}
+        <span className="text-2xl font-semibold">{value}</span>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useAlayacareResource } from '@/lib/alayacareApi';
 import { StatTile } from '@/components/StatTile';
 import { MapPanel } from '@/components/MapPanel';
+import { IconClock, IconXCircle, IconUser, IconUsers } from '@/components/AlayacareIcons';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
 function relativeTime(dateStr: string): string {
@@ -65,12 +66,12 @@ export default function AlayacareDashboardPage() {
       <div>
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">KPI&apos;s</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-          <StatTile label="Scheduled Visits" value={String(scheduledVisits)} tone="purple" />
-          <StatTile label="Vacant Visits" value={String(vacantVisits)} tone="red" />
-          <StatTile label="Late Visits" value={String(lateVisits)} tone="red" />
-          <StatTile label="Cancelled Visits" value={String(cancelledVisits)} tone="red" />
-          <StatTile label="Active Clients" value={String(activeClients)} tone="green" />
-          <StatTile label="Care Team Members" value={String(careTeamSize)} tone="purple" />
+          <StatTile label="Scheduled Visits" value={String(scheduledVisits)} tone="purple" icon={<IconClock size={18} />} />
+          <StatTile label="Vacant Visits" value={String(vacantVisits)} tone="red" icon={<IconClock size={18} />} />
+          <StatTile label="Late Visits" value={String(lateVisits)} tone="red" icon={<IconClock size={18} />} />
+          <StatTile label="Cancelled Visits" value={String(cancelledVisits)} tone="red" icon={<IconXCircle size={18} />} />
+          <StatTile label="Active Clients" value={String(activeClients)} tone="green" icon={<IconUser size={18} />} />
+          <StatTile label="Care Team Members" value={String(careTeamSize)} tone="purple" icon={<IconUsers size={18} />} />
         </div>
       </div>
 

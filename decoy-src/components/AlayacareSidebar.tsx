@@ -102,14 +102,17 @@ export function AlayacareSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-20 shrink-0 flex-col items-center bg-[#0f2a5c] py-4 text-white">
+    <aside className="flex w-20 shrink-0 flex-col items-center bg-[#1d3fd6] py-3 text-white">
+      <div className="relative mb-3 h-10 w-10 rounded bg-white/90" title="Not part of this demo">
+        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#1d3fd6] bg-green-500" />
+      </div>
       {ITEMS.map((item) =>
         item.href ? (
           <Link
             key={item.label}
             href={item.href}
-            className={`mb-1 flex w-full flex-col items-center gap-1 rounded px-1 py-2.5 text-[10px] leading-tight ${
-              pathname === item.href ? 'bg-blue-700 font-medium' : 'text-white/70 hover:bg-white/10'
+            className={`mb-1 flex w-[88%] flex-col items-center gap-1 rounded px-1 py-2.5 text-[10px] leading-tight ${
+              pathname === item.href ? 'bg-white font-medium text-blue-700' : 'text-white/75 hover:bg-white/10'
             }`}
           >
             {item.icon}
@@ -119,7 +122,7 @@ export function AlayacareSidebar() {
           <div
             key={item.label}
             title="Not part of this demo"
-            className="mb-1 flex w-full cursor-default flex-col items-center gap-1 px-1 py-2.5 text-[10px] leading-tight text-white/40"
+            className="mb-1 flex w-[88%] cursor-default flex-col items-center gap-1 px-1 py-2.5 text-[10px] leading-tight text-white/40"
           >
             {item.icon}
             {item.label}
