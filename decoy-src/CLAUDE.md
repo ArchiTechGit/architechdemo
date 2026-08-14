@@ -9,19 +9,31 @@ backend using each real system's actual API shape, so network traffic in a
 demo looks identical to a genuine integration against that system.
 
 v1 (done): Microsoft Dynamics 365 (Dataverse) — Accounts, Contacts,
-Opportunities, Leads, Notes, and a Sales Dashboard (KPI tiles + bar-list
-charts, styled like a real D365 dashboard but computed client-side from
-Decoy's own live data — see `app/dynamics/dashboard/page.tsx`). Dashboard
-is the landing page after `/decoy/`, matching real D365 behavior.
+Opportunities, Leads, Notes, and a Sales Dashboard (5 KPI tiles + 5 chart
+panels — 3 bar-lists, a donut, and a trend line — styled like a real D365
+dashboard but computed client-side from Decoy's own live data — see
+`app/dynamics/dashboard/page.tsx`). Dashboard is the landing page after
+`/decoy/`, matching real D365 behavior.
+
+Seed data (`supabase/seed/dynamics.sql`) is themed healthcare / aged care /
+emergency services / critical services: 13 fictional accounts (hospitals,
+aged care groups, ambulance/fire/SES, poison control/crisis lines), 13
+contacts, 13 opportunities (each a contact-centre-shaped deal), 7 leads,
+5 notes. Extend this theme for new fake data rather than introducing an
+unrelated industry — it's deliberate, matching ArchiTech's actual customer
+base.
 
 UI chrome (top command bar, left sidebar nav, chevron stage tracker on
 Opportunities/Leads) is styled to match real D365 — see `components/TopNav.tsx`
 (command bar), `components/Sidebar.tsx` (nav, some items are inert — no
 backing page yet, e.g. Calendar/Tasks/Forecasts), `components/StageTracker.tsx`.
+A full API reference page lives at `/dynamics/help` (linked from the top
+bar's "?" icon) — keep it in sync whenever the `dataverse-api` entity sets,
+fields, or enum values change; it's the doc the client actually points
+Webex Contact Center flow integrations at, not just a nice-to-have.
 
-Not yet built: Alayacare (aged-care EMR/PAS), Epic (FHIR EHR). Build order
-is Dynamics → Alayacare → Epic (Epic is hardest — nested FHIR resources,
-fake login screen).
+Next build: Alayacare (aged-care EMR/PAS), then Epic (FHIR EHR, hardest —
+nested FHIR resources, fake login screen).
 
 Full history: `docs/superpowers/specs/2026-08-14-decoy-design.md` and
 `docs/superpowers/plans/2026-08-14-decoy-dynamics-v1.md` in the repo root
@@ -240,12 +252,23 @@ Management API rather than a local Docker Postgres.)
   (`dynamics` vs a future `alayacare`/`epic`), not from row-level rules.
   Don't add per-row restrictions unless a specific new requirement calls
   for it.
+- **Every Edge Function must handle CORS itself, including `OPTIONS`
+  preflight.** This bit us once live: the browser's `fetch()` calls from
+  `architechdemo.com` were silently failing every request because
+  `dataverse-api`/`reset-demo` had no `Access-Control-Allow-*` headers and
+  no `OPTIONS` handler (Supabase doesn't add CORS for you), and the pages
+  had no `.catch()` on the fetch chain, so every page just hung on
+  "Loading…" forever with no visible error. Any new Edge Function needs the
+  same `CORS_HEADERS` object + `if (req.method === 'OPTIONS') return new
+  Response(null, { status: 204, headers: CORS_HEADERS })` pattern from
+  `dataverse-api/index.ts`, and every client hook needs a `.catch()` that
+  sets an error state — never let a fetch chain fail silently into an
+  infinite loading spinner.
 
 ## What's explicitly out of scope right now
 
-- Alayacare and Epic schemas/UI/API shims — next builds, each gets its own
-  spec + plan cycle (same process as this one: brainstorming → spec →
-  writing-plans → executing-plans).
+- Epic schema/UI/API shim — after Alayacare. Same process as Dynamics:
+  brainstorming → spec → writing-plans → executing-plans.
 - The cross-system top nav switcher — only makes sense once ≥2 systems
   exist; Dynamics is still the only one.
 - Retiring `emrdemo` (the old single-vendor fake-EMR demo elsewhere in this
