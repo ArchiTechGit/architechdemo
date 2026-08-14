@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useDataverseTable } from '@/lib/dataverseApi';
+import { Field } from '@/components/Field';
 import type { Account } from '@/lib/types';
 
 type FormState = Omit<Account, 'accountid' | 'createdon'>;
@@ -61,19 +62,19 @@ export default function AccountsPage() {
 
   return (
     <div className="grid grid-cols-2 gap-6">
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Accounts</h1>
+      <div className="rounded border bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b px-4 py-2">
+          <h1 className="text-sm font-semibold text-gray-700">Accounts</h1>
           <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
             New
           </button>
         </div>
-        <table className="w-full border-collapse bg-white text-sm shadow-sm">
+        <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b bg-gray-100 text-left">
-              <th className="p-2">Name</th>
-              <th className="p-2">Industry</th>
-              <th className="p-2">Phone</th>
+            <tr className="border-b bg-gray-50 text-left text-gray-500">
+              <th className="p-2 font-medium">Name</th>
+              <th className="p-2 font-medium">Industry</th>
+              <th className="p-2 font-medium">Phone</th>
             </tr>
           </thead>
           <tbody>
@@ -81,7 +82,7 @@ export default function AccountsPage() {
               <tr
                 key={row.accountid}
                 onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.accountid ? 'bg-blue-50' : ''}`}
+                className={`cursor-pointer border-b last:border-0 hover:bg-blue-50 ${selectedId === row.accountid ? 'bg-blue-50' : ''}`}
               >
                 <td className="p-2">{row.name}</td>
                 <td className="p-2">{row.industrycode}</td>
@@ -92,22 +93,45 @@ export default function AccountsPage() {
         </table>
       </div>
 
-      <div className="rounded bg-white p-4 shadow-sm">
-        <h2 className="mb-3 font-medium">{selectedId ? 'Edit account' : 'New account'}</h2>
-        <div className="space-y-2">
-          <input className="w-full rounded border p-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input className="w-full rounded border p-2" placeholder="Industry" value={form.industrycode ?? ''} onChange={(e) => setForm({ ...form, industrycode: e.target.value })} />
-          <input className="w-full rounded border p-2" placeholder="Phone" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
-          <input className="w-full rounded border p-2" placeholder="Website" value={form.websiteurl ?? ''} onChange={(e) => setForm({ ...form, websiteurl: e.target.value })} />
-          <input className="w-full rounded border p-2" placeholder="Street" value={form.address1_line1 ?? ''} onChange={(e) => setForm({ ...form, address1_line1: e.target.value })} />
-          <div className="grid grid-cols-3 gap-2">
-            <input className="rounded border p-2" placeholder="City" value={form.address1_city ?? ''} onChange={(e) => setForm({ ...form, address1_city: e.target.value })} />
-            <input className="rounded border p-2" placeholder="State" value={form.address1_stateorprovince ?? ''} onChange={(e) => setForm({ ...form, address1_stateorprovince: e.target.value })} />
-            <input className="rounded border p-2" placeholder="Postcode" value={form.address1_postalcode ?? ''} onChange={(e) => setForm({ ...form, address1_postalcode: e.target.value })} />
-          </div>
-          <input className="w-full rounded border p-2" placeholder="Country" value={form.address1_country ?? ''} onChange={(e) => setForm({ ...form, address1_country: e.target.value })} />
+      <div className="rounded bg-white shadow-sm">
+        <div className="border-b p-4">
+          <input
+            className="w-full border-none p-0 text-lg font-semibold outline-none"
+            placeholder="New account"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <span className="text-xs text-gray-400">Account{selectedId ? ' · Saved' : ''}</span>
         </div>
-        <div className="mt-4 flex gap-2">
+        <div className="space-y-3 p-4">
+          <Field label="Industry">
+            <input className="w-full rounded border p-2" value={form.industrycode ?? ''} onChange={(e) => setForm({ ...form, industrycode: e.target.value })} />
+          </Field>
+          <Field label="Phone">
+            <input className="w-full rounded border p-2" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
+          </Field>
+          <Field label="Website">
+            <input className="w-full rounded border p-2" value={form.websiteurl ?? ''} onChange={(e) => setForm({ ...form, websiteurl: e.target.value })} />
+          </Field>
+          <Field label="Street">
+            <input className="w-full rounded border p-2" value={form.address1_line1 ?? ''} onChange={(e) => setForm({ ...form, address1_line1: e.target.value })} />
+          </Field>
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="City">
+              <input className="w-full rounded border p-2" value={form.address1_city ?? ''} onChange={(e) => setForm({ ...form, address1_city: e.target.value })} />
+            </Field>
+            <Field label="State">
+              <input className="w-full rounded border p-2" value={form.address1_stateorprovince ?? ''} onChange={(e) => setForm({ ...form, address1_stateorprovince: e.target.value })} />
+            </Field>
+            <Field label="Postcode">
+              <input className="w-full rounded border p-2" value={form.address1_postalcode ?? ''} onChange={(e) => setForm({ ...form, address1_postalcode: e.target.value })} />
+            </Field>
+          </div>
+          <Field label="Country">
+            <input className="w-full rounded border p-2" value={form.address1_country ?? ''} onChange={(e) => setForm({ ...form, address1_country: e.target.value })} />
+          </Field>
+        </div>
+        <div className="flex gap-2 border-t p-4">
           <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
           {selectedId && (
             <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>

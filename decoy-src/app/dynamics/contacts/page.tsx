@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useDataverseTable } from '@/lib/dataverseApi';
+import { Field } from '@/components/Field';
 import type { Account, Annotation, Contact } from '@/lib/types';
 
 type FormState = Omit<Contact, 'contactid' | 'createdon' | 'parentcustomerid_account'>;
@@ -97,17 +98,17 @@ export default function ContactsPage() {
 
   return (
     <div className="grid grid-cols-2 gap-6">
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Contacts</h1>
+      <div className="rounded border bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b px-4 py-2">
+          <h1 className="text-sm font-semibold text-gray-700">Contacts</h1>
           <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
         </div>
-        <table className="w-full border-collapse bg-white text-sm shadow-sm">
+        <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b bg-gray-100 text-left">
-              <th className="p-2">Name</th>
-              <th className="p-2">Account</th>
-              <th className="p-2">Email</th>
+            <tr className="border-b bg-gray-50 text-left text-gray-500">
+              <th className="p-2 font-medium">Name</th>
+              <th className="p-2 font-medium">Account</th>
+              <th className="p-2 font-medium">Email</th>
             </tr>
           </thead>
           <tbody>
@@ -115,7 +116,7 @@ export default function ContactsPage() {
               <tr
                 key={row.contactid}
                 onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.contactid ? 'bg-blue-50' : ''}`}
+                className={`cursor-pointer border-b last:border-0 hover:bg-blue-50 ${selectedId === row.contactid ? 'bg-blue-50' : ''}`}
               >
                 <td className="p-2">{row.firstname} {row.lastname}</td>
                 <td className="p-2">{row.parentcustomerid_account?.name ?? '—'}</td>
@@ -127,29 +128,45 @@ export default function ContactsPage() {
       </div>
 
       <div className="space-y-4">
-        <div className="rounded bg-white p-4 shadow-sm">
-          <h2 className="mb-3 font-medium">{selectedId ? 'Edit contact' : 'New contact'}</h2>
-          <div className="space-y-2">
-            <select className="w-full rounded border p-2" value={form.parentcustomerid ?? ''} onChange={(e) => setForm({ ...form, parentcustomerid: e.target.value || null })}>
-              <option value="">No account</option>
-              {accounts.map((a) => (
-                <option key={a.accountid} value={a.accountid}>{a.name}</option>
-              ))}
-            </select>
+        <div className="rounded bg-white shadow-sm">
+          <div className="border-b p-4">
             <div className="grid grid-cols-2 gap-2">
-              <input className="rounded border p-2" placeholder="First name" value={form.firstname} onChange={(e) => setForm({ ...form, firstname: e.target.value })} />
-              <input className="rounded border p-2" placeholder="Last name" value={form.lastname} onChange={(e) => setForm({ ...form, lastname: e.target.value })} />
+              <input className="border-none p-0 text-lg font-semibold outline-none" placeholder="First name" value={form.firstname} onChange={(e) => setForm({ ...form, firstname: e.target.value })} />
+              <input className="border-none p-0 text-lg font-semibold outline-none" placeholder="Last name" value={form.lastname} onChange={(e) => setForm({ ...form, lastname: e.target.value })} />
             </div>
-            <input className="w-full rounded border p-2" placeholder="Job title" value={form.jobtitle ?? ''} onChange={(e) => setForm({ ...form, jobtitle: e.target.value })} />
-            <input className="w-full rounded border p-2" placeholder="Email" value={form.emailaddress1 ?? ''} onChange={(e) => setForm({ ...form, emailaddress1: e.target.value })} />
-            <input className="w-full rounded border p-2" placeholder="Secondary email" value={form.emailaddress2 ?? ''} onChange={(e) => setForm({ ...form, emailaddress2: e.target.value })} />
-            <div className="grid grid-cols-3 gap-2">
-              <input className="rounded border p-2" placeholder="Phone" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
-              <input className="rounded border p-2" placeholder="Phone 2" value={form.telephone2 ?? ''} onChange={(e) => setForm({ ...form, telephone2: e.target.value })} />
-              <input className="rounded border p-2" placeholder="Mobile" value={form.mobilephone ?? ''} onChange={(e) => setForm({ ...form, mobilephone: e.target.value })} />
+            <span className="text-xs text-gray-400">Contact{selectedId ? ' · Saved' : ''}</span>
+          </div>
+          <div className="space-y-3 p-4">
+            <Field label="Account">
+              <select className="w-full rounded border p-2" value={form.parentcustomerid ?? ''} onChange={(e) => setForm({ ...form, parentcustomerid: e.target.value || null })}>
+                <option value="">No account</option>
+                {accounts.map((a) => (
+                  <option key={a.accountid} value={a.accountid}>{a.name}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Job title">
+              <input className="w-full rounded border p-2" value={form.jobtitle ?? ''} onChange={(e) => setForm({ ...form, jobtitle: e.target.value })} />
+            </Field>
+            <Field label="Email">
+              <input className="w-full rounded border p-2" value={form.emailaddress1 ?? ''} onChange={(e) => setForm({ ...form, emailaddress1: e.target.value })} />
+            </Field>
+            <Field label="Secondary email">
+              <input className="w-full rounded border p-2" value={form.emailaddress2 ?? ''} onChange={(e) => setForm({ ...form, emailaddress2: e.target.value })} />
+            </Field>
+            <div className="grid grid-cols-3 gap-3">
+              <Field label="Phone">
+                <input className="w-full rounded border p-2" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
+              </Field>
+              <Field label="Phone 2">
+                <input className="w-full rounded border p-2" value={form.telephone2 ?? ''} onChange={(e) => setForm({ ...form, telephone2: e.target.value })} />
+              </Field>
+              <Field label="Mobile">
+                <input className="w-full rounded border p-2" value={form.mobilephone ?? ''} onChange={(e) => setForm({ ...form, mobilephone: e.target.value })} />
+              </Field>
             </div>
           </div>
-          <div className="mt-4 flex gap-2">
+          <div className="flex gap-2 border-t p-4">
             <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
             {selectedId && (
               <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
