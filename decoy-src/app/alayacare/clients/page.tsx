@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAlayacareResource } from '@/lib/alayacareApi';
+import { useArchicareResource } from '@/lib/archicareApi';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   IconTag,
@@ -23,10 +23,10 @@ import {
   IconInfo,
   IconExternalLink,
   RISK_CATEGORY_ICON_PATHS,
-} from '@/components/AlayacareIcons';
-import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
+} from '@/components/ArchicareIcons';
+import type { ArchicareClient, ArchicareVisit } from '@/lib/archicareTypes';
 
-type FormState = Omit<AlayacareClient, 'client_id' | 'contacts' | 'createdon' | 'services'> & {
+type FormState = Omit<ArchicareClient, 'client_id' | 'contacts' | 'createdon' | 'services'> & {
   servicesText: string;
 };
 
@@ -122,8 +122,8 @@ function initials(first: string, last: string): string {
 }
 
 export default function ClientsPage() {
-  const { rows, loading, error, insert, update, remove } = useAlayacareResource<AlayacareClient>('client-profile');
-  const { rows: visits } = useAlayacareResource<AlayacareVisit>('scheduled-visits');
+  const { rows, loading, error, insert, update, remove } = useArchicareResource<ArchicareClient>('client-profile');
+  const { rows: visits } = useArchicareResource<ArchicareVisit>('scheduled-visits');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(BLANK);
   const [tab, setTab] = useState<Tab>('Overview');
@@ -131,7 +131,7 @@ export default function ClientsPage() {
   const [search, setSearch] = useState('');
   const [panelOpen, setPanelOpen] = useState(false);
 
-  function selectRow(row: AlayacareClient) {
+  function selectRow(row: ArchicareClient) {
     setPanelOpen(true);
     setSelectedId(row.client_id);
     setTab('Overview');

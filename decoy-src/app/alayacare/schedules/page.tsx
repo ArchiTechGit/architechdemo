@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useAlayacareResource, useCareTeam } from '@/lib/alayacareApi';
+import { useArchicareResource, useCareTeam } from '@/lib/archicareApi';
 import { StatusBadge } from '@/components/StatusBadge';
-import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
+import type { ArchicareClient, ArchicareVisit } from '@/lib/archicareTypes';
 
-const STATUSES: AlayacareVisit['status'][] = ['scheduled', 'completed', 'cancelled', 'missed'];
+const STATUSES: ArchicareVisit['status'][] = ['scheduled', 'completed', 'cancelled', 'missed'];
 
-type FormState = Omit<AlayacareVisit, 'alayacare_visit_id' | 'createdon'>;
+type FormState = Omit<ArchicareVisit, 'alayacare_visit_id' | 'createdon'>;
 
 const BLANK: FormState = {
   alayacare_service_id: null,
@@ -39,8 +39,8 @@ function dayHeading(key: string): string {
 }
 
 export default function SchedulesPage() {
-  const { rows, loading, error, insert, update, remove } = useAlayacareResource<AlayacareVisit>('scheduled-visits');
-  const { rows: clients } = useAlayacareResource<AlayacareClient>('client-profile');
+  const { rows, loading, error, insert, update, remove } = useArchicareResource<ArchicareVisit>('scheduled-visits');
+  const { rows: clients } = useArchicareResource<ArchicareClient>('client-profile');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [form, setForm] = useState<FormState>(BLANK);
   const { careTeam } = useCareTeam(selectedId);
@@ -50,7 +50,7 @@ export default function SchedulesPage() {
     return c ? `${c.first_name} ${c.last_name}` : 'Unassigned';
   }
 
-  function selectRow(row: AlayacareVisit) {
+  function selectRow(row: ArchicareVisit) {
     setSelectedId(row.alayacare_visit_id);
     setForm({
       alayacare_service_id: row.alayacare_service_id,
@@ -85,7 +85,7 @@ export default function SchedulesPage() {
   if (loading) return <p>Loading…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
 
-  const grouped = rows.reduce<Record<string, AlayacareVisit[]>>((acc, v) => {
+  const grouped = rows.reduce<Record<string, ArchicareVisit[]>>((acc, v) => {
     const key = dayKey(v.start_at);
     (acc[key] ??= []).push(v);
     return acc;
@@ -165,7 +165,7 @@ export default function SchedulesPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Status</label>
-              <select className="w-full rounded border p-2" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as AlayacareVisit['status'] })}>
+              <select className="w-full rounded border p-2" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as ArchicareVisit['status'] })}>
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}

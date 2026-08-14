@@ -1,17 +1,17 @@
-create or replace function alayacare.reset_demo_data()
+create or replace function archicare.reset_demo_data()
 returns void
 language plpgsql
 security definer
-set search_path = alayacare, pg_temp
+set search_path = archicare, pg_temp
 as $$
 begin
-  truncate table alayacare.care_team_member, alayacare.visit, alayacare.client restart identity cascade;
+  truncate table archicare.care_team_member, archicare.visit, archicare.client restart identity cascade;
   -- Seeded clients below use explicit literal client_id values (C0100001-C0100020) and
   -- never touch this sequence, so it must restart well above that range or the first
   -- auto-generated id (e.g. from a demo "New client" save) would collide/precede them.
-  alter sequence alayacare.client_id_seq restart with 200000;
+  alter sequence archicare.client_id_seq restart with 200000;
 
-  insert into alayacare.client (client_id, salutation, first_name, last_name, birthday, zip, phone_main, ai_agent_opt_out, channels_of_communication, types_of_communication, notification_recipient, contacts, status, address_line, city, state, external_id, risks, services) values
+  insert into archicare.client (client_id, salutation, first_name, last_name, birthday, zip, phone_main, ai_agent_opt_out, channels_of_communication, types_of_communication, notification_recipient, contacts, status, address_line, city, state, external_id, risks, services) values
     ('C0100001', 'Mrs', 'Margaret', 'Voss', '1938-03-14', '3220', '+61411300001', '', 'Phone Call', '', 'Client', '[]', 'Active', '14 Ryrie St', 'Geelong', 'VIC', '2088101', 'Fall history, Lives alone', array['Personal Support','Respite','Assessments']),
     ('C0100002', 'Mr', 'Harold', 'Fenwick', '1941-11-02', '3350', '+61411300002', '', 'Phone Call', '', 'Client', '[]', 'Active', '22 Sturt St', 'Ballarat', 'VIC', '2088102', 'Hoarder, Loose stair on the front steps', array['PSW Visits','Physiotherapy','Mentorship']),
     ('C0100003', 'Mrs', 'Ivy', 'Castellano', '1933-07-19', '3199', '+61411300003', '', 'SMS', '', 'Family Contact', '[]', 'Active', '8 Beach St', 'Frankston', 'VIC', '2088103', 'Dog on premises, Hearing impaired', array['Personal Support','Respiratory Services']),
@@ -33,7 +33,7 @@ begin
     ('C0100019', 'Mr', 'Sylvester', 'Pham', '1940-08-19', '3337', '+61411300019', '', 'Phone Call', '', 'Client', '[]', 'Active', '14 High St', 'Melton', 'VIC', '2088119', 'Cognitive decline', array['Personal Support','Mentorship']),
     ('C0100020', 'Mrs', 'Muriel', 'Kaczmarek', '1937-02-01', '3030', '+61411300020', '', 'Phone Call', '', 'Client', '[]', 'Active', '31 Watton St', 'Werribee', 'VIC', '2088120', 'Vision impaired, hearing impaired', array['Personal Support','Respite','Assessments']);
 
-  insert into alayacare.visit (alayacare_service_id, employee_id, service_code_id, status, start_at, end_at, cancelled, client_id) values
+  insert into archicare.visit (alayacare_service_id, employee_id, service_code_id, status, start_at, end_at, cancelled, client_id) values
     (610001, '051201', 43, 'scheduled', '2026-08-20T05:25:00+00:00', '2026-08-20T06:25:00+00:00', false, 'C0100001'),
     (610001, '051201', 43, 'completed', '2026-08-06T05:25:00+00:00', '2026-08-06T06:25:00+00:00', false, 'C0100001'),
     (610002, 'S0018842', 106, 'scheduled', '2026-08-22T22:00:00+00:00', '2026-08-23T00:30:00+00:00', false, 'C0100002'),
@@ -60,7 +60,7 @@ begin
     (610019, '051340', 283, 'completed', '2026-08-04T21:00:00+00:00', '2026-08-04T22:00:00+00:00', false, 'C0100019'),
     (610020, '051201', 43, 'scheduled', '2026-08-29T05:00:00+00:00', '2026-08-29T06:00:00+00:00', false, 'C0100020');
 
-  insert into alayacare.care_team_member (client_id, employee_id, first_name, last_name, role, email) values
+  insert into archicare.care_team_member (client_id, employee_id, first_name, last_name, role, email) values
     ('C0100001', '051201', 'Nathan', 'Brice', 'Support Worker', 'nbrice@agedcaredemo.example'),
     ('C0100001', '', 'Simone', 'Achebe', 'Team Leader', 'sachebe@agedcaredemo.example'),
     ('C0100002', 'S0018842', 'Priya', 'Dutta', 'Support Worker', 'pdutta@agedcaredemo.example'),
@@ -88,7 +88,7 @@ begin
 end;
 $$;
 
-revoke execute on function alayacare.reset_demo_data() from public, anon, authenticated;
-grant execute on function alayacare.reset_demo_data() to service_role;
+revoke execute on function archicare.reset_demo_data() from public, anon, authenticated;
+grant execute on function archicare.reset_demo_data() to service_role;
 
-select alayacare.reset_demo_data();
+select archicare.reset_demo_data();

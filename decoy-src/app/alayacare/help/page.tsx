@@ -1,4 +1,4 @@
-const BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/alayacare-api/AlayaCare/v1`;
+const BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/archicare-api/AlayaCare/v1`;
 const RESET_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/reset-demo`;
 
 function Code({ children }: { children: string }) {
@@ -18,7 +18,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default function AlayacareHelpPage() {
+export default function ArchicareHelpPage() {
   return (
     <div className="max-w-4xl space-y-4">
       <div>
@@ -135,7 +135,7 @@ Content-Type: application/json`}</Code>
         <Code>{`GET ${BASE}/client-profile?page=1
 
 → 200 OK
-{ "count": 5, "page": 1, "total_pages": 1, "items": [ { "client_id": "C0100001", ... }, ... ] }`}</Code>
+{ "count": 20, "page": 1, "total_pages": 1, "items": [ { "client_id": "C0100001", ... }, ... ] }`}</Code>
       </Section>
 
       <Section title="Client — POST / PATCH / DELETE (Inferred)">
@@ -271,7 +271,7 @@ DELETE ${BASE}/scheduled-visits/1
         <Code>{`POST ${RESET_URL}
 Content-Type: application/json
 
-{ "schema": "alayacare" }
+{ "schema": "archicare" }
 
 → 200 OK
 { "ok": true }`}</Code>

@@ -1,11 +1,11 @@
 'use client';
 
-import { useAlayacareResource } from '@/lib/alayacareApi';
+import { useArchicareResource } from '@/lib/archicareApi';
 import { StatTile } from '@/components/StatTile';
 import { MapPanel } from '@/components/MapPanel';
 import { ExploreBar } from '@/components/ExploreBar';
-import { IconClock, IconXCircle, IconUser, IconUsers } from '@/components/AlayacareIcons';
-import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
+import { IconClock, IconXCircle, IconUser, IconUsers } from '@/components/ArchicareIcons';
+import type { ArchicareClient, ArchicareVisit } from '@/lib/archicareTypes';
 
 function relativeTime(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -16,7 +16,7 @@ function relativeTime(dateStr: string): string {
   return `About ${days} day${days === 1 ? '' : 's'} ago`;
 }
 
-function activityMessage(visit: AlayacareVisit, clientName: string): string {
+function activityMessage(visit: ArchicareVisit, clientName: string): string {
   switch (visit.status) {
     case 'completed':
       return `Visit completed for ${clientName}`;
@@ -29,9 +29,9 @@ function activityMessage(visit: AlayacareVisit, clientName: string): string {
   }
 }
 
-export default function AlayacareDashboardPage() {
-  const { rows: clients, loading: clientsLoading } = useAlayacareResource<AlayacareClient>('client-profile');
-  const { rows: visits, loading: visitsLoading } = useAlayacareResource<AlayacareVisit>('scheduled-visits');
+export default function ArchicareDashboardPage() {
+  const { rows: clients, loading: clientsLoading } = useArchicareResource<ArchicareClient>('client-profile');
+  const { rows: visits, loading: visitsLoading } = useArchicareResource<ArchicareVisit>('scheduled-visits');
 
   if (clientsLoading || visitsLoading) return <p>Loading…</p>;
 

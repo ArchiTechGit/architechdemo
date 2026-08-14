@@ -3,16 +3,16 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { resetDemoData } from '@/lib/resetDemoData';
-import { IconSearch, IconMail, IconLogout, IconChevronDown } from './AlayacareIcons';
+import { IconSearch, IconMail, IconLogout, IconChevronDown } from './ArchicareIcons';
 
-export function AlayacareTopNav() {
+export function ArchicareTopNav() {
   const [resetting, setResetting] = useState(false);
 
   async function handleReset() {
     if (!confirm('Reset all ArchiCare demo data to the seed set? This deletes any edits.')) return;
     setResetting(true);
     try {
-      await resetDemoData('alayacare');
+      await resetDemoData('archicare');
       window.location.reload();
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Reset failed');

@@ -50,14 +50,14 @@ Deno.serve(async (req) => {
     if (req.method !== 'GET') return errorResponse('method not allowed', 405);
     const visitId = Number(staffContactsMatch[1]);
     const { data: visit, error: visitError } = await supabase
-      .schema('alayacare')
+      .schema('archicare')
       .from('visit')
       .select('client_id')
       .eq('alayacare_visit_id', visitId)
       .single();
     if (visitError || !visit?.client_id) return errorResponse('visit not found', 404);
     const { data: careTeam, error: careTeamError } = await supabase
-      .schema('alayacare')
+      .schema('archicare')
       .from('care_team_member')
       .select('employee_id,first_name,last_name,role,email')
       .eq('client_id', visit.client_id);
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
   const clientMatch = path.match(/\/client-profile(?:\/([A-Za-z0-9]+))?$/);
   if (clientMatch) {
     const clientId = clientMatch[1];
-    const db = supabase.schema('alayacare').from('client');
+    const db = supabase.schema('archicare').from('client');
 
     if (req.method === 'GET' && !clientId) {
       const page = Number(url.searchParams.get('page') ?? '1');
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
   const visitMatch = path.match(/\/scheduled-visits(?:\/([0-9]+))?$/);
   if (visitMatch) {
     const visitId = visitMatch[1] ? Number(visitMatch[1]) : undefined;
-    const db = supabase.schema('alayacare').from('visit');
+    const db = supabase.schema('archicare').from('visit');
 
     if (req.method === 'GET' && !visitId) {
       const page = Number(url.searchParams.get('page') ?? '1');

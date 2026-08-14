@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AlayacareTopNav } from '@/components/AlayacareTopNav';
-import { AlayacareSidebar } from '@/components/AlayacareSidebar';
+import { ArchicareTopNav } from '@/components/ArchicareTopNav';
+import { ArchicareSidebar } from '@/components/ArchicareSidebar';
 
 const TABS = [
   { label: 'Live Dashboard', href: '/alayacare/dashboard' },
@@ -15,12 +15,12 @@ const TABS = [
   { label: 'Tasks' },
 ];
 
-export default function AlayacareLayout({ children }: { children: React.ReactNode }) {
+export default function ArchicareLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
     <div className="flex h-screen flex-col">
-      <AlayacareTopNav />
+      <ArchicareTopNav />
       <nav className="flex gap-6 border-b bg-white px-4 text-sm">
         {TABS.map((tab) =>
           tab.href ? (
@@ -41,7 +41,7 @@ export default function AlayacareLayout({ children }: { children: React.ReactNod
         )}
       </nav>
       <div className="flex flex-1 overflow-hidden">
-        <AlayacareSidebar />
+        <ArchicareSidebar />
         <main className="flex-1 overflow-auto bg-gray-50 p-6">{children}</main>
       </div>
     </div>

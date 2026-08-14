@@ -1,4 +1,4 @@
-export interface AlayacareClient {
+export interface ArchicareClient {
   client_id: string;
   salutation: string | null;
   first_name: string;
@@ -21,7 +21,7 @@ export interface AlayacareClient {
   createdon: string;
 }
 
-export interface AlayacareVisit {
+export interface ArchicareVisit {
   alayacare_visit_id: number;
   alayacare_service_id: number | null;
   employee_id: string | null;

@@ -81,17 +81,31 @@ for this reason — don't wire "Data Exploration" (still inert in
 evidence.
 
 Concretely, as it stands now:
-- **Visible brand chrome says "ArchiCare", not "AlayaCare"** — the
-  top nav wordmark (`components/AlayacareTopNav.tsx`) and the
-  cross-system switcher label were renamed on request. This is
-  cosmetic-only: the route path (`/alayacare/*`), component/file names,
-  Postgres schema (`alayacare`), Edge Function (`alayacare-api`), and
-  the `/alayacare/help` API reference content all stay as "Alayacare"
-  since they're technically accurate documentation of the real system
-  being emulated, not customer-facing brand chrome. Don't let a future
-  "rename it" request cascade into renaming the technical layer too
-  without asking — those are two different kinds of "name."
-- `components/AlayacareSidebar.tsx` — real inline SVG icons per nav item
+- **Visible brand chrome AND the internal technical layer both say
+  "ArchiCare" now** — this was a two-stage rename. First pass (cosmetic
+  only): the top nav wordmark and cross-system switcher label. Second
+  pass (explicit follow-up ask — "everything backend that says alayacare
+  needs to be changed to archicare"): Postgres schema (`alayacare` →
+  `archicare`, via `alter schema alayacare rename to archicare` in
+  `supabase/migrations/0005_rename_alayacare_to_archicare.sql`), Edge
+  Function (`alayacare-api` → `archicare-api`, old one deleted after
+  cutover), `reset-demo`'s `ALLOWED_SCHEMAS` entry, component/lib/type
+  names (`ArchicareTopNav`, `ArchicareSidebar`, `ArchicareIcons`,
+  `archicareApi.ts`/`archicareTypes.ts`, `ArchicareClient`/
+  `ArchicareVisit`, `useArchicareResource`), and the PostgREST exposed
+  schema list (Management API `db_schema` — `alayacare` swapped for
+  `archicare`).
+  **Two things were deliberately left alone, confirmed with the user
+  before doing the rename:** the route path (`/alayacare/*`) stays as
+  a URL — renaming it would break every internal link for no fidelity
+  benefit and wasn't asked for; and the actual captured wire format —
+  the REST path `/AlayaCare/v1/...` and field names
+  `alayacare_visit_id`/`alayacare_service_id` — stays exactly as
+  captured from real traffic, since that byte-for-byte fidelity is the
+  entire point of this project. If a future request says "rename
+  everything," re-confirm scope the same way rather than assuming it
+  includes the captured wire shape.
+- `components/ArchicareSidebar.tsx` — real inline SVG icons per nav item
   (stacked above the label), not bare text. Matches the reference
   screenshots' icon-above-label structure.
 - `components/MapPanel.tsx` — a purely decorative static map (inline
@@ -142,7 +156,7 @@ status stays a plain dropdown, no `checked_in_at`/`checked_out_at`
 fields exist. If asked to add it later, that's new schema, not an
 oversight to "restore."
 
-`alayacare.client` has grown several real, editable fields across
+`archicare.client` has grown several real, editable fields across
 follow-up migrations: `status` (Active/Inactive), a real address
 (`address_line`/`city`/`state`, alongside the original `zip`),
 `external_id` (a second identifier distinct from `client_id`/"AlayaCare
@@ -215,11 +229,11 @@ conversation that led to the pivot (originally this was going to be plain
 `supabase-js` calls from the browser; that was explicitly rejected mid-build).
 
 **Alayacare follows the identical pattern with a different wire format**:
-a second Edge Function, `alayacare-api`, exposes Alayacare's real REST API
+a second Edge Function, `archicare-api`, exposes ArchiCare's real REST API
 shape (`/AlayaCare/v1/<resource>[/<id>][?query]`, plain REST verbs, no
-OData) against a separate `alayacare` Postgres schema. Each system's shim
+OData) against a separate `archicare` Postgres schema. Each system's shim
 is independent — they don't share a translation layer, because the two
-real systems don't share a wire format. **Three of `alayacare-api`'s
+real systems don't share a wire format. **Three of `archicare-api`'s
 endpoints are captured-exact**, reproduced byte-for-byte from real traffic
 the user supplied (`GET client-profile/{id}`, `GET scheduled-visits`, `GET
 cancelled-visit/staff-contacts/{visit_id}` — yes, that last path name is
@@ -277,7 +291,7 @@ Opportunities (has lookups + `$expand`).
 ## Supabase project
 
 Project ref: `kjapsnzcaicecjnctmoh` (`https://kjapsnzcaicecjnctmoh.supabase.co`).
-One project for all of Decoy — `dynamics` and `alayacare` schemas both
+One project for all of Decoy — `dynamics` and `archicare` schemas both
 live here now; Epic will get its own Postgres schema (`epic`) in this same
 project too, not a new project.
 
@@ -289,9 +303,9 @@ there's no CLI command for it:
 curl -X PATCH "https://api.supabase.com/v1/projects/kjapsnzcaicecjnctmoh/postgrest" \
   -H "Authorization: Bearer <personal-access-token>" \
   -H "Content-Type: application/json" \
-  -d '{"db_schema":"public,graphql_public,dynamics,alayacare"}'
+  -d '{"db_schema":"public,graphql_public,dynamics,archicare"}'
 ```
-Without this, every `supabase-js` `.schema('alayacare')` call — from *both*
+Without this, every `supabase-js` `.schema('archicare')` call — from *both*
 the browser and Edge Functions — fails with `PGRST106: Invalid schema`,
 even using the service role key. Schema exposure is a PostgREST-layer
 setting, not an RLS/permissions thing.
@@ -349,7 +363,7 @@ for upstream changes first (`git fetch && git log HEAD..origin/master
 ```bash
 cd decoy-src
 SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy dataverse-api --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
-SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy alayacare-api --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
+SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy archicare-api --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
 SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy reset-demo --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
 ```
 `--no-verify-jwt` is required — Decoy has no login of its own (deliberate;
@@ -375,7 +389,7 @@ Management API rather than a local Docker Postgres.)
 - **Never use emoji as structural icons** — an early Alayacare pass used
   emoji (⚠️📍📞🏷️ etc.) for icons throughout the Clients page and Risks
   section; caught by the `ui-ux-pro-max` skill's own checklist and
-  replaced with a proper inline SVG set (`components/AlayacareIcons.tsx`).
+  replaced with a proper inline SVG set (`components/ArchicareIcons.tsx`).
   Emoji are font-dependent, inconsistent across platforms, and can't be
   themed — use SVG icons from that shared file (or add to it) for any
   new icon need in this system.
@@ -387,14 +401,14 @@ Management API rather than a local Docker Postgres.)
   present in `SKILL.md` even though the executable tooling isn't).
 - **Every `useXTable`/`useXResource` hook is generic over `T extends
   object`, not `Record<string, unknown>`** — plain TS interfaces
-  (`Account`, `Contact`, `AlayacareClient`, ...) have no index signature and
+  (`Account`, `Contact`, `ArchicareClient`, ...) have no index signature and
   fail the stricter constraint. Hit this twice now (`useDataverseTable`,
-  then `useAlayacareResource`) — if you add a new typed hook, start with
+  then `useArchicareResource`) — if you add a new typed hook, start with
   `T extends object` and save yourself the round-trip.
 - **A Postgres sequence-based default (`default ('C' || lpad(nextval(...)))`)
   doesn't advance when a row is inserted with an explicit literal value for
-  that column.** The `alayacare.client` seed data uses literal `client_id`
-  values (`C0100001`-`C0100005`) so the sequence never moves — the first
+  that column.** The `archicare.client` seed data uses literal `client_id`
+  values (`C0100001`-`C0100020`) so the sequence never moves — the first
   real auto-generated id came back as `C0100000`, colliding with/preceding
   the seeded range, until the reset function's `alter sequence ... restart
   with 200000` was bumped well above it. Any new seeded table with a
@@ -414,7 +428,7 @@ Management API rather than a local Docker Postgres.)
 - **RLS policies on every schema's tables are fully permissive**
   (`using (true) with check (true)`) — this is intentional, not a
   placeholder to tighten later. Isolation between systems comes from the
-  Postgres **schema** boundary (`dynamics` vs `alayacare` vs a future
+  Postgres **schema** boundary (`dynamics` vs `archicare` vs a future
   `epic`), not from row-level rules. Don't add per-row restrictions unless
   a specific new requirement calls for it.
 - **Every Edge Function must handle CORS itself, including `OPTIONS`

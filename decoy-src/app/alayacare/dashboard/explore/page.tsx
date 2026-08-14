@@ -1,11 +1,11 @@
 'use client';
 
-import { useAlayacareResource } from '@/lib/alayacareApi';
+import { useArchicareResource } from '@/lib/archicareApi';
 import { TrendChart } from '@/components/TrendChart';
 import { DonutChart } from '@/components/DonutChart';
 import { BarList } from '@/components/BarList';
 import { ExploreBar } from '@/components/ExploreBar';
-import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
+import type { ArchicareClient, ArchicareVisit } from '@/lib/archicareTypes';
 
 // A saved custom dashboard under the "Live Dashboard" tab -- confirmed by a
 // full-resolution official screenshot showing "Live Dashboard" highlighted
@@ -18,8 +18,8 @@ function dayLabel(dateStr: string): string {
 }
 
 export default function ExploreDashboardPage() {
-  const { rows: clients, loading: clientsLoading } = useAlayacareResource<AlayacareClient>('client-profile');
-  const { rows: visits, loading: visitsLoading } = useAlayacareResource<AlayacareVisit>('scheduled-visits');
+  const { rows: clients, loading: clientsLoading } = useArchicareResource<ArchicareClient>('client-profile');
+  const { rows: visits, loading: visitsLoading } = useArchicareResource<ArchicareVisit>('scheduled-visits');
 
   if (clientsLoading || visitsLoading) return <p>Loading…</p>;
 
@@ -30,7 +30,7 @@ export default function ExploreDashboardPage() {
 
   const visitsByDay = Object.entries(
     visits
-      .filter((v): v is AlayacareVisit & { start_at: string } => v.start_at !== null)
+      .filter((v): v is ArchicareVisit & { start_at: string } => v.start_at !== null)
       .reduce<Record<string, number>>((acc, v) => {
         const key = v.start_at.slice(0, 10);
         acc[key] = (acc[key] ?? 0) + 1;

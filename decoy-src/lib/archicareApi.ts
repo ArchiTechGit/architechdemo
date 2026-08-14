@@ -1,11 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { CareTeamMember } from './alayacareTypes';
+import type { CareTeamMember } from './archicareTypes';
 
-const API_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/alayacare-api/AlayaCare/v1`;
+const API_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/archicare-api/AlayaCare/v1`;
 
-export function useAlayacareResource<T extends object>(
+export function useArchicareResource<T extends object>(
   resource: string,
   listParams: Record<string, string> = {},
 ) {

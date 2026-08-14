@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconPersonSilhouette } from './AlayacareIcons';
+import { IconPersonSilhouette } from './ArchicareIcons';
 
 interface NavItem {
   label: string;
@@ -99,7 +99,7 @@ const ITEMS: NavItem[] = [
   },
 ];
 
-export function AlayacareSidebar() {
+export function ArchicareSidebar() {
   const pathname = usePathname();
 
   return (
