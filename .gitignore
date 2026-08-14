@@ -4,6 +4,8 @@
 
 # Build outputs (demo dist/ folders committed for GitHub Pages)
 build/
+decoy-src/.next
+decoy-src/out
 
 # Environment variables
 .env
