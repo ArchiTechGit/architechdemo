@@ -38,24 +38,56 @@ a care-team lookup, and a Live Dashboard, at `/alayacare/*`. Built from
 inferred like Dynamics' schema fidelity) — see Architecture below for
 which endpoints are captured-exact vs inferred.
 
-The UI/UX was deliberately reworked (after an initial pass that was
+The UI/UX went through two rework passes (after an initial pass that was
 fairly reported as "just Dynamics with different colors") to feel like
 the actual product, grounded in researching AlayaCare's real platform
 (Back Office Suite: scheduling, visit verification, coordination;
 Clinical Suite: care plans, forms, ADLs/vitals — see
 `docs/superpowers/specs/2026-08-14-decoy-alayacare-v1-design.md` for
-sources). Concretely: `app/alayacare/clients/page.tsx` is a tabbed chart
-(Overview/Demographics/Care Plan/Scheduling), not one flat form — Care
-Plan is an explicit inert placeholder (real module, no captured API to
-build against). `app/alayacare/schedules/page.tsx` groups visits under
-date headers (a roster), not a flat sortable table. The Live Dashboard
-matches the actual reference screenshot's panel shapes (a "Client Visit
-Summary" table + adjacent trend chart, then a status donut + upcoming-
-visits list) rather than the generic KPI-tile row the Dynamics dashboard
-uses. **Clock-in/clock-out (Visit Verification) was explicitly declined**
-— status stays a plain dropdown, no `checked_in_at`/`checked_out_at`
+sources) plus several real product screenshots the user supplied over
+time. **When a later real screenshot conflicts with an earlier guess,
+the later real one wins** — e.g. the dashboard was originally built
+against a loading-*skeleton* screenshot (guessed panel shapes from grey
+placeholder blocks) and then rebuilt against an actual product-tour
+screenshot once that arrived, since the real layout turned out to be
+different (KPI tiles + activity feed, not a data-table-plus-chart).
+
+Concretely, as it stands now:
+- `app/alayacare/clients/page.tsx` — a tabbed chart (Overview /
+  Demographics / Care Plan / Scheduling), not one flat form. Care Plan is
+  an explicit inert placeholder (real module, no captured API to build
+  against). The list view has a sub-tab row (Client List real, the rest
+  inert) and a filter row (Status is a real functional filter; Groups/
+  Tags/Risk Level are decorative selects, no backing dimensions modeled).
+  Columns include **Risk Review / Risk Trend / Factors, which are
+  deliberately cosmetic** — see the `cosmeticRisk()` comment in that
+  file. They're a deterministic hash of `client_id`, not real risk
+  scoring. Client Intelligence (the real AlayaCare feature this mimics)
+  stays deferred — don't wire real logic into these columns without a
+  separate spec, and don't mistake the hash output for meaningful data
+  when reasoning about the app's behavior.
+- `app/alayacare/schedules/page.tsx` — groups visits under date headers
+  (a roster), not a flat sortable table.
+- `app/alayacare/dashboard/page.tsx` — a KPI tile row (Scheduled/Vacant/
+  Late/Cancelled Visits, Active Clients, Care Team Members — all real,
+  computed from actual data) plus a "Real Time Activity" feed (real
+  visits ordered by creation time, message text repurposed from the real
+  product's clock-in/form-fill feed semantics since we don't model
+  those). The real product's KPI row also has tiles for mobile clock-in,
+  employee skills/certs, forms approval, shift offers, and family
+  portal — all skipped, not faked, since none of those features are
+  modeled. Its Map panel (live GPS staff pins) is skipped entirely — no
+  coordinate data exists and building one would be disproportionate.
+
+**Clock-in/clock-out (Visit Verification) was explicitly declined** —
+status stays a plain dropdown, no `checked_in_at`/`checked_out_at`
 fields exist. If asked to add it later, that's new schema, not an
 oversight to "restore."
+
+`alayacare.client` also has `status` (Active/Inactive) and a real
+address (`address_line`/`city`/`state`, alongside the original `zip`)
+added in a follow-up migration — these are real, editable fields, not
+cosmetic like the risk columns.
 
 A **cross-system switcher** banner (`components/SystemSwitcher.tsx`,
 wired into the root `app/layout.tsx`) sits above both systems' own top
