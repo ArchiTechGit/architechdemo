@@ -9,7 +9,15 @@ backend using each real system's actual API shape, so network traffic in a
 demo looks identical to a genuine integration against that system.
 
 v1 (done): Microsoft Dynamics 365 (Dataverse) — Accounts, Contacts,
-Opportunities, Leads, Notes.
+Opportunities, Leads, Notes, and a Sales Dashboard (KPI tiles + bar-list
+charts, styled like a real D365 dashboard but computed client-side from
+Decoy's own live data — see `app/dynamics/dashboard/page.tsx`). Dashboard
+is the landing page after `/decoy/`, matching real D365 behavior.
+
+UI chrome (top command bar, left sidebar nav, chevron stage tracker on
+Opportunities/Leads) is styled to match real D365 — see `components/TopNav.tsx`
+(command bar), `components/Sidebar.tsx` (nav, some items are inert — no
+backing page yet, e.g. Calendar/Tasks/Forecasts), `components/StageTracker.tsx`.
 
 Not yet built: Alayacare (aged-care EMR/PAS), Epic (FHIR EHR). Build order
 is Dynamics → Alayacare → Epic (Epic is hardest — nested FHIR resources,
