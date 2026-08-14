@@ -15,6 +15,35 @@ function Svg({ children, size = 16 }: { children: React.ReactNode; size?: number
   );
 }
 
+export const IconArrowUp = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M12 19V5" />
+    <path d="m6 11 6-6 6 6" />
+  </Svg>
+);
+
+export const IconArrowDown = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M12 5v14" />
+    <path d="m18 13-6 6-6-6" />
+  </Svg>
+);
+
+export const IconArrowRight = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M5 12h14" />
+    <path d="m13 6 6 6-6 6" />
+  </Svg>
+);
+
+export const IconDownload = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M12 4v11" />
+    <path d="m7 10 5 5 5-5" />
+    <path d="M5 20h14" />
+  </Svg>
+);
+
 export const IconSearch = (p: { size?: number }) => (
   <Svg {...p}>
     <circle cx="11" cy="11" r="7" />

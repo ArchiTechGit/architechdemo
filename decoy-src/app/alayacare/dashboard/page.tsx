@@ -3,6 +3,7 @@
 import { useAlayacareResource } from '@/lib/alayacareApi';
 import { StatTile } from '@/components/StatTile';
 import { MapPanel } from '@/components/MapPanel';
+import { ExploreBar } from '@/components/ExploreBar';
 import { IconClock, IconXCircle, IconUser, IconUsers } from '@/components/AlayacareIcons';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
@@ -61,6 +62,8 @@ export default function AlayacareDashboardPage() {
 
   return (
     <div className="space-y-4">
+      <ExploreBar />
+
       <h1 className="text-lg font-semibold text-gray-700">Live Dashboard</h1>
 
       <div>

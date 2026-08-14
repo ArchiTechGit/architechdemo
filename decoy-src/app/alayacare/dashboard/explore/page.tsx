@@ -4,15 +4,15 @@ import { useAlayacareResource } from '@/lib/alayacareApi';
 import { TrendChart } from '@/components/TrendChart';
 import { DonutChart } from '@/components/DonutChart';
 import { BarList } from '@/components/BarList';
+import { ExploreBar } from '@/components/ExploreBar';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
-// This is a distinct real screen from the KPI/Activity "Live Dashboard" --
-// AlayaCare's "Dashboard" section has a separate Explore/BI area for
-// saved custom reports (the "> Explore / Save as Home Screen" chrome
-// below is decorative, matching that area's real chrome). Financial
-// columns (Bill Rate Sum / Cost of Service / Profitability) show "--"
-// rather than fabricated dollar figures -- no billing data is modeled
-// in this demo. See CLAUDE.md.
+// A saved custom dashboard under the "Live Dashboard" tab -- confirmed by a
+// full-resolution official screenshot showing "Live Dashboard" highlighted
+// active while this content renders, with an ">Explore" picker above it
+// (see ExploreBar). Not a separate tab. Financial columns (Bill Rate Sum /
+// Cost of Service / Profitability) show "--" rather than fabricated dollar
+// figures -- no billing data is modeled in this demo. See CLAUDE.md.
 function dayLabel(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' });
 }
@@ -52,20 +52,7 @@ export default function ExploreDashboardPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-white px-3 py-2 text-sm text-gray-500">
-        <div className="flex items-center gap-2">
-          <span>›</span>
-          <span>Explore</span>
-          <select disabled title="Not part of this demo" className="rounded border p-1 text-xs text-gray-400">
-            <option>Do not send</option>
-          </select>
-          <button disabled title="Not part of this demo" className="rounded border px-2 py-1 text-xs text-gray-300">Save as Home Screen</button>
-        </div>
-        <div className="flex items-center gap-2">
-          <button disabled title="Not part of this demo" className="rounded border px-2 py-1 text-xs text-gray-400">What&apos;s New</button>
-          <button disabled title="Not part of this demo" className="rounded border px-2 py-1 text-xs text-gray-400">Support</button>
-        </div>
-      </div>
+      <ExploreBar />
 
       <h1 className="text-lg font-semibold text-gray-700">Admin&apos;s Exec Dashboard</h1>
 

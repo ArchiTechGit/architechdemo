@@ -10,7 +10,8 @@ const TABS = [
   { label: 'Visit Reports' },
   { label: 'Forms' },
   { label: 'Client Intake' },
-  { label: 'Data Exploration', href: '/alayacare/dashboard/explore' },
+  { label: 'Marketplace' },
+  { label: 'Data Exploration' },
   { label: 'Tasks' },
 ];
 
@@ -27,7 +28,7 @@ export default function AlayacareLayout({ children }: { children: React.ReactNod
               key={tab.label}
               href={tab.href}
               className={`border-b-2 px-1 py-3 ${
-                pathname === tab.href ? 'border-blue-700 font-medium text-blue-800' : 'border-transparent text-gray-500'
+                pathname?.startsWith(tab.href) ? 'border-blue-700 font-medium text-blue-800' : 'border-transparent text-gray-500'
               }`}
             >
               {tab.label}

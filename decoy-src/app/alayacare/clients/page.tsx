@@ -14,6 +14,11 @@ import {
   IconClock,
   IconChevronDown,
   IconSettings,
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowRight,
+  IconDownload,
+  IconSearch,
   RISK_CATEGORY_ICON_PATHS,
 } from '@/components/AlayacareIcons';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
@@ -55,21 +60,28 @@ const TABS = [
 type Tab = (typeof TABS)[number];
 const REAL_TABS: Tab[] = ['Overview', 'Client Info', 'Scheduling'];
 
-const SUB_TABS = ['Client List', 'Services List', 'My Client Service List', 'Client Charts', 'Facility List', 'Notable'] as const;
+const SUB_TABS = ['List', 'Groups', 'Services', 'My Services', 'Charts', 'Facilities'] as const;
 
 // Cosmetic only -- Client Intelligence (real risk scoring from hospitalisation/
 // fall/pain-mention events) was explicitly deferred. These are stable,
 // deterministic per-client decorations for visual match with the reference
 // screenshot, not computed from any real event data. Never wire real logic
-// into these without a separate spec -- see CLAUDE.md.
+// into these without a separate spec -- see CLAUDE.md. Same for the Groups
+// tag below the row -- no Groups entity is modeled, this is a fixed label
+// picked deterministically from client_id, purely for visual match.
 const RISK_LEVELS = ['High', 'Medium', 'Low'] as const;
-const RISK_TRENDS = ['Up', 'Down', 'Stable'] as const;
+const RISK_TRENDS = [
+  { label: 'Up', icon: <IconArrowUp key="u" size={11} />, tone: 'bg-red-50 text-red-700' },
+  { label: 'Stable', icon: <IconArrowRight key="s" size={11} />, tone: 'bg-orange-50 text-orange-700' },
+  { label: 'Down', icon: <IconArrowDown key="d" size={11} />, tone: 'bg-teal-50 text-teal-700' },
+] as const;
 const RISK_FACTOR_ICONS = [
   <IconWarningTriangle key="w" size={14} />,
   <IconClipboard key="c" size={14} />,
   <IconClock key="t" size={14} />,
   <IconUser key="u" size={14} />,
 ];
+const GROUP_LABELS = ['2 Groups', 'Attleboro', 'Rapids Suite', 'Beaumont', '3 Groups', 'WB Group', '6 Groups'];
 
 function hashString(value: string): number {
   let hash = 0;
@@ -87,7 +99,8 @@ function cosmeticRisk(clientId: string) {
   const reviewedAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
   const factorCount = (hash % 3) + 1;
   const factors = RISK_FACTOR_ICONS.slice(0, factorCount);
-  return { level, trend, daysAgo, reviewedAt, factors };
+  const group = GROUP_LABELS[hash % GROUP_LABELS.length];
+  return { level, trend, daysAgo, reviewedAt, factors, group };
 }
 
 function age(birthday: string | null): string {
@@ -107,6 +120,7 @@ export default function ClientsPage() {
   const [form, setForm] = useState<FormState>(BLANK);
   const [tab, setTab] = useState<Tab>('Overview');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>('Active');
+  const [search, setSearch] = useState('');
 
   function selectRow(row: AlayacareClient) {
     setSelectedId(row.client_id);
@@ -161,7 +175,13 @@ export default function ClientsPage() {
 
   const selected = rows.find((r) => r.client_id === selectedId);
   const clientVisits = selectedId ? visits.filter((v) => v.client_id === selectedId) : [];
-  const visibleRows = statusFilter === 'All' ? rows : rows.filter((r) => r.status === statusFilter);
+  const visibleRows = rows
+    .filter((r) => statusFilter === 'All' || r.status === statusFilter)
+    .filter((r) => {
+      const q = search.trim().toLowerCase();
+      if (!q) return true;
+      return `${r.first_name} ${r.last_name}`.toLowerCase().includes(q);
+    });
 
   if (loading) return <p>Loading…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
@@ -185,7 +205,7 @@ export default function ClientsPage() {
         <div className="rounded border bg-white shadow-sm">
           <div className="flex items-center justify-between border-b px-4 py-2">
             <h2 className="text-sm font-semibold text-gray-700">Client List</h2>
-            <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
+            <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">+ Client</button>
           </div>
           <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-4 py-2 text-xs">
             {statusFilter === 'All' ? (
@@ -207,8 +227,27 @@ export default function ClientsPage() {
               Tags: All <IconChevronDown size={12} />
             </span>
             <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
+              Latest Risk Review: All <IconChevronDown size={12} />
+            </span>
+            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
               Risk Level: All <IconChevronDown size={12} />
             </span>
+            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
+              Risk Trend: All <IconChevronDown size={12} />
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <button disabled title="Not part of this demo" className="rounded border bg-white p-1.5 text-gray-400"><IconDownload size={13} /></button>
+              <button disabled title="Not part of this demo" className="rounded border bg-white p-1.5 text-gray-400"><IconSettings size={13} /></button>
+              <div className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-500">
+                <IconSearch size={12} />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Find"
+                  className="w-20 border-none p-0 text-xs outline-none"
+                />
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
@@ -219,6 +258,7 @@ export default function ClientsPage() {
                   <th className="p-2 font-medium">DOB</th>
                   <th className="p-2 font-medium">Status</th>
                   <th className="p-2 font-medium">Address</th>
+                  <th className="p-2 font-medium"><span className="flex items-center gap-1">Groups <IconChevronDown size={11} /></span></th>
                   <th className="p-2 font-medium"><span className="flex items-center gap-1">Risk Review <IconChevronDown size={11} /></span></th>
                   <th className="p-2 font-medium">Risk Trend</th>
                   <th className="p-2 font-medium"><span className="flex items-center gap-1">Factors <IconChevronDown size={11} /></span></th>
@@ -242,6 +282,7 @@ export default function ClientsPage() {
                         </span>
                       </td>
                       <td className="p-2 whitespace-nowrap text-gray-600">{row.address_line}, {row.city}</td>
+                      <td className="p-2 whitespace-nowrap text-gray-500">{risk.group}</td>
                       <td className="p-2 whitespace-nowrap text-gray-500">
                         <div>{risk.daysAgo === 1 ? 'Yesterday' : `${risk.daysAgo} days ago`}</div>
                         <div className="text-[10px] text-gray-400">
@@ -249,9 +290,14 @@ export default function ClientsPage() {
                         </div>
                       </td>
                       <td className="p-2">
-                        <span className={`rounded px-2 py-0.5 text-xs font-medium ${risk.level === 'High' ? 'bg-red-100 text-red-800' : risk.level === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                          {risk.level} · {risk.trend}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`w-fit rounded px-2 py-0.5 text-xs font-medium ${risk.level === 'High' ? 'bg-red-100 text-red-800' : risk.level === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                            {risk.level}
+                          </span>
+                          <span className={`flex w-fit items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ${risk.trend.tone}`}>
+                            {risk.trend.icon} {risk.trend.label}
+                          </span>
+                        </div>
                       </td>
                       <td className="p-2">
                         <div className="flex gap-1 text-gray-500">{risk.factors}</div>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { resetDemoData } from '@/lib/resetDemoData';
-import { IconSearch, IconMail, IconApps, IconChat, IconLogout, IconChevronDown } from './AlayacareIcons';
+import { IconSearch, IconMail, IconLogout, IconChevronDown } from './AlayacareIcons';
 
 export function AlayacareTopNav() {
   const [resetting, setResetting] = useState(false);
@@ -28,7 +28,6 @@ export function AlayacareTopNav() {
         <div className="flex w-72 items-center gap-2 rounded bg-white px-3 py-1.5 text-sm text-gray-500">
           <IconSearch size={15} />
           <span className="flex-1">Search</span>
-          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400">⌘K</span>
         </div>
       </div>
       <div className="flex items-center gap-3 text-sm text-white/80">
@@ -43,13 +42,14 @@ export function AlayacareTopNav() {
         >
           {resetting ? 'Resetting…' : 'Reset demo data'}
         </button>
-        <span className="hidden lg:inline">HQ</span>
+        <span className="hidden lg:inline">Admin</span>
         <span className="flex items-center gap-1 rounded px-1.5 py-1 text-xs hover:bg-white/10" title="Not part of this demo">
-          America/Toronto <IconChevronDown size={12} />
+          Australia / Victoria <IconChevronDown size={12} />
+        </span>
+        <span className="hidden items-center gap-1 rounded border border-white/30 px-2 py-1 text-xs xl:flex" title="Not part of this demo">
+          Switch to <span className="rounded bg-white/10 px-1.5">HQ</span>
         </span>
         <button title="Mail" className="rounded p-1.5 hover:bg-white/10"><IconMail size={17} /></button>
-        <button title="Apps" className="rounded p-1.5 hover:bg-white/10"><IconApps size={17} /></button>
-        <button title="Chat" className="rounded p-1.5 hover:bg-white/10"><IconChat size={17} /></button>
         <button title="Log out" className="rounded p-1.5 hover:bg-white/10"><IconLogout size={17} /></button>
       </div>
     </header>
