@@ -213,7 +213,8 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className={panelOpen ? 'grid grid-cols-2 gap-6' : 'grid grid-cols-1 gap-6'}>
+      <div className="grid grid-cols-1 gap-6">
+        {!panelOpen && (
         <div className="rounded border bg-white shadow-sm">
           <div className="flex items-center justify-between border-b px-4 py-2">
             <h2 className="text-sm font-semibold text-gray-700">Client List</h2>
@@ -336,6 +337,7 @@ export default function ClientsPage() {
             </table>
           </div>
         </div>
+        )}
 
         {panelOpen && (
         <div className="rounded bg-white shadow-sm">
@@ -343,10 +345,9 @@ export default function ClientsPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setPanelOpen(false)}
-                title="Back to list"
-                className="mr-1 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="mr-1 flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
               >
-                ✕
+                ← Back
               </button>
               <span className="flex h-12 w-12 items-center justify-center rounded bg-blue-100 text-sm font-semibold text-blue-800">
                 {form.first_name || form.last_name ? initials(form.first_name, form.last_name) : '—'}
