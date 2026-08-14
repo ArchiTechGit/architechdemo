@@ -1,6 +1,6 @@
 import './globals.css';
 
-export const metadata = { title: 'Decoy' };
+export const metadata = { title: "Decoy - ArchiTech's own CRM/EMR/PAS/EHR Simulator" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
