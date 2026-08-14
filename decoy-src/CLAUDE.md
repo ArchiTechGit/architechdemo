@@ -345,6 +345,19 @@ Management API rather than a local Docker Postgres.)
 
 ## Key gotchas hit during the build (avoid re-discovering these)
 
+- **Never use emoji as structural icons** — an early Alayacare pass used
+  emoji (⚠️📍📞🏷️ etc.) for icons throughout the Clients page and Risks
+  section; caught by the `ui-ux-pro-max` skill's own checklist and
+  replaced with a proper inline SVG set (`components/AlayacareIcons.tsx`).
+  Emoji are font-dependent, inconsistent across platforms, and can't be
+  themed — use SVG icons from that shared file (or add to it) for any
+  new icon need in this system.
+- **The `ui-ux-pro-max` skill's `scripts/search.py` and `data/` aren't
+  actually installed in this environment** — both are tiny stub files
+  (~30 bytes), not the real script/CSV data described in `SKILL.md`.
+  Don't waste a turn trying to run its CLI; apply the skill's embedded
+  Quick Reference / Common Rules tables directly instead (they're fully
+  present in `SKILL.md` even though the executable tooling isn't).
 - **Every `useXTable`/`useXResource` hook is generic over `T extends
   object`, not `Record<string, unknown>`** — plain TS interfaces
   (`Account`, `Contact`, `AlayacareClient`, ...) have no index signature and
