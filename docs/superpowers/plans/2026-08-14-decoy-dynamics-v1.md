@@ -1730,10 +1730,10 @@ git commit -m "feat(decoy): add leads list/detail page"
 
 **Files:**
 - Create: `wxcc-build/decoy/` (build output, copied — not hand-written)
-- Modify: `wxcc-build/index.html` (add TOC row)
 
 **Interfaces:**
 - Consumes: `decoy-src/out/` produced by `npm run build` (Task 1's build target, now with real pages from Tasks 7–10).
+- Produces: `wxcc-build/decoy/` populated with the static site. Task 12 links to it from the root TOC.
 
 - [ ] **Step 1: Build the static export**
 
@@ -1751,19 +1751,40 @@ mkdir -p decoy
 cp -r decoy-src/out/. decoy/
 ```
 
-- [ ] **Step 3: Add a TOC row to root `index.html`**
-
-Open `index.html`, find the existing table of demo links (same pattern used for `wxccroi`, `wxcc`, `emrdemo` rows), and add a row for Decoy following that exact markup pattern, pointing at `/decoy/`, numbered as the next sequential entry, labelled e.g. "Decoy — Dynamics 365 CRM Demo".
-
-- [ ] **Step 4: Verify locally**
+- [ ] **Step 3: Verify locally**
 
 Serve the repo root with any static file server (e.g. `npx serve .`) and open `/decoy/`. Expected: redirects to `/decoy/dynamics/accounts`, nav works, all four pages load data over the `dataverse-api` function (check Network tab shows `/api/data/v9.2/...` URLs), Reset button hits the `reset-demo` function and reloads seeded data.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add decoy index.html
+git add decoy
 git commit -m "feat(decoy): build and deploy dynamics v1 to /decoy/"
+```
+
+---
+
+### Task 12: Add Decoy to the site TOC
+
+**Files:**
+- Modify: `wxcc-build/index.html` (add TOC row)
+
+**Interfaces:**
+- Consumes: `wxcc-build/decoy/` from Task 11 (the row's link target).
+
+- [ ] **Step 1: Add a TOC row to root `index.html`**
+
+Open `index.html`, find the existing table of demo links (same pattern used for `wxccroi`, `wxcc`, `emrdemo` rows), and add a row for Decoy following that exact markup pattern, pointing at `/decoy/`, numbered as the next sequential entry, labelled e.g. "Decoy — Dynamics 365 CRM Demo".
+
+- [ ] **Step 2: Verify locally**
+
+Serve the repo root with any static file server (e.g. `npx serve .`), open the root `index.html`, and confirm the new row renders and its link opens `/decoy/` correctly.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat(decoy): add Decoy to the site TOC"
 ```
 
 ---
