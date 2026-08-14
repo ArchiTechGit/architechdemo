@@ -16,7 +16,7 @@ export interface LookupConfig {
   [column: string]: { bindProperty: string; targetSet: string };
 }
 
-export function useDataverseTable<T extends Record<string, unknown>>(
+export function useDataverseTable<T extends object>(
   entitySet: string,
   lookups: LookupConfig = {},
   expand?: string,
@@ -43,7 +43,7 @@ export function useDataverseTable<T extends Record<string, unknown>>(
   }, [refresh]);
 
   function toWireBody(values: Partial<T>) {
-    const out: Record<string, unknown> = { ...values };
+    const out: Record<string, unknown> = { ...(values as Record<string, unknown>) };
     for (const [column, lookup] of Object.entries(lookups)) {
       if (column in out) {
         const value = out[column];
