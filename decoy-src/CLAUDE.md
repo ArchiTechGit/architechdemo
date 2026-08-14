@@ -38,6 +38,25 @@ a care-team lookup, and a Live Dashboard, at `/alayacare/*`. Built from
 inferred like Dynamics' schema fidelity) — see Architecture below for
 which endpoints are captured-exact vs inferred.
 
+The UI/UX was deliberately reworked (after an initial pass that was
+fairly reported as "just Dynamics with different colors") to feel like
+the actual product, grounded in researching AlayaCare's real platform
+(Back Office Suite: scheduling, visit verification, coordination;
+Clinical Suite: care plans, forms, ADLs/vitals — see
+`docs/superpowers/specs/2026-08-14-decoy-alayacare-v1-design.md` for
+sources). Concretely: `app/alayacare/clients/page.tsx` is a tabbed chart
+(Overview/Demographics/Care Plan/Scheduling), not one flat form — Care
+Plan is an explicit inert placeholder (real module, no captured API to
+build against). `app/alayacare/schedules/page.tsx` groups visits under
+date headers (a roster), not a flat sortable table. The Live Dashboard
+matches the actual reference screenshot's panel shapes (a "Client Visit
+Summary" table + adjacent trend chart, then a status donut + upcoming-
+visits list) rather than the generic KPI-tile row the Dynamics dashboard
+uses. **Clock-in/clock-out (Visit Verification) was explicitly declined**
+— status stays a plain dropdown, no `checked_in_at`/`checked_out_at`
+fields exist. If asked to add it later, that's new schema, not an
+oversight to "restore."
+
 A **cross-system switcher** banner (`components/SystemSwitcher.tsx`,
 wired into the root `app/layout.tsx`) sits above both systems' own top
 bars, linking `/dynamics/dashboard` ↔ `/alayacare/dashboard`. It's global
