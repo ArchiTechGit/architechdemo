@@ -38,56 +38,89 @@ a care-team lookup, and a Live Dashboard, at `/alayacare/*`. Built from
 inferred like Dynamics' schema fidelity) — see Architecture below for
 which endpoints are captured-exact vs inferred.
 
-The UI/UX went through two rework passes (after an initial pass that was
-fairly reported as "just Dynamics with different colors") to feel like
-the actual product, grounded in researching AlayaCare's real platform
-(Back Office Suite: scheduling, visit verification, coordination;
-Clinical Suite: care plans, forms, ADLs/vitals — see
+The UI/UX went through several rework passes (after an initial pass that
+was fairly reported as "just Dynamics with different colors") to feel
+like the actual product, grounded in researching AlayaCare's real
+platform (Back Office Suite: scheduling, visit verification,
+coordination; Clinical Suite: care plans, forms, ADLs/vitals — see
 `docs/superpowers/specs/2026-08-14-decoy-alayacare-v1-design.md` for
-sources) plus several real product screenshots the user supplied over
-time. **When a later real screenshot conflicts with an earlier guess,
-the later real one wins** — e.g. the dashboard was originally built
-against a loading-*skeleton* screenshot (guessed panel shapes from grey
-placeholder blocks) and then rebuilt against an actual product-tour
-screenshot once that arrived, since the real layout turned out to be
-different (KPI tiles + activity feed, not a data-table-plus-chart).
+sources) plus a growing set of real product screenshots the user
+supplied over time. **When a later real screenshot conflicts with an
+earlier guess, the later real one wins, and earlier guesses get thrown
+out, not layered on top** — this has happened repeatedly: the dashboard
+was first built against a loading-*skeleton* screenshot (guessed panel
+shapes from grey placeholder blocks), then rebuilt against a real
+product-tour screenshot once that arrived (KPI tiles + Real Time
+Activity + Map, not a data-table-plus-chart); the client detail page's
+tab set was first invented (Overview/Demographics/Care Plan/Scheduling),
+then replaced outright once a real client-detail screenshot arrived
+(Overview/Client Info/Scheduling/Care Management/Care Delivery/
+Accounting/Events/Patient Risk Dashboard). Expect more of this as more
+real screenshots show up — don't treat any current layout as settled.
 
 Concretely, as it stands now:
-- `app/alayacare/clients/page.tsx` — a tabbed chart (Overview /
-  Demographics / Care Plan / Scheduling), not one flat form. Care Plan is
-  an explicit inert placeholder (real module, no captured API to build
-  against). The list view has a sub-tab row (Client List real, the rest
-  inert) and a filter row (Status is a real functional filter; Groups/
-  Tags/Risk Level are decorative selects, no backing dimensions modeled).
-  Columns include **Risk Review / Risk Trend / Factors, which are
-  deliberately cosmetic** — see the `cosmeticRisk()` comment in that
-  file. They're a deterministic hash of `client_id`, not real risk
-  scoring. Client Intelligence (the real AlayaCare feature this mimics)
-  stays deferred — don't wire real logic into these columns without a
-  separate spec, and don't mistake the hash output for meaningful data
-  when reasoning about the app's behavior.
+- **Visible brand chrome says "ArchiTech Care", not "AlayaCare"** — the
+  top nav wordmark (`components/AlayacareTopNav.tsx`) and the
+  cross-system switcher label were renamed on request. This is
+  cosmetic-only: the route path (`/alayacare/*`), component/file names,
+  Postgres schema (`alayacare`), Edge Function (`alayacare-api`), and
+  the `/alayacare/help` API reference content all stay as "Alayacare"
+  since they're technically accurate documentation of the real system
+  being emulated, not customer-facing brand chrome. Don't let a future
+  "rename it" request cascade into renaming the technical layer too
+  without asking — those are two different kinds of "name."
+- `components/AlayacareSidebar.tsx` — real inline SVG icons per nav item
+  (stacked above the label), not bare text. Matches the reference
+  screenshots' icon-above-label structure.
+- `components/MapPanel.tsx` — a purely decorative static map (inline
+  SVG roads + a pin + a fixed tooltip card), added to the dashboard
+  beside Real Time Activity. No real coordinate data exists anywhere in
+  this schema (clients only have city/postcode text) — this can never
+  become a real interactive map without adding real geo data first.
+- `app/alayacare/clients/page.tsx` — a tabbed chart. Real tabs: Overview
+  (Client Information block, Risks, Services — all editable), Client
+  Info (the granular demographics form: salutation, birthday, full
+  address, comms prefs), Scheduling (that client's visits). Inert tabs:
+  Care Management, Care Delivery, Accounting, Events, Patient Risk
+  Dashboard (`REAL_TABS` array in that file controls which are
+  clickable). The list view has a sub-tab row (Client List real, the
+  rest inert) and a filter row (Status is a real functional filter;
+  Groups/Tags/Risk Level are decorative selects, no backing dimensions
+  modeled). List columns include **Risk Review / Risk Trend / Factors,
+  which are deliberately cosmetic** — see the `cosmeticRisk()` comment
+  in that file. They're a deterministic hash of `client_id`, not real
+  risk scoring. Client Intelligence (the real AlayaCare feature this
+  mimics) stays deferred — don't wire real logic into these columns
+  without a separate spec, and don't mistake the hash output for
+  meaningful data when reasoning about the app's behavior. By contrast,
+  **Risks (free text) and Services (`text[]`) on the detail page are
+  real, editable fields** — the distinction is that these are just
+  case-manager-entered text/tags, cheap to make real, unlike Risk Trend
+  which would need real event data (hospitalisations, falls, pain
+  mentions) we don't have.
 - `app/alayacare/schedules/page.tsx` — groups visits under date headers
   (a roster), not a flat sortable table.
 - `app/alayacare/dashboard/page.tsx` — a KPI tile row (Scheduled/Vacant/
   Late/Cancelled Visits, Active Clients, Care Team Members — all real,
-  computed from actual data) plus a "Real Time Activity" feed (real
-  visits ordered by creation time, message text repurposed from the real
-  product's clock-in/form-fill feed semantics since we don't model
-  those). The real product's KPI row also has tiles for mobile clock-in,
-  employee skills/certs, forms approval, shift offers, and family
-  portal — all skipped, not faked, since none of those features are
-  modeled. Its Map panel (live GPS staff pins) is skipped entirely — no
-  coordinate data exists and building one would be disproportionate.
+  computed from actual data), a Map panel (see above, decorative), and
+  a "Real Time Activity" feed (real visits ordered by creation time,
+  message text repurposed from the real product's clock-in/form-fill
+  feed semantics since we don't model those). The real product's KPI
+  row also has tiles for mobile clock-in, employee skills/certs, forms
+  approval, shift offers, and family portal — all skipped, not faked,
+  since none of those features are modeled.
 
 **Clock-in/clock-out (Visit Verification) was explicitly declined** —
 status stays a plain dropdown, no `checked_in_at`/`checked_out_at`
 fields exist. If asked to add it later, that's new schema, not an
 oversight to "restore."
 
-`alayacare.client` also has `status` (Active/Inactive) and a real
-address (`address_line`/`city`/`state`, alongside the original `zip`)
-added in a follow-up migration — these are real, editable fields, not
-cosmetic like the risk columns.
+`alayacare.client` has grown several real, editable fields across
+follow-up migrations: `status` (Active/Inactive), a real address
+(`address_line`/`city`/`state`, alongside the original `zip`),
+`external_id` (a second identifier distinct from `client_id`/"AlayaCare
+ID"), `risks` (free text), and `services` (`text[]`). None of these are
+cosmetic like the list page's risk columns.
 
 A **cross-system switcher** banner (`components/SystemSwitcher.tsx`,
 wired into the root `app/layout.tsx`) sits above both systems' own top
