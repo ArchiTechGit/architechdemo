@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-const ALLOWED_SCHEMAS = ['dynamics'];
+const ALLOWED_SCHEMAS = ['dynamics', 'alayacare'];
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
