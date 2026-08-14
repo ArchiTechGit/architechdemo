@@ -32,11 +32,24 @@ bar's "?" icon) — keep it in sync whenever the `dataverse-api` entity sets,
 fields, or enum values change; it's the doc the client actually points
 Webex Contact Center flow integrations at, not just a nice-to-have.
 
-Next build: Alayacare (aged-care EMR/PAS), then Epic (FHIR EHR, hardest —
-nested FHIR resources, fake login screen).
+v1 (done): Alayacare (aged-care EMR/PAS) — Clients, Schedules (Visits),
+a care-team lookup, and a Live Dashboard, at `/alayacare/*`. Built from
+**real captured Alayacare API traffic** the user supplied (not just
+inferred like Dynamics' schema fidelity) — see Architecture below for
+which endpoints are captured-exact vs inferred.
 
-Full history: `docs/superpowers/specs/2026-08-14-decoy-design.md` and
-`docs/superpowers/plans/2026-08-14-decoy-dynamics-v1.md` in the repo root
+A **cross-system switcher** banner (`components/SystemSwitcher.tsx`,
+wired into the root `app/layout.tsx`) sits above both systems' own top
+bars, linking `/dynamics/dashboard` ↔ `/alayacare/dashboard`. It's global
+— every route under either system renders it.
+
+Next build: Epic (FHIR EHR, hardest — nested FHIR resources, fake login
+screen).
+
+Full history: `docs/superpowers/specs/2026-08-14-decoy-design.md`,
+`docs/superpowers/plans/2026-08-14-decoy-dynamics-v1.md`,
+`docs/superpowers/specs/2026-08-14-decoy-alayacare-v1-design.md`, and
+`docs/superpowers/plans/2026-08-14-decoy-alayacare-v1.md` in the repo root
 (one level up from this file) — read those for the reasoning behind design
 decisions, not just the what.
 
@@ -90,6 +103,23 @@ split — Dataverse Web API shim" section for the full reasoning and the
 conversation that led to the pivot (originally this was going to be plain
 `supabase-js` calls from the browser; that was explicitly rejected mid-build).
 
+**Alayacare follows the identical pattern with a different wire format**:
+a second Edge Function, `alayacare-api`, exposes Alayacare's real REST API
+shape (`/AlayaCare/v1/<resource>[/<id>][?query]`, plain REST verbs, no
+OData) against a separate `alayacare` Postgres schema. Each system's shim
+is independent — they don't share a translation layer, because the two
+real systems don't share a wire format. **Three of `alayacare-api`'s
+endpoints are captured-exact**, reproduced byte-for-byte from real traffic
+the user supplied (`GET client-profile/{id}`, `GET scheduled-visits`, `GET
+cancelled-visit/staff-contacts/{visit_id}` — yes, that last path name is
+real and stays even though it works for non-cancelled visits too, see the
+spec). Every write endpoint (POST/PATCH/DELETE) and the list-all
+`client-profile` GET are **inferred** — built to match the captured
+conventions, never observed in real traffic. `/alayacare/help` marks each
+endpoint Captured or Inferred explicitly; keep that distinction visible
+if you add more endpoints — don't let an inferred addition read as
+equally certain to a captured one.
+
 ## Schema fidelity — how far it goes, and how far it doesn't
 
 Tables and columns use real Dataverse **logical names**: `account.accountid`,
@@ -136,9 +166,9 @@ Opportunities (has lookups + `$expand`).
 ## Supabase project
 
 Project ref: `kjapsnzcaicecjnctmoh` (`https://kjapsnzcaicecjnctmoh.supabase.co`).
-One project for all of Decoy — Alayacare and Epic will get their own
-Postgres **schemas** (`alayacare`, `epic`) in this same project, not new
-projects.
+One project for all of Decoy — `dynamics` and `alayacare` schemas both
+live here now; Epic will get its own Postgres schema (`epic`) in this same
+project too, not a new project.
 
 **Non-obvious setup step:** PostgREST only exposes `public`/`graphql_public`
 by default. Any new schema (this project already did it for `dynamics`)
@@ -208,6 +238,7 @@ for upstream changes first (`git fetch && git log HEAD..origin/master
 ```bash
 cd decoy-src
 SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy dataverse-api --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
+SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy alayacare-api --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
 SUPABASE_ACCESS_TOKEN=<token> npx supabase functions deploy reset-demo --project-ref kjapsnzcaicecjnctmoh --no-verify-jwt
 ```
 `--no-verify-jwt` is required — Decoy has no login of its own (deliberate;
@@ -230,10 +261,20 @@ Management API rather than a local Docker Postgres.)
 
 ## Key gotchas hit during the build (avoid re-discovering these)
 
-- **`useDataverseTable<T>` is generic over `T extends object`, not
-  `Record<string, unknown>`** — plain TS interfaces (`Account`, `Contact`,
-  ...) have no index signature and fail the stricter constraint. If you add
-  a new typed table hook, don't tighten this back up.
+- **Every `useXTable`/`useXResource` hook is generic over `T extends
+  object`, not `Record<string, unknown>`** — plain TS interfaces
+  (`Account`, `Contact`, `AlayacareClient`, ...) have no index signature and
+  fail the stricter constraint. Hit this twice now (`useDataverseTable`,
+  then `useAlayacareResource`) — if you add a new typed hook, start with
+  `T extends object` and save yourself the round-trip.
+- **A Postgres sequence-based default (`default ('C' || lpad(nextval(...)))`)
+  doesn't advance when a row is inserted with an explicit literal value for
+  that column.** The `alayacare.client` seed data uses literal `client_id`
+  values (`C0100001`-`C0100005`) so the sequence never moves — the first
+  real auto-generated id came back as `C0100000`, colliding with/preceding
+  the seeded range, until the reset function's `alter sequence ... restart
+  with 200000` was bumped well above it. Any new seeded table with a
+  sequence-backed id column needs the same restart-value gap.
 - **`supabase/functions/**` is excluded from `decoy-src/tsconfig.json`** —
   those files are Deno runtime (`Deno.serve`, `https://esm.sh/...` remote
   imports), not part of the Next.js TS project. `npx tsc --noEmit` from
@@ -246,12 +287,12 @@ Management API rather than a local Docker Postgres.)
   page, then `curl` against the deployed Edge Function for each HTTP verb
   once a real project existed. Follow that pattern for new work rather than
   introducing a test runner.
-- **RLS policies on `dynamics.*` are fully permissive** (`using (true) with
-  check (true)`) — this is intentional, not a placeholder to tighten later.
-  Isolation between systems comes from the Postgres **schema** boundary
-  (`dynamics` vs a future `alayacare`/`epic`), not from row-level rules.
-  Don't add per-row restrictions unless a specific new requirement calls
-  for it.
+- **RLS policies on every schema's tables are fully permissive**
+  (`using (true) with check (true)`) — this is intentional, not a
+  placeholder to tighten later. Isolation between systems comes from the
+  Postgres **schema** boundary (`dynamics` vs `alayacare` vs a future
+  `epic`), not from row-level rules. Don't add per-row restrictions unless
+  a specific new requirement calls for it.
 - **Every Edge Function must handle CORS itself, including `OPTIONS`
   preflight.** This bit us once live: the browser's `fetch()` calls from
   `architechdemo.com` were silently failing every request because
@@ -267,10 +308,16 @@ Management API rather than a local Docker Postgres.)
 
 ## What's explicitly out of scope right now
 
-- Epic schema/UI/API shim — after Alayacare. Same process as Dynamics:
-  brainstorming → spec → writing-plans → executing-plans.
-- The cross-system top nav switcher — only makes sense once ≥2 systems
-  exist; Dynamics is still the only one.
+- Epic schema/UI/API shim — the last system in the build order. Same
+  process as Dynamics and Alayacare: brainstorming → spec → writing-plans
+  → executing-plans.
+- Alayacare Employee (standalone entity), Tasks, Extensions — need real
+  captured traffic before building, per the Alayacare spec's decision;
+  don't extrapolate these blind the way the writes were (writes were
+  explicitly approved as inferred; these three weren't).
+- Alayacare Client Intelligence (risk scoring: risk factors, trend chart,
+  event history) — a real Alayacare feature, screenshot supplied for
+  chrome/style reference only. Its own spec/plan cycle if/when prioritized.
 - Retiring `emrdemo` (the old single-vendor fake-EMR demo elsewhere in this
   repo) — happens once Epic ships, replacing it. Don't touch `emrdemo`
   before then.
