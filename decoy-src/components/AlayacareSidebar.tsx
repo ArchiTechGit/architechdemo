@@ -85,26 +85,15 @@ const ITEMS: NavItem[] = [
       </svg>
     ),
   },
-  {
-    label: 'App Tools',
-    icon: (
-      <svg {...ICON_PROPS}>
-        <rect x="4" y="4" width="6" height="6" rx="1" />
-        <rect x="14" y="4" width="6" height="6" rx="1" />
-        <rect x="4" y="14" width="6" height="6" rx="1" />
-        <rect x="14" y="14" width="6" height="6" rx="1" />
-      </svg>
-    ),
-  },
 ];
 
 export function AlayacareSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-20 shrink-0 flex-col items-center bg-[#1d3fd6] py-3 text-white">
+    <aside className="flex w-20 shrink-0 flex-col items-center bg-[#0a1e4a] py-3 text-white">
       <div className="relative mb-3 h-10 w-10 rounded bg-white/90" title="Not part of this demo">
-        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#1d3fd6] bg-green-500" />
+        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0a1e4a] bg-green-500" />
       </div>
       {ITEMS.map((item) =>
         item.href ? (
@@ -112,7 +101,7 @@ export function AlayacareSidebar() {
             key={item.label}
             href={item.href}
             className={`mb-1 flex w-[88%] flex-col items-center gap-1 rounded px-1 py-2.5 text-[10px] leading-tight ${
-              pathname === item.href ? 'bg-white font-medium text-blue-700' : 'text-white/75 hover:bg-white/10'
+              pathname === item.href ? 'bg-blue-600 font-medium text-white' : 'text-white/75 hover:bg-white/10'
             }`}
           >
             {item.icon}

@@ -22,7 +22,7 @@ export function AlayacareTopNav() {
   }
 
   return (
-    <header className="flex h-14 items-center justify-between bg-[#1d3fd6] px-4 text-white">
+    <header className="flex h-14 items-center justify-between bg-[#0a1e4a] px-4 text-white">
       <div className="flex items-center gap-4">
         <span className="text-lg font-semibold tracking-tight">ArchiCare</span>
         <div className="flex w-72 items-center gap-2 rounded bg-white px-3 py-1.5 text-sm text-gray-500">

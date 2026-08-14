@@ -5,7 +5,7 @@ export function MapPanel() {
   return (
     <div className="overflow-hidden rounded border bg-white shadow-sm">
       <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold text-gray-700">Map</h2>
+        <h2 className="text-sm font-semibold text-gray-700">Current Work Sessions</h2>
       </div>
       <div className="relative h-64 bg-[#eef1e8]">
         <svg viewBox="0 0 400 260" className="h-full w-full" preserveAspectRatio="xMidYMid slice">

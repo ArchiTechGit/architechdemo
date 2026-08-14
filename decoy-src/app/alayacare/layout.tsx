@@ -10,7 +10,7 @@ const TABS = [
   { label: 'Visit Reports' },
   { label: 'Forms' },
   { label: 'Client Intake' },
-  { label: 'Data Exploration' },
+  { label: 'Data Exploration', href: '/alayacare/dashboard/explore' },
   { label: 'Tasks' },
 ];
 

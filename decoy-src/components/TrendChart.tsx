@@ -7,10 +7,14 @@ export function TrendChart({
   title,
   points,
   formatValue = (v: number) => String(v),
+  lineColor = '#2a78d6',
+  areaColor = '#cde2fb',
 }: {
   title: string;
   points: TrendPoint[];
   formatValue?: (value: number) => string;
+  lineColor?: string;
+  areaColor?: string;
 }) {
   const width = 480;
   const height = 180;
@@ -53,11 +57,11 @@ export function TrendChart({
               strokeWidth={1}
             />
           ))}
-          <path d={areaPath} fill="#cde2fb" opacity={0.6} />
-          <path d={linePath} fill="none" stroke="#2a78d6" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+          <path d={areaPath} fill={areaColor} opacity={0.6} />
+          <path d={linePath} fill="none" stroke={lineColor} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
           {coords.map((c) => (
             <g key={c.label}>
-              <circle cx={c.x} cy={c.y} r={4} fill="#2a78d6">
+              <circle cx={c.x} cy={c.y} r={4} fill={lineColor}>
                 <title>{`${c.label}: ${formatValue(c.value)}`}</title>
               </circle>
               <text x={c.x} y={height - 8} textAnchor="middle" className="fill-gray-400 text-[9px]">

@@ -64,7 +64,7 @@ export default function AlayacareDashboardPage() {
       <h1 className="text-lg font-semibold text-gray-700">Live Dashboard</h1>
 
       <div>
-        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">KPI&apos;s</h2>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Metrics</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           <StatTile label="Scheduled Visits" value={String(scheduledVisits)} tone="purple" icon={<IconClock size={18} />} />
           <StatTile label="Vacant Visits" value={String(vacantVisits)} tone="red" icon={<IconClock size={18} />} />
@@ -79,7 +79,7 @@ export default function AlayacareDashboardPage() {
         <MapPanel />
         <div className="rounded border bg-white shadow-sm">
           <div className="border-b px-4 py-3">
-            <h2 className="text-sm font-semibold text-gray-700">Real Time Activity</h2>
+            <h2 className="text-sm font-semibold text-gray-700">Activity Feed</h2>
           </div>
           <ul className="divide-y text-sm">
             {activity.map((item) => (
