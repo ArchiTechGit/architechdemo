@@ -109,6 +109,12 @@ visit status.
 - `/alayacare/help` API reference page, same purpose as the Dynamics one:
   the doc a real integration (Webex CC flow or otherwise) would be pointed
   at. Must clearly flag which endpoints are captured-exact vs inferred.
+- **Cross-system switcher** — a single top-level banner (above both
+  systems' own top bars) linking `/dynamics` ↔ `/alayacare`. The original
+  Decoy spec deferred this until ≥2 systems existed "to switch between" —
+  that condition is met once Alayacare ships, so this is the last task of
+  the Alayacare implementation plan rather than its own cycle. Small,
+  additive, doesn't restructure either system's existing layout.
 
 **Explicitly deferred:**
 - Employee (standalone entity/page) — no capture, no immediate need beyond
@@ -265,5 +271,3 @@ response shapes byte-for-byte where a capture exists.
 - Employee, Tasks, Extensions entities — need real captures before
   building, per this session's decision.
 - Client Intelligence (risk scoring) — v1.1+, own spec/plan cycle.
-- Cross-system top-level switcher — still deferred from the original
-  Decoy spec; now genuinely relevant once Alayacare ships (2 systems).
