@@ -2,6 +2,7 @@
 
 import { useAlayacareResource } from '@/lib/alayacareApi';
 import { StatTile } from '@/components/StatTile';
+import { MapPanel } from '@/components/MapPanel';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
 function relativeTime(dateStr: string): string {
@@ -73,19 +74,22 @@ export default function AlayacareDashboardPage() {
         </div>
       </div>
 
-      <div className="rounded border bg-white shadow-sm">
-        <div className="border-b px-4 py-3">
-          <h2 className="text-sm font-semibold text-gray-700">Real Time Activity</h2>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <MapPanel />
+        <div className="rounded border bg-white shadow-sm">
+          <div className="border-b px-4 py-3">
+            <h2 className="text-sm font-semibold text-gray-700">Real Time Activity</h2>
+          </div>
+          <ul className="divide-y text-sm">
+            {activity.map((item) => (
+              <li key={item.id} className="flex items-center justify-between px-4 py-3">
+                <span className="text-gray-700">{item.message}</span>
+                <span className="whitespace-nowrap text-xs text-gray-400">{item.when}</span>
+              </li>
+            ))}
+            {activity.length === 0 && <li className="px-4 py-3 text-gray-500">No recent activity.</li>}
+          </ul>
         </div>
-        <ul className="divide-y text-sm">
-          {activity.map((item) => (
-            <li key={item.id} className="flex items-center justify-between px-4 py-3">
-              <span className="text-gray-700">{item.message}</span>
-              <span className="whitespace-nowrap text-xs text-gray-400">{item.when}</span>
-            </li>
-          ))}
-          {activity.length === 0 && <li className="px-4 py-3 text-gray-500">No recent activity.</li>}
-        </ul>
       </div>
     </div>
   );

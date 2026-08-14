@@ -15,6 +15,9 @@ export interface AlayacareClient {
   address_line: string | null;
   city: string | null;
   state: string | null;
+  external_id: string | null;
+  risks: string | null;
+  services: string[];
   createdon: string;
 }
 
