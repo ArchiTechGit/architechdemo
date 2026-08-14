@@ -35,6 +35,10 @@ export function useDataverseTable<T extends object>(
         if (body.error) setError(body.error.message);
         else setRows(body.value as T[]);
         setLoading(false);
+      })
+      .catch((e) => {
+        setError(e instanceof Error ? e.message : 'request failed');
+        setLoading(false);
       });
   }, [entitySet, expand]);
 

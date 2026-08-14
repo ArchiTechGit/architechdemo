@@ -54,6 +54,12 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': '*',
+};
+
 function parsePath(pathname: string) {
   const match = pathname.match(/\/api\/data\/v9\.2\/([a-z]+)(?:\(([0-9a-fA-F-]+)\))?$/);
   if (!match) return null;
@@ -106,21 +112,29 @@ async function expandRows(
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   const url = new URL(req.url);
   const parsed = parsePath(url.pathname);
   if (!parsed) {
-    return new Response(JSON.stringify({ error: { message: 'not found' } }), { status: 404 });
+    return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+      status: 404,
+      headers: CORS_HEADERS,
+    });
   }
 
   const config = ENTITIES[parsed.entitySet];
   if (!config) {
     return new Response(JSON.stringify({ error: { message: `unknown entity set ${parsed.entitySet}` } }), {
       status: 404,
+      headers: CORS_HEADERS,
     });
   }
 
   const db = supabase.schema('dynamics').from(config.table);
-  const jsonHeaders = { 'content-type': 'application/json', 'odata-version': '4.0' };
+  const jsonHeaders = { ...CORS_HEADERS, 'content-type': 'application/json', 'odata-version': '4.0' };
 
   if (req.method === 'GET' && !parsed.id) {
     const select = url.searchParams.get('$select') ?? '*';
@@ -133,7 +147,12 @@ Deno.serve(async (req) => {
       query = query.order('createdon', { ascending: false });
     }
     const { data, error } = await query;
-    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 500 });
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 500,
+        headers: CORS_HEADERS,
+      });
+    }
     const expanded = await expandRows(config, data ?? [], url.searchParams.get('$expand'));
     return new Response(
       JSON.stringify({ '@odata.context': `$metadata#${parsed.entitySet}`, value: expanded }),
@@ -143,29 +162,52 @@ Deno.serve(async (req) => {
 
   if (req.method === 'GET' && parsed.id) {
     const { data, error } = await db.select('*').eq(config.pk, parsed.id).single();
-    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 404 });
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 404,
+        headers: CORS_HEADERS,
+      });
+    }
     return new Response(JSON.stringify(data), { headers: jsonHeaders });
   }
 
   if (req.method === 'POST') {
     const body = translateWriteBody(config, await req.json());
     const { data, error } = await db.insert(body).select('*').single();
-    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 400 });
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 400,
+        headers: CORS_HEADERS,
+      });
+    }
     return new Response(JSON.stringify(data), { status: 201, headers: jsonHeaders });
   }
 
   if (req.method === 'PATCH' && parsed.id) {
     const body = translateWriteBody(config, await req.json());
     const { error } = await db.update(body).eq(config.pk, parsed.id);
-    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 400 });
-    return new Response(null, { status: 204 });
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 400,
+        headers: CORS_HEADERS,
+      });
+    }
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   if (req.method === 'DELETE' && parsed.id) {
     const { error } = await db.delete().eq(config.pk, parsed.id);
-    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 400 });
-    return new Response(null, { status: 204 });
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 400,
+        headers: CORS_HEADERS,
+      });
+    }
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
-  return new Response(JSON.stringify({ error: { message: 'method not allowed' } }), { status: 405 });
+  return new Response(JSON.stringify({ error: { message: 'method not allowed' } }), {
+    status: 405,
+    headers: CORS_HEADERS,
+  });
 });
