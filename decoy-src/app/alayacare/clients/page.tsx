@@ -19,6 +19,9 @@ import {
   IconArrowRight,
   IconDownload,
   IconSearch,
+  IconCopy,
+  IconInfo,
+  IconExternalLink,
   RISK_CATEGORY_ICON_PATHS,
 } from '@/components/AlayacareIcons';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
@@ -70,6 +73,11 @@ const SUB_TABS = ['List', 'Groups', 'Services', 'My Services', 'Charts', 'Facili
 // tag below the row -- no Groups entity is modeled, this is a fixed label
 // picked deterministically from client_id, purely for visual match.
 const RISK_LEVELS = ['High', 'Medium', 'Low'] as const;
+const RISK_LEVEL_BLOCK_TONE: Record<(typeof RISK_LEVELS)[number], string> = {
+  High: 'bg-red-100 text-red-900',
+  Medium: 'bg-orange-100 text-orange-900',
+  Low: 'bg-rose-50 text-rose-800',
+};
 const RISK_TRENDS = [
   { label: 'Up', icon: <IconArrowUp key="u" size={11} />, tone: 'bg-red-50 text-red-700' },
   { label: 'Stable', icon: <IconArrowRight key="s" size={11} />, tone: 'bg-orange-50 text-orange-700' },
@@ -207,38 +215,39 @@ export default function ClientsPage() {
             <h2 className="text-sm font-semibold text-gray-700">Client List</h2>
             <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">+ Client</button>
           </div>
-          <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-4 py-2 text-xs">
-            {statusFilter === 'All' ? (
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded border p-1">
-                <option value="All">Status: All</option>
+          <div className="flex flex-wrap items-end gap-4 border-b bg-gray-50 px-4 py-2 text-xs">
+            <label className="flex flex-col gap-1">
+              <span className="text-gray-500">Status</span>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded border bg-white p-1.5">
+                <option value="All">All</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
-            ) : (
-              <span className="flex items-center gap-1.5 rounded border bg-white px-2 py-1 font-medium text-gray-700">
-                {statusFilter}
-                <button onClick={() => setStatusFilter('All')} title="Clear filter" className="text-gray-400 hover:text-gray-700">✕</button>
-              </span>
-            )}
-            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
-              Groups: All <IconChevronDown size={12} />
-            </span>
-            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
-              Tags: All <IconChevronDown size={12} />
-            </span>
-            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
-              Latest Risk Review: All <IconChevronDown size={12} />
-            </span>
-            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
-              Risk Level: All <IconChevronDown size={12} />
-            </span>
-            <span className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-400" title="Not part of this demo">
-              Risk Trend: All <IconChevronDown size={12} />
-            </span>
+            </label>
+            <label className="flex flex-col gap-1 text-gray-400" title="Not part of this demo">
+              <span className="text-gray-500">Groups</span>
+              <span className="flex items-center gap-1 rounded border bg-white p-1.5">All <IconChevronDown size={12} /></span>
+            </label>
+            <label className="flex flex-col gap-1 text-gray-400" title="Not part of this demo">
+              <span className="text-gray-500">Tags</span>
+              <span className="flex items-center gap-1 rounded border bg-white p-1.5">All <IconChevronDown size={12} /></span>
+            </label>
+            <label className="flex flex-col gap-1 text-gray-400" title="Not part of this demo">
+              <span className="text-gray-500">Latest Risk Review</span>
+              <span className="flex items-center gap-1 rounded border bg-white p-1.5">All <IconChevronDown size={12} /></span>
+            </label>
+            <label className="flex flex-col gap-1 text-gray-400" title="Not part of this demo">
+              <span className="text-gray-500">Risk Level</span>
+              <span className="flex items-center gap-1 rounded border bg-white p-1.5">All <IconChevronDown size={12} /></span>
+            </label>
+            <label className="flex flex-col gap-1 text-gray-400" title="Not part of this demo">
+              <span className="text-gray-500">Risk Trend</span>
+              <span className="flex items-center gap-1 rounded border bg-white p-1.5">All <IconChevronDown size={12} /></span>
+            </label>
             <div className="ml-auto flex items-center gap-2">
               <button disabled title="Not part of this demo" className="rounded border bg-white p-1.5 text-gray-400"><IconDownload size={13} /></button>
               <button disabled title="Not part of this demo" className="rounded border bg-white p-1.5 text-gray-400"><IconSettings size={13} /></button>
-              <div className="flex items-center gap-1 rounded border bg-white px-2 py-1 text-gray-500">
+              <div className="flex items-center gap-1 rounded border bg-white px-2 py-1.5 text-gray-500">
                 <IconSearch size={12} />
                 <input
                   value={search}
@@ -258,10 +267,12 @@ export default function ClientsPage() {
                   <th className="p-2 font-medium">DOB</th>
                   <th className="p-2 font-medium">Status</th>
                   <th className="p-2 font-medium">Address</th>
+                  <th className="p-2 font-medium">Phone</th>
                   <th className="p-2 font-medium"><span className="flex items-center gap-1">Groups <IconChevronDown size={11} /></span></th>
-                  <th className="p-2 font-medium"><span className="flex items-center gap-1">Risk Review <IconChevronDown size={11} /></span></th>
+                  <th className="p-2 font-medium"><span className="flex items-center gap-1">Latest Risk Review <IconChevronDown size={11} /></span></th>
                   <th className="p-2 font-medium">Risk Trend</th>
                   <th className="p-2 font-medium"><span className="flex items-center gap-1">Factors <IconChevronDown size={11} /></span></th>
+                  <th className="p-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -282,25 +293,37 @@ export default function ClientsPage() {
                         </span>
                       </td>
                       <td className="p-2 whitespace-nowrap text-gray-600">{row.address_line}, {row.city}</td>
-                      <td className="p-2 whitespace-nowrap text-gray-500">{risk.group}</td>
+                      <td className="p-2 whitespace-nowrap text-gray-600">
+                        <span className="flex items-center gap-1.5">
+                          {row.phone_main || '—'}
+                          {row.phone_main && <IconCopy size={12} />}
+                        </span>
+                      </td>
+                      <td className="p-2 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <span className="flex w-fit items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            {risk.group}
+                          </span>
+                          {risk.group.includes('Groups') && <IconInfo size={11} />}
+                        </div>
+                      </td>
                       <td className="p-2 whitespace-nowrap text-gray-500">
                         <div>{risk.daysAgo === 1 ? 'Yesterday' : `${risk.daysAgo} days ago`}</div>
                         <div className="text-[10px] text-gray-400">
                           {risk.reviewedAt.toLocaleDateString()} · by Admin ArchiCare
                         </div>
                       </td>
-                      <td className="p-2">
-                        <div className="flex flex-col gap-1">
-                          <span className={`w-fit rounded px-2 py-0.5 text-xs font-medium ${risk.level === 'High' ? 'bg-red-100 text-red-800' : risk.level === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                            {risk.level}
-                          </span>
-                          <span className={`flex w-fit items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ${risk.trend.tone}`}>
-                            {risk.trend.icon} {risk.trend.label}
-                          </span>
+                      <td className={`p-2 text-center ${RISK_LEVEL_BLOCK_TONE[risk.level]}`}>
+                        <div className="font-semibold">{risk.level}</div>
+                        <div className="flex items-center justify-center gap-1 text-xs">
+                          {risk.trend.icon} {risk.trend.label}
                         </div>
                       </td>
                       <td className="p-2">
                         <div className="flex gap-1 text-gray-500">{risk.factors}</div>
+                      </td>
+                      <td className="p-2 text-right">
+                        <button disabled title="Not part of this demo" className="text-gray-300"><IconExternalLink size={14} /></button>
                       </td>
                     </tr>
                   );
@@ -328,7 +351,7 @@ export default function ClientsPage() {
               </div>
               {selected && (
                 <div className="text-right text-xs text-gray-500">
-                  <div>AlayaCare ID: {selected.client_id}</div>
+                  <div>ArchiCare ID: {selected.client_id}</div>
                   <div>External ID: {form.external_id || '—'}</div>
                 </div>
               )}
@@ -499,7 +522,7 @@ export default function ClientsPage() {
 
           {!REAL_TABS.includes(tab) && (
             <div className="p-4 text-sm text-gray-500">
-              {tab} isn&apos;t modeled in this demo — it&apos;s a real AlayaCare module without
+              {tab} isn&apos;t modeled in this demo — it&apos;s a real ArchiCare module without
               captured API traffic to build against yet.
             </div>
           )}

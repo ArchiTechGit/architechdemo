@@ -21,12 +21,12 @@ export default function AlayacareHelpPage() {
   return (
     <div className="max-w-4xl space-y-4">
       <div>
-        <h1 className="text-lg font-semibold text-gray-700">Alayacare API Reference</h1>
+        <h1 className="text-lg font-semibold text-gray-700">ArchiCare API Reference</h1>
         <p className="text-sm text-gray-500">
-          Three endpoints below (marked <strong>Captured</strong>) reproduce real Alayacare
+          Three endpoints below (marked <strong>Captured</strong>) reproduce real ArchiCare
           integration traffic byte-for-byte. Everything marked <strong>Inferred</strong> was built
           to match that traffic&apos;s conventions but was not itself observed in real traffic — treat
-          it as plausible, not verified, if you&apos;re validating against a real Alayacare tenant.
+          it as plausible, not verified, if you&apos;re validating against a real ArchiCare tenant.
         </p>
       </div>
 

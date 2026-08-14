@@ -172,6 +172,22 @@ export const IconCopy = (p: { size?: number }) => (
   </Svg>
 );
 
+export const IconExternalLink = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M10 6H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5" />
+    <path d="M14 4h6v6" />
+    <path d="M20 4 11 13" />
+  </Svg>
+);
+
+export const IconInfo = (p: { size?: number }) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 11v5.5" />
+    <circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
 export const IconSettings = (p: { size?: number }) => (
   <Svg {...p}>
     <circle cx="12" cy="12" r="2.8" />
