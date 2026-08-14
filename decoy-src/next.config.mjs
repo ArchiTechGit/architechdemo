@@ -2,6 +2,7 @@
 const nextConfig = {
   output: 'export',
   basePath: '/decoy',
+  trailingSlash: true,
   images: { unoptimized: true },
 };
 
