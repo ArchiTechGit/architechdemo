@@ -59,7 +59,7 @@ Accounting/Events/Patient Risk Dashboard). Expect more of this as more
 real screenshots show up — don't treat any current layout as settled.
 
 Concretely, as it stands now:
-- **Visible brand chrome says "ArchiTech Care", not "AlayaCare"** — the
+- **Visible brand chrome says "ArchiCare", not "AlayaCare"** — the
   top nav wordmark (`components/AlayacareTopNav.tsx`) and the
   cross-system switcher label were renamed on request. This is
   cosmetic-only: the route path (`/alayacare/*`), component/file names,

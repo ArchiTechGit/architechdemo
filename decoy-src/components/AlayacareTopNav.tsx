@@ -23,7 +23,7 @@ export function AlayacareTopNav() {
   return (
     <header className="flex h-14 items-center justify-between bg-[#0f2a5c] px-4 text-white">
       <div className="flex items-center gap-4">
-        <span className="text-lg font-semibold tracking-tight">ArchiTech Care</span>
+        <span className="text-lg font-semibold tracking-tight">ArchiCare</span>
         <input
           placeholder="Search clients, employees, contacts"
           disabled
