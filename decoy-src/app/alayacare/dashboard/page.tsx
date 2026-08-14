@@ -1,9 +1,9 @@
 'use client';
 
 import { useAlayacareResource } from '@/lib/alayacareApi';
-import { StatTile } from '@/components/StatTile';
-import { BarList } from '@/components/BarList';
 import { DonutChart } from '@/components/DonutChart';
+import { BarList } from '@/components/BarList';
+import { TrendChart } from '@/components/TrendChart';
 import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
 const STATUS_COLORS: Record<AlayacareVisit['status'], string> = {
@@ -13,9 +13,8 @@ const STATUS_COLORS: Record<AlayacareVisit['status'], string> = {
   missed: '#898781',
 };
 
-function monthLabel(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-AU', { month: 'short', day: 'numeric' });
+function dayLabel(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' });
 }
 
 export default function AlayacareDashboardPage() {
@@ -24,8 +23,29 @@ export default function AlayacareDashboardPage() {
 
   if (clientsLoading || visitsLoading) return <p>Loading…</p>;
 
-  const upcoming = visits.filter((v) => v.start_at && new Date(v.start_at) > new Date() && v.status === 'scheduled');
-  const uniqueEmployees = new Set(visits.map((v) => v.employee_id).filter(Boolean)).size;
+  const now = new Date();
+
+  const clientVisitSummary = clients.map((c) => {
+    const clientVisits = visits.filter((v) => v.client_id === c.client_id);
+    const upcoming = clientVisits.filter((v) => v.start_at && new Date(v.start_at) > now && v.status === 'scheduled');
+    return {
+      client: c,
+      visitCount: clientVisits.length,
+      upcomingCount: upcoming.length,
+    };
+  });
+
+  const visitsByDay = Object.entries(
+    visits
+      .filter((v): v is AlayacareVisit & { start_at: string } => v.start_at !== null)
+      .reduce<Record<string, number>>((acc, v) => {
+        const key = v.start_at.slice(0, 10);
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      }, {}),
+  )
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([key, value]) => ({ label: dayLabel(key), value }));
 
   const visitsByStatusDonut = (['scheduled', 'completed', 'cancelled', 'missed'] as const).map((status) => ({
     label: status,
@@ -33,19 +53,12 @@ export default function AlayacareDashboardPage() {
     color: STATUS_COLORS[status],
   }));
 
-  const visitsByClient = clients
-    .map((c) => ({
-      label: `${c.first_name} ${c.last_name}`,
-      value: visits.filter((v) => v.client_id === c.client_id).length,
-    }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
-
-  const upcomingList = [...upcoming]
+  const upcomingList = [...visits]
+    .filter((v) => v.start_at && new Date(v.start_at) > now && v.status === 'scheduled')
     .sort((a, b) => new Date(a.start_at!).getTime() - new Date(b.start_at!).getTime())
     .slice(0, 5)
     .map((v) => ({
-      label: `${clients.find((c) => c.client_id === v.client_id)?.first_name ?? 'Unknown'} — ${monthLabel(v.start_at!)}`,
+      label: `${clients.find((c) => c.client_id === v.client_id)?.first_name ?? 'Unknown'} — ${dayLabel(v.start_at!)}`,
       value: 1,
     }));
 
@@ -53,20 +66,38 @@ export default function AlayacareDashboardPage() {
     <div className="space-y-4">
       <h1 className="text-lg font-semibold text-gray-700">Live Dashboard</h1>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatTile label="Total Clients" caption="Active" value={String(clients.length)} />
-        <StatTile label="Total Visits" caption="All Statuses" value={String(visits.length)} />
-        <StatTile label="Upcoming Visits" caption="Scheduled, Future" value={String(upcoming.length)} />
-        <StatTile label="Care Staff" caption="Unique Employees Rostered" value={String(uniqueEmployees)} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="rounded border bg-white shadow-sm lg:col-span-2">
+          <div className="border-b px-4 py-3">
+            <h2 className="text-sm font-semibold text-gray-700">Client Visit Summary</h2>
+          </div>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b bg-gray-50 text-left text-gray-500">
+                <th className="p-2 font-medium">Full Name</th>
+                <th className="p-2 font-medium">Postcode</th>
+                <th className="p-2 font-medium">Visit Count</th>
+                <th className="p-2 font-medium">Upcoming Visits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientVisitSummary.map(({ client, visitCount, upcomingCount }) => (
+                <tr key={client.client_id} className="border-b last:border-0">
+                  <td className="p-2">{client.first_name} {client.last_name}</td>
+                  <td className="p-2">{client.zip}</td>
+                  <td className="p-2">{visitCount}</td>
+                  <td className="p-2">{upcomingCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <TrendChart title="Visits per Day" points={visitsByDay} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <DonutChart title="Visits by Status" slices={visitsByStatusDonut} />
-        <BarList title="Visits by Client" items={visitsByClient} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4">
-        <BarList title="Next 5 Upcoming Visits" items={upcomingList} formatValue={() => ''} />
+        <BarList title="Next Upcoming Visits" items={upcomingList} formatValue={() => ''} />
       </div>
     </div>
   );

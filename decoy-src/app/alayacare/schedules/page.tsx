@@ -25,6 +25,19 @@ function toLocalInput(value: string | null): string {
   return value.slice(0, 16);
 }
 
+function dayKey(startAt: string | null): string {
+  return startAt ? startAt.slice(0, 10) : 'unscheduled';
+}
+
+function dayHeading(key: string): string {
+  if (key === 'unscheduled') return 'Unscheduled';
+  return new Date(`${key}T00:00:00`).toLocaleDateString('en-AU', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
 export default function SchedulesPage() {
   const { rows, loading, error, insert, update, remove } = useAlayacareResource<AlayacareVisit>('scheduled-visits');
   const { rows: clients } = useAlayacareResource<AlayacareClient>('client-profile');
@@ -72,6 +85,17 @@ export default function SchedulesPage() {
   if (loading) return <p>Loading…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
 
+  const grouped = rows.reduce<Record<string, AlayacareVisit[]>>((acc, v) => {
+    const key = dayKey(v.start_at);
+    (acc[key] ??= []).push(v);
+    return acc;
+  }, {});
+  const sortedKeys = Object.keys(grouped).sort((a, b) => {
+    if (a === 'unscheduled') return 1;
+    if (b === 'unscheduled') return -1;
+    return a.localeCompare(b);
+  });
+
   return (
     <div className="grid grid-cols-2 gap-6">
       <div className="rounded border bg-white shadow-sm">
@@ -79,30 +103,35 @@ export default function SchedulesPage() {
           <h1 className="text-sm font-semibold text-gray-700">Schedules</h1>
           <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
         </div>
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b bg-gray-50 text-left text-gray-500">
-              <th className="p-2 font-medium">Client</th>
-              <th className="p-2 font-medium">Start</th>
-              <th className="p-2 font-medium">Employee</th>
-              <th className="p-2 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr
-                key={row.alayacare_visit_id}
-                onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b last:border-0 hover:bg-blue-50 ${selectedId === row.alayacare_visit_id ? 'bg-blue-50' : ''}`}
-              >
-                <td className="p-2">{clientName(row.client_id)}</td>
-                <td className="p-2">{row.start_at ? new Date(row.start_at).toLocaleString() : '—'}</td>
-                <td className="p-2">{row.employee_id}</td>
-                <td className="p-2"><StatusBadge status={row.status} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="max-h-[32rem] overflow-y-auto">
+          {sortedKeys.map((key) => (
+            <div key={key}>
+              <div className="sticky top-0 border-b bg-gray-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {dayHeading(key)}
+              </div>
+              {grouped[key]
+                .sort((a, b) => (a.start_at ?? '').localeCompare(b.start_at ?? ''))
+                .map((row) => (
+                  <div
+                    key={row.alayacare_visit_id}
+                    onClick={() => selectRow(row)}
+                    className={`flex cursor-pointer items-center justify-between border-b px-4 py-2 text-sm last:border-0 hover:bg-blue-50 ${selectedId === row.alayacare_visit_id ? 'bg-blue-50' : ''}`}
+                  >
+                    <div>
+                      <div className="font-medium text-gray-800">{clientName(row.client_id)}</div>
+                      <div className="text-xs text-gray-500">
+                        {row.start_at ? new Date(row.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        {' · '}
+                        {row.employee_id || 'Unassigned'}
+                      </div>
+                    </div>
+                    <StatusBadge status={row.status} />
+                  </div>
+                ))}
+            </div>
+          ))}
+          {rows.length === 0 && <p className="p-4 text-sm text-gray-500">No visits scheduled.</p>}
+        </div>
       </div>
 
       <div className="space-y-4">

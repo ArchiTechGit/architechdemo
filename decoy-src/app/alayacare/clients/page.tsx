@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useAlayacareResource } from '@/lib/alayacareApi';
-import type { AlayacareClient } from '@/lib/alayacareTypes';
+import { StatusBadge } from '@/components/StatusBadge';
+import type { AlayacareClient, AlayacareVisit } from '@/lib/alayacareTypes';
 
 type FormState = Omit<AlayacareClient, 'client_id' | 'contacts' | 'createdon'>;
 
@@ -19,6 +20,9 @@ const BLANK: FormState = {
   notification_recipient: '',
 };
 
+const TABS = ['Overview', 'Demographics', 'Care Plan', 'Scheduling'] as const;
+type Tab = (typeof TABS)[number];
+
 function age(birthday: string | null): string {
   if (!birthday) return '—';
   const diffMs = Date.now() - new Date(birthday).getTime();
@@ -31,11 +35,14 @@ function initials(first: string, last: string): string {
 
 export default function ClientsPage() {
   const { rows, loading, error, insert, update, remove } = useAlayacareResource<AlayacareClient>('client-profile');
+  const { rows: visits } = useAlayacareResource<AlayacareVisit>('scheduled-visits');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(BLANK);
+  const [tab, setTab] = useState<Tab>('Overview');
 
   function selectRow(row: AlayacareClient) {
     setSelectedId(row.client_id);
+    setTab('Overview');
     setForm({
       salutation: row.salutation ?? '',
       first_name: row.first_name,
@@ -52,6 +59,7 @@ export default function ClientsPage() {
 
   function startNew() {
     setSelectedId(null);
+    setTab('Overview');
     setForm(BLANK);
   }
 
@@ -69,6 +77,7 @@ export default function ClientsPage() {
   }
 
   const selected = rows.find((r) => r.client_id === selectedId);
+  const clientVisits = selectedId ? visits.filter((v) => v.client_id === selectedId) : [];
 
   if (loading) return <p>Loading…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
@@ -119,40 +128,92 @@ export default function ClientsPage() {
             </span>
           </div>
         </div>
-        <div className="space-y-3 p-4">
-          <div className="grid grid-cols-2 gap-3">
+
+        <div className="flex gap-4 border-b px-4 text-sm">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`border-b-2 px-1 py-2 ${tab === t ? 'border-blue-700 font-medium text-blue-800' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'Overview' && (
+          <div className="space-y-3 p-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Salutation</label>
-              <input className="w-full rounded border p-2" value={form.salutation ?? ''} onChange={(e) => setForm({ ...form, salutation: e.target.value })} />
+              <label className="mb-1 block text-xs font-medium text-gray-500">Phone (main)</label>
+              <input className="w-full rounded border p-2" value={form.phone_main ?? ''} onChange={(e) => setForm({ ...form, phone_main: e.target.value })} />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Birthday</label>
-              <input type="date" className="w-full rounded border p-2" value={form.birthday ?? ''} onChange={(e) => setForm({ ...form, birthday: e.target.value })} />
+              <label className="mb-1 block text-xs font-medium text-gray-500">Preferred channel of communication</label>
+              <input className="w-full rounded border p-2" value={form.channels_of_communication ?? ''} onChange={(e) => setForm({ ...form, channels_of_communication: e.target.value })} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-500">Notification recipient</label>
+              <input className="w-full rounded border p-2" value={form.notification_recipient ?? ''} onChange={(e) => setForm({ ...form, notification_recipient: e.target.value })} />
             </div>
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-500">Postcode</label>
-            <input className="w-full rounded border p-2" value={form.zip ?? ''} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
+        )}
+
+        {tab === 'Demographics' && (
+          <div className="space-y-3 p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500">Salutation</label>
+                <input className="w-full rounded border p-2" value={form.salutation ?? ''} onChange={(e) => setForm({ ...form, salutation: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500">Birthday</label>
+                <input type="date" className="w-full rounded border p-2" value={form.birthday ?? ''} onChange={(e) => setForm({ ...form, birthday: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-500">Postcode</label>
+              <input className="w-full rounded border p-2" value={form.zip ?? ''} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-500">Preferred contact type</label>
+              <input className="w-full rounded border p-2" value={form.types_of_communication ?? ''} onChange={(e) => setForm({ ...form, types_of_communication: e.target.value })} />
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-500">Phone (main)</label>
-            <input className="w-full rounded border p-2" value={form.phone_main ?? ''} onChange={(e) => setForm({ ...form, phone_main: e.target.value })} />
+        )}
+
+        {tab === 'Care Plan' && (
+          <div className="p-4 text-sm text-gray-500">
+            Care Plan documentation (ADLs, interventions, goal tracking) isn&apos;t modeled in this
+            demo — it&apos;s a real AlayaCare module without captured API traffic to build against yet.
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-500">Preferred channel of communication</label>
-            <input className="w-full rounded border p-2" value={form.channels_of_communication ?? ''} onChange={(e) => setForm({ ...form, channels_of_communication: e.target.value })} />
+        )}
+
+        {tab === 'Scheduling' && (
+          <div className="p-4">
+            {clientVisits.length === 0 ? (
+              <p className="text-sm text-gray-500">No visits scheduled for this client.</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {clientVisits.map((v) => (
+                  <li key={v.alayacare_visit_id} className="flex items-center justify-between border-b pb-2">
+                    <span>{v.start_at ? new Date(v.start_at).toLocaleString() : '—'}</span>
+                    <span className="text-gray-500">{v.employee_id}</span>
+                    <StatusBadge status={v.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-500">Notification recipient</label>
-            <input className="w-full rounded border p-2" value={form.notification_recipient ?? ''} onChange={(e) => setForm({ ...form, notification_recipient: e.target.value })} />
+        )}
+
+        {(tab === 'Overview' || tab === 'Demographics') && (
+          <div className="flex gap-2 border-t p-4">
+            <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
+            {selectedId && (
+              <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
+            )}
           </div>
-        </div>
-        <div className="flex gap-2 border-t p-4">
-          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
-          {selectedId && (
-            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
