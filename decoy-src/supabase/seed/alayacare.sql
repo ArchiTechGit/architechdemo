@@ -6,7 +6,10 @@ set search_path = alayacare, pg_temp
 as $$
 begin
   truncate table alayacare.care_team_member, alayacare.visit, alayacare.client restart identity cascade;
-  alter sequence alayacare.client_id_seq restart with 100000;
+  -- Seeded clients below use explicit literal client_id values (C0100001-C0100005) and
+  -- never touch this sequence, so it must restart well above that range or the first
+  -- auto-generated id (e.g. from a demo "New client" save) would collide/precede them.
+  alter sequence alayacare.client_id_seq restart with 200000;
 
   insert into alayacare.client (client_id, salutation, first_name, last_name, birthday, zip, phone_main, ai_agent_opt_out, channels_of_communication, types_of_communication, notification_recipient, contacts) values
     ('C0100001', 'Mrs', 'Margaret', 'Voss', '1938-03-14', '3220', '+61411300001', '', 'Phone Call', '', 'Client', '[]'),
