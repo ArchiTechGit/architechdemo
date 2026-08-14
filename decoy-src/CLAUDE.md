@@ -58,6 +58,28 @@ then replaced outright once a real client-detail screenshot arrived
 Accounting/Events/Patient Risk Dashboard). Expect more of this as more
 real screenshots show up — don't treat any current layout as settled.
 
+**Official brand assets (alayacare.com's own site) outrank ad-hoc pasted
+screenshots** when they conflict — e.g. top nav/sidebar color went
+blue→navy→blue-reverted-to-navy as screenshot counts see-sawed, and was
+only settled once `alayacare.com/wp-content/uploads/2025/01/Client-List-1.png`
+confirmed navy (`#0a1e4a`). Same tier-break restored the Marketplace tab
+and sidebar "App Tools" item after both had been dropped on lower-res
+screenshots, once HD official images confirmed both present. To find more
+official images, `curl -sL <page-url> -A "<browser-UA>"` and grep the raw
+HTML for `wp-content/uploads` — `WebFetch` alone only returns lazy-load SVG
+placeholders for this site's images, not real `src` paths.
+
+The "Cost of Service to Client Profitability" screen
+(`app/alayacare/dashboard/explore/page.tsx`) is **not a separate "Data
+Exploration" tab** — a full-res reference screenshot showed the "Live
+Dashboard" tab still highlighted active while that content rendered,
+meaning it's a second saved view *within* Live Dashboard. `components/ExploreBar.tsx`
+is a two-way switcher (`Live Dashboard` ↔ `Admin's Exec Dashboard`)
+rendered at the top of both `dashboard/page.tsx` and `dashboard/explore/page.tsx`
+for this reason — don't wire "Data Exploration" (still inert in
+`app/alayacare/layout.tsx`'s `TABS`) to link here again without new
+evidence.
+
 Concretely, as it stands now:
 - **Visible brand chrome says "ArchiCare", not "AlayaCare"** — the
   top nav wordmark (`components/AlayacareTopNav.tsx`) and the
@@ -85,8 +107,13 @@ Concretely, as it stands now:
   Dashboard (`REAL_TABS` array in that file controls which are
   clickable). The list view has a sub-tab row (Client List real, the
   rest inert) and a filter row (Status is a real functional filter;
-  Groups/Tags/Risk Level are decorative selects, no backing dimensions
-  modeled). List columns include **Risk Review / Risk Trend / Factors,
+  Groups/Tags/Latest Risk Review/Risk Level/Risk Trend are decorative
+  selects, no backing dimensions modeled — Find is a real client-side
+  name filter). List columns include **Risk Review / Risk Trend /
+  Factors / Groups, all cosmetic** — the Groups column
+  (`GROUP_LABELS` in that file) is the same deterministic
+  hash-of-`client_id` pattern as the others; no Groups entity is
+  modeled. By contrast, **Risk Review / Risk Trend / Factors,
   which are deliberately cosmetic** — see the `cosmeticRisk()` comment
   in that file. They're a deterministic hash of `client_id`, not real
   risk scoring. Client Intelligence (the real AlayaCare feature this
