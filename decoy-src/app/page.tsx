@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const router = useRouter();
   useEffect(() => {
-    router.replace('/dynamics/accounts');
+    router.replace('/dynamics/dashboard');
   }, [router]);
   return null;
 }

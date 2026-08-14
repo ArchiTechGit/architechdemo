@@ -14,7 +14,10 @@ interface NavGroup {
 }
 
 const GROUPS: NavGroup[] = [
-  { title: 'My work', items: [{ label: 'Dashboard' }, { label: 'Sales accelerator' }] },
+  {
+    title: 'My work',
+    items: [{ label: 'Dashboard', href: '/dynamics/dashboard' }, { label: 'Sales accelerator' }],
+  },
   { title: 'Activities', items: [{ label: 'Calendar' }, { label: 'Tasks' }, { label: 'Calls' }] },
   {
     title: 'Pipeline',
