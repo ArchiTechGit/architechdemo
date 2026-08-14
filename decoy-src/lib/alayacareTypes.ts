@@ -11,6 +11,10 @@ export interface AlayacareClient {
   types_of_communication: string | null;
   notification_recipient: string | null;
   contacts: unknown[];
+  status: 'Active' | 'Inactive';
+  address_line: string | null;
+  city: string | null;
+  state: string | null;
   createdon: string;
 }
 
