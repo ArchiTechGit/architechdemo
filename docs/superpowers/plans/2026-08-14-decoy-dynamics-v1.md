@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship a live-editable, Supabase-backed Dynamics 365 CRM demo (Accounts, Contacts, Opportunities, Leads) as a static-export Next.js app deployed at `architechdemo.com/decoy/`.
+**Goal:** Ship a live-editable Dynamics 365 CRM demo (Accounts, Contacts, Opportunities, Leads, Notes) where the browser talks to the backend using the real Dataverse Web API (OData v4) request shape — same URLs, query params, body format, and headers a genuine Dynamics integration would use — deployed as a static-export Next.js app at `architechdemo.com/decoy/`.
 
-**Architecture:** Next.js app (source lives in this repo at `decoy-src/`, since the Google Drive source-project convention in `CONTEXT.md` isn't reachable from this environment — see Constraint below) queries Supabase directly from the browser via `supabase-js` against a dedicated `dynamics` Postgres schema. Each entity is one page combining a list table and an edit/detail panel (master-detail on one page) — this sidesteps Next's static-export requirement that dynamic route segments (`[id]`) be known at build time, which doesn't fit data that's seeded/edited at demo-time. A "Reset demo data" button calls a Supabase Edge Function (service-role privileged) that re-seeds the schema; the anon browser key never gets that privilege directly.
+**Architecture:** Next.js app (source at `decoy-src/` in this repo — see Constraint below) never calls Postgres or `supabase-js` directly from the browser. Instead it calls a Supabase Edge Function (`dataverse-api`) that exposes `GET/POST/PATCH/DELETE .../api/data/v9.2/<entityset>[(id)]` with `$select`/`$expand`/`$orderby` and `"<lookup>@odata.bind"` FK writes — the actual Dataverse Web API surface — and that function translates the request into a query against the `dynamics` Postgres schema. What appears in a browser's network tab during a demo is the same request shape a real Dynamics integration sends. A separate "Reset demo data" button calls a second, bespoke Edge Function (service-role privileged) — reset has no real-Dynamics equivalent, so it isn't part of the API shim.
 
-**Tech Stack:** Next.js 14 (App Router, `output: 'export'`), TypeScript, Tailwind CSS, `@supabase/supabase-js`, Supabase Postgres + Edge Functions (Deno). No app test framework (spec requirement — this is a sales demo).
+**Tech Stack:** Next.js 14 (App Router, `output: 'export'`), TypeScript, Tailwind CSS, Supabase Postgres + Edge Functions (Deno, using `@supabase/supabase-js` server-side only inside the functions). No `supabase-js` in the browser bundle — the frontend only ever does `fetch()`. No app test framework (spec requirement — this is a sales demo).
 
 **Spec:** `docs/superpowers/specs/2026-08-14-decoy-design.md`
 
@@ -14,9 +14,11 @@
 
 - `output: 'export'` and `basePath: '/decoy'` in `next.config.mjs` (spec: static export, deploy-only repo).
 - One Supabase project; `dynamics` lives in its own Postgres schema, never mixed into `public` or a future `alayacare`/`epic` schema (spec: schema-per-system).
+- **Schema fidelity**: table and column names match real Dataverse logical names (`account`/`accountid`, `contact`/`parentcustomerid`, `opportunity`/`estimatedvalue`/`salesstage`, `lead`/`statuscode`, `annotation` for Notes). Capped scope: no `systemuser`/`ownerid`, no dual `statecode`+`statuscode`, no `createdby`/`modifiedby` — user confirmed only the manipulable demo data (customer details, notes, phone, email) needs to be schema-accurate.
+- **API fidelity**: the browser talks to the backend using real Dataverse Web API v9.2 shape (URL pattern, `$select`/`$expand`/`$orderby`, `@odata.bind` for lookups, `{"@odata.context":...,"value":[...]}` envelopes, `OData-MaxVersion`/`OData-Version: 4.0` headers, 204-on-PATCH/DELETE, 201-with-body-on-POST). Capped scope: only the exact call shapes the four entity pages use — not a general OData parser.
 - No app test framework. Verification steps in this plan are manual (build succeeds, `curl`/browser checks) — do not add Jest/Vitest/Playwright (spec: no test framework, sales demo not a product).
-- Decoy has no login of its own — every page loads open (spec: open, no login).
-- Reset-to-seed is the only privileged operation. It must go through the Edge Function (service-role key), never be callable with the anon key directly — the DB function it wraps has `EXECUTE` revoked from `anon`/`authenticated` (spec: reset button, elevated privilege isolated from browser).
+- Decoy has no login of its own — every page loads open (spec: open, no login). The Dataverse shim sends a cosmetic static `Authorization: Bearer` header (looks like a real OAuth-authenticated call in the network tab) — the Edge Function ignores its value.
+- Reset-to-seed is the only privileged operation, stays on its own Edge Function (service role), never callable with by the browser directly — its DB function has `EXECUTE` revoked from `anon`/`authenticated`.
 - Use `npm`, not `pnpm` (`CONTEXT.md`: pnpm fails on Google Drive paths; npm is the repo-wide convention regardless of source location).
 - Deploy target: static export output copied into `wxcc-build/decoy/` at repo root, with a new TOC row added to root `index.html` (repo convention for all existing demos).
 - Source deviation from spec: spec says source lives in a separate `thesenate/projects/decoy` dir on Google Drive. That drive isn't mounted in this environment, so source lives at `decoy-src/` inside this repo instead (git-tracked, `node_modules`/`.next`/`out` ignored) — same as the existing `emrdemo` demo already does it. Functionally equivalent; only the source location differs from the spec's example path.
@@ -52,6 +54,8 @@ npm install -D typescript @types/react @types/node tailwindcss postcss autoprefi
 
 - [ ] **Step 2: Write `package.json` scripts**
 
+Note: no `@supabase/supabase-js` dependency here — the browser only does `fetch()`; `supabase-js` is used server-side inside the Edge Functions (Tasks 3–4), imported there directly from `esm.sh`, not from this package.json.
+
 ```json
 {
   "name": "decoy",
@@ -64,8 +68,7 @@ npm install -D typescript @types/react @types/node tailwindcss postcss autoprefi
   "dependencies": {
     "next": "14.2.5",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "@supabase/supabase-js": "2.45.4"
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "typescript": "5.5.4",
@@ -202,14 +205,14 @@ git commit -m "feat(decoy): scaffold Next.js static-export app"
 
 ---
 
-### Task 2: Supabase schema, RLS, and seed data for Dynamics
+### Task 2: Supabase schema, RLS, and seed data for Dynamics (Dataverse field names)
 
 **Files:**
 - Create: `decoy-src/supabase/migrations/0001_dynamics_schema.sql`
 - Create: `decoy-src/supabase/seed/dynamics.sql`
 
 **Interfaces:**
-- Produces: Postgres schema `dynamics` with tables `accounts`, `contacts`, `opportunities`, `leads`; a `dynamics.reset_demo_data()` function later tasks' Edge Function will call.
+- Produces: Postgres schema `dynamics` with tables `account`, `contact`, `opportunity`, `lead`, `annotation` (Notes — polymorphic, attaches to any of the other four via `objectid`/`objecttypecode`), using real Dataverse logical column names. A `dynamics.reset_demo_data()` function Task 4's Edge Function will call. Task 3's Edge Function will map these table names to Dataverse entity-set names (`accounts`, `contacts`, `opportunities`, `leads`, `annotations`).
 
 - [ ] **Step 1: Write the schema migration**
 
@@ -217,66 +220,95 @@ git commit -m "feat(decoy): scaffold Next.js static-export app"
 ```sql
 create schema if not exists dynamics;
 
-create table dynamics.accounts (
-  id uuid primary key default gen_random_uuid(),
+create table dynamics.account (
+  accountid uuid primary key default gen_random_uuid(),
   name text not null,
-  industry text,
-  phone text,
-  website text,
-  address text,
-  created_at timestamptz not null default now()
+  telephone1 text,
+  websiteurl text,
+  address1_line1 text,
+  address1_city text,
+  address1_stateorprovince text,
+  address1_postalcode text,
+  address1_country text,
+  industrycode text,
+  createdon timestamptz not null default now()
 );
 
-create table dynamics.contacts (
-  id uuid primary key default gen_random_uuid(),
-  account_id uuid references dynamics.accounts(id) on delete set null,
-  first_name text not null,
-  last_name text not null,
-  email text,
-  phone text,
-  job_title text,
-  created_at timestamptz not null default now()
+create table dynamics.contact (
+  contactid uuid primary key default gen_random_uuid(),
+  parentcustomerid uuid references dynamics.account(accountid) on delete set null,
+  firstname text not null,
+  lastname text not null,
+  jobtitle text,
+  emailaddress1 text,
+  emailaddress2 text,
+  telephone1 text,
+  telephone2 text,
+  mobilephone text,
+  address1_line1 text,
+  address1_city text,
+  address1_stateorprovince text,
+  address1_postalcode text,
+  address1_country text,
+  createdon timestamptz not null default now()
 );
 
-create table dynamics.opportunities (
-  id uuid primary key default gen_random_uuid(),
-  account_id uuid references dynamics.accounts(id) on delete set null,
-  contact_id uuid references dynamics.contacts(id) on delete set null,
+create table dynamics.opportunity (
+  opportunityid uuid primary key default gen_random_uuid(),
+  parentaccountid uuid references dynamics.account(accountid) on delete set null,
+  parentcontactid uuid references dynamics.contact(contactid) on delete set null,
   name text not null,
-  estimated_revenue numeric,
-  close_date date,
-  stage text not null default 'Qualify' check (stage in ('Qualify','Develop','Propose','Close')),
-  created_at timestamptz not null default now()
+  estimatedvalue numeric,
+  estimatedclosedate date,
+  salesstage text not null default 'Qualify' check (salesstage in ('Qualify','Develop','Propose','Close')),
+  createdon timestamptz not null default now()
 );
 
-create table dynamics.leads (
-  id uuid primary key default gen_random_uuid(),
-  first_name text not null,
-  last_name text not null,
-  company_name text,
-  email text,
-  phone text,
-  status text not null default 'New' check (status in ('New','Contacted','Qualified','Disqualified')),
-  created_at timestamptz not null default now()
+create table dynamics.lead (
+  leadid uuid primary key default gen_random_uuid(),
+  firstname text not null,
+  lastname text not null,
+  companyname text,
+  subject text not null default 'New lead',
+  emailaddress1 text,
+  telephone1 text,
+  mobilephone text,
+  leadsourcecode text,
+  statuscode text not null default 'New' check (statuscode in ('New','Contacted','Qualified','Disqualified')),
+  createdon timestamptz not null default now()
 );
 
--- Expose schema to PostgREST and grant CRUD to the anon demo role.
+-- Notes, real Dataverse "annotation" entity: polymorphic, attaches to any
+-- record via objectid + objecttypecode. No FK (target table varies).
+create table dynamics.annotation (
+  annotationid uuid primary key default gen_random_uuid(),
+  objectid uuid not null,
+  objecttypecode text not null check (objecttypecode in ('account','contact','lead','opportunity')),
+  subject text,
+  notetext text,
+  createdon timestamptz not null default now()
+);
+
+-- Expose schema to PostgREST and grant CRUD to the anon demo role. The
+-- Dataverse Web API shim (Task 3) uses the service role internally, but the
+-- anon grant is still useful for direct debugging via the Supabase dashboard.
 grant usage on schema dynamics to anon, authenticated, service_role;
-grant select, insert, update, delete on all tables in schema dynamics to anon, authenticated;
-grant all on all tables in schema dynamics to service_role;
+grant select, insert, update, delete on all tables in schema dynamics to anon, authenticated, service_role;
 alter default privileges in schema dynamics grant select, insert, update, delete on tables to anon, authenticated;
 
 -- RLS on, permissive policies: this is a public sales demo, isolation comes
 -- from the dedicated schema, not from row-level restriction.
-alter table dynamics.accounts enable row level security;
-alter table dynamics.contacts enable row level security;
-alter table dynamics.opportunities enable row level security;
-alter table dynamics.leads enable row level security;
+alter table dynamics.account enable row level security;
+alter table dynamics.contact enable row level security;
+alter table dynamics.opportunity enable row level security;
+alter table dynamics.lead enable row level security;
+alter table dynamics.annotation enable row level security;
 
-create policy "anon full access" on dynamics.accounts for all using (true) with check (true);
-create policy "anon full access" on dynamics.contacts for all using (true) with check (true);
-create policy "anon full access" on dynamics.opportunities for all using (true) with check (true);
-create policy "anon full access" on dynamics.leads for all using (true) with check (true);
+create policy "anon full access" on dynamics.account for all using (true) with check (true);
+create policy "anon full access" on dynamics.contact for all using (true) with check (true);
+create policy "anon full access" on dynamics.opportunity for all using (true) with check (true);
+create policy "anon full access" on dynamics.lead for all using (true) with check (true);
+create policy "anon full access" on dynamics.annotation for all using (true) with check (true);
 ```
 
 - [ ] **Step 2: Write the seed script as a reusable reset function**
@@ -290,26 +322,30 @@ security definer
 set search_path = dynamics, pg_temp
 as $$
 begin
-  truncate table dynamics.opportunities, dynamics.contacts, dynamics.leads, dynamics.accounts restart identity cascade;
+  truncate table dynamics.annotation, dynamics.opportunity, dynamics.contact, dynamics.lead, dynamics.account restart identity cascade;
 
-  insert into dynamics.accounts (id, name, industry, phone, website, address) values
-    ('11111111-1111-1111-1111-111111111111', 'Northwind Health', 'Healthcare', '02 9000 1111', 'northwindhealth.example', '1 Flinders St, Melbourne VIC'),
-    ('11111111-1111-1111-1111-111111111112', 'Contoso Aged Care', 'Aged Care', '02 9000 1112', 'contosoagedcare.example', '22 George St, Sydney NSW'),
-    ('11111111-1111-1111-1111-111111111113', 'Fabrikam Retail', 'Retail', '02 9000 1113', 'fabrikamretail.example', '5 Queen St, Brisbane QLD');
+  insert into dynamics.account (accountid, name, telephone1, websiteurl, address1_line1, address1_city, address1_stateorprovince, address1_postalcode, address1_country, industrycode) values
+    ('11111111-1111-1111-1111-111111111111', 'Northwind Health', '02 9000 1111', 'northwindhealth.example', '1 Flinders St', 'Melbourne', 'VIC', '3000', 'Australia', 'Healthcare'),
+    ('11111111-1111-1111-1111-111111111112', 'Contoso Aged Care', '02 9000 1112', 'contosoagedcare.example', '22 George St', 'Sydney', 'NSW', '2000', 'Australia', 'Aged Care'),
+    ('11111111-1111-1111-1111-111111111113', 'Fabrikam Retail', '02 9000 1113', 'fabrikamretail.example', '5 Queen St', 'Brisbane', 'QLD', '4000', 'Australia', 'Retail');
 
-  insert into dynamics.contacts (id, account_id, first_name, last_name, email, phone, job_title) values
-    ('22222222-2222-2222-2222-222222222221', '11111111-1111-1111-1111-111111111111', 'Priya', 'Nathan', 'priya.nathan@northwindhealth.example', '0400 111 221', 'IT Director'),
-    ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111112', 'Tom', 'Reilly', 'tom.reilly@contosoagedcare.example', '0400 111 222', 'Operations Manager'),
-    ('22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111113', 'Ava', 'Chen', 'ava.chen@fabrikamretail.example', '0400 111 223', 'CX Lead');
+  insert into dynamics.contact (contactid, parentcustomerid, firstname, lastname, jobtitle, emailaddress1, emailaddress2, telephone1, telephone2, mobilephone, address1_line1, address1_city, address1_stateorprovince, address1_postalcode, address1_country) values
+    ('22222222-2222-2222-2222-222222222221', '11111111-1111-1111-1111-111111111111', 'Priya', 'Nathan', 'IT Director', 'priya.nathan@northwindhealth.example', null, '02 9000 1121', null, '0400 111 221', '1 Flinders St', 'Melbourne', 'VIC', '3000', 'Australia'),
+    ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111112', 'Tom', 'Reilly', 'Operations Manager', 'tom.reilly@contosoagedcare.example', null, '02 9000 1122', null, '0400 111 222', '22 George St', 'Sydney', 'NSW', '2000', 'Australia'),
+    ('22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111113', 'Ava', 'Chen', 'CX Lead', 'ava.chen@fabrikamretail.example', null, '02 9000 1123', null, '0400 111 223', '5 Queen St', 'Brisbane', 'QLD', '4000', 'Australia');
 
-  insert into dynamics.opportunities (id, account_id, contact_id, name, estimated_revenue, close_date, stage) values
+  insert into dynamics.opportunity (opportunityid, parentaccountid, parentcontactid, name, estimatedvalue, estimatedclosedate, salesstage) values
     ('33333333-3333-3333-3333-333333333331', '11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222221', 'Contact Centre Modernisation', 185000, '2026-10-15', 'Develop'),
     ('33333333-3333-3333-3333-333333333332', '11111111-1111-1111-1111-111111111112', '22222222-2222-2222-2222-222222222222', 'Scheduling Integration', 92000, '2026-09-01', 'Propose'),
     ('33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111113', '22222222-2222-2222-2222-222222222223', 'Digital Front Door Rollout', 260000, '2026-11-30', 'Qualify');
 
-  insert into dynamics.leads (id, first_name, last_name, company_name, email, phone, status) values
-    ('44444444-4444-4444-4444-444444444441', 'Sam', 'Doyle', 'Woodgrove Bank', 'sam.doyle@woodgrove.example', '0400 111 441', 'New'),
-    ('44444444-4444-4444-4444-444444444442', 'Lena', 'Kaur', 'Adatum Insurance', 'lena.kaur@adatum.example', '0400 111 442', 'Contacted');
+  insert into dynamics.lead (leadid, firstname, lastname, companyname, subject, emailaddress1, telephone1, mobilephone, statuscode) values
+    ('44444444-4444-4444-4444-444444444441', 'Sam', 'Doyle', 'Woodgrove Bank', 'Interested in contact centre demo', 'sam.doyle@woodgrove.example', '02 9000 1441', '0400 111 441', 'New'),
+    ('44444444-4444-4444-4444-444444444442', 'Lena', 'Kaur', 'Adatum Insurance', 'Requested pricing for scheduling module', 'lena.kaur@adatum.example', '02 9000 1442', '0400 111 442', 'Contacted');
+
+  insert into dynamics.annotation (objectid, objecttypecode, subject, notetext) values
+    ('22222222-2222-2222-2222-222222222221', 'contact', 'Renewal call', 'Discussed renewal timeline, wants a demo of the reporting dashboard before committing.'),
+    ('22222222-2222-2222-2222-222222222222', 'contact', 'Onboarding note', 'Prefers email over phone. Best reached after 2pm.');
 end;
 $$;
 
@@ -335,7 +371,7 @@ Expected: both run with no errors.
 - [ ] **Step 4: Verify via REST**
 
 ```bash
-curl "https://<project-ref>.supabase.co/rest/v1/accounts?select=name" \
+curl "https://<project-ref>.supabase.co/rest/v1/account?select=name" \
   -H "apikey: <anon-key>" -H "Authorization: Bearer <anon-key>" \
   -H "Accept-Profile: dynamics"
 ```
@@ -345,19 +381,246 @@ Expected: JSON array of the 3 seeded account names.
 
 ```bash
 git add decoy-src/supabase
-git commit -m "feat(decoy): add dynamics schema, RLS policies, and seed/reset function"
+git commit -m "feat(decoy): add dynamics schema (Dataverse field names), RLS policies, notes table, and seed/reset function"
 ```
 
 ---
 
-### Task 3: Reset Edge Function
+### Task 3: Dataverse Web API shim (Edge Function)
+
+**Files:**
+- Create: `decoy-src/supabase/functions/dataverse-api/index.ts`
+
+**Interfaces:**
+- Consumes: `dynamics.account`/`contact`/`opportunity`/`lead`/`annotation` tables from Task 2.
+- Produces: `GET/POST/PATCH/DELETE {SUPABASE_URL}/functions/v1/dataverse-api/api/data/v9.2/<entityset>[(id)]` — the real Dataverse Web API v9.2 URL/query/body shape. Task 5's `useDataverseTable` hook is the only consumer.
+  - `GET .../accounts?$select=...&$orderby=...&$expand=<nav>($select=...)` → `200 {"@odata.context": "$metadata#accounts", "value": [...]}`
+  - `GET .../accounts(id)` → `200 <entity object>`
+  - `POST .../contacts` body may include `"parentcustomerid_account@odata.bind": "/accounts(guid)"` → `201 <created entity>`
+  - `PATCH .../contacts(id)` (same body shape) → `204`
+  - `DELETE .../contacts(id)` → `204`
+
+- [ ] **Step 1: Write the function**
+
+`decoy-src/supabase/functions/dataverse-api/index.ts`:
+```ts
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+
+interface LookupDef {
+  bindProperty: string;
+  targetSet: string;
+  targetTable: string;
+  targetPk: string;
+}
+
+interface EntityConfig {
+  table: string;
+  pk: string;
+  lookups: Record<string, LookupDef>;
+}
+
+const ENTITIES: Record<string, EntityConfig> = {
+  accounts: { table: 'account', pk: 'accountid', lookups: {} },
+  contacts: {
+    table: 'contact',
+    pk: 'contactid',
+    lookups: {
+      parentcustomerid: {
+        bindProperty: 'parentcustomerid_account',
+        targetSet: 'accounts',
+        targetTable: 'account',
+        targetPk: 'accountid',
+      },
+    },
+  },
+  opportunities: {
+    table: 'opportunity',
+    pk: 'opportunityid',
+    lookups: {
+      parentaccountid: {
+        bindProperty: 'parentaccountid_account',
+        targetSet: 'accounts',
+        targetTable: 'account',
+        targetPk: 'accountid',
+      },
+      parentcontactid: {
+        bindProperty: 'parentcontactid_contact',
+        targetSet: 'contacts',
+        targetTable: 'contact',
+        targetPk: 'contactid',
+      },
+    },
+  },
+  leads: { table: 'lead', pk: 'leadid', lookups: {} },
+  annotations: { table: 'annotation', pk: 'annotationid', lookups: {} },
+};
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+);
+
+function parsePath(pathname: string) {
+  const match = pathname.match(/\/api\/data\/v9\.2\/([a-z]+)(?:\(([0-9a-fA-F-]+)\))?$/);
+  if (!match) return null;
+  return { entitySet: match[1], id: match[2] as string | undefined };
+}
+
+function guidFromBind(bindValue: string): string | null {
+  const match = bindValue.match(/\(([0-9a-fA-F-]+)\)$/);
+  return match ? match[1] : null;
+}
+
+function translateWriteBody(config: EntityConfig, body: Record<string, unknown>) {
+  const out: Record<string, unknown> = {};
+  const bindKeyToColumn = new Map(
+    Object.entries(config.lookups).map(([column, lookup]) => [`${lookup.bindProperty}@odata.bind`, column]),
+  );
+  for (const [key, value] of Object.entries(body)) {
+    const column = bindKeyToColumn.get(key);
+    if (column) {
+      out[column] = typeof value === 'string' ? guidFromBind(value) : null;
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+async function expandRows(
+  config: EntityConfig,
+  rows: Record<string, unknown>[],
+  expandParam: string | null,
+) {
+  if (!expandParam) return rows;
+  const match = expandParam.match(/^([a-zA-Z_]+)(?:\(\$select=([a-zA-Z0-9_,]+)\))?$/);
+  if (!match) return rows;
+  const [, navProperty, selectList] = match;
+  const entry = Object.entries(config.lookups).find(([, l]) => l.bindProperty === navProperty);
+  if (!entry) return rows;
+  const [column, lookup] = entry;
+  const ids = [...new Set(rows.map((r) => r[column]).filter((v): v is string => typeof v === 'string'))];
+  if (ids.length === 0) return rows;
+  const cols = selectList ? `${lookup.targetPk},${selectList}` : '*';
+  const { data: related } = await supabase
+    .schema('dynamics')
+    .from(lookup.targetTable)
+    .select(cols)
+    .in(lookup.targetPk, ids);
+  const byId = new Map((related ?? []).map((r: any) => [r[lookup.targetPk], r]));
+  return rows.map((r) => ({ ...r, [navProperty]: byId.get(r[column] as string) ?? null }));
+}
+
+Deno.serve(async (req) => {
+  const url = new URL(req.url);
+  const parsed = parsePath(url.pathname);
+  if (!parsed) {
+    return new Response(JSON.stringify({ error: { message: 'not found' } }), { status: 404 });
+  }
+
+  const config = ENTITIES[parsed.entitySet];
+  if (!config) {
+    return new Response(JSON.stringify({ error: { message: `unknown entity set ${parsed.entitySet}` } }), {
+      status: 404,
+    });
+  }
+
+  const db = supabase.schema('dynamics').from(config.table);
+  const jsonHeaders = { 'content-type': 'application/json', 'odata-version': '4.0' };
+
+  if (req.method === 'GET' && !parsed.id) {
+    const select = url.searchParams.get('$select') ?? '*';
+    const orderby = url.searchParams.get('$orderby');
+    let query = db.select(select);
+    if (orderby) {
+      const [col, dir] = orderby.trim().split(/\s+/);
+      query = query.order(col, { ascending: (dir ?? 'asc').toLowerCase() !== 'desc' });
+    } else {
+      query = query.order('createdon', { ascending: false });
+    }
+    const { data, error } = await query;
+    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 500 });
+    const expanded = await expandRows(config, data ?? [], url.searchParams.get('$expand'));
+    return new Response(
+      JSON.stringify({ '@odata.context': `$metadata#${parsed.entitySet}`, value: expanded }),
+      { headers: jsonHeaders },
+    );
+  }
+
+  if (req.method === 'GET' && parsed.id) {
+    const { data, error } = await db.select('*').eq(config.pk, parsed.id).single();
+    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 404 });
+    return new Response(JSON.stringify(data), { headers: jsonHeaders });
+  }
+
+  if (req.method === 'POST') {
+    const body = translateWriteBody(config, await req.json());
+    const { data, error } = await db.insert(body).select('*').single();
+    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 400 });
+    return new Response(JSON.stringify(data), { status: 201, headers: jsonHeaders });
+  }
+
+  if (req.method === 'PATCH' && parsed.id) {
+    const body = translateWriteBody(config, await req.json());
+    const { error } = await db.update(body).eq(config.pk, parsed.id);
+    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 400 });
+    return new Response(null, { status: 204 });
+  }
+
+  if (req.method === 'DELETE' && parsed.id) {
+    const { error } = await db.delete().eq(config.pk, parsed.id);
+    if (error) return new Response(JSON.stringify({ error: { message: error.message } }), { status: 400 });
+    return new Response(null, { status: 204 });
+  }
+
+  return new Response(JSON.stringify({ error: { message: 'method not allowed' } }), { status: 405 });
+});
+```
+
+- [ ] **Step 2: Deploy it**
+
+```bash
+cd decoy-src
+npx supabase functions deploy dataverse-api --no-verify-jwt
+```
+`--no-verify-jwt` because Decoy has no login (Global Constraints) — the frontend sends a cosmetic static bearer token, not a real Supabase JWT.
+
+- [ ] **Step 3: Verify each verb**
+
+```bash
+BASE="https://<project-ref>.supabase.co/functions/v1/dataverse-api/api/data/v9.2"
+
+curl "$BASE/accounts?\$select=name&\$orderby=name" -H "Accept: application/json"
+# Expected: {"@odata.context":"$metadata#accounts","value":[{"name":"Contoso Aged Care"}, ...]}
+
+curl "$BASE/contacts?\$expand=parentcustomerid_account(\$select=name)"
+# Expected: each contact has a nested "parentcustomerid_account": {"accountid": "...", "name": "..."}
+
+curl -X POST "$BASE/leads" -H "Content-Type: application/json" \
+  -d '{"firstname":"Test","lastname":"Lead","subject":"Verify POST","statuscode":"New"}'
+# Expected: 201 with the created lead including a generated leadid
+
+curl -X DELETE "$BASE/leads(<the-leadid-from-above>)"
+# Expected: 204 empty body
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add decoy-src/supabase/functions/dataverse-api
+git commit -m "feat(decoy): add dataverse-api edge function (real Dataverse Web API shape over dynamics schema)"
+```
+
+---
+
+### Task 4: Reset Edge Function
 
 **Files:**
 - Create: `decoy-src/supabase/functions/reset-demo/index.ts`
 
 **Interfaces:**
 - Consumes: `dynamics.reset_demo_data()` from Task 2 (service-role only).
-- Produces: `POST /functions/v1/reset-demo` with body `{ "schema": "dynamics" }` → `200 { "ok": true }`. Later systems (`alayacare`, `epic`) add their own `reset_demo_data()` function in their schema and this same function will route to it — the `schema` field is validated against an allow-list here so it never runs arbitrary SQL.
+- Produces: `POST /functions/v1/reset-demo` with body `{ "schema": "dynamics" }` → `200 { "ok": true }`. This is a bespoke demo-control endpoint, not part of the Dataverse Web API shim in Task 3 — it has no real-Dynamics equivalent. Later systems (`alayacare`, `epic`) add their own `reset_demo_data()` function in their schema and this same function routes to it — the `schema` field is validated against an allow-list here so it never runs arbitrary SQL.
 
 - [ ] **Step 1: Write the function**
 
@@ -401,7 +664,6 @@ Deno.serve(async (req) => {
 cd decoy-src
 npx supabase functions deploy reset-demo --no-verify-jwt
 ```
-`--no-verify-jwt` because Decoy has no login (Global Constraints) — anyone with the URL can hit it, same trust level as every other button in this public demo.
 
 - [ ] **Step 3: Verify**
 
@@ -410,176 +672,232 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/reset-demo" \
   -H "Content-Type: application/json" \
   -d '{"schema":"dynamics"}'
 ```
-Expected: `{"ok":true}`. Re-run the Task 2 Step 4 `curl` afterward — same 3 account names should reappear even after manually deleting/editing rows in between.
+Expected: `{"ok":true}`. Re-run the Task 3 Step 3 `accounts` `curl` afterward — same 3 account names should reappear even after manually deleting/editing rows in between.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add decoy-src/supabase/functions
+git add decoy-src/supabase/functions/reset-demo
 git commit -m "feat(decoy): add reset-demo edge function"
 ```
 
 ---
 
-### Task 4: Supabase client and generic table hook
+### Task 5: Dataverse API client hook and shared types
 
 **Files:**
-- Create: `decoy-src/lib/supabase.ts`
 - Create: `decoy-src/lib/types.ts`
-- Create: `decoy-src/lib/useSupabaseTable.ts`
+- Create: `decoy-src/lib/dataverseApi.ts`
+- Create: `decoy-src/lib/resetDemoData.ts`
 - Create: `decoy-src/.env.local` (untracked — real project values)
 - Create: `decoy-src/.env.local.example` (tracked — placeholder values, documents required vars)
 
 **Interfaces:**
-- Produces: `useSupabaseTable<T>(schema: string, table: string)` returning `{ rows: T[], loading: boolean, error: string | null, refresh(): void, insert(values): Promise<void>, update(id, values): Promise<void>, remove(id): Promise<void> }`. Every entity page in Tasks 6–9 consumes this.
-- Produces: `Account`, `Contact`, `Opportunity`, `Lead` types from `lib/types.ts`.
+- Produces: `useDataverseTable<T>(entitySet: string, lookups?: LookupConfig, expand?: string)` returning `{ rows: T[], loading: boolean, error: string | null, refresh(): void, insert(values): Promise<void>, update(id, values): Promise<void>, remove(id): Promise<void> }`. Every entity page in Tasks 6–9 consumes this against Task 3's `dataverse-api` function.
+- Produces: `resetDemoData(schema: string): Promise<void>`, calling Task 4's `reset-demo` function. Consumed by Task 6's `TopNav`.
+- Produces: `Account`, `Contact`, `Opportunity`, `Lead`, `Annotation` types from `lib/types.ts`, including the optional expanded-nav-property fields (`parentcustomerid_account`, `parentaccountid_account`, `parentcontactid_contact`) that show up when a page requests `$expand`.
 
 - [ ] **Step 1: Write env files**
 
 `decoy-src/.env.local.example`:
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-`decoy-src/.env.local` (fill in real values from the Supabase dashboard, this file is gitignored by the root `.env*` rule already in `.gitignore`):
+`decoy-src/.env.local` (fill in the real value from the Supabase dashboard, gitignored by the root `.env*` rule already in `.gitignore`):
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 ```
+No anon key needed client-side — the frontend never talks to Supabase's own REST/Postgres endpoints, only to the two Edge Functions, which don't require the `apikey` header.
 
-- [ ] **Step 2: Write the Supabase client**
-
-`decoy-src/lib/supabase.ts`:
-```ts
-import { createClient } from '@supabase/supabase-js';
-
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
-
-export async function resetDemoData(schema: string): Promise<void> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/reset-demo`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ schema }),
-    },
-  );
-  if (!res.ok) throw new Error(`reset failed: ${res.status}`);
-}
-```
-
-- [ ] **Step 3: Write shared types**
+- [ ] **Step 2: Write shared types**
 
 `decoy-src/lib/types.ts`:
 ```ts
 export interface Account {
-  id: string;
+  accountid: string;
   name: string;
-  industry: string | null;
-  phone: string | null;
-  website: string | null;
-  address: string | null;
-  created_at: string;
+  telephone1: string | null;
+  websiteurl: string | null;
+  address1_line1: string | null;
+  address1_city: string | null;
+  address1_stateorprovince: string | null;
+  address1_postalcode: string | null;
+  address1_country: string | null;
+  industrycode: string | null;
+  createdon: string;
 }
 
 export interface Contact {
-  id: string;
-  account_id: string | null;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone: string | null;
-  job_title: string | null;
-  created_at: string;
+  contactid: string;
+  parentcustomerid: string | null;
+  firstname: string;
+  lastname: string;
+  jobtitle: string | null;
+  emailaddress1: string | null;
+  emailaddress2: string | null;
+  telephone1: string | null;
+  telephone2: string | null;
+  mobilephone: string | null;
+  address1_line1: string | null;
+  address1_city: string | null;
+  address1_stateorprovince: string | null;
+  address1_postalcode: string | null;
+  address1_country: string | null;
+  createdon: string;
+  parentcustomerid_account?: { accountid: string; name: string } | null;
 }
 
 export interface Opportunity {
-  id: string;
-  account_id: string | null;
-  contact_id: string | null;
+  opportunityid: string;
+  parentaccountid: string | null;
+  parentcontactid: string | null;
   name: string;
-  estimated_revenue: number | null;
-  close_date: string | null;
-  stage: 'Qualify' | 'Develop' | 'Propose' | 'Close';
-  created_at: string;
+  estimatedvalue: number | null;
+  estimatedclosedate: string | null;
+  salesstage: 'Qualify' | 'Develop' | 'Propose' | 'Close';
+  createdon: string;
+  parentaccountid_account?: { accountid: string; name: string } | null;
+  parentcontactid_contact?: { contactid: string; firstname: string; lastname: string } | null;
 }
 
 export interface Lead {
-  id: string;
-  first_name: string;
-  last_name: string;
-  company_name: string | null;
-  email: string | null;
-  phone: string | null;
-  status: 'New' | 'Contacted' | 'Qualified' | 'Disqualified';
-  created_at: string;
+  leadid: string;
+  firstname: string;
+  lastname: string;
+  companyname: string | null;
+  subject: string;
+  emailaddress1: string | null;
+  telephone1: string | null;
+  mobilephone: string | null;
+  leadsourcecode: string | null;
+  statuscode: 'New' | 'Contacted' | 'Qualified' | 'Disqualified';
+  createdon: string;
+}
+
+export interface Annotation {
+  annotationid: string;
+  objectid: string;
+  objecttypecode: 'account' | 'contact' | 'lead' | 'opportunity';
+  subject: string | null;
+  notetext: string | null;
+  createdon: string;
 }
 ```
 
-- [ ] **Step 4: Write the generic hook**
+- [ ] **Step 3: Write the Dataverse API hook**
 
-`decoy-src/lib/useSupabaseTable.ts`:
+`decoy-src/lib/dataverseApi.ts`:
 ```ts
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from './supabase';
 
-export function useSupabaseTable<T extends { id: string }>(schema: string, table: string) {
+const API_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/dataverse-api/api/data/v9.2`;
+
+const ODATA_HEADERS = {
+  'OData-MaxVersion': '4.0',
+  'OData-Version': '4.0',
+  'Content-Type': 'application/json; charset=utf-8',
+  Accept: 'application/json',
+  Authorization: 'Bearer demo-token',
+};
+
+export interface LookupConfig {
+  [column: string]: { bindProperty: string; targetSet: string };
+}
+
+export function useDataverseTable<T extends Record<string, unknown>>(
+  entitySet: string,
+  lookups: LookupConfig = {},
+  expand?: string,
+) {
   const [rows, setRows] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     setLoading(true);
-    supabase
-      .schema(schema)
-      .from(table)
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) setError(error.message);
-        else setRows((data ?? []) as T[]);
+    const params = new URLSearchParams({ $orderby: 'createdon desc' });
+    if (expand) params.set('$expand', expand);
+    fetch(`${API_BASE}/${entitySet}?${params.toString()}`, { headers: ODATA_HEADERS })
+      .then((res) => res.json())
+      .then((body) => {
+        if (body.error) setError(body.error.message);
+        else setRows(body.value as T[]);
         setLoading(false);
       });
-  }, [schema, table]);
+  }, [entitySet, expand]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
+  function toWireBody(values: Partial<T>) {
+    const out: Record<string, unknown> = { ...values };
+    for (const [column, lookup] of Object.entries(lookups)) {
+      if (column in out) {
+        const value = out[column];
+        delete out[column];
+        if (value) out[`${lookup.bindProperty}@odata.bind`] = `/${lookup.targetSet}(${value})`;
+      }
+    }
+    return out;
+  }
+
   const insert = useCallback(
     async (values: Partial<T>) => {
-      const { error } = await supabase.schema(schema).from(table).insert(values);
-      if (error) throw new Error(error.message);
+      const res = await fetch(`${API_BASE}/${entitySet}`, {
+        method: 'POST',
+        headers: ODATA_HEADERS,
+        body: JSON.stringify(toWireBody(values)),
+      });
+      if (!res.ok) throw new Error(`insert failed: ${res.status}`);
       refresh();
     },
-    [schema, table, refresh],
+    [entitySet, lookups, refresh],
   );
 
   const update = useCallback(
     async (id: string, values: Partial<T>) => {
-      const { error } = await supabase.schema(schema).from(table).update(values).eq('id', id);
-      if (error) throw new Error(error.message);
+      const res = await fetch(`${API_BASE}/${entitySet}(${id})`, {
+        method: 'PATCH',
+        headers: ODATA_HEADERS,
+        body: JSON.stringify(toWireBody(values)),
+      });
+      if (!res.ok) throw new Error(`update failed: ${res.status}`);
       refresh();
     },
-    [schema, table, refresh],
+    [entitySet, lookups, refresh],
   );
 
   const remove = useCallback(
     async (id: string) => {
-      const { error } = await supabase.schema(schema).from(table).delete().eq('id', id);
-      if (error) throw new Error(error.message);
+      const res = await fetch(`${API_BASE}/${entitySet}(${id})`, {
+        method: 'DELETE',
+        headers: ODATA_HEADERS,
+      });
+      if (!res.ok) throw new Error(`delete failed: ${res.status}`);
       refresh();
     },
-    [schema, table, refresh],
+    [entitySet, refresh],
   );
 
   return { rows, loading, error, refresh, insert, update, remove };
+}
+```
+
+- [ ] **Step 4: Write the reset helper**
+
+`decoy-src/lib/resetDemoData.ts`:
+```ts
+export async function resetDemoData(schema: string): Promise<void> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/reset-demo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ schema }),
+  });
+  if (!res.ok) throw new Error(`reset failed: ${res.status}`);
 }
 ```
 
@@ -595,12 +913,12 @@ Expected: no type errors.
 
 ```bash
 git add decoy-src/lib decoy-src/.env.local.example
-git commit -m "feat(decoy): add supabase client, shared types, and useSupabaseTable hook"
+git commit -m "feat(decoy): add dataverse api hook, reset helper, and dataverse-shaped types"
 ```
 
 ---
 
-### Task 5: Dynamics layout and top nav (with Reset button)
+### Task 6: Dynamics layout and top nav (with Reset button)
 
 **Files:**
 - Create: `decoy-src/app/dynamics/layout.tsx`
@@ -608,7 +926,7 @@ git commit -m "feat(decoy): add supabase client, shared types, and useSupabaseTa
 - Modify: `decoy-src/app/page.tsx`
 
 **Interfaces:**
-- Consumes: `resetDemoData` from `lib/supabase.ts` (Task 4).
+- Consumes: `resetDemoData` from `lib/resetDemoData.ts` (Task 5).
 - Produces: `<TopNav />` rendered above every `/dynamics/*` page; links to Accounts, Contacts, Opportunities, Leads.
 
 - [ ] **Step 1: Write the nav component**
@@ -620,7 +938,7 @@ git commit -m "feat(decoy): add supabase client, shared types, and useSupabaseTa
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { resetDemoData } from '@/lib/supabase';
+import { resetDemoData } from '@/lib/resetDemoData';
 
 const LINKS = [
   { href: '/dynamics/accounts', label: 'Accounts' },
@@ -716,7 +1034,7 @@ export default function Home() {
 cd decoy-src
 npm run build
 ```
-Expected: succeeds (accounts page doesn't exist yet, so this will 404 at runtime — that's expected until Task 6; the build itself must still succeed since these are all static/client components with no dynamic route params).
+Expected: succeeds (accounts page doesn't exist yet, so this will 404 at runtime — that's expected until Task 7; the build itself must still succeed since these are all static/client components with no dynamic route params).
 
 - [ ] **Step 5: Commit**
 
@@ -727,14 +1045,14 @@ git commit -m "feat(decoy): add dynamics layout, top nav, and reset button"
 
 ---
 
-### Task 6: Accounts page (list + detail, full CRUD)
+### Task 7: Accounts page (list + detail, full CRUD)
 
 **Files:**
 - Create: `decoy-src/app/dynamics/accounts/page.tsx`
 
 **Interfaces:**
-- Consumes: `useSupabaseTable<Account>('dynamics', 'accounts')` (Task 4).
-- Produces: the pattern every later entity page (Tasks 7–9) copies — list table on the left, selected-record form on the right, "New" clears the form for insert.
+- Consumes: `useDataverseTable<Account>('accounts')` (Task 5). No lookups (Account has none).
+- Produces: the pattern every later entity page (Tasks 8–9) copies — list table on the left, selected-record form on the right, "New" clears the form for insert.
 
 - [ ] **Step 1: Write the page**
 
@@ -743,33 +1061,40 @@ git commit -m "feat(decoy): add dynamics layout, top nav, and reset button"
 'use client';
 
 import { useState } from 'react';
-import { useSupabaseTable } from '@/lib/useSupabaseTable';
+import { useDataverseTable } from '@/lib/dataverseApi';
 import type { Account } from '@/lib/types';
 
-const BLANK: Omit<Account, 'id' | 'created_at'> = {
+type FormState = Omit<Account, 'accountid' | 'createdon'>;
+
+const BLANK: FormState = {
   name: '',
-  industry: '',
-  phone: '',
-  website: '',
-  address: '',
+  telephone1: '',
+  websiteurl: '',
+  address1_line1: '',
+  address1_city: '',
+  address1_stateorprovince: '',
+  address1_postalcode: '',
+  address1_country: '',
+  industrycode: '',
 };
 
 export default function AccountsPage() {
-  const { rows, loading, error, insert, update, remove } = useSupabaseTable<Account>(
-    'dynamics',
-    'accounts',
-  );
+  const { rows, loading, error, insert, update, remove } = useDataverseTable<Account>('accounts');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [form, setForm] = useState(BLANK);
+  const [form, setForm] = useState<FormState>(BLANK);
 
   function selectRow(row: Account) {
-    setSelectedId(row.id);
+    setSelectedId(row.accountid);
     setForm({
       name: row.name,
-      industry: row.industry ?? '',
-      phone: row.phone ?? '',
-      website: row.website ?? '',
-      address: row.address ?? '',
+      telephone1: row.telephone1 ?? '',
+      websiteurl: row.websiteurl ?? '',
+      address1_line1: row.address1_line1 ?? '',
+      address1_city: row.address1_city ?? '',
+      address1_stateorprovince: row.address1_stateorprovince ?? '',
+      address1_postalcode: row.address1_postalcode ?? '',
+      address1_country: row.address1_country ?? '',
+      industrycode: row.industrycode ?? '',
     });
   }
 
@@ -814,13 +1139,13 @@ export default function AccountsPage() {
           <tbody>
             {rows.map((row) => (
               <tr
-                key={row.id}
+                key={row.accountid}
                 onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.id ? 'bg-blue-50' : ''}`}
+                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.accountid ? 'bg-blue-50' : ''}`}
               >
                 <td className="p-2">{row.name}</td>
-                <td className="p-2">{row.industry}</td>
-                <td className="p-2">{row.phone}</td>
+                <td className="p-2">{row.industrycode}</td>
+                <td className="p-2">{row.telephone1}</td>
               </tr>
             ))}
           </tbody>
@@ -830,45 +1155,22 @@ export default function AccountsPage() {
       <div className="rounded bg-white p-4 shadow-sm">
         <h2 className="mb-3 font-medium">{selectedId ? 'Edit account' : 'New account'}</h2>
         <div className="space-y-2">
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Industry"
-            value={form.industry ?? ''}
-            onChange={(e) => setForm({ ...form, industry: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Phone"
-            value={form.phone ?? ''}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Website"
-            value={form.website ?? ''}
-            onChange={(e) => setForm({ ...form, website: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Address"
-            value={form.address ?? ''}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-          />
+          <input className="w-full rounded border p-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input className="w-full rounded border p-2" placeholder="Industry" value={form.industrycode ?? ''} onChange={(e) => setForm({ ...form, industrycode: e.target.value })} />
+          <input className="w-full rounded border p-2" placeholder="Phone" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
+          <input className="w-full rounded border p-2" placeholder="Website" value={form.websiteurl ?? ''} onChange={(e) => setForm({ ...form, websiteurl: e.target.value })} />
+          <input className="w-full rounded border p-2" placeholder="Street" value={form.address1_line1 ?? ''} onChange={(e) => setForm({ ...form, address1_line1: e.target.value })} />
+          <div className="grid grid-cols-3 gap-2">
+            <input className="rounded border p-2" placeholder="City" value={form.address1_city ?? ''} onChange={(e) => setForm({ ...form, address1_city: e.target.value })} />
+            <input className="rounded border p-2" placeholder="State" value={form.address1_stateorprovince ?? ''} onChange={(e) => setForm({ ...form, address1_stateorprovince: e.target.value })} />
+            <input className="rounded border p-2" placeholder="Postcode" value={form.address1_postalcode ?? ''} onChange={(e) => setForm({ ...form, address1_postalcode: e.target.value })} />
+          </div>
+          <input className="w-full rounded border p-2" placeholder="Country" value={form.address1_country ?? ''} onChange={(e) => setForm({ ...form, address1_country: e.target.value })} />
         </div>
         <div className="mt-4 flex gap-2">
-          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            Save
-          </button>
+          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
           {selectedId && (
-            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">
-              Delete
-            </button>
+            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
           )}
         </div>
       </div>
@@ -883,7 +1185,7 @@ export default function AccountsPage() {
 cd decoy-src
 npm run dev
 ```
-Open `http://localhost:3000/decoy/dynamics/accounts`. Expected: 3 seeded accounts listed; clicking a row populates the form; editing name and clicking Save updates the table; New + fill + Save adds a 4th row; Delete removes the selected row.
+Open `http://localhost:3000/decoy/dynamics/accounts` and the browser devtools Network tab. Expected: 3 seeded accounts listed; the list request shows as `GET .../api/data/v9.2/accounts?$orderby=createdon+desc` with `OData-Version: 4.0` response header; clicking a row populates the form; Save fires a `PATCH .../accounts(id)` returning 204; New + fill + Save fires a `POST .../accounts` returning 201; Delete fires `DELETE .../accounts(id)` returning 204.
 
 - [ ] **Step 3: Commit**
 
@@ -894,13 +1196,13 @@ git commit -m "feat(decoy): add accounts list/detail page with CRUD"
 
 ---
 
-### Task 7: Contacts page (linked to Account)
+### Task 8: Contacts page (linked to Account via @odata.bind/$expand, with Notes)
 
 **Files:**
 - Create: `decoy-src/app/dynamics/contacts/page.tsx`
 
 **Interfaces:**
-- Consumes: `useSupabaseTable<Contact>('dynamics', 'contacts')` and `useSupabaseTable<Account>('dynamics', 'accounts')` (for the account picker) from Task 4.
+- Consumes: `useDataverseTable<Contact>('contacts', { parentcustomerid: { bindProperty: 'parentcustomerid_account', targetSet: 'accounts' } }, 'parentcustomerid_account($select=name)')` for the list (demonstrates `$expand`); a second `useDataverseTable<Account>('accounts')` for the account-picker dropdown; `useDataverseTable<Annotation>('annotations')` for Notes. All from Task 5.
 
 - [ ] **Step 1: Write the page**
 
@@ -909,40 +1211,61 @@ git commit -m "feat(decoy): add accounts list/detail page with CRUD"
 'use client';
 
 import { useState } from 'react';
-import { useSupabaseTable } from '@/lib/useSupabaseTable';
-import type { Account, Contact } from '@/lib/types';
+import { useDataverseTable } from '@/lib/dataverseApi';
+import type { Account, Annotation, Contact } from '@/lib/types';
 
-const BLANK: Omit<Contact, 'id' | 'created_at'> = {
-  account_id: null,
-  first_name: '',
-  last_name: '',
-  email: '',
-  phone: '',
-  job_title: '',
+type FormState = Omit<Contact, 'contactid' | 'createdon' | 'parentcustomerid_account'>;
+
+const BLANK: FormState = {
+  parentcustomerid: null,
+  firstname: '',
+  lastname: '',
+  jobtitle: '',
+  emailaddress1: '',
+  emailaddress2: '',
+  telephone1: '',
+  telephone2: '',
+  mobilephone: '',
+  address1_line1: '',
+  address1_city: '',
+  address1_stateorprovince: '',
+  address1_postalcode: '',
+  address1_country: '',
+};
+
+const CONTACT_LOOKUPS = {
+  parentcustomerid: { bindProperty: 'parentcustomerid_account', targetSet: 'accounts' },
 };
 
 export default function ContactsPage() {
-  const { rows, loading, error, insert, update, remove } = useSupabaseTable<Contact>(
-    'dynamics',
+  const { rows, loading, error, insert, update, remove } = useDataverseTable<Contact>(
     'contacts',
+    CONTACT_LOOKUPS,
+    'parentcustomerid_account($select=name)',
   );
-  const { rows: accounts } = useSupabaseTable<Account>('dynamics', 'accounts');
+  const { rows: accounts } = useDataverseTable<Account>('accounts');
+  const { rows: notes, insert: insertNote } = useDataverseTable<Annotation>('annotations');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [form, setForm] = useState(BLANK);
-
-  function accountName(id: string | null) {
-    return accounts.find((a) => a.id === id)?.name ?? '—';
-  }
+  const [form, setForm] = useState<FormState>(BLANK);
+  const [noteText, setNoteText] = useState('');
 
   function selectRow(row: Contact) {
-    setSelectedId(row.id);
+    setSelectedId(row.contactid);
     setForm({
-      account_id: row.account_id,
-      first_name: row.first_name,
-      last_name: row.last_name,
-      email: row.email ?? '',
-      phone: row.phone ?? '',
-      job_title: row.job_title ?? '',
+      parentcustomerid: row.parentcustomerid,
+      firstname: row.firstname,
+      lastname: row.lastname,
+      jobtitle: row.jobtitle ?? '',
+      emailaddress1: row.emailaddress1 ?? '',
+      emailaddress2: row.emailaddress2 ?? '',
+      telephone1: row.telephone1 ?? '',
+      telephone2: row.telephone2 ?? '',
+      mobilephone: row.mobilephone ?? '',
+      address1_line1: row.address1_line1 ?? '',
+      address1_city: row.address1_city ?? '',
+      address1_stateorprovince: row.address1_stateorprovince ?? '',
+      address1_postalcode: row.address1_postalcode ?? '',
+      address1_country: row.address1_country ?? '',
     });
   }
 
@@ -964,6 +1287,21 @@ export default function ContactsPage() {
     startNew();
   }
 
+  async function handleAddNote() {
+    if (!selectedId || !noteText.trim()) return;
+    await insertNote({
+      objectid: selectedId,
+      objecttypecode: 'contact',
+      subject: 'Note',
+      notetext: noteText.trim(),
+    });
+    setNoteText('');
+  }
+
+  const contactNotes = notes
+    .filter((n) => n.objecttypecode === 'contact' && n.objectid === selectedId)
+    .sort((a, b) => (a.createdon < b.createdon ? 1 : -1));
+
   if (loading) return <p>Loading…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
 
@@ -972,9 +1310,7 @@ export default function ContactsPage() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Contacts</h1>
-          <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            New
-          </button>
+          <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
         </div>
         <table className="w-full border-collapse bg-white text-sm shadow-sm">
           <thead>
@@ -987,77 +1323,74 @@ export default function ContactsPage() {
           <tbody>
             {rows.map((row) => (
               <tr
-                key={row.id}
+                key={row.contactid}
                 onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.id ? 'bg-blue-50' : ''}`}
+                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.contactid ? 'bg-blue-50' : ''}`}
               >
-                <td className="p-2">
-                  {row.first_name} {row.last_name}
-                </td>
-                <td className="p-2">{accountName(row.account_id)}</td>
-                <td className="p-2">{row.email}</td>
+                <td className="p-2">{row.firstname} {row.lastname}</td>
+                <td className="p-2">{row.parentcustomerid_account?.name ?? '—'}</td>
+                <td className="p-2">{row.emailaddress1}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="rounded bg-white p-4 shadow-sm">
-        <h2 className="mb-3 font-medium">{selectedId ? 'Edit contact' : 'New contact'}</h2>
-        <div className="space-y-2">
-          <select
-            className="w-full rounded border p-2"
-            value={form.account_id ?? ''}
-            onChange={(e) => setForm({ ...form, account_id: e.target.value || null })}
-          >
-            <option value="">No account</option>
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-          <input
-            className="w-full rounded border p-2"
-            placeholder="First name"
-            value={form.first_name}
-            onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Last name"
-            value={form.last_name}
-            onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Email"
-            value={form.email ?? ''}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Phone"
-            value={form.phone ?? ''}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Job title"
-            value={form.job_title ?? ''}
-            onChange={(e) => setForm({ ...form, job_title: e.target.value })}
-          />
+      <div className="space-y-4">
+        <div className="rounded bg-white p-4 shadow-sm">
+          <h2 className="mb-3 font-medium">{selectedId ? 'Edit contact' : 'New contact'}</h2>
+          <div className="space-y-2">
+            <select className="w-full rounded border p-2" value={form.parentcustomerid ?? ''} onChange={(e) => setForm({ ...form, parentcustomerid: e.target.value || null })}>
+              <option value="">No account</option>
+              {accounts.map((a) => (
+                <option key={a.accountid} value={a.accountid}>{a.name}</option>
+              ))}
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded border p-2" placeholder="First name" value={form.firstname} onChange={(e) => setForm({ ...form, firstname: e.target.value })} />
+              <input className="rounded border p-2" placeholder="Last name" value={form.lastname} onChange={(e) => setForm({ ...form, lastname: e.target.value })} />
+            </div>
+            <input className="w-full rounded border p-2" placeholder="Job title" value={form.jobtitle ?? ''} onChange={(e) => setForm({ ...form, jobtitle: e.target.value })} />
+            <input className="w-full rounded border p-2" placeholder="Email" value={form.emailaddress1 ?? ''} onChange={(e) => setForm({ ...form, emailaddress1: e.target.value })} />
+            <input className="w-full rounded border p-2" placeholder="Secondary email" value={form.emailaddress2 ?? ''} onChange={(e) => setForm({ ...form, emailaddress2: e.target.value })} />
+            <div className="grid grid-cols-3 gap-2">
+              <input className="rounded border p-2" placeholder="Phone" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
+              <input className="rounded border p-2" placeholder="Phone 2" value={form.telephone2 ?? ''} onChange={(e) => setForm({ ...form, telephone2: e.target.value })} />
+              <input className="rounded border p-2" placeholder="Mobile" value={form.mobilephone ?? ''} onChange={(e) => setForm({ ...form, mobilephone: e.target.value })} />
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
+            {selectedId && (
+              <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
+            )}
+          </div>
         </div>
-        <div className="mt-4 flex gap-2">
-          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            Save
-          </button>
-          {selectedId && (
-            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">
-              Delete
-            </button>
-          )}
-        </div>
+
+        {selectedId && (
+          <div className="rounded bg-white p-4 shadow-sm">
+            <h2 className="mb-3 font-medium">Notes</h2>
+            <div className="mb-3 space-y-2">
+              <textarea
+                className="w-full rounded border p-2 text-sm"
+                rows={2}
+                placeholder="Add a note…"
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+              />
+              <button onClick={handleAddNote} className="rounded bg-gray-800 px-3 py-1 text-sm text-white">Add note</button>
+            </div>
+            <ul className="space-y-2 text-sm">
+              {contactNotes.map((n) => (
+                <li key={n.annotationid} className="border-b pb-2">
+                  <div className="text-gray-500">{new Date(n.createdon).toLocaleString()}</div>
+                  <div>{n.notetext}</div>
+                </li>
+              ))}
+              {contactNotes.length === 0 && <li className="text-gray-500">No notes yet.</li>}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1066,24 +1399,24 @@ export default function ContactsPage() {
 
 - [ ] **Step 2: Verify manually**
 
-`npm run dev`, open `http://localhost:3000/decoy/dynamics/contacts`. Expected: 3 seeded contacts, each showing its linked account name; changing the account dropdown and saving updates the link; New + fill + Save adds a contact linked to a chosen account.
+`npm run dev`, open `http://localhost:3000/decoy/dynamics/contacts` with devtools Network tab open. Expected: the list request is `GET .../contacts?$orderby=createdon+desc&$expand=parentcustomerid_account($select=name)`; each row's Account column reads directly off the expanded `parentcustomerid_account.name`, no client-side join; the two seeded notes appear under Priya Nathan and Tom Reilly when selected; adding a note appends it immediately; changing the account dropdown and saving sends a PATCH body containing `"parentcustomerid_account@odata.bind": "/accounts(<id>)"`.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add decoy-src/app/dynamics/contacts
-git commit -m "feat(decoy): add contacts list/detail page linked to accounts"
+git commit -m "feat(decoy): add contacts list/detail page using \$expand and @odata.bind, with notes"
 ```
 
 ---
 
-### Task 8: Opportunities page (linked to Account + Contact)
+### Task 9: Opportunities page (linked to Account + Contact via @odata.bind)
 
 **Files:**
 - Create: `decoy-src/app/dynamics/opportunities/page.tsx`
 
 **Interfaces:**
-- Consumes: `useSupabaseTable<Opportunity>`, `useSupabaseTable<Account>`, `useSupabaseTable<Contact>` from Task 4.
+- Consumes: `useDataverseTable<Opportunity>('opportunities', OPPORTUNITY_LOOKUPS)`, plus `useDataverseTable<Account>('accounts')` and `useDataverseTable<Contact>('contacts')` for the pickers, from Task 5.
 
 - [ ] **Step 1: Write the page**
 
@@ -1092,43 +1425,50 @@ git commit -m "feat(decoy): add contacts list/detail page linked to accounts"
 'use client';
 
 import { useState } from 'react';
-import { useSupabaseTable } from '@/lib/useSupabaseTable';
+import { useDataverseTable } from '@/lib/dataverseApi';
 import type { Account, Contact, Opportunity } from '@/lib/types';
 
-const STAGES: Opportunity['stage'][] = ['Qualify', 'Develop', 'Propose', 'Close'];
+const STAGES: Opportunity['salesstage'][] = ['Qualify', 'Develop', 'Propose', 'Close'];
 
-const BLANK: Omit<Opportunity, 'id' | 'created_at'> = {
-  account_id: null,
-  contact_id: null,
+type FormState = Omit<Opportunity, 'opportunityid' | 'createdon' | 'parentaccountid_account' | 'parentcontactid_contact'>;
+
+const BLANK: FormState = {
+  parentaccountid: null,
+  parentcontactid: null,
   name: '',
-  estimated_revenue: null,
-  close_date: null,
-  stage: 'Qualify',
+  estimatedvalue: null,
+  estimatedclosedate: null,
+  salesstage: 'Qualify',
+};
+
+const OPPORTUNITY_LOOKUPS = {
+  parentaccountid: { bindProperty: 'parentaccountid_account', targetSet: 'accounts' },
+  parentcontactid: { bindProperty: 'parentcontactid_contact', targetSet: 'contacts' },
 };
 
 export default function OpportunitiesPage() {
-  const { rows, loading, error, insert, update, remove } = useSupabaseTable<Opportunity>(
-    'dynamics',
+  const { rows, loading, error, insert, update, remove } = useDataverseTable<Opportunity>(
     'opportunities',
+    OPPORTUNITY_LOOKUPS,
   );
-  const { rows: accounts } = useSupabaseTable<Account>('dynamics', 'accounts');
-  const { rows: contacts } = useSupabaseTable<Contact>('dynamics', 'contacts');
+  const { rows: accounts } = useDataverseTable<Account>('accounts');
+  const { rows: contacts } = useDataverseTable<Contact>('contacts');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [form, setForm] = useState(BLANK);
+  const [form, setForm] = useState<FormState>(BLANK);
 
   function accountName(id: string | null) {
-    return accounts.find((a) => a.id === id)?.name ?? '—';
+    return accounts.find((a) => a.accountid === id)?.name ?? '—';
   }
 
   function selectRow(row: Opportunity) {
-    setSelectedId(row.id);
+    setSelectedId(row.opportunityid);
     setForm({
-      account_id: row.account_id,
-      contact_id: row.contact_id,
+      parentaccountid: row.parentaccountid,
+      parentcontactid: row.parentcontactid,
       name: row.name,
-      estimated_revenue: row.estimated_revenue,
-      close_date: row.close_date,
-      stage: row.stage,
+      estimatedvalue: row.estimatedvalue,
+      estimatedclosedate: row.estimatedclosedate,
+      salesstage: row.salesstage,
     });
   }
 
@@ -1158,30 +1498,28 @@ export default function OpportunitiesPage() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Opportunities</h1>
-          <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            New
-          </button>
+          <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
         </div>
         <table className="w-full border-collapse bg-white text-sm shadow-sm">
           <thead>
             <tr className="border-b bg-gray-100 text-left">
               <th className="p-2">Name</th>
               <th className="p-2">Account</th>
-              <th className="p-2">Revenue</th>
+              <th className="p-2">Est. value</th>
               <th className="p-2">Stage</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr
-                key={row.id}
+                key={row.opportunityid}
                 onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.id ? 'bg-blue-50' : ''}`}
+                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.opportunityid ? 'bg-blue-50' : ''}`}
               >
                 <td className="p-2">{row.name}</td>
-                <td className="p-2">{accountName(row.account_id)}</td>
-                <td className="p-2">{row.estimated_revenue ?? '—'}</td>
-                <td className="p-2">{row.stage}</td>
+                <td className="p-2">{accountName(row.parentaccountid)}</td>
+                <td className="p-2">{row.estimatedvalue ?? '—'}</td>
+                <td className="p-2">{row.salesstage}</td>
               </tr>
             ))}
           </tbody>
@@ -1191,69 +1529,31 @@ export default function OpportunitiesPage() {
       <div className="rounded bg-white p-4 shadow-sm">
         <h2 className="mb-3 font-medium">{selectedId ? 'Edit opportunity' : 'New opportunity'}</h2>
         <div className="space-y-2">
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <select
-            className="w-full rounded border p-2"
-            value={form.account_id ?? ''}
-            onChange={(e) => setForm({ ...form, account_id: e.target.value || null })}
-          >
+          <input className="w-full rounded border p-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <select className="w-full rounded border p-2" value={form.parentaccountid ?? ''} onChange={(e) => setForm({ ...form, parentaccountid: e.target.value || null })}>
             <option value="">No account</option>
             {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
+              <option key={a.accountid} value={a.accountid}>{a.name}</option>
             ))}
           </select>
-          <select
-            className="w-full rounded border p-2"
-            value={form.contact_id ?? ''}
-            onChange={(e) => setForm({ ...form, contact_id: e.target.value || null })}
-          >
+          <select className="w-full rounded border p-2" value={form.parentcontactid ?? ''} onChange={(e) => setForm({ ...form, parentcontactid: e.target.value || null })}>
             <option value="">No contact</option>
             {contacts.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.first_name} {c.last_name}
-              </option>
+              <option key={c.contactid} value={c.contactid}>{c.firstname} {c.lastname}</option>
             ))}
           </select>
-          <input
-            type="number"
-            className="w-full rounded border p-2"
-            placeholder="Estimated revenue"
-            value={form.estimated_revenue ?? ''}
-            onChange={(e) => setForm({ ...form, estimated_revenue: e.target.value ? Number(e.target.value) : null })}
-          />
-          <input
-            type="date"
-            className="w-full rounded border p-2"
-            value={form.close_date ?? ''}
-            onChange={(e) => setForm({ ...form, close_date: e.target.value || null })}
-          />
-          <select
-            className="w-full rounded border p-2"
-            value={form.stage}
-            onChange={(e) => setForm({ ...form, stage: e.target.value as Opportunity['stage'] })}
-          >
+          <input type="number" className="w-full rounded border p-2" placeholder="Estimated value" value={form.estimatedvalue ?? ''} onChange={(e) => setForm({ ...form, estimatedvalue: e.target.value ? Number(e.target.value) : null })} />
+          <input type="date" className="w-full rounded border p-2" value={form.estimatedclosedate ?? ''} onChange={(e) => setForm({ ...form, estimatedclosedate: e.target.value || null })} />
+          <select className="w-full rounded border p-2" value={form.salesstage} onChange={(e) => setForm({ ...form, salesstage: e.target.value as Opportunity['salesstage'] })}>
             {STAGES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
+              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
         <div className="mt-4 flex gap-2">
-          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            Save
-          </button>
+          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
           {selectedId && (
-            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">
-              Delete
-            </button>
+            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
           )}
         </div>
       </div>
@@ -1264,24 +1564,24 @@ export default function OpportunitiesPage() {
 
 - [ ] **Step 2: Verify manually**
 
-`npm run dev`, open `http://localhost:3000/decoy/dynamics/opportunities`. Expected: 3 seeded opportunities with account names and stages showing; editing stage via dropdown and saving persists; New + fill creates a 4th linked to any account/contact.
+`npm run dev`, open `http://localhost:3000/decoy/dynamics/opportunities`. Expected: 3 seeded opportunities with account names and stages showing; editing stage via dropdown and saving persists via a `PATCH .../opportunities(id)` body containing plain `salesstage` (not a lookup — no bind needed) alongside any `@odata.bind` keys for account/contact changes; New + fill creates a 4th linked to any account/contact via `@odata.bind`.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add decoy-src/app/dynamics/opportunities
-git commit -m "feat(decoy): add opportunities list/detail page linked to accounts and contacts"
+git commit -m "feat(decoy): add opportunities list/detail page linked to accounts and contacts via @odata.bind"
 ```
 
 ---
 
-### Task 9: Leads page
+### Task 10: Leads page
 
 **Files:**
 - Create: `decoy-src/app/dynamics/leads/page.tsx`
 
 **Interfaces:**
-- Consumes: `useSupabaseTable<Lead>('dynamics', 'leads')` from Task 4.
+- Consumes: `useDataverseTable<Lead>('leads')` from Task 5. No lookups (Lead has none in this schema).
 
 - [ ] **Step 1: Write the page**
 
@@ -1290,37 +1590,42 @@ git commit -m "feat(decoy): add opportunities list/detail page linked to account
 'use client';
 
 import { useState } from 'react';
-import { useSupabaseTable } from '@/lib/useSupabaseTable';
+import { useDataverseTable } from '@/lib/dataverseApi';
 import type { Lead } from '@/lib/types';
 
-const STATUSES: Lead['status'][] = ['New', 'Contacted', 'Qualified', 'Disqualified'];
+const STATUSES: Lead['statuscode'][] = ['New', 'Contacted', 'Qualified', 'Disqualified'];
 
-const BLANK: Omit<Lead, 'id' | 'created_at'> = {
-  first_name: '',
-  last_name: '',
-  company_name: '',
-  email: '',
-  phone: '',
-  status: 'New',
+type FormState = Omit<Lead, 'leadid' | 'createdon'>;
+
+const BLANK: FormState = {
+  firstname: '',
+  lastname: '',
+  companyname: '',
+  subject: '',
+  emailaddress1: '',
+  telephone1: '',
+  mobilephone: '',
+  leadsourcecode: '',
+  statuscode: 'New',
 };
 
 export default function LeadsPage() {
-  const { rows, loading, error, insert, update, remove } = useSupabaseTable<Lead>(
-    'dynamics',
-    'leads',
-  );
+  const { rows, loading, error, insert, update, remove } = useDataverseTable<Lead>('leads');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [form, setForm] = useState(BLANK);
+  const [form, setForm] = useState<FormState>(BLANK);
 
   function selectRow(row: Lead) {
-    setSelectedId(row.id);
+    setSelectedId(row.leadid);
     setForm({
-      first_name: row.first_name,
-      last_name: row.last_name,
-      company_name: row.company_name ?? '',
-      email: row.email ?? '',
-      phone: row.phone ?? '',
-      status: row.status,
+      firstname: row.firstname,
+      lastname: row.lastname,
+      companyname: row.companyname ?? '',
+      subject: row.subject,
+      emailaddress1: row.emailaddress1 ?? '',
+      telephone1: row.telephone1 ?? '',
+      mobilephone: row.mobilephone ?? '',
+      leadsourcecode: row.leadsourcecode ?? '',
+      statuscode: row.statuscode,
     });
   }
 
@@ -1350,9 +1655,7 @@ export default function LeadsPage() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Leads</h1>
-          <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            New
-          </button>
+          <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">New</button>
         </div>
         <table className="w-full border-collapse bg-white text-sm shadow-sm">
           <thead>
@@ -1365,15 +1668,13 @@ export default function LeadsPage() {
           <tbody>
             {rows.map((row) => (
               <tr
-                key={row.id}
+                key={row.leadid}
                 onClick={() => selectRow(row)}
-                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.id ? 'bg-blue-50' : ''}`}
+                className={`cursor-pointer border-b hover:bg-blue-50 ${selectedId === row.leadid ? 'bg-blue-50' : ''}`}
               >
-                <td className="p-2">
-                  {row.first_name} {row.last_name}
-                </td>
-                <td className="p-2">{row.company_name}</td>
-                <td className="p-2">{row.status}</td>
+                <td className="p-2">{row.firstname} {row.lastname}</td>
+                <td className="p-2">{row.companyname}</td>
+                <td className="p-2">{row.statuscode}</td>
               </tr>
             ))}
           </tbody>
@@ -1383,56 +1684,27 @@ export default function LeadsPage() {
       <div className="rounded bg-white p-4 shadow-sm">
         <h2 className="mb-3 font-medium">{selectedId ? 'Edit lead' : 'New lead'}</h2>
         <div className="space-y-2">
-          <input
-            className="w-full rounded border p-2"
-            placeholder="First name"
-            value={form.first_name}
-            onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Last name"
-            value={form.last_name}
-            onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Company"
-            value={form.company_name ?? ''}
-            onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Email"
-            value={form.email ?? ''}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <input
-            className="w-full rounded border p-2"
-            placeholder="Phone"
-            value={form.phone ?? ''}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <select
-            className="w-full rounded border p-2"
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value as Lead['status'] })}
-          >
+          <div className="grid grid-cols-2 gap-2">
+            <input className="rounded border p-2" placeholder="First name" value={form.firstname} onChange={(e) => setForm({ ...form, firstname: e.target.value })} />
+            <input className="rounded border p-2" placeholder="Last name" value={form.lastname} onChange={(e) => setForm({ ...form, lastname: e.target.value })} />
+          </div>
+          <input className="w-full rounded border p-2" placeholder="Company" value={form.companyname ?? ''} onChange={(e) => setForm({ ...form, companyname: e.target.value })} />
+          <input className="w-full rounded border p-2" placeholder="Topic" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
+          <input className="w-full rounded border p-2" placeholder="Email" value={form.emailaddress1 ?? ''} onChange={(e) => setForm({ ...form, emailaddress1: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <input className="rounded border p-2" placeholder="Phone" value={form.telephone1 ?? ''} onChange={(e) => setForm({ ...form, telephone1: e.target.value })} />
+            <input className="rounded border p-2" placeholder="Mobile" value={form.mobilephone ?? ''} onChange={(e) => setForm({ ...form, mobilephone: e.target.value })} />
+          </div>
+          <select className="w-full rounded border p-2" value={form.statuscode} onChange={(e) => setForm({ ...form, statuscode: e.target.value as Lead['statuscode'] })}>
             {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
+              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
         <div className="mt-4 flex gap-2">
-          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">
-            Save
-          </button>
+          <button onClick={handleSave} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">Save</button>
           {selectedId && (
-            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">
-              Delete
-            </button>
+            <button onClick={handleDelete} className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">Delete</button>
           )}
         </div>
       </div>
@@ -1454,14 +1726,14 @@ git commit -m "feat(decoy): add leads list/detail page"
 
 ---
 
-### Task 10: Build and deploy to the site
+### Task 11: Build and deploy to the site
 
 **Files:**
 - Create: `wxcc-build/decoy/` (build output, copied — not hand-written)
 - Modify: `wxcc-build/index.html` (add TOC row)
 
 **Interfaces:**
-- Consumes: `decoy-src/out/` produced by `npm run build` (Task 1's build target, now with real pages from Tasks 6–9).
+- Consumes: `decoy-src/out/` produced by `npm run build` (Task 1's build target, now with real pages from Tasks 7–10).
 
 - [ ] **Step 1: Build the static export**
 
@@ -1485,7 +1757,7 @@ Open `index.html`, find the existing table of demo links (same pattern used for 
 
 - [ ] **Step 4: Verify locally**
 
-Serve the repo root with any static file server (e.g. `npx serve .`) and open `/decoy/`. Expected: redirects to `/decoy/dynamics/accounts`, nav works, Reset button hits the deployed Edge Function and reloads seeded data.
+Serve the repo root with any static file server (e.g. `npx serve .`) and open `/decoy/`. Expected: redirects to `/decoy/dynamics/accounts`, nav works, all four pages load data over the `dataverse-api` function (check Network tab shows `/api/data/v9.2/...` URLs), Reset button hits the `reset-demo` function and reloads seeded data.
 
 - [ ] **Step 5: Commit**
 
