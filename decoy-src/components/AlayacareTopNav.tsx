@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { resetDemoData } from '@/lib/resetDemoData';
 
@@ -30,6 +31,9 @@ export function AlayacareTopNav() {
         />
       </div>
       <div className="flex items-center gap-3 text-sm text-white/80">
+        <Link href="/alayacare/help" title="API Help" className="rounded border border-white/30 px-2 py-1 text-xs hover:bg-white/10">
+          ?
+        </Link>
         <button
           onClick={handleReset}
           disabled={resetting}
