@@ -129,8 +129,10 @@ export default function ClientsPage() {
   const [tab, setTab] = useState<Tab>('Overview');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>('Active');
   const [search, setSearch] = useState('');
+  const [panelOpen, setPanelOpen] = useState(false);
 
   function selectRow(row: AlayacareClient) {
+    setPanelOpen(true);
     setSelectedId(row.client_id);
     setTab('Overview');
     setForm({
@@ -172,6 +174,7 @@ export default function ClientsPage() {
     if (selectedId) await update(selectedId, payload);
     else await insert(payload);
     startNew();
+    setPanelOpen(false);
   }
 
   async function handleDelete() {
@@ -179,6 +182,7 @@ export default function ClientsPage() {
     if (!confirm('Delete this client?')) return;
     await remove(selectedId);
     startNew();
+    setPanelOpen(false);
   }
 
   const selected = rows.find((r) => r.client_id === selectedId);
@@ -209,11 +213,11 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className={panelOpen ? 'grid grid-cols-2 gap-6' : 'grid grid-cols-1 gap-6'}>
         <div className="rounded border bg-white shadow-sm">
           <div className="flex items-center justify-between border-b px-4 py-2">
             <h2 className="text-sm font-semibold text-gray-700">Client List</h2>
-            <button onClick={startNew} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">+ Client</button>
+            <button onClick={() => { startNew(); setPanelOpen(true); }} className="rounded bg-blue-700 px-3 py-1 text-sm text-white">+ Client</button>
           </div>
           <div className="flex flex-wrap items-end gap-4 border-b bg-gray-50 px-4 py-2 text-xs">
             <label className="flex flex-col gap-1">
@@ -333,9 +337,17 @@ export default function ClientsPage() {
           </div>
         </div>
 
+        {panelOpen && (
         <div className="rounded bg-white shadow-sm">
           <div className="border-b p-4">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setPanelOpen(false)}
+                title="Back to list"
+                className="mr-1 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                ✕
+              </button>
               <span className="flex h-12 w-12 items-center justify-center rounded bg-blue-100 text-sm font-semibold text-blue-800">
                 {form.first_name || form.last_name ? initials(form.first_name, form.last_name) : '—'}
               </span>
@@ -536,6 +548,7 @@ export default function ClientsPage() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );

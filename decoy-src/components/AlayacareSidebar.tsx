@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { IconPersonSilhouette } from './AlayacareIcons';
 
 interface NavItem {
   label: string;
@@ -103,7 +104,9 @@ export function AlayacareSidebar() {
 
   return (
     <aside className="flex w-20 shrink-0 flex-col items-center bg-[#0a1e4a] py-3 text-white">
-      <div className="mb-3 h-10 w-10 rounded bg-white/90" title="Not part of this demo" />
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded bg-white/90 text-[#0a1e4a]" title="Not part of this demo">
+        <IconPersonSilhouette size={22} />
+      </div>
       {ITEMS.map((item) =>
         item.href ? (
           <Link

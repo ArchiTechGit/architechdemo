@@ -188,6 +188,13 @@ export const IconInfo = (p: { size?: number }) => (
   </Svg>
 );
 
+export const IconPersonSilhouette = (p: { size?: number }) => (
+  <svg width={p.size ?? 16} height={p.size ?? 16} viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="8" r="4.2" />
+    <path d="M4 21c1.4-4.4 4.8-6.8 8-6.8s6.6 2.4 8 6.8Z" />
+  </svg>
+);
+
 export const IconSettings = (p: { size?: number }) => (
   <Svg {...p}>
     <circle cx="12" cy="12" r="2.8" />
