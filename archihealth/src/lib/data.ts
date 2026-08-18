@@ -821,9 +821,15 @@ const aishaAlHassan: Patient = {
 export const supportingPatients: Patient[] = [
   margaretThompson,
   robertAdeyemi,
+  isabelleDupont,
+  danielKowalczyk,
+  evelynNakamura,
   thomasSullivan,
+  priyaKrishnamurthy,
+  williamGrant,
   sandraOkonkwo,
   jamesMoretti,
+  aishaAlHassan,
 ];
 
 // ---------------------------------------------------------------------------

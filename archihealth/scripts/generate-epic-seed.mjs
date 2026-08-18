@@ -70,6 +70,8 @@ for (const p of PATIENTS) {
     })})`,
   );
 
+  const treatingPractitionerId = practitionerId(p.treatingClinician, p.department);
+
   encounterRows.push(
     `(${sqlStr(`enc-${patientId}`)}, ${sqlJson({
       resourceType: "Encounter",
@@ -80,6 +82,7 @@ for (const p of PATIENTS) {
       period: { start: p.admissionDate },
       serviceProvider: { display: "ArchiTech Hospital" },
       location: [{ location: { display: `Ward ${p.ward}, Bed ${p.bedNumber}` } }],
+      participant: [{ individual: { reference: `Practitioner/${treatingPractitionerId}` } }],
     })}, ${sqlStr(patientId)})`,
   );
 
@@ -138,8 +141,6 @@ for (const p of PATIENTS) {
       })}, ${sqlStr(patientId)})`,
     );
   });
-
-  practitionerId(p.treatingClinician, p.department);
 
   // Astrid Nygaard's TKR is the one encounter note describing an actual
   // procedure — everyone else's encounter notes are ward-round/admission
