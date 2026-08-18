@@ -40,6 +40,7 @@ async function handleResourceType(
 ) {
   const db = supabase.schema('epic').from(table);
   const patientFilter = url.searchParams.get('patient');
+  const practitionerFilter = url.searchParams.get('practitioner');
 
   if (req.method === 'GET' && id) {
     const { data, error } = await db.select('data').eq('id', id).single();
@@ -50,6 +51,7 @@ async function handleResourceType(
   if (req.method === 'GET' && !id) {
     let query = db.select('data');
     if (patientFilter) query = query.eq('patient_id', patientFilter);
+    if (practitionerFilter) query = query.eq('practitioner_id', practitionerFilter);
     const { data, error } = await query;
     if (error) return operationOutcome(error.message, 'exception', 500);
     return new Response(JSON.stringify(bundle((data ?? []).map((r: any) => r.data))), { headers: JSON_HEADERS });
@@ -63,8 +65,13 @@ async function handleResourceType(
     const newId = crypto.randomUUID();
     body.id = newId;
     const patientId = body.subject?.reference?.replace('Patient/', '') ?? body.patient?.reference?.replace('Patient/', '');
+    const practitionerId = body.practitioner?.reference?.replace('Practitioner/', '');
     const row: Record<string, unknown> = { id: newId, data: body };
-    if (table !== 'patient' && table !== 'practitioner') row.patient_id = patientId;
+    if (table === 'practitioner_role') {
+      row.practitioner_id = practitionerId;
+    } else if (table !== 'patient' && table !== 'practitioner') {
+      row.patient_id = patientId;
+    }
     const { data, error } = await db.insert(row).select('data').single();
     if (error) return operationOutcome(error.message, 'invalid', 400);
     return new Response(JSON.stringify(data.data), { status: 201, headers: JSON_HEADERS });
@@ -99,6 +106,10 @@ Deno.serve(async (req) => {
     MedicationRequest: 'medication_request',
     Observation: 'observation',
     AllergyIntolerance: 'allergy_intolerance',
+    DiagnosticReport: 'diagnostic_report',
+    Procedure: 'procedure',
+    Practitioner: 'practitioner',
+    PractitionerRole: 'practitioner_role',
   };
   const match = path.match(/\/api\/FHIR\/R4\/([A-Za-z]+)(?:\/([^/]+))?$/);
   if (match) {
