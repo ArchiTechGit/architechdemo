@@ -9,7 +9,7 @@ export function ArchicareTopNav() {
   const [resetting, setResetting] = useState(false);
 
   async function handleReset() {
-    if (!confirm('Reset all ArchiCare demo data to the seed set? This deletes any edits.')) return;
+    if (!confirm('Reset all ArchiTech Care demo data to the seed set? This deletes any edits.')) return;
     setResetting(true);
     try {
       await resetDemoData('archicare');
@@ -24,7 +24,7 @@ export function ArchicareTopNav() {
   return (
     <header className="flex h-14 items-center justify-between bg-[#0a1e4a] px-4 text-white">
       <div className="flex items-center gap-4">
-        <span className="text-lg font-semibold tracking-tight">ArchiCare</span>
+        <span className="text-lg font-semibold tracking-tight">ArchiTech Care</span>
         <div className="flex w-72 items-center gap-2 rounded bg-white px-3 py-1.5 text-sm text-gray-500">
           <IconSearch size={15} />
           <span className="flex-1">Search</span>

@@ -22,16 +22,16 @@ export default function ArchicareHelpPage() {
   return (
     <div className="max-w-4xl space-y-4">
       <div>
-        <h1 className="text-lg font-semibold text-gray-700">ArchiCare API Reference</h1>
+        <h1 className="text-lg font-semibold text-gray-700">ArchiTech Care API Reference</h1>
         <p className="text-sm text-gray-500">
-          This demo exposes the real ArchiCare REST API request shape — plain REST verbs, no OData,
-          same URL pattern and body format a genuine ArchiCare integration uses. Point any
+          This demo exposes the real ArchiTech Care REST API request shape — plain REST verbs, no OData,
+          same URL pattern and body format a genuine ArchiTech Care integration uses. Point any
           HTTP-capable integration (including a Webex Contact Center flow&apos;s HTTP Request node)
           directly at these endpoints. Three endpoints below (marked <strong>Captured</strong>)
           reproduce real integration traffic byte-for-byte. Everything marked{' '}
           <strong>Inferred</strong> was built to match that traffic&apos;s conventions but was not
           itself observed in real traffic — treat it as plausible, not verified, if you&apos;re
-          validating against a real ArchiCare tenant.
+          validating against a real ArchiTech Care tenant.
         </p>
       </div>
 
@@ -44,7 +44,7 @@ export default function ArchicareHelpPage() {
         <p>
           This is an open demo — there is no real auth. Send any value in the header below; the
           server ignores it. It&apos;s included so requests look like a genuine authenticated
-          ArchiCare call in network inspection tools:
+          ArchiTech Care call in network inspection tools:
         </p>
         <Code>{`Authorization: Bearer <any-value>
 Content-Type: application/json`}</Code>
@@ -220,7 +220,7 @@ DELETE ${BASE}/scheduled-visits/1
           ai_agent_opt_out, channels_of_communication, types_of_communication,
           notification_recipient, contacts, createdon
         </p>
-        <p className="text-xs text-gray-500">Captured fields (above) — real ArchiCare shape.</p>
+        <p className="text-xs text-gray-500">Captured fields (above) — real ArchiTech Care shape.</p>
         <p className="font-mono text-xs text-gray-500">
           status, address_line, city, state, external_id, risks, services
         </p>
@@ -264,8 +264,8 @@ DELETE ${BASE}/scheduled-visits/1
 
       <Section title="Demo control — not part of the API surface">
         <p>
-          One additional endpoint resets all ArchiCare demo data back to its seed state. It has no
-          real-ArchiCare equivalent — don&apos;t wire a production flow to it, it&apos;s here for
+          One additional endpoint resets all ArchiTech Care demo data back to its seed state. It has no
+          real-ArchiTech-Care equivalent — don&apos;t wire a production flow to it, it&apos;s here for
           resetting between demos.
         </p>
         <Code>{`POST ${RESET_URL}

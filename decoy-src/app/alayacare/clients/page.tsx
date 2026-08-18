@@ -324,7 +324,7 @@ export default function ClientsPage() {
                       <td className="p-2 whitespace-nowrap text-gray-500">
                         <div>{risk.daysAgo === 1 ? 'Yesterday' : `${risk.daysAgo} days ago`}</div>
                         <div className="text-[10px] text-gray-400">
-                          {risk.reviewedAt.toLocaleDateString()} · by Admin ArchiCare
+                          {risk.reviewedAt.toLocaleDateString()} · by Admin ArchiTech Care
                         </div>
                       </td>
                       <td className={`p-2 text-center ${RISK_LEVEL_BLOCK_TONE[risk.level]}`}>
@@ -381,7 +381,7 @@ export default function ClientsPage() {
               </div>
               {selected && (
                 <div className="text-right text-xs text-gray-500">
-                  <div>ArchiCare ID: {selected.client_id}</div>
+                  <div>ArchiTech Care ID: {selected.client_id}</div>
                   <div>External ID: {form.external_id || '—'}</div>
                 </div>
               )}
@@ -552,7 +552,7 @@ export default function ClientsPage() {
 
           {!REAL_TABS.includes(tab) && (
             <div className="p-4 text-sm text-gray-500">
-              {tab} isn&apos;t modeled in this demo — it&apos;s a real ArchiCare module without
+              {tab} isn&apos;t modeled in this demo — it&apos;s a real ArchiTech Care module without
               captured API traffic to build against yet.
             </div>
           )}

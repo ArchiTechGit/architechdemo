@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const SYSTEMS = [
   { label: 'Dynamics 365', href: '/dynamics/dashboard', prefix: '/dynamics' },
-  { label: 'ArchiCare', href: '/alayacare/dashboard', prefix: '/alayacare' },
+  { label: 'ArchiTech Care', href: '/alayacare/dashboard', prefix: '/alayacare' },
 ];
 
 export function SystemSwitcher() {
