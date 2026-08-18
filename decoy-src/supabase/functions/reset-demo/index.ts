@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-const ALLOWED_SCHEMAS = ['dynamics', 'archicare'];
+const ALLOWED_SCHEMAS = ['dynamics', 'archicare', 'epic'];
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
