@@ -92,10 +92,19 @@ Deno.serve(async (req) => {
     );
   }
 
-  const match = path.match(/\/api\/FHIR\/R4\/(Patient|Encounter)(?:\/([^/]+))?$/);
+  const RESOURCE_TABLES: Record<string, string> = {
+    Patient: 'patient',
+    Encounter: 'encounter',
+    Condition: 'condition',
+    MedicationRequest: 'medication_request',
+    Observation: 'observation',
+    AllergyIntolerance: 'allergy_intolerance',
+  };
+  const match = path.match(/\/api\/FHIR\/R4\/([A-Za-z]+)(?:\/([^/]+))?$/);
   if (match) {
     const [, resourceType, id] = match;
-    const table = resourceType === 'Patient' ? 'patient' : 'encounter';
+    const table = RESOURCE_TABLES[resourceType];
+    if (!table) return operationOutcome(`unsupported resource type: ${resourceType}`, 'not-supported', 400);
     return handleResourceType(table, resourceType, req, url, id);
   }
 
