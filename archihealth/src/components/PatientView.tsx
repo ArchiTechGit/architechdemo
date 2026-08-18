@@ -138,11 +138,87 @@ export function PatientView({ patient, onBack }: { patient: Patient; onBack: () 
         </div>
       )}
 
-      {tab !== "summary" && <TabPlaceholder patient={patient} tab={tab} />}
+      {tab === "medications" && (
+        <div className="p-4">
+          <table className="w-full text-sm">
+            <thead className="border-b text-left text-xs uppercase text-gray-500">
+              <tr><th className="p-2">Medication</th><th className="p-2">Status</th><th className="p-2">Route</th></tr>
+            </thead>
+            <tbody>
+              {patient.medications.map((m) => (
+                <tr key={m.id} className="border-b last:border-0">
+                  <td className="p-2 text-gray-700">{m.name}{m.brandName ? ` (${m.brandName})` : ""} {m.dose} {m.frequency}</td>
+                  <td className="p-2">
+                    <span className={`rounded px-2 py-0.5 text-xs ${m.status === "Active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                      {m.status}{m.isHighAlert ? " ⚠" : ""}
+                    </span>
+                  </td>
+                  <td className="p-2 text-gray-600">{m.route}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "conditions" && (
+        <div className="space-y-2 p-4">
+          {patient.diagnoses.map((d) => (
+            <div key={d.icdCode} className="flex items-center justify-between rounded border p-3 text-sm">
+              <div>
+                <div className="font-medium text-gray-700">{d.shortName}</div>
+                <div className="text-xs text-gray-400">{d.icdCode} &middot; {d.description}</div>
+              </div>
+              <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500">{d.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === "observations" && (
+        <div className="p-4">
+          <table className="w-full text-sm">
+            <thead className="border-b text-left text-xs uppercase text-gray-500">
+              <tr>
+                <th className="p-2">Date</th><th className="p-2">HR</th><th className="p-2">BP</th>
+                <th className="p-2">SpO2</th><th className="p-2">RR</th><th className="p-2">Temp</th><th className="p-2">EWS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...patient.vitals].sort((a, b) => b.timestamp.localeCompare(a.timestamp)).map((v) => (
+                <tr key={v.timestamp} className="border-b font-mono last:border-0">
+                  <td className="p-2 text-gray-600">{v.timestamp.replace("T", " ")}</td>
+                  <td className="p-2 text-gray-600">{v.heartRate}</td>
+                  <td className="p-2 text-gray-600">{v.systolicBP}/{v.diastolicBP}</td>
+                  <td className="p-2 text-gray-600">{v.oxygenSaturation}%</td>
+                  <td className="p-2 text-gray-600">{v.respiratoryRate}</td>
+                  <td className="p-2 text-gray-600">{v.temperature}&deg;C</td>
+                  <td className="p-2 text-gray-600">
+                    <span className={v.ewsScore >= 5 ? "text-red-600" : v.ewsScore >= 3 ? "text-amber-600" : "text-green-600"}>
+                      {v.ewsScore}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "webex" && (
+        <div className="p-4">
+          <div className="rounded border bg-gray-50 p-4">
+            <div className="mb-2 text-sm font-medium text-gray-700">Connect with {patient.firstName} {patient.lastName}</div>
+            <div className="mb-3 font-mono text-sm text-gray-600">Patient: {patient.phone} &middot; Clinician: {patient.gp.phone}</div>
+            <button
+              onClick={() => alert(`Instant Connect initiated to ${patient.firstName} ${patient.lastName} (demo only — no real call placed).`)}
+              className="rounded bg-[#0a1e4a] px-3 py-1.5 text-sm text-white hover:bg-[#0a1e4a]/90"
+            >
+              Initiate connection
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function TabPlaceholder({ patient, tab }: { patient: Patient; tab: Tab }) {
-  return <div className="p-4 text-sm text-gray-400">{tab} tab for {patient.firstName} {patient.lastName} — implemented in Task 7.</div>;
 }
