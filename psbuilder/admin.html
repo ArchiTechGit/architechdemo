@@ -75,6 +75,16 @@
         Needs a fine-grained personal access token scoped to this repo only, with Contents: Read and write permission.
         Stored only in this browser's local storage — never sent anywhere except GitHub's API.
       </p>
+      <div class="q-card" style="max-width:560px;">
+        <div class="q-label">How to get a token</div>
+        <ol style="margin:0;padding-left:18px;font-size:13px;color:var(--text);line-height:1.9;">
+          <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--cyan);">github.com/settings/personal-access-tokens/new</a> (sign in if asked).</li>
+          <li>Under <b>Repository access</b>, select <b>Only select repositories</b> → choose <b>ArchiTechGit/architechdemo</b>.</li>
+          <li>Under <b>Permissions</b> → <b>Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
+          <li>Click <b>Generate token</b> at the bottom, then copy the token (starts with <code>github_pat_</code>) — GitHub only shows it once.</li>
+          <li>Paste it below and click Continue.</li>
+        </ol>
+      </div>
       <input type="password" id="token-input" placeholder="github_pat_..." />
       <br/>
       <button class="btn-primary" onclick="saveTokenAndLoad()">Continue</button>
