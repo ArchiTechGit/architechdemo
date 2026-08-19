@@ -79,9 +79,11 @@
         <div class="q-label">How to get a token</div>
         <ol style="margin:0;padding-left:18px;font-size:13px;color:var(--text);line-height:1.9;">
           <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--cyan);">github.com/settings/personal-access-tokens/new</a> (sign in if asked).</li>
-          <li>Under <b>Repository access</b>, select <b>Only select repositories</b> → choose <b>ArchiTechGit/architechdemo</b>.</li>
-          <li>Under <b>Permissions</b> → <b>Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
-          <li>Click <b>Generate token</b> at the bottom, then copy the token (starts with <code>github_pat_</code>) — GitHub only shows it once.</li>
+          <li>Give it any <b>Token name</b>, e.g. "psbuilder-admin".</li>
+          <li>Under <b>Resource owner</b>, switch the dropdown from your personal account to <b>ArchiTechGit</b> (the org that owns this repo) — repo-scoping only shows up once the owner is set to the org.</li>
+          <li>Under <b>Repository access</b>, pick the option to limit access to specific repositories, then choose <b>architechdemo</b>.</li>
+          <li>A <b>Permissions → Repository permissions</b> section will appear once a specific repo is selected. Find <b>Contents</b> and set it to <b>Read and write</b>.</li>
+          <li>Click <b>Generate token</b>, then copy the token (starts with <code>github_pat_</code>) — GitHub only shows it once.</li>
           <li>Paste it below and click Continue.</li>
         </ol>
       </div>
