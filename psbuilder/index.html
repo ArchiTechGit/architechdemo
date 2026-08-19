@@ -166,196 +166,56 @@
   </div>
 
   <script>
-    const PRODUCTS = [
-      { id: 'wxcc', name: 'Webex Contact Centre', note: 'Available', disabled: false },
-      { id: 'wireless', name: 'Wireless', note: 'Coming soon', disabled: true },
-      { id: 'spaces', name: 'Cisco Spaces', note: 'Coming soon', disabled: true },
-    ];
+    let CONFIG = null;
 
-    const TYPES = [
-      { id: 'new', name: 'New / Greenfield', desc: 'Brand-new WxCC deployment, nothing to migrate off.' },
-      { id: 'migration', name: 'Migration', desc: 'Customer is moving off another contact centre platform onto WxCC.' },
-    ];
-
-    const SCOPES = [
-      { id: 'dfd', name: 'Digital Front Door', desc: 'Core CC plus an AI Agent, AI Assistant/CRM integration and omnichannel layer.' },
-      { id: 'standard', name: 'Standard Contact Centre', desc: 'Core routing/IVR/queue/agent config only. No AI or digital layer.' },
-    ];
-
-    // ─── Fixed baseline tasks: always included once type + scope are picked, no question asked ───
-    function baselineTasks(typeId) {
-      const migrationTasks = typeId === 'migration' ? [
-        { phase: 'Design', task: 'Legacy platform environment review & migration mapping', location: 'Office', trips: 0 },
-        { phase: 'Staging', task: 'Legacy platform parallel-run validation', location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Legacy platform decommission', location: 'Office', trips: 0 },
-      ] : [];
-
-      return migrationTasks.concat([
-        { phase: 'Kickoff', task: 'Kick Off Session with Stakeholders', location: 'Office', trips: 0 },
-        { phase: 'Design', task: 'WxCC — Existing Environment Review', location: 'Office', trips: 0 },
-        { phase: 'Design', task: 'WxCC — Skills, Team, Queue Design', location: 'Office', trips: 0 },
-        { phase: 'Design', task: 'Design Documentation & Sign-off', location: 'Office', trips: 0 },
-        { phase: 'Staging', task: 'WxCC A2Q Process', location: 'Office', trips: 0 },
-        { phase: 'Staging', task: 'Webex Contact Centre tenant provisioning and validation', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Tenant & Org General Settings', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Site Configuration', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Teams Configuration', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Queue Configuration', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Skills Based Routing Configuration', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Entry Point Configurations', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Business hours and holiday treatment configuration', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Wrap-up code configuration', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Agent Desktop layout customisation', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Detailed Functional Test Plan Document', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Detailed Functional Testing — Voice', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'User Acceptance Testing Plan', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'User Acceptance Testing Execution (assistance)', location: 'Office', trips: 0 },
-        { phase: 'Implementation', task: 'Remediations', location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Quick Reference Guide development', location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Production cutover', location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'Hypercare support period', location: 'Office', trips: 0 },
-        { phase: 'Project Completion & Handover', task: 'As-built documentation', location: 'Office', trips: 0 },
-      ]);
+    async function loadConfig() {
+      const res = await fetch('./config.json');
+      CONFIG = await res.json();
     }
 
-    // ─── Questions: each contributes 0+ generated task lines based on the answer ───
-    // visible(scopeId) gates whether the question is asked at all.
-    function buildQuestions(scopeId) {
-      const aiVisible = scopeId === 'dfd';
-      const questions = [];
+    // ─── Trigger evaluation: turns config.activities + current question state into the flat task list ───
+    function fillTemplate(str, n) {
+      return str.replace(/\{\{n\}\}/g, n);
+    }
 
-      questions.push({
-        id: 'workshops', type: 'stepper',
-        label: 'How many discovery workshops do you need?',
-        sub: 'Covers agent experience mapping, knowledge scripting, use-case gathering, CRM field mapping, omnichannel scope.',
-        min: 0, max: 6, default: 4,
-        generate: (n) => Array.from({ length: n }, (_, i) => ({
-          phase: 'Design', task: `Workshop ${i + 1} — discovery session`, location: 'Office', trips: 0,
-        })),
-      });
+    function evaluateActivities(typeId, scopeId, questionsArr) {
+      const byId = {};
+      questionsArr.forEach(q => { byId[q.id] = q; });
 
-      questions.push({
-        id: 'staging-channels', type: 'checklist',
-        label: 'Which channels need environment staging / provisioning?',
-        sub: 'Drives the Staging phase task list.',
-        options: [
-          { id: 'sms', label: 'SMS asset provisioning', checked: false },
-          { id: 'webexconnect', label: 'Webex Connect account/asset setup', checked: false },
-          { id: 'facebook', label: 'Facebook Business Manager / Meta setup', checked: false },
-          { id: 'instagram', label: 'Instagram DM custom channel setup', checked: false },
-          { id: 'email', label: 'Email channel asset setup + mailbox routing', checked: false },
-          { id: 'crm', label: 'CRM environment access confirmed', checked: false, visible: aiVisible },
-        ],
-        generate: (opts) => opts.filter(o => o.checked && o.visible !== false).map(o => ({
-          phase: 'Staging', task: o.label, location: 'Office', trips: 0,
-        })),
-      });
-
-      if (aiVisible) {
-        questions.push({
-          id: 'agent-domains', type: 'stepper',
-          label: 'How many AI Agent bots / knowledge domains need to be built?',
-          sub: 'e.g. billing enquiries, product support, appointment booking — one domain per distinct topic area. Set to 0 to skip AI Agent entirely.',
-          min: 0, max: 6, default: scopeId === 'dfd' ? 2 : 0,
-          generate: (n) => {
-            if (n === 0) return [];
-            const base = [
-              { phase: 'Implementation', task: 'Knowledge base content sourcing', location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Intent-based routing configuration', location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Knowledge accuracy testing', location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Agent Detailed Testing & Remediation', location: 'Office', trips: 0 },
-              { phase: 'Implementation', task: 'Detailed Functional Testing — AI Agent', location: 'Office', trips: 0 },
-            ];
-            const domains = Array.from({ length: n }, (_, i) => ({
-              phase: 'Implementation', task: `AI Agent build — knowledge domain ${i + 1} FAQ`, location: 'Office', trips: 0,
-            }));
-            return base.concat(domains);
-          },
+      const lines = [];
+      CONFIG.activities.forEach(activity => {
+        const t = activity.trigger;
+        const push = (n) => lines.push({
+          phase: activity.phase,
+          task: n === undefined ? activity.description : fillTemplate(activity.description, n),
+          location: activity.location,
+          trips: activity.trips,
         });
 
-        questions.push({
-          id: 'ai-assistant', type: 'toggle',
-          label: 'Include AI Assistant + CRM integration for agents?',
-          sub: 'Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to CRM. CRM platform is whatever the customer runs (Dynamics, Salesforce, ServiceNow, etc).',
-          default: scopeId === 'dfd',
-          generate: (on) => !on ? [] : [
-            { phase: 'Design', task: 'Workshop — AI Assistant Use Cases', location: 'Office', trips: 0 },
-            { phase: 'Design', task: 'Workshop — CRM Field Mapping', location: 'Office', trips: 0 },
-            { phase: 'Staging', task: 'CRM environment access and credentials confirmed', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Screen-pop configuration', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Call transcription and summarisation enablement', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Suggested response configuration', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Wrap-up and task automation configuration', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Write-back mapping (notes, summaries, outcomes into CRM)', location: 'Office', trips: 0 },
-            { phase: 'Implementation', task: 'Detailed Functional Testing — AI Assistant', location: 'Office', trips: 0 },
-          ],
-        });
-
-        questions.push({
-          id: 'omni-channels', type: 'checklist',
-          label: 'Which omnichannel channels are in scope for build?',
-          sub: 'Each selected channel adds its build + integration task. Selecting any channel also adds an OmniChannel testing pass.',
-          options: [
-            { id: 'webchat', label: 'Web chat widget (branding, pre-chat form, reason codes)', checked: scopeId === 'dfd' },
-            { id: 'sms-flow', label: 'SMS flow configuration', checked: scopeId === 'dfd' },
-            { id: 'email-routing', label: 'Email routing and triage configuration', checked: scopeId === 'dfd' },
-            { id: 'fb-messenger', label: 'Facebook Messenger integration and testing', checked: false },
-            { id: 'instagram-dm', label: 'Instagram DM custom channel integration and testing', checked: false },
-            { id: 'qb-api', label: 'Quick Button integration — external SMS sender API', checked: false },
-            { id: 'qb-desktop', label: 'Quick Button integration — external SMS agent desktop', checked: false },
-          ],
-          generate: (opts) => {
-            const selected = opts.filter(o => o.checked);
-            const lines = selected.map(o => ({ phase: 'Implementation', task: o.label, location: 'Office', trips: 0 }));
-            if (selected.length) {
-              lines.push({ phase: 'Design', task: 'Workshop — Omnichannel Scope', location: 'Office', trips: 0 });
-              lines.push({ phase: 'Implementation', task: 'Detailed Functional Testing — OmniChannel', location: 'Office', trips: 0 });
-            }
-            return lines;
-          },
-        });
-      }
-
-      questions.push({
-        id: 'reporting', type: 'checklist',
-        label: 'Which reporting / analytics components are needed?',
-        sub: 'Optional on every engagement type.',
-        options: [
-          { id: 'topic-analytics', label: 'Topic analytics configuration', checked: false },
-          { id: 'analyzer-dashboard', label: 'Analyzer dashboard setup', checked: false },
-          { id: 'dashboard-embed', label: 'Dashboard embedding into Agent Desktop', checked: false },
-          { id: 'journey-data', label: 'Journey Data Service configuration', checked: false },
-        ],
-        generate: (opts) => opts.filter(o => o.checked).map(o => ({
-          phase: 'Implementation', task: o.label, location: 'Office', trips: 0,
-        })),
+        if (t.type === 'always') {
+          push();
+        } else if (t.type === 'typeEquals') {
+          if (typeId === t.value) push();
+        } else if (t.type === 'stepperGate') {
+          const q = byId[t.questionId];
+          if (q && q.value > 0) push(q.value);
+        } else if (t.type === 'stepperRepeat') {
+          const q = byId[t.questionId];
+          const n = q ? q.value : 0;
+          for (let i = 1; i <= n; i++) push(i);
+        } else if (t.type === 'toggleOn') {
+          const q = byId[t.questionId];
+          if (q && q.value) push();
+        } else if (t.type === 'checklistOption') {
+          const q = byId[t.questionId];
+          const opt = q && q.options.find(o => o.id === t.optionId);
+          if (opt && opt.checked) push();
+        } else if (t.type === 'checklistAny') {
+          const q = byId[t.questionId];
+          if (q && q.options.some(o => o.checked)) push();
+        }
       });
-
-      questions.push({
-        id: 'agent-training', type: 'stepper',
-        label: 'How many agent training sessions are needed?',
-        sub: 'Delivered at client site.',
-        min: 0, max: 6, default: 2,
-        generate: (n) => n === 0 ? [] : [{
-          phase: 'Project Completion & Handover',
-          task: `Agent training (desktop, call/chat handling, wrap-up codes) — ${n} session${n === 1 ? '' : 's'}`,
-          location: 'Client Site', trips: 1,
-        }],
-      });
-
-      questions.push({
-        id: 'supervisor-training', type: 'toggle',
-        label: 'Include supervisor training (queue monitoring, reporting)?',
-        default: true,
-        generate: (on) => !on ? [] : [{
-          phase: 'Project Completion & Handover', task: 'Supervisor training (queue monitoring, reporting)',
-          location: 'Client Site', trips: 1,
-        }],
-      });
-
-      return questions;
+      return lines;
     }
 
     let selectedProduct = null;
@@ -366,11 +226,11 @@
     function renderProducts() {
       const root = document.getElementById('product-grid');
       root.innerHTML = '';
-      PRODUCTS.forEach(p => {
+      CONFIG.products.forEach(p => {
         const card = document.createElement('div');
-        card.className = 'pick-card' + (p.disabled ? ' disabled' : '') + (selectedProduct === p.id ? ' selected' : '');
+        card.className = 'pick-card' + (!p.enabled ? ' disabled' : '') + (selectedProduct === p.id ? ' selected' : '');
         card.innerHTML = `<div class="pick-name">${p.name}</div><div class="pick-note">${p.note}</div>`;
-        if (!p.disabled) card.onclick = () => selectProduct(p.id);
+        if (p.enabled) card.onclick = () => selectProduct(p.id);
         root.appendChild(card);
       });
     }
@@ -385,7 +245,7 @@
     function renderTypes() {
       const root = document.getElementById('type-grid');
       root.innerHTML = '';
-      TYPES.forEach(t => {
+      CONFIG.types.forEach(t => {
         const card = document.createElement('div');
         card.className = 'pick-card' + (selectedType === t.id ? ' selected' : '');
         card.innerHTML = `<div class="pick-name">${t.name}</div><div class="pick-note">${t.desc}</div>`;
@@ -405,7 +265,7 @@
     function renderScopes() {
       const root = document.getElementById('scope-grid');
       root.innerHTML = '';
-      SCOPES.forEach(s => {
+      CONFIG.scopes.forEach(s => {
         const card = document.createElement('div');
         card.className = 'pick-card' + (selectedScope === s.id ? ' selected' : '');
         card.innerHTML = `<div class="pick-name">${s.name}</div><div class="pick-note">${s.desc}</div>`;
@@ -421,11 +281,18 @@
     }
 
     function buildAndShowQuestions() {
-      questions = buildQuestions(selectedScope);
-      questions.forEach(q => {
-        if (q.type === 'stepper') q.value = q.default;
-        if (q.type === 'toggle') q.value = q.default;
-      });
+      questions = CONFIG.questions
+        .filter(q => q.scopeGate === 'all' || q.scopeGate === selectedScope)
+        .map(q => {
+          const copy = JSON.parse(JSON.stringify(q));
+          if (copy.type === 'stepper' || copy.type === 'toggle') copy.value = copy.default;
+          if (copy.type === 'checklist') {
+            copy.options = copy.options
+              .filter(o => o.scopeGate === 'all' || o.scopeGate === selectedScope)
+              .map(o => Object.assign({}, o, { checked: o.default }));
+          }
+          return copy;
+        });
       show('question-section');
       renderQuestions();
     }
@@ -495,11 +362,7 @@
     function tsvRow(cells) { return cells.join('\t'); }
 
     function createEstimate() {
-      let tasks = baselineTasks(selectedType);
-      questions.forEach(q => {
-        if (q.type === 'checklist') tasks = tasks.concat(q.generate(q.options));
-        else tasks = tasks.concat(q.generate(q.value));
-      });
+      const tasks = evaluateActivities(selectedType, selectedScope, questions);
 
       const lines = [tsvRow(SHEET_COLUMNS)];
       let totalTrips = 0;
@@ -528,7 +391,9 @@
       document.execCommand('copy');
     }
 
-    renderProducts();
+    loadConfig().then(() => {
+      renderProducts();
+    });
   </script>
 </body>
 </html>
