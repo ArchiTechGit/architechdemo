@@ -3,9 +3,9 @@
 Reference for generating a Webex Contact Centre engagement task list without opening [psbuilder/index.html](index.html).
 This covers the **Webex Contact Centre** flow only. [config.json](config.json) holds one entry per flow, and each defines its own subflows, variables, tasks, phases and columns.
 Give me the inputs below in any format, I output the same TSV table the tool produces
-(header row: `Phase	Skill Required	Task Type	Description`, paste-ready into the engagement spreadsheet).
+It emits the 24 columns of the PSE's `Input_Tasks` table, header row included, ready to paste into the first task row of **Project Technical Tasks**.
 
-For this flow, `Skill Required` is always **Collaboration** and `Task Type` is always **ArchiTech Activity** — both are fixed column values in its config, so only `Phase` and `Description` vary per task. No hours have been costed for this flow yet, so it has no Hours column.
+Every task in this flow is `Skill Required` = **Collaboration** and `Task Type` = **ArchiTech Activity**. No effort has been costed against them yet, so the resource columns come out blank.
 
 ## Inputs needed
 
@@ -98,26 +98,59 @@ A task carries `subflows: "all"` or a list of subflow ids. That is what the admi
 page groups by: an **All subflows** section plus one per subflow. A task naming
 several subflows shows under each of them.
 
-### Variables and hours
+### What a task carries
 
-A number input is a variable. Its `token` is what you write in braces inside a
-task description, and its id is what the hours math bills against:
+The shape comes from the PSE's `Input_Tasks` table, so a task can fill every
+column the sheet asks a human to fill:
+
+| Task field | PSE column |
+|---|---|
+| `phase` | Phase |
+| `skill` | Skill Required |
+| `taskType` | Task Type |
+| `description` | Description |
+| `trips` | Onsite Round Trips |
+| `stays` | Overnight Stays |
+| `documents` | Finished Document Outputs |
+| `clientEffort` | Client Effort Estimate |
+| `subcontractorEffort` | Subcontractor Effort Estimate |
+| `effort[]` | R1–R5 Location / Business Hours / After Hours |
+
+Everything from column Z onward in the sheet is computed by the workbook, so the
+builder never writes it.
+
+### Effort and roles
+
+Effort is per role, and split into business and after hours:
 
 ```json
 {
   "description": "Enroll {number of devices} Spectralink Handsets to MDM",
-  "hours": { "base": 1, "per": [{ "input": "devices", "hours": 0.25 }] }
+  "effort": [
+    { "role": "SE", "location": "Office",
+      "business": { "base": 1, "per": [{ "input": "devices", "each": 0.25 }] } }
+  ]
 }
 ```
 
 On 200 handsets that reads "Enroll 200 Spectralink Handsets to MDM" and costs
-`1 + 200 x 0.25` = 51 hours. Hours are linear only: a base plus a rate per unit.
+`1 + 200 x 0.25` = 51 business hours against a Systems Engineer.
+
+Roles are the seven from `ENGINEER_ROLES`: `TA`, `SE`, `SSE`, `SCE`, `SA`, `AC`,
+`SC`. The sheet only has five resource columns, so a flow may use at most five
+distinct roles; the builder assigns them to R1–R5 in the order they first appear
+and tells you what to set row 41 to.
+
+### Amounts
+
+Hours and counts are both "amounts": either a plain number, or a base plus a rate
+per unit of a variable — `{ "base": 1, "per": [{ "input": "devices", "each": 0.25 }] }`.
+That is how a task scales with scope.
 
 A task can also carry `repeatPer: "<variable>"`, which emits one line per unit
 instead of one line total, and `{#}` in the description becomes the line number.
-A task cannot both repeat per a variable and bill per that same variable, since
-that would count the effort twice.
-
+A task cannot both repeat per a variable and scale an amount by that same
+variable, since that would count the effort twice.
 ### Extra conditions
 
 On top of subflow membership, an input, a checklist option or a task may carry a

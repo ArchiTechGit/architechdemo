@@ -38,15 +38,95 @@
         },
         {
           "header": "Skill Required",
-          "constant": "Collaboration"
+          "from": "skill"
         },
         {
           "header": "Task Type",
-          "constant": "ArchiTech Activity"
+          "from": "taskType"
         },
         {
           "header": "Description",
           "from": "description"
+        },
+        {
+          "header": "Onsite Round Trips",
+          "from": "trips"
+        },
+        {
+          "header": "Overnight Stays",
+          "from": "stays"
+        },
+        {
+          "header": "Finished Document Outputs",
+          "from": "documents"
+        },
+        {
+          "header": "Client Effort Estimate",
+          "from": "clientEffort"
+        },
+        {
+          "header": "Subcontractor Effort Estimate",
+          "from": "subcontractorEffort"
+        },
+        {
+          "header": "R1 Location",
+          "from": "r1Location"
+        },
+        {
+          "header": "R1 Business Hours",
+          "from": "r1Business"
+        },
+        {
+          "header": "R1 After Hours",
+          "from": "r1After"
+        },
+        {
+          "header": "R2 Location",
+          "from": "r2Location"
+        },
+        {
+          "header": "R2 Business Hours",
+          "from": "r2Business"
+        },
+        {
+          "header": "R2 After Hours",
+          "from": "r2After"
+        },
+        {
+          "header": "R3 Location",
+          "from": "r3Location"
+        },
+        {
+          "header": "R3 Business Hours",
+          "from": "r3Business"
+        },
+        {
+          "header": "R3 After Hours",
+          "from": "r3After"
+        },
+        {
+          "header": "R4 Location",
+          "from": "r4Location"
+        },
+        {
+          "header": "R4 Business Hours",
+          "from": "r4Business"
+        },
+        {
+          "header": "R4 After Hours",
+          "from": "r4After"
+        },
+        {
+          "header": "R5 Location",
+          "from": "r5Location"
+        },
+        {
+          "header": "R5 Business Hours",
+          "from": "r5Business"
+        },
+        {
+          "header": "R5 After Hours",
+          "from": "r5After"
         }
       ],
       "subflows": [
@@ -237,813 +317,957 @@
           "id": "legacy-review",
           "phase": "Design",
           "description": "Legacy platform environment review & migration mapping",
-          "location": "Office",
           "subflows": [
             "migration"
           ],
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "legacy-parallel-run",
           "phase": "Staging",
           "description": "Legacy platform parallel-run validation",
-          "location": "Office",
           "subflows": [
             "migration"
           ],
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "legacy-decommission",
           "phase": "Project Completion & Handover",
           "description": "Legacy platform decommission",
-          "location": "Office",
           "subflows": [
             "migration"
           ],
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "kickoff",
           "phase": "Kickoff",
           "description": "Kick Off Session with Stakeholders",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "existing-env-review",
           "phase": "Design",
           "description": "WxCC — Existing Environment Review",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "skills-team-queue-design",
           "phase": "Design",
           "description": "WxCC — Skills, Team, Queue Design",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "design-doc-signoff",
           "phase": "Design",
           "description": "Design Documentation & Sign-off",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "a2q-process",
           "phase": "Staging",
           "description": "WxCC A2Q Process",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "tenant-provisioning",
           "phase": "Staging",
           "description": "Webex Contact Centre tenant provisioning and validation",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "tenant-org-settings",
           "phase": "Implementation",
           "description": "Tenant & Org General Settings",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "site-config",
           "phase": "Implementation",
           "description": "Site Configuration",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "teams-config",
           "phase": "Implementation",
           "description": "Teams Configuration",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "queue-config",
           "phase": "Implementation",
           "description": "Queue Configuration",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "skills-based-routing",
           "phase": "Implementation",
           "description": "Skills Based Routing Configuration",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "entry-point-config",
           "phase": "Implementation",
           "description": "Entry Point Configurations",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "channel-cx-settings",
           "phase": "Implementation",
           "description": "Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "voice-ivr-build",
           "phase": "Implementation",
           "description": "Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "business-hours-config",
           "phase": "Implementation",
           "description": "Business hours and holiday treatment configuration",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "wrapup-code-config",
           "phase": "Implementation",
           "description": "Wrap-up code configuration",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "agent-desktop-layout",
           "phase": "Implementation",
           "description": "Agent Desktop layout customisation",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "functional-test-plan-doc",
           "phase": "Implementation",
           "description": "Detailed Functional Test Plan Document",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "functional-testing-voice",
           "phase": "Implementation",
           "description": "Detailed Functional Testing — Voice",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "uat-plan",
           "phase": "Implementation",
           "description": "User Acceptance Testing Plan",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "uat-execution",
           "phase": "Implementation",
           "description": "User Acceptance Testing Execution (assistance)",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "remediations",
           "phase": "Implementation",
           "description": "Remediations",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "quick-ref-guide",
           "phase": "Project Completion & Handover",
           "description": "Quick Reference Guide development",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "production-cutover",
           "phase": "Project Completion & Handover",
           "description": "Production cutover",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "hypercare",
           "phase": "Project Completion & Handover",
           "description": "Hypercare support period",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "as-built-doc",
           "phase": "Project Completion & Handover",
           "description": "As-built documentation",
-          "location": "Office",
           "subflows": "all",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "workshop-discovery",
           "phase": "Design",
           "description": "Workshop {#} — discovery session",
-          "location": "Office",
           "subflows": "all",
           "repeatPer": "workshops",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "staging-sms",
           "phase": "Staging",
           "description": "SMS asset provisioning",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "staging-channels",
             "is": "sms"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "staging-webexconnect",
           "phase": "Staging",
           "description": "Webex Connect account/asset setup",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "staging-channels",
             "is": "webexconnect"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "staging-facebook",
           "phase": "Staging",
           "description": "Facebook Business Manager / Meta setup",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "staging-channels",
             "is": "facebook"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "staging-instagram",
           "phase": "Staging",
           "description": "Instagram DM custom channel setup",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "staging-channels",
             "is": "instagram"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "staging-email",
           "phase": "Staging",
           "description": "Email channel asset setup + mailbox routing",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "staging-channels",
             "is": "email"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "staging-crm",
           "phase": "Staging",
           "description": "CRM environment access confirmed",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "staging-channels",
             "is": "crm"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "kb-content-sourcing",
           "phase": "Implementation",
           "description": "Knowledge base content sourcing",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "agent-domains",
             "moreThanZero": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "intent-routing-config",
           "phase": "Implementation",
           "description": "Intent-based routing configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "agent-domains",
             "moreThanZero": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "kb-accuracy-testing",
           "phase": "Implementation",
           "description": "Knowledge accuracy testing",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "agent-domains",
             "moreThanZero": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "ai-agent-testing-remediation",
           "phase": "Implementation",
           "description": "Agent Detailed Testing & Remediation",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "agent-domains",
             "moreThanZero": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "functional-testing-ai-agent",
           "phase": "Implementation",
           "description": "Detailed Functional Testing — AI Agent",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "agent-domains",
             "moreThanZero": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "ai-agent-domain-build",
           "phase": "Implementation",
           "description": "AI Agent build — knowledge domain {#} FAQ",
-          "location": "Office",
           "subflows": "all",
           "repeatPer": "agent-domains",
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "workshop-ai-assistant-usecases",
           "phase": "Design",
           "description": "Workshop — AI Assistant Use Cases",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "workshop-crm-field-mapping",
           "phase": "Design",
           "description": "Workshop — CRM Field Mapping",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "crm-access-confirmed",
           "phase": "Staging",
           "description": "CRM environment access and credentials confirmed",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "screen-pop-config",
           "phase": "Implementation",
           "description": "Screen-pop configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "call-transcription-config",
           "phase": "Implementation",
           "description": "Call transcription and summarisation enablement",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "suggested-response-config",
           "phase": "Implementation",
           "description": "Suggested response configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "wrapup-task-automation-config",
           "phase": "Implementation",
           "description": "Wrap-up and task automation configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "writeback-mapping-config",
           "phase": "Implementation",
           "description": "Write-back mapping (notes, summaries, outcomes into CRM)",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "functional-testing-ai-assistant",
           "phase": "Implementation",
           "description": "Detailed Functional Testing — AI Assistant",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "ai-assistant",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-webchat",
           "phase": "Implementation",
           "description": "Web chat widget (branding, pre-chat form, reason codes)",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "webchat"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-sms-flow",
           "phase": "Implementation",
           "description": "SMS flow configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "sms-flow"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-email-routing",
           "phase": "Implementation",
           "description": "Email routing and triage configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "email-routing"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-fb-messenger",
           "phase": "Implementation",
           "description": "Facebook Messenger integration and testing",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "fb-messenger"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-instagram-dm",
           "phase": "Implementation",
           "description": "Instagram DM custom channel integration and testing",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "instagram-dm"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-qb-api",
           "phase": "Implementation",
           "description": "Quick Button integration — external SMS sender API",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "qb-api"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "omni-qb-desktop",
           "phase": "Implementation",
           "description": "Quick Button integration — external SMS agent desktop",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "is": "qb-desktop"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "workshop-omnichannel-scope",
           "phase": "Design",
           "description": "Workshop — Omnichannel Scope",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "anySelected": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "functional-testing-omnichannel",
           "phase": "Implementation",
           "description": "Detailed Functional Testing — OmniChannel",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "omni-channels",
             "anySelected": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "topic-analytics-config",
           "phase": "Implementation",
           "description": "Topic analytics configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "reporting",
             "is": "topic-analytics"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "analyzer-dashboard-setup",
           "phase": "Implementation",
           "description": "Analyzer dashboard setup",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "reporting",
             "is": "analyzer-dashboard"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "dashboard-embed-config",
           "phase": "Implementation",
           "description": "Dashboard embedding into Agent Desktop",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "reporting",
             "is": "dashboard-embed"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "journey-data-config",
           "phase": "Implementation",
           "description": "Journey Data Service configuration",
-          "location": "Office",
           "subflows": "all",
           "showWhen": {
             "input": "reporting",
             "is": "journey-data"
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Office"
         },
         {
           "id": "agent-training-task",
           "phase": "Project Completion & Handover",
           "description": "Agent training (desktop, call/chat handling, wrap-up codes) — {agent-training} sessions",
-          "location": "Client Site",
           "trips": 1,
           "subflows": "all",
           "showWhen": {
             "input": "agent-training",
             "moreThanZero": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Client Site"
         },
         {
           "id": "supervisor-training-task",
           "phase": "Project Completion & Handover",
           "description": "Supervisor training (queue monitoring, reporting)",
-          "location": "Client Site",
           "trips": 1,
           "subflows": "all",
           "showWhen": {
             "input": "supervisor-training",
             "isOn": true
           },
-          "hours": {
-            "base": 0
-          }
+          "skill": "Collaboration",
+          "taskType": "ArchiTech Activity",
+          "effort": [],
+          "defaultLocation": "Client Site"
         }
       ]
+    }
+  ],
+  "roles": [
+    {
+      "id": "TA",
+      "name": "Technical Assistant"
+    },
+    {
+      "id": "SE",
+      "name": "Systems Engineer (Professional Services)"
+    },
+    {
+      "id": "SSE",
+      "name": "Senior Systems Engineer (Professional Services)"
+    },
+    {
+      "id": "SCE",
+      "name": "Security Engineer"
+    },
+    {
+      "id": "SA",
+      "name": "Solution Architect"
+    },
+    {
+      "id": "AC",
+      "name": "Security Advisor / Consultant"
+    },
+    {
+      "id": "SC",
+      "name": "Senior Consultant"
+    }
+  ],
+  "skills": [
+    "Collaboration",
+    "Networking",
+    "Secure Networking",
+    "Security",
+    "Integrated Health",
+    "Data Centre / Cloud",
+    "Operational Technology",
+    "Travel"
+  ],
+  "taskTypes": [
+    "ArchiTech Activity",
+    "Client Dependency",
+    "ArchiTech Subcontractor Activity",
+    "ArchiTech Document Deliverable"
+  ],
+  "pseColumns": [
+    {
+      "header": "Phase",
+      "from": "phase"
+    },
+    {
+      "header": "Skill Required",
+      "from": "skill"
+    },
+    {
+      "header": "Task Type",
+      "from": "taskType"
+    },
+    {
+      "header": "Description",
+      "from": "description"
+    },
+    {
+      "header": "Onsite Round Trips",
+      "from": "trips"
+    },
+    {
+      "header": "Overnight Stays",
+      "from": "stays"
+    },
+    {
+      "header": "Finished Document Outputs",
+      "from": "documents"
+    },
+    {
+      "header": "Client Effort Estimate",
+      "from": "clientEffort"
+    },
+    {
+      "header": "Subcontractor Effort Estimate",
+      "from": "subcontractorEffort"
+    },
+    {
+      "header": "R1 Location",
+      "from": "r1Location"
+    },
+    {
+      "header": "R1 Business Hours",
+      "from": "r1Business"
+    },
+    {
+      "header": "R1 After Hours",
+      "from": "r1After"
+    },
+    {
+      "header": "R2 Location",
+      "from": "r2Location"
+    },
+    {
+      "header": "R2 Business Hours",
+      "from": "r2Business"
+    },
+    {
+      "header": "R2 After Hours",
+      "from": "r2After"
+    },
+    {
+      "header": "R3 Location",
+      "from": "r3Location"
+    },
+    {
+      "header": "R3 Business Hours",
+      "from": "r3Business"
+    },
+    {
+      "header": "R3 After Hours",
+      "from": "r3After"
+    },
+    {
+      "header": "R4 Location",
+      "from": "r4Location"
+    },
+    {
+      "header": "R4 Business Hours",
+      "from": "r4Business"
+    },
+    {
+      "header": "R4 After Hours",
+      "from": "r4After"
+    },
+    {
+      "header": "R5 Location",
+      "from": "r5Location"
+    },
+    {
+      "header": "R5 Business Hours",
+      "from": "r5Business"
+    },
+    {
+      "header": "R5 After Hours",
+      "from": "r5After"
     }
   ]
 }

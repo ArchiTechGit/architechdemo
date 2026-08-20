@@ -186,7 +186,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.1.0';
+    const ADMIN_VERSION = '0.2.0';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -333,28 +333,39 @@
       return 'unknown condition';
     }
 
-    // Hours at the flow's default answers, so authoring shows a real number.
-    function hoursAtDefaults(task) {
-      const h = task.hours || {};
-      let total = Number(h.base || 0);
-      (h.per || []).forEach(p => {
+    // Effort at the flow's default answers, so the lists show real numbers.
+    function amountAt(a) {
+      if (a == null) return 0;
+      if (typeof a === "number") return a;
+      let total = Number(a.base || 0);
+      (a.per || []).forEach(p => {
         const inp = inputById(p.input);
         const dflt = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
-        total += Number(dflt) * Number(p.hours || 0);
+        total += Number(dflt) * Number(p.each || 0);
       });
       return round2(total);
     }
 
-    function describeHours(task) {
-      const h = task.hours || {};
-      const bits = [];
-      if (h.base) bits.push(`${h.base}h base`);
-      (h.per || []).forEach(p => {
-        const inp = inputById(p.input);
-        bits.push(`${p.hours}h per ${inp ? tokenOf(inp) : p.input}`);
+    function hoursAtDefaults(task) {
+      return round2((task.effort || []).reduce((n, e) => n + amountAt(e.business) + amountAt(e.after), 0));
+    }
+
+    function roleLabel(id) {
+      const r = (CONFIG.roles || []).find(r => r.id === id);
+      return r ? r.id : id;
+    }
+
+    // A short, readable summary of who does the work and when.
+    function describeEffort(task) {
+      const bits = (task.effort || []).map(e => {
+        const bh = amountAt(e.business);
+        const ah = amountAt(e.after);
+        const parts = [];
+        if (bh) parts.push(bh + "h");
+        if (ah) parts.push(ah + "h after hours");
+        return roleLabel(e.role) + " " + (parts.join(" + ") || "0h");
       });
-      if (!bits.length) return 'no hours set';
-      return bits.join(' + ');
+      return bits.length ? bits.join(", ") : "no effort costed";
     }
   </script>
 
@@ -540,36 +551,42 @@
     }
 
     function taskEl(t, idx) {
-      const f = F();
-      const row = document.createElement('div');
-      row.className = 'act';
-      const meta = [t.phase, t.location].filter(Boolean);
-      if (t.trips) meta.push('onsite trip');
+      const row = document.createElement("div");
+      row.className = "act";
+      const meta = [t.phase];
+      if (t.skill) meta.push(t.skill);
+      if (t.taskType && t.taskType !== "ArchiTech Activity") meta.push(t.taskType);
+      meta.push(describeEffort(t));
+      const trips = amountAt(t.trips);
+      if (trips) meta.push(trips + " round trip" + (trips === 1 ? "" : "s"));
+      if (amountAt(t.stays)) meta.push(amountAt(t.stays) + " overnight");
+      if (amountAt(t.documents)) meta.push(amountAt(t.documents) + " document");
+      if (amountAt(t.clientEffort)) meta.push(amountAt(t.clientEffort) + "h client");
+      if (amountAt(t.subcontractorEffort)) meta.push(amountAt(t.subcontractorEffort) + "h subcontractor");
       if (t.repeatPer) {
         const inp = inputById(t.repeatPer);
-        meta.push('one line per ' + (inp ? tokenOf(inp) : t.repeatPer));
+        meta.push("one line per " + (inp ? tokenOf(inp) : t.repeatPer));
       }
       const gate = describeCond(t.showWhen);
       if (gate) meta.push(gate);
-      if (Array.isArray(t.subflows) && t.subflows.length > 1) {
-        meta.push('shared by ' + t.subflows.length + ' subflows');
-      }
+      if (Array.isArray(t.subflows) && t.subflows.length > 1) meta.push("shared by " + t.subflows.length + " subflows");
+
       const hrs = hoursAtDefaults(t);
-      row.innerHTML = `
-        <div class="act-text">
-          <div class="act-desc">${esc(t.description)}</div>
-          <div class="act-meta">${esc(meta.join(' · '))}</div>
-        </div>
-        <span class="act-hours" title="${attr(describeHours(t))}">${hrs ? hrs + 'h' : '—'}</span>`;
-      const actions = document.createElement('div');
-      actions.className = 'block-actions';
-      const edit = document.createElement('button');
-      edit.className = 'btn-ghost';
-      edit.textContent = 'Edit';
-      edit.onclick = () => { EDITING = { kind: 'task', idx }; renderAdmin(); };
-      const del = document.createElement('button');
-      del.className = 'btn-ghost';
-      del.textContent = 'Delete';
+      row.innerHTML =
+        '<div class="act-text">' +
+          '<div class="act-desc">' + esc(t.description) + '</div>' +
+          '<div class="act-meta">' + esc(meta.join(" · ")) + '</div>' +
+        '</div>' +
+        '<span class="act-hours">' + (hrs ? hrs + "h" : "—") + '</span>';
+      const actions = document.createElement("div");
+      actions.className = "block-actions";
+      const edit = document.createElement("button");
+      edit.className = "btn-ghost";
+      edit.textContent = "Edit";
+      edit.onclick = () => { EDITING = { kind: "task", idx }; renderAdmin(); };
+      const del = document.createElement("button");
+      del.className = "btn-ghost";
+      del.textContent = "Delete";
       del.onclick = () => deleteTask(idx);
       actions.append(edit, del);
       row.appendChild(actions);
@@ -714,9 +731,10 @@
       const usedBy = f.tasks.filter(t =>
         (t.showWhen && t.showWhen.input === inp.id) ||
         t.repeatPer === inp.id ||
-        ((t.hours || {}).per || []).some(p => p.input === inp.id) ||
-        String(t.description).includes('{' + tokenOf(inp) + '}')
-      ).length;
+        String(t.description).includes("{" + tokenOf(inp) + "}") ||
+        [t.trips, t.stays, t.documents, t.clientEffort, t.subcontractorEffort]
+          .concat((t.effort || []).flatMap(e => [e.business, e.after]))
+          .some(a => a && typeof a === "object" && (a.per || []).some(p => p.input === inp.id))      ).length;
       const warn = usedBy ? `\n\n${count(usedBy, 'task', 'tasks')} reference it and will break until you fix them.` : '';
       if (!confirm(`Delete "${inp.label}"?${warn}`)) return;
       f.inputs.splice(idx, 1);
@@ -877,6 +895,10 @@
 
   <script>
     // ─── Task form ───
+    // A task has to come out of here shaped the way the PSE's Input_Tasks table
+    // wants it: a phase, a skill, a task type, counts for trips/stays/documents
+    // and client or subcontractor effort, and per-role hours split into business
+    // and after hours.
     function deleteTask(idx) {
       if (!confirm(`Delete task "${F().tasks[idx].description}"?`)) return;
       F().tasks.splice(idx, 1);
@@ -884,59 +906,145 @@
       renderAdmin();
     }
 
+    const COUNT_FIELDS = [
+      { key: 'stays', label: 'Overnight stays' },
+      { key: 'documents', label: 'Finished document outputs' },
+      { key: 'clientEffort', label: 'Client effort estimate (hours)' },
+      { key: 'subcontractorEffort', label: 'Subcontractor effort estimate (hours)' },
+    ];
+
+    // ── amount editors: a base number, optionally scaling per variable ──
+    function amountEditor(prefix, amount, label) {
+      const a = (amount == null) ? { base: 0 } : (typeof amount === 'number' ? { base: amount } : amount);
+      window._amounts[prefix] = JSON.parse(JSON.stringify(a.per || []));
+      return `
+        <div class="row-editor">
+          <span class="rate-label">${esc(label)}</span>
+          <input type="number" step="0.25" id="${prefix}-base" value="${a.base || 0}" oninput="updateTaskPreview()" />
+        </div>
+        <div id="${prefix}-rates" style="padding-left:18px;"></div>
+        <button class="btn-ghost" type="button" style="margin-left:18px;" onclick="addAmountRate('${prefix}')">+ scale with a variable</button>`;
+    }
+
+    function renderAmountRates(prefix) {
+      const box = document.getElementById(prefix + '-rates');
+      if (!box) return;
+      const numbers = numberInputs();
+      box.innerHTML = (window._amounts[prefix] || []).map((r, n) => `
+        <div class="row-editor" data-rate="${n}">
+          <span class="rate-label" style="flex:0 0 auto;">plus</span>
+          <input type="number" step="0.25" data-role="rate-each" value="${r.each}"
+                 oninput="readAmountRates('${prefix}');updateTaskPreview()" />
+          <select data-role="rate-input" onchange="readAmountRates('${prefix}');updateTaskPreview()" style="flex:1;">
+            ${numbers.map(i => `<option value="${attr(i.id)}" ${r.input === i.id ? 'selected' : ''}>per ${esc(tokenOf(i))}</option>`).join('')}
+          </select>
+          <button class="btn-x" type="button" onclick="removeAmountRate('${prefix}',${n})">&#10005;</button>
+        </div>`).join('');
+    }
+
+    function readAmountRates(prefix) {
+      const box = document.getElementById(prefix + '-rates');
+      if (!box) return;
+      window._amounts[prefix] = Array.from(box.querySelectorAll('.row-editor')).map(row => ({
+        input: row.querySelector('[data-role="rate-input"]').value,
+        each: Number(row.querySelector('[data-role="rate-each"]').value),
+      }));
+    }
+
+    function addAmountRate(prefix) {
+      const numbers = numberInputs();
+      if (!numbers.length) { alert('Add a variable first, then effort can scale with it.'); return; }
+      readAmountRates(prefix);
+      window._amounts[prefix].push({ input: numbers[0].id, each: 0 });
+      renderAmountRates(prefix);
+      updateTaskPreview();
+    }
+
+    function removeAmountRate(prefix, n) {
+      readAmountRates(prefix);
+      window._amounts[prefix].splice(n, 1);
+      renderAmountRates(prefix);
+      updateTaskPreview();
+    }
+
+    function readAmount(prefix) {
+      const baseEl = document.getElementById(prefix + '-base');
+      if (!baseEl) return undefined;
+      const base = Number(baseEl.value || 0);
+      readAmountRates(prefix);
+      const per = (window._amounts[prefix] || []).filter(r => r.input && r.each);
+      if (!base && !per.length) return undefined;
+      return per.length ? { base, per } : base;
+    }
+
+    function amountAtDefaults(prefix) {
+      const baseEl = document.getElementById(prefix + '-base');
+      if (!baseEl) return 0;
+      let total = Number(baseEl.value || 0);
+      (window._amounts[prefix] || []).forEach(r => {
+        const inp = inputById(r.input);
+        const dflt = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
+        total += Number(dflt) * Number(r.each || 0);
+      });
+      return round2(total);
+    }
+
+    // ── the form itself ──
     function renderTaskForm(slot, idx, section) {
       const f = F();
       const existing = idx >= 0 ? f.tasks[idx] : {
-        id: null, phase: f.phases[0], description: '', location: f.locations[0], trips: 0,
-        subflows: section.shared ? 'all' : [section.id], hours: { base: 0 },
+        id: null, phase: f.phases[0], description: '',
+        skill: (CONFIG.skills || [])[0], taskType: (CONFIG.taskTypes || [])[0],
+        subflows: section.shared ? 'all' : [section.id], effort: [],
       };
       window._tf = existing;
-      window._tfRates = JSON.parse(JSON.stringify((existing.hours || {}).per || []));
-
-      const numbers = numberInputs();
-      const chips = numbers.map(i =>
-        `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
-      ).join('') + '<span class="chip plain" onclick="createVariableInline()">+ New variable</span>';
+      window._amounts = {};
+      window._tfEffort = JSON.parse(JSON.stringify(existing.effort || []));
 
       slot.innerHTML = `
         <div class="q-card" style="margin-top:8px;">
           <div class="field">
             <label class="field-label">Description</label>
             <textarea id="tf-description">${esc(existing.description)}</textarea>
-            <div class="q-sub" style="margin-top:8px;">Insert a variable: ${chips}</div>
-            ${existing.repeatPer || numbers.length ? '<div class="q-sub" style="margin-top:4px;">Use <b>{#}</b> for the line number when this task repeats.</div>' : ''}
+            <div class="q-sub" style="margin-top:8px;" id="tf-chips"></div>
           </div>
+
           <div class="field-row">
             <div class="field">
               <label class="field-label">Phase</label>
               <select id="tf-phase">${f.phases.map(p => `<option ${existing.phase === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
             </div>
             <div class="field">
-              <label class="field-label">Location</label>
-              <select id="tf-location">${f.locations.map(l => `<option ${existing.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+              <label class="field-label">Skill required</label>
+              <select id="tf-skill">${(CONFIG.skills || []).map(s => `<option ${existing.skill === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
             </div>
           </div>
-          <label class="checkbox-row field">
-            <input type="checkbox" id="tf-onsite" ${existing.trips ? 'checked' : ''} />
-            <span>Counts as an onsite trip</span>
-          </label>
+          <div class="field">
+            <label class="field-label">Task type</label>
+            <select id="tf-tasktype" onchange="updateTaskPreview()">${(CONFIG.taskTypes || []).map(t => `<option ${existing.taskType === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
+          </div>
 
           <div class="field">
-            <label class="field-label">Hours</label>
-            <div class="row-editor">
-              <span class="rate-label">Base hours, however big the job is</span>
-              <input type="number" step="0.25" id="tf-base" value="${(existing.hours || {}).base || 0}" oninput="updateHoursPreview()" />
-            </div>
-            <div id="tf-rates"></div>
-            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addRateRow()">+ Bill per variable</button>
-            <div class="q-sub" style="margin-top:8px;" id="tf-hours-preview"></div>
+            <label class="field-label">Who does the work, and for how long</label>
+            <div id="tf-effort"></div>
+            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addEffortLine()">+ Add a resource</button>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Travel and outputs</label>
+            ${amountEditor('tf-trips', existing.trips, 'Onsite round trips')}
+            ${COUNT_FIELDS.map(c => `
+              <div class="row-editor">
+                <span class="rate-label">${esc(c.label)}</span>
+                <input type="number" step="0.25" id="tf-${c.key}" value="${typeof existing[c.key] === 'number' ? existing[c.key] : ((existing[c.key] || {}).base || 0)}" oninput="updateTaskPreview()" />
+              </div>`).join('')}
           </div>
 
           <div class="field">
             <label class="field-label">One line per variable (optional)</label>
-            <select id="tf-repeat" onchange="updateHoursPreview()">
+            <select id="tf-repeat" onchange="updateTaskPreview()">
               <option value="">Just one line</option>
-              ${numbers.map(i => `<option value="${attr(i.id)}" ${existing.repeatPer === i.id ? 'selected' : ''}>One line per ${esc(tokenOf(i))}</option>`).join('')}
+              ${numberInputs().map(i => `<option value="${attr(i.id)}" ${existing.repeatPer === i.id ? 'selected' : ''}>One line per ${esc(tokenOf(i))}</option>`).join('')}
             </select>
           </div>
 
@@ -949,72 +1057,111 @@
             <div id="tf-cond"></div>
           </div>
 
+          <div class="q-sub" id="tf-preview" style="margin-bottom:12px;"></div>
           <button class="btn-primary" onclick="saveTaskForm(${idx})">Save task</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
         </div>`;
 
-      renderRateRows();
+      renderChips();
+      renderEffortLines();
+      renderAmountRates('tf-trips');
       renderSubflowPicker(document.getElementById('tf-subflows'), existing.subflows);
       renderCondEditor(document.getElementById('tf-cond'), existing.showWhen, { alwaysLabel: 'No extra condition' });
-      updateHoursPreview();
+      updateTaskPreview();
       slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function renderRateRows() {
-      const box = document.getElementById('tf-rates');
-      const numbers = numberInputs();
-      box.innerHTML = window._tfRates.map((r, n) => `
-        <div class="row-editor" data-rate="${n}">
-          <select data-role="rate-input" onchange="readRateRows();updateHoursPreview()" style="flex:1;">
-            ${numbers.map(i => `<option value="${attr(i.id)}" ${r.input === i.id ? 'selected' : ''}>per ${esc(tokenOf(i))}</option>`).join('')}
-          </select>
-          <input type="number" step="0.25" data-role="rate-hours" value="${r.hours}" oninput="readRateRows();updateHoursPreview()" />
-          <span class="rate-label" style="flex:0 0 auto;">hours each</span>
-          <button class="btn-x" type="button" onclick="removeRateRow(${n})">&#10005;</button>
+    function renderChips() {
+      const box = document.getElementById('tf-chips');
+      if (!box) return;
+      box.innerHTML = 'Insert a variable: ' + numberInputs().map(i =>
+        `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
+      ).join('') + '<span class="chip plain" onclick="createVariableInline()">+ New variable</span>' +
+      '<span class="chip plain" onclick="insertToken(\'#\')">{#} line number</span>';
+    }
+
+    function renderEffortLines() {
+      const f = F();
+      const box = document.getElementById('tf-effort');
+      const roles = CONFIG.roles || [];
+      box.innerHTML = window._tfEffort.map((e, n) => `
+        <div class="q-card" style="background:rgba(255,255,255,0.02);margin-bottom:10px;" data-effort="${n}">
+          <div class="row-editor">
+            <select data-role="eff-role" onchange="readEffortLines();updateTaskPreview()" style="flex:1;">
+              ${roles.map(r => `<option value="${attr(r.id)}" ${e.role === r.id ? 'selected' : ''}>${esc(r.name)}</option>`).join('')}
+            </select>
+            <select data-role="eff-location" onchange="readEffortLines()" style="flex:0 0 150px;">
+              ${f.locations.map(l => `<option ${e.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}
+            </select>
+            <button class="btn-x" type="button" onclick="removeEffortLine(${n})">&#10005;</button>
+          </div>
+          ${amountEditor('tf-eff' + n + '-bh', e.business, 'Business hours')}
+          ${amountEditor('tf-eff' + n + '-ah', e.after, 'After hours')}
         </div>`).join('');
-    }
-
-    function readRateRows() {
-      window._tfRates = Array.from(document.querySelectorAll('#tf-rates .row-editor')).map(row => ({
-        input: row.querySelector('[data-role="rate-input"]').value,
-        hours: Number(row.querySelector('[data-role="rate-hours"]').value),
-      }));
-    }
-
-    function addRateRow() {
-      const numbers = numberInputs();
-      if (!numbers.length) { alert('Add a number variable first, then you can bill per unit of it.'); return; }
-      readRateRows();
-      window._tfRates.push({ input: numbers[0].id, hours: 0 });
-      renderRateRows();
-      updateHoursPreview();
-    }
-
-    function removeRateRow(n) {
-      readRateRows();
-      window._tfRates.splice(n, 1);
-      renderRateRows();
-      updateHoursPreview();
-    }
-
-    function updateHoursPreview() {
-      const base = Number(document.getElementById('tf-base').value || 0);
-      const repeat = document.getElementById('tf-repeat').value;
-      let per = base;
-      const bits = [`${base}h base`];
-      window._tfRates.forEach(r => {
-        const inp = inputById(r.input);
-        const dflt = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
-        per += Number(dflt) * Number(r.hours || 0);
-        bits.push(`${r.hours}h x ${dflt} ${inp ? tokenOf(inp) : r.input}`);
+      if (!window._tfEffort.length) {
+        box.innerHTML = '<div class="q-sub" style="font-style:italic;color:var(--faint);margin-bottom:8px;">No effort costed against this task yet.</div>';
+      }
+      window._tfEffort.forEach((e, n) => {
+        renderAmountRates('tf-eff' + n + '-bh');
+        renderAmountRates('tf-eff' + n + '-ah');
       });
-      let text = `At the current defaults: ${bits.join(' + ')} = ${round2(per)}h per line.`;
+    }
+
+    function readEffortLines() {
+      const box = document.getElementById('tf-effort');
+      const rows = Array.from(box.querySelectorAll('[data-effort]'));
+      window._tfEffort = rows.map((row, n) => ({
+        role: row.querySelector('[data-role="eff-role"]').value,
+        location: row.querySelector('[data-role="eff-location"]').value,
+        business: readAmount('tf-eff' + n + '-bh'),
+        after: readAmount('tf-eff' + n + '-ah'),
+      }));
+      return window._tfEffort;
+    }
+
+    function addEffortLine() {
+      const roles = CONFIG.roles || [];
+      if (!roles.length) { alert('No engineer roles are configured.'); return; }
+      if (document.querySelector('[data-effort]')) readEffortLines();
+      const used = window._tfEffort.map(e => e.role);
+      const next = roles.find(r => !used.includes(r.id)) || roles[0];
+      window._tfEffort.push({ role: next.id, location: F().locations[0], business: 0, after: 0 });
+      renderEffortLines();
+      updateTaskPreview();
+    }
+
+    function removeEffortLine(n) {
+      readEffortLines();
+      window._tfEffort.splice(n, 1);
+      renderEffortLines();
+      updateTaskPreview();
+    }
+
+    function updateTaskPreview() {
+      const box = document.getElementById('tf-preview');
+      if (!box) return;
+      const rows = Array.from(document.querySelectorAll('[data-effort]'));
+      let hours = 0;
+      const bits = [];
+      rows.forEach((row, n) => {
+        const roleId = row.querySelector('[data-role="eff-role"]').value;
+        const bh = amountAtDefaults('tf-eff' + n + '-bh');
+        const ah = amountAtDefaults('tf-eff' + n + '-ah');
+        hours += bh + ah;
+        const r = (CONFIG.roles || []).find(r => r.id === roleId);
+        bits.push(`${r ? r.id : roleId} ${bh}h${ah ? ' + ' + ah + 'h after' : ''}`);
+      });
+      const trips = amountAtDefaults('tf-trips');
+      const repeat = document.getElementById('tf-repeat').value;
+      let text = hours || trips
+        ? `At the current defaults: ${bits.join(', ') || 'no hours'} = ${round2(hours)}h per line${trips ? `, ${trips} round trip${trips === 1 ? '' : 's'}` : ''}.`
+        : 'At the current defaults: nothing costed yet.';
       if (repeat) {
         const inp = inputById(repeat);
         const n = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
-        text += ` Repeated ${n} times, that is ${round2(per * n)}h.`;
+        text += ` Repeated ${n} times, that is ${round2(hours * n)}h.`;
       }
-      document.getElementById('tf-hours-preview').textContent = text;
+      box.textContent = text;
     }
 
     // Drops {token} in at the caret, so a variable can be woven into the text.
@@ -1036,20 +1183,15 @@
       const dflt = Number(prompt('Starting value:', '1'));
       const f = F();
       const id = uniqueId(slugify(token), f.inputs.map(i => i.id));
-      const input = {
-        id, type: 'number', label: label.trim(), min: 0, max: 100000,
-        default: isNaN(dflt) ? 0 : dflt,
-      };
+      const input = { id, type: 'number', label: label.trim(), min: 0, max: 100000, default: isNaN(dflt) ? 0 : dflt };
       if (token.trim() !== id) input.token = token.trim();
       f.inputs.push(input);
       insertToken(tokenOf(input));
-      // Refresh the chip row and rate dropdowns against the new variable.
-      const chipRow = document.querySelector('#tf-description').parentElement.querySelector('.q-sub');
-      chipRow.innerHTML = 'Insert a variable: ' + numberInputs().map(i =>
-        `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
-      ).join('') + '<span class="chip plain" onclick="createVariableInline()">+ New variable</span>';
-      renderRateRows();
-      updateHoursPreview();
+      renderChips();
+      readEffortLines();
+      renderEffortLines();
+      renderAmountRates('tf-trips');
+      updateTaskPreview();
     }
 
     function saveTaskForm(idx) {
@@ -1057,37 +1199,60 @@
       const e = window._tf;
       const description = document.getElementById('tf-description').value.trim();
       if (!description) { alert('Description is required.'); return; }
-      readRateRows();
-
-      const taken = f.tasks.filter((t, n) => n !== idx).map(t => t.id);
-      const next = {
-        id: e.id || uniqueId(slugify(description), taken),
-        phase: document.getElementById('tf-phase').value,
-        description,
-        location: document.getElementById('tf-location').value,
-      };
-      if (document.getElementById('tf-onsite').checked) next.trips = 1;
-
-      next.subflows = readSubflowPicker();
 
       const repeat = document.getElementById('tf-repeat').value;
-      if (repeat) next.repeatPer = repeat;
+      const effort = readEffortLines().filter(x => x.business || x.after);
 
+      const roles = effort.map(x => x.role);
+      if (roles.length !== new Set(roles).size) {
+        alert('Each resource can only appear once on a task. Merge the duplicate rows.');
+        return;
+      }
+
+      // The PSE only has five resource columns, so the flow cannot use more
+      // than five distinct roles across all of its tasks.
+      const others = new Set();
+      f.tasks.forEach((t, n) => { if (n !== idx) (t.effort || []).forEach(x => others.add(x.role)); });
+      roles.forEach(r => others.add(r));
+      if (others.size > 5) {
+        alert(`That would take this flow to ${others.size} different resources, but the PSE only has five resource columns. Reuse one of the roles already in play.`);
+        return;
+      }
+
+      const next = {
+        id: e.id || uniqueId(slugify(description), f.tasks.filter((t, n) => n !== idx).map(t => t.id)),
+        phase: document.getElementById('tf-phase').value,
+        skill: document.getElementById('tf-skill').value,
+        taskType: document.getElementById('tf-tasktype').value,
+        description,
+      };
+
+      const trips = readAmount('tf-trips');
+      if (trips !== undefined) next.trips = trips;
+      COUNT_FIELDS.forEach(c => {
+        const v = Number(document.getElementById('tf-' + c.key).value || 0);
+        if (v) next[c.key] = v;
+      });
+
+      next.subflows = readSubflowPicker();
+      if (repeat) next.repeatPer = repeat;
       const cond = readCondEditor();
       if (cond) next.showWhen = cond;
 
-      const base = Number(document.getElementById('tf-base').value || 0);
-      const rates = window._tfRates.filter(r => r.input && r.hours);
-      // A repeating task already emits one line per unit; billing per that same
-      // unit on every line would count the effort twice.
-      const clash = rates.find(r => r.input === repeat);
-      if (clash) {
-        const inp = inputById(clash.input);
-        alert(`This task already emits one line per ${inp ? tokenOf(inp) : clash.input}, so billing per that same variable would double count. Remove one of the two.`);
+      // A repeating task already emits one line per unit, so scaling a line by
+      // that same unit would count the effort twice.
+      const clashes = [];
+      const amounts = [trips].concat(effort.flatMap(x => [x.business, x.after]));
+      amounts.forEach(a => {
+        if (a && typeof a === 'object') (a.per || []).forEach(p => { if (p.input === repeat) clashes.push(p.input); });
+      });
+      if (clashes.length) {
+        const inp = inputById(clashes[0]);
+        alert(`This task already emits one line per ${inp ? tokenOf(inp) : clashes[0]}, so scaling each line by that same variable would double count. Remove one of the two.`);
         return;
       }
-      next.hours = rates.length ? { base, per: rates } : { base };
 
+      next.effort = effort;
       if (idx >= 0) f.tasks[idx] = next;
       else f.tasks.push(next);
       EDITING = null;
@@ -1241,7 +1406,7 @@
             <label class="field-label">Spreadsheet columns, in paste order</label>
             <div id="ff-columns">${f.columns.map(columnRowHtml).join('')}</div>
             <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addColumnRow()">+ Add column</button>
-          </div>
+            <button class="btn-ghost" type="button" onclick="usePseColumns()">Reset to the standard PSE columns</button>          </div>
 
           <button class="btn-primary" onclick="saveFlowForm()">Save flow</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
@@ -1289,6 +1454,13 @@
           <input type="text" placeholder="Fixed value" value="${attr(isConstant ? c.constant : '')}" data-role="col-constant" style="display:${isConstant ? 'block' : 'none'};" />
           <button class="btn-x" type="button" onclick="this.closest('.row-editor').remove()">&#10005;</button>
         </div>`;
+    }
+
+    // Puts the flow back to the 24 columns the PSE's Input_Tasks table expects.
+    function usePseColumns() {
+      if (!confirm('Replace this flow\'s columns with the standard 24 the PSE expects?')) return;
+      document.getElementById('ff-columns').innerHTML =
+        (CONFIG.pseColumns || []).map(columnRowHtml).join('');
     }
 
     function addColumnRow() {

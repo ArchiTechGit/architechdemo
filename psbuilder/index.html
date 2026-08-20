@@ -264,15 +264,29 @@
       });
     }
 
-    function hoursFor(task, resolved) {
-      const h = task.hours || {};
-      let total = Number(h.base || 0);
-      (h.per || []).forEach(p => {
-        total += Number(resolved[p.input] || 0) * Number(p.hours || 0);
+    // An amount is either a plain number or a base plus a rate per unit of a
+    // variable, which is how effort and counts both scale with scope.
+    function amountOf(a, resolved) {
+      if (a == null) return 0;
+      if (typeof a === "number") return a;
+      let total = Number(a.base || 0);
+      (a.per || []).forEach(p => {
+        total += Number(resolved[p.input] || 0) * Number(p.each || 0);
       });
       return Math.round(total * 100) / 100;
     }
 
+    function roleName(id) {
+      const r = (CONFIG.roles || []).find(r => r.id === id);
+      return r ? r.name : id;
+    }
+
+    // Total effort on a task line, however many roles share it.
+    function totalHours(line) {
+      return round2((line.effortLines || []).reduce((n, e) => n + e.business + e.after, 0));
+    }
+
+    function round2(n) { return Math.round(Number(n || 0) * 100) / 100; }
     // ─── Rendering ──────────────────────────────────────────────────────
     function renderFlows() {
       const root = document.getElementById('flow-list');
@@ -453,10 +467,23 @@
         if (!inSubflow(task.subflows, subflow)) return;
         if (!condMet(task.showWhen, resolved)) return;
 
-        const emit = (index) => out.push(Object.assign({}, task, {
+        const emit = (index) => out.push({
+          phase: task.phase,
+          skill: task.skill || "",
+          taskType: task.taskType || "",
           description: fillText(task.description, resolved, index),
-          hours: hoursFor(task, resolved),
-        }));
+          trips: amountOf(task.trips, resolved),
+          stays: amountOf(task.stays, resolved),
+          documents: amountOf(task.documents, resolved),
+          clientEffort: amountOf(task.clientEffort, resolved),
+          subcontractorEffort: amountOf(task.subcontractorEffort, resolved),
+          effortLines: (task.effort || []).map(e => ({
+            role: e.role,
+            location: e.location || task.defaultLocation || "",
+            business: amountOf(e.business, resolved),
+            after: amountOf(e.after, resolved),
+          })).filter(e => e.role && (e.business || e.after)),
+        });
 
         if (task.repeatPer) {
           const n = Number(resolved[task.repeatPer] || 0);
@@ -468,31 +495,68 @@
       return out;
     }
 
-    function createEstimate() {
-      const resolved = resolveInputs();
-      const tasks = buildTasks(resolved);
-      const cols = flow.columns;
-
-      const lines = [cols.map(c => c.header).join('\t')];
-      let trips = 0, hours = 0;
-      tasks.forEach(t => {
-        lines.push(cols.map(c => c.constant !== undefined ? c.constant : (t[c.from] != null ? t[c.from] : '')).join('\t'));
-        trips += Number(t.trips || 0);
-        hours += Number(t.hours || 0);
-      });
-
-      document.getElementById('estimate-output').value = lines.join('\n');
-      document.getElementById('sum-tasks').textContent = tasks.length;
-      document.getElementById('sum-hours').textContent = Math.round(hours * 100) / 100;
-      document.getElementById('sum-trips').textContent = trips;
-      document.getElementById('output-hint').textContent =
-        'Tab-separated, header row included. Click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as ' +
-        cols.map(c => c.header).join(' / ') + '.';
-
-      hide('question-section');
-      show('output-section');
+    // The PSE fixes a role per resource column, so the roles actually used are
+    // assigned to slots R1..R5 in the order they first appear.
+    function assignSlots(lines) {
+      const order = [];
+      lines.forEach(l => l.effortLines.forEach(e => {
+        if (!order.includes(e.role)) order.push(e.role);
+      }));
+      return order;
     }
 
+    // Flattens each line onto the five slot columns the sheet expects.
+    function applySlots(line, slots) {
+      for (let n = 1; n <= 5; n++) {
+        const role = slots[n - 1];
+        const e = role ? line.effortLines.find(x => x.role === role) : null;
+        line["r" + n + "Location"] = e ? e.location : "";
+        line["r" + n + "Business"] = e && e.business ? e.business : "";
+        line["r" + n + "After"] = e && e.after ? e.after : "";
+      }
+      return line;
+    }
+    function createEstimate() {
+      const resolved = resolveInputs();
+      const lines = buildTasks(resolved);
+      const allSlots = assignSlots(lines);
+      const slots = allSlots.slice(0, 5);
+      const overflow = allSlots.slice(5);
+      lines.forEach(l => applySlots(l, slots));
+
+      const cols = flow.columns;
+      const rows = [cols.map(c => c.header).join("\t")];
+      let trips = 0, hours = 0;
+      lines.forEach(l => {
+        rows.push(cols.map(c => {
+          if (c.constant !== undefined) return c.constant;
+          const v = l[c.from];
+          return v == null ? "" : v;
+        }).join("\t"));
+        trips += Number(l.trips || 0);
+        hours += totalHours(l);
+      });
+
+      document.getElementById("estimate-output").value = rows.join("\n");
+      document.getElementById("sum-tasks").textContent = lines.length;
+      document.getElementById("sum-hours").textContent = round2(hours);
+      document.getElementById("sum-trips").textContent = round2(trips);
+
+      // The sheet needs its resource columns set to match, so spell it out.
+      const mapping = slots.length
+        ? "Set the resource columns on row 41 to: " +
+          slots.map((r, i) => "R" + (i + 1) + " = " + roleName(r)).join(", ") + ". "
+        : "No effort has been costed against these tasks yet. ";
+      const warn = overflow.length
+        ? "Note: " + overflow.map(roleName).join(", ") +
+          " could not fit, because the sheet only has five resource columns. Their hours are not in this paste. "
+        : "";
+      document.getElementById("output-hint").textContent =
+        mapping + warn + "Tab-separated with a header row: select all, copy, then paste into the first task row of Project Technical Tasks.";
+
+      hide("question-section");
+      show("output-section");
+    }
     function backToQuestions() {
       hide('output-section');
       show('question-section');
