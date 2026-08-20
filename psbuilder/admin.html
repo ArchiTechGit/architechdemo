@@ -154,9 +154,11 @@
         </ol>
       </div>
       <input type="password" id="token-input" placeholder="github_pat_..." style="max-width:480px;margin-bottom:12px;" />
-      <br/>
-      <button class="btn-primary" onclick="saveTokenAndLoad()">Continue</button>
-    </div>
+      <div id="token-error" class="q-sub" style="display:none;max-width:560px;margin-bottom:12px;color:var(--amber);"></div>
+      <div>
+        <button class="btn-primary" onclick="useTypedToken()">Continue</button>
+        <button class="btn-ghost" id="forget-token" style="display:none;" onclick="forgetToken()">Forget the saved token</button>
+      </div>    </div>
 
     <div id="admin-app" style="display:none;">
       <div class="fbar">
@@ -164,6 +166,7 @@
         <select id="flow-select" onchange="switchFlow(this.value)"></select>
         <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
         <button class="btn-ghost" onclick="openNewFlow()">+ New flow</button>
+        <button class="btn-ghost" id="signed-in" onclick="forgetToken()" title="Clear the token stored in this browser">Token saved</button>
       </div>
       <div id="flow-form-slot"></div>
       <p class="page-desc" id="admin-intro"></p>
@@ -186,7 +189,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.3.0';
+    const ADMIN_VERSION = '0.3.1';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -205,22 +208,56 @@
       CONFIG = JSON.parse(decodeURIComponent(escape(atob(data.content))));
     }
 
-    async function saveTokenAndLoad() {
-      const input = document.getElementById('token-input').value.trim();
-      if (!input) return;
-      GITHUB_TOKEN = input;
-      localStorage.setItem('psbuilder_admin_token', GITHUB_TOKEN);
-      try {
-        await fetchConfigFromGitHub();
-        document.getElementById('token-gate').style.display = 'none';
-        document.getElementById('admin-app').style.display = 'block';
-        activeFlowId = CONFIG.flows.length ? CONFIG.flows[0].id : null;
-        renderAdmin();
-      } catch (e) {
-        alert('Could not load config — check your token has Contents read/write on this repo. ' + e.message);
-      }
+    // GitHub is specific about why it said no, and the difference matters: a
+    // fine-grained token on an org repo often needs approving before it works.
+    function explainFailure(status) {
+      if (status === 401) return 'That token was rejected (401). It may be mistyped, revoked, or expired.';
+      if (status === 403) return 'Token understood but not allowed (403). If the org has not approved it yet, it stays blocked until an owner does.';
+      if (status === 404) return 'Repo not visible to that token (404). Check it is scoped to ArchiTechGit/architechdemo with Contents access.';
+      return 'GitHub returned ' + status + '.';
     }
 
+    function showTokenError(message) {
+      const box = document.getElementById('token-error');
+      box.textContent = message;
+      box.style.display = 'block';
+      document.getElementById('forget-token').style.display =
+        localStorage.getItem('psbuilder_admin_token') ? 'inline-block' : 'none';
+    }
+
+    function forgetToken() {
+      localStorage.removeItem('psbuilder_admin_token');
+      GITHUB_TOKEN = '';
+      location.reload();
+    }
+
+    function useTypedToken() {
+      const typed = document.getElementById('token-input').value.trim();
+      if (!typed) { showTokenError('Paste a token first.'); return; }
+      tryToken(typed, true);
+    }
+
+    // `interactive` means the user just typed it, so failures are worth saying
+    // loudly. A stored token that has gone stale fails quietly into the gate.
+    async function tryToken(token, interactive) {
+      GITHUB_TOKEN = token;
+      try {
+        await fetchConfigFromGitHub();
+      } catch (e) {
+        // Never keep a token that does not work - that was the old bug.
+        localStorage.removeItem('psbuilder_admin_token');
+        const status = Number(String(e.message).match(/\d{3}/) || 0);
+        document.getElementById('token-input').value = token;
+        showTokenError(explainFailure(status) + (interactive ? '' : ' The saved token has been cleared.'));
+        return false;
+      }
+      localStorage.setItem('psbuilder_admin_token', token);
+      document.getElementById('token-gate').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'block';
+      activeFlowId = CONFIG.flows.length ? CONFIG.flows[0].id : null;
+      renderAdmin();
+      return true;
+    }
     function utf8ToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
 
     async function saveConfig() {
@@ -256,7 +293,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('version-badge').textContent = 'v' + ADMIN_VERSION;
       document.title = 'PS Builder — Admin v' + ADMIN_VERSION;
-      if (GITHUB_TOKEN) saveTokenAndLoad();
+      const stored = localStorage.getItem('psbuilder_admin_token');
+      if (stored) tryToken(stored, false);
     });
   </script>
 

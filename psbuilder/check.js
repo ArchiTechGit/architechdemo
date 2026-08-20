@@ -57,6 +57,21 @@ if (versionMatch) {
     adminHtml.indexOf("textContent = 'v' + ADMIN_VERSION") !== -1, true);
 }
 
+// ── 1c. A token is only remembered once it has been proved to work ─────
+section('Token persistence');
+const tryTokenSrc = (adminHtml.match(/async function tryToken\([\s\S]*?\n    \}/) || [''])[0];
+check('admin has a tryToken step', tryTokenSrc.length > 0, true);
+if (tryTokenSrc) {
+  const fetchAt = tryTokenSrc.indexOf('await fetchConfigFromGitHub()');
+  const saveAt = tryTokenSrc.indexOf('localStorage.setItem');
+  const clearAt = tryTokenSrc.indexOf('localStorage.removeItem');
+  check('it fetches before it saves', fetchAt !== -1 && saveAt > fetchAt, true);
+  check('a token that fails is cleared, not kept', clearAt !== -1 && clearAt < saveAt, true);
+}
+check('startup reuses the stored token', /if \(stored\) tryToken\(stored, false\)/.test(adminHtml), true);
+check('the token can be forgotten on purpose', /function forgetToken\(\)/.test(adminHtml), true);
+check('failures explain the status', /function explainFailure\(status\)/.test(adminHtml), true);
+
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
 section('PSE lists');
 check('seven engineer roles', (config.roles || []).map(r => r.id),
