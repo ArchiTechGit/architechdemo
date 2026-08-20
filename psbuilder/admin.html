@@ -26,7 +26,7 @@
 
     body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
 
-    .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 100px; }
+    .page { max-width: 780px; margin: 0 auto; padding: 48px 24px 100px; }
 
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
     .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
@@ -53,10 +53,16 @@
     .btn-secondary:hover { opacity: 0.9; }
 
     .btn-ghost {
-      background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 13px;
-      padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: var(--font); margin-left: 8px;
+      background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 12.5px;
+      padding: 6px 12px; border-radius: 7px; cursor: pointer; font-family: var(--font); margin-left: 6px;
     }
     .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    .btn-add {
+      background: transparent; border: 1px dashed var(--border); color: var(--muted); font-size: 12.5px;
+      padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: var(--font); width: 100%; text-align: left;
+    }
+    .btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
 
     .btn-x {
       background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer;
@@ -87,15 +93,36 @@
     .option-row input[type="text"] { flex: 1; }
     .option-row label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 
-    .list-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.02); }
-    .list-item-text { flex: 1; min-width: 0; }
-    .list-item-title { font-size: 13.5px; font-weight: 600; }
-    .list-item-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .list-item-actions { display: flex; flex-shrink: 0; }
-
     .checkbox-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .checkbox-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; }
     .checkbox-row span { font-size: 13px; }
+
+    /* ─── Question-centric layout ─── */
+    .block { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); overflow: hidden; }
+    .block-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; cursor: pointer; user-select: none; }
+    .block-head:hover { background: rgba(255,255,255,0.02); }
+    .block-head.static { cursor: default; }
+    .block-head.static:hover { background: transparent; }
+    .block-chevron { color: var(--faint); font-size: 11px; width: 12px; flex-shrink: 0; transition: transform 0.15s; }
+    .block-chevron.open { transform: rotate(90deg); }
+    .block-title { flex: 1; min-width: 0; }
+    .block-name { font-size: 14px; font-weight: 600; line-height: 1.4; }
+    .block-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .block-count { font-size: 11.5px; font-weight: 700; color: var(--cyan); background: var(--cyan-dim); border: 1px solid var(--cyan-mid); border-radius: 20px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap; }
+    .block-count.zero { color: var(--faint); background: transparent; border-color: var(--border); }
+    .block-actions { display: flex; flex-shrink: 0; }
+    .block-body { padding: 0 18px 16px 42px; }
+
+    .cond { margin-bottom: 16px; }
+    .cond:last-child { margin-bottom: 4px; }
+    .cond-head { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .cond-empty { font-size: 12.5px; color: var(--faint); font-style: italic; margin-bottom: 8px; }
+
+    .act { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.02); }
+    .act-text { flex: 1; min-width: 0; }
+    .act-desc { font-size: 13px; line-height: 1.45; }
+    .act-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    .act-actions { display: flex; flex-shrink: 0; }
 
     .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 16px 0; margin-top: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
   </style>
@@ -130,13 +157,8 @@
     </div>
 
     <div id="admin-app" style="display:none;">
-      <div class="section-label">Questions</div>
-      <div id="questions-list"></div>
-      <div id="question-form-slot"></div>
-
-      <div class="section-label" style="margin-top:32px;">Activities</div>
-      <div id="activities-list"></div>
-      <div id="activity-form-slot"></div>
+      <p class="page-desc" id="admin-intro"></p>
+      <div id="admin-root"></div>
 
       <div class="save-bar">
         <button class="btn-primary" onclick="saveConfig()">Save to GitHub</button>
@@ -172,8 +194,7 @@
         await fetchConfigFromGitHub();
         document.getElementById('token-gate').style.display = 'none';
         document.getElementById('admin-app').style.display = 'block';
-        renderQuestionsList();
-        renderActivitiesList();
+        renderAdmin();
       } catch (e) {
         alert('Could not load config — check your token has Contents read/write on this repo. ' + e.message);
       }
@@ -186,84 +207,316 @@
 
   <script>
     // ─── Shared helpers ───
+    function esc(str) {
+      return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function attr(str) {
+      return esc(str).replace(/"/g, '&quot;');
+    }
     function slugify(str) {
       return (str || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'item';
     }
-
     function uniqueId(base, existingIds) {
-      let id = base;
-      let n = 2;
+      let id = base, n = 2;
       while (existingIds.includes(id)) { id = `${base}-${n}`; n++; }
       return id;
     }
+    function questionById(qid) { return CONFIG.questions.find(q => q.id === qid); }
+    function plural(n, word) { return `${n} ${word}${n === 1 ? '' : 's'}`; }
 
-    function questionLabelById(qid) {
-      const q = CONFIG.questions.find(q => q.id === qid);
-      return q ? q.label : qid;
+    // Does this activity's trigger match the given condition slot?
+    function triggerMatches(t, target) {
+      if (!t || t.type !== target.type) return false;
+      if (target.value !== undefined && t.value !== target.value) return false;
+      if (target.questionId !== undefined && t.questionId !== target.questionId) return false;
+      if (target.optionId !== undefined && t.optionId !== target.optionId) return false;
+      return true;
     }
 
-    function optionLabelById(qid, oid) {
-      const q = CONFIG.questions.find(q => q.id === qid);
-      const o = q && q.options && q.options.find(o => o.id === oid);
-      return o ? o.label : oid;
+    // All activities matching a condition slot, as {activity, idx} pairs.
+    function activitiesFor(target) {
+      return CONFIG.activities
+        .map((a, idx) => ({ a, idx }))
+        .filter(({ a }) => triggerMatches(a.trigger, target));
+    }
+
+    // Condition slots a question exposes, in display order.
+    function conditionsForQuestion(q) {
+      if (q.type === 'stepper') {
+        return [
+          { label: 'When the answer is more than zero', trigger: { type: 'stepperGate', questionId: q.id } },
+          { label: 'One line per unit answered', trigger: { type: 'stepperRepeat', questionId: q.id } },
+        ];
+      }
+      if (q.type === 'toggle') {
+        return [{ label: 'When turned on', trigger: { type: 'toggleOn', questionId: q.id } }];
+      }
+      if (q.type === 'checklist') {
+        const perOption = (q.options || []).map(o => ({
+          label: `When checked: ${o.label}`,
+          trigger: { type: 'checklistOption', questionId: q.id, optionId: o.id },
+        }));
+        return perOption.concat([{ label: 'When any option is checked', trigger: { type: 'checklistAny', questionId: q.id } }]);
+      }
+      return [];
+    }
+
+    // Activities whose trigger points at a question or option that no longer exists.
+    function orphanActivities() {
+      return CONFIG.activities.map((a, idx) => ({ a, idx })).filter(({ a }) => {
+        const t = a.trigger || {};
+        if (!t.questionId) return false;
+        const q = questionById(t.questionId);
+        if (!q) return true;
+        if (t.type === 'checklistOption') return !(q.options || []).some(o => o.id === t.optionId);
+        return false;
+      });
     }
   </script>
 
   <script>
-    // ─── Questions: list + plain-language form ───
-    function renderQuestionsList() {
-      const root = document.getElementById('questions-list');
+    // ─── Render: question-centric ───
+    // EDITING describes which inline form is open, so a full re-render can put it back.
+    //   { kind: 'question', idx }                    edit/new question form
+    //   { kind: 'activity', idx }                    edit existing activity
+    //   { kind: 'activity-new', trigger, anchor }    new activity preset to a condition
+    let EDITING = null;
+    const EXPANDED = new Set();
+
+    function closeForm() { EDITING = null; renderAdmin(); }
+
+    function toggleExpand(key) {
+      if (EXPANDED.has(key)) EXPANDED.delete(key); else EXPANDED.add(key);
+      renderAdmin();
+    }
+
+    function anchorKey(trigger) {
+      return [trigger.type, trigger.value, trigger.questionId, trigger.optionId].filter(Boolean).join(':');
+    }
+
+    function renderAdmin() {
+      const root = document.getElementById('admin-root');
       root.innerHTML = '';
-      CONFIG.questions.forEach((q, idx) => {
-        const typeLabel = q.type === 'stepper' ? 'Number' : q.type === 'toggle' ? 'Yes/No' : 'Checklist';
-        const scopeLabel = q.scopeGate === 'dfd' ? 'Digital Front Door only' : 'Everyone';
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div class="list-item-text">
-            <div class="list-item-title">${q.label}</div>
-            <div class="list-item-sub">${typeLabel} · ${scopeLabel}</div>
-          </div>
-          <div class="list-item-actions">
-            <button class="btn-ghost" onclick="openQuestionForm(${idx})">Edit</button>
-            <button class="btn-ghost" onclick="deleteQuestion(${idx})">Delete</button>
-          </div>`;
-        root.appendChild(item);
+      document.getElementById('admin-intro').textContent =
+        `${plural(CONFIG.activities.length, 'activity').replace('activitys', 'activities')} across ${plural(CONFIG.questions.length, 'question')}. Everything is grouped by what makes it appear in the estimate — expand a group to see or change what it pulls in.`;
+
+      // Always-included activities.
+      root.appendChild(blockEl({
+        key: 'always',
+        name: 'Always included',
+        meta: 'Every engagement gets these — no question asked.',
+        conditions: [{ label: null, trigger: { type: 'always' } }],
+      }));
+
+      // Engagement-type-only activities.
+      CONFIG.types.forEach(t => {
+        root.appendChild(blockEl({
+          key: `type:${t.id}`,
+          name: `Only for ${t.name} engagements`,
+          meta: 'Added automatically when this engagement type is picked.',
+          conditions: [{ label: null, trigger: { type: 'typeEquals', value: t.id } }],
+        }));
       });
-      const addBtn = document.createElement('button');
-      addBtn.className = 'btn-secondary';
-      addBtn.textContent = '+ Add question';
-      addBtn.onclick = () => openQuestionForm(-1);
-      root.appendChild(addBtn);
+
+      // One block per question.
+      const qLabel = document.createElement('div');
+      qLabel.className = 'section-label';
+      qLabel.style.marginTop = '32px';
+      qLabel.textContent = 'Driven by a scoping question';
+      root.appendChild(qLabel);
+
+      CONFIG.questions.forEach((q, qIdx) => {
+        const typeName = q.type === 'stepper' ? 'Number' : q.type === 'toggle' ? 'Yes/No' : 'Checklist';
+        const scopeName = q.scopeGate === 'dfd' ? 'Digital Front Door only' : 'Asked on every engagement';
+        root.appendChild(blockEl({
+          key: `q:${q.id}`,
+          name: q.label,
+          meta: `${typeName} · ${scopeName}`,
+          conditions: conditionsForQuestion(q),
+          questionIdx: qIdx,
+        }));
+      });
+
+      const addQ = document.createElement('button');
+      addQ.className = 'btn-secondary';
+      addQ.textContent = '+ Add question';
+      addQ.onclick = () => { EDITING = { kind: 'question', idx: -1 }; renderAdmin(); };
+      root.appendChild(addQ);
+
+      if (EDITING && EDITING.kind === 'question') {
+        const slot = document.createElement('div');
+        slot.style.marginTop = '12px';
+        root.appendChild(slot);
+        renderQuestionForm(slot, EDITING.idx);
+      }
+
+      // Anything pointing at a deleted question/option.
+      const orphans = orphanActivities();
+      if (orphans.length) {
+        const warn = document.createElement('div');
+        warn.className = 'section-label';
+        warn.style.marginTop = '32px';
+        warn.style.color = '#F0A020';
+        warn.textContent = 'Not connected to anything — will never appear';
+        root.appendChild(warn);
+        const box = document.createElement('div');
+        box.className = 'block';
+        const body = document.createElement('div');
+        body.className = 'block-body';
+        body.style.padding = '16px 18px';
+        orphans.forEach(({ a, idx }) => body.appendChild(activityEl(a, idx)));
+        box.appendChild(body);
+        root.appendChild(box);
+      }
     }
 
+    function blockEl({ key, name, meta, conditions, questionIdx }) {
+      const block = document.createElement('div');
+      block.className = 'block';
+
+      const total = conditions.reduce((sum, c) => sum + activitiesFor(c.trigger).length, 0);
+      const editingInside = EDITING && (
+        (EDITING.kind === 'activity-new' && conditions.some(c => anchorKey(c.trigger) === EDITING.anchor)) ||
+        (EDITING.kind === 'activity' && conditions.some(c => triggerMatches(CONFIG.activities[EDITING.idx].trigger, c.trigger)))
+      );
+      const open = EXPANDED.has(key) || editingInside;
+
+      const head = document.createElement('div');
+      head.className = 'block-head';
+      head.innerHTML = `
+        <span class="block-chevron ${open ? 'open' : ''}">▶</span>
+        <div class="block-title">
+          <div class="block-name">${esc(name)}</div>
+          <div class="block-meta">${esc(meta)}</div>
+        </div>
+        <span class="block-count ${total === 0 ? 'zero' : ''}">${total === 0 ? 'none' : plural(total, 'activity').replace('activitys', 'activities')}</span>`;
+      head.onclick = () => toggleExpand(key);
+
+      if (questionIdx !== undefined) {
+        const actions = document.createElement('div');
+        actions.className = 'block-actions';
+        const edit = document.createElement('button');
+        edit.className = 'btn-ghost';
+        edit.textContent = 'Edit question';
+        edit.onclick = (e) => { e.stopPropagation(); EDITING = { kind: 'question', idx: questionIdx }; renderAdmin(); };
+        const del = document.createElement('button');
+        del.className = 'btn-ghost';
+        del.textContent = 'Delete';
+        del.onclick = (e) => { e.stopPropagation(); deleteQuestion(questionIdx); };
+        actions.appendChild(edit);
+        actions.appendChild(del);
+        head.appendChild(actions);
+      }
+      block.appendChild(head);
+
+      if (!open) return block;
+
+      const body = document.createElement('div');
+      body.className = 'block-body';
+      if (questionIdx === undefined) body.style.paddingLeft = '18px';
+
+      conditions.forEach(cond => {
+        const wrap = document.createElement('div');
+        wrap.className = 'cond';
+        const matches = activitiesFor(cond.trigger);
+
+        if (cond.label) {
+          const h = document.createElement('div');
+          h.className = 'cond-head';
+          h.textContent = cond.label;
+          wrap.appendChild(h);
+        }
+        if (!matches.length) {
+          const empty = document.createElement('div');
+          empty.className = 'cond-empty';
+          empty.textContent = 'No activities yet.';
+          wrap.appendChild(empty);
+        }
+        matches.forEach(({ a, idx }) => {
+          wrap.appendChild(activityEl(a, idx));
+          if (EDITING && EDITING.kind === 'activity' && EDITING.idx === idx) {
+            const slot = document.createElement('div');
+            wrap.appendChild(slot);
+            renderActivityForm(slot, idx, a.trigger);
+          }
+        });
+
+        const add = document.createElement('button');
+        add.className = 'btn-add';
+        add.textContent = '+ Add activity here';
+        add.onclick = () => {
+          EDITING = { kind: 'activity-new', trigger: cond.trigger, anchor: anchorKey(cond.trigger) };
+          renderAdmin();
+        };
+        wrap.appendChild(add);
+
+        if (EDITING && EDITING.kind === 'activity-new' && EDITING.anchor === anchorKey(cond.trigger)) {
+          const slot = document.createElement('div');
+          wrap.appendChild(slot);
+          renderActivityForm(slot, -1, EDITING.trigger);
+        }
+        body.appendChild(wrap);
+      });
+
+      block.appendChild(body);
+      return block;
+    }
+
+    function activityEl(a, idx) {
+      const row = document.createElement('div');
+      row.className = 'act';
+      const trip = a.trips ? ' · onsite trip' : '';
+      row.innerHTML = `
+        <div class="act-text">
+          <div class="act-desc">${esc(a.description)}</div>
+          <div class="act-meta">${esc(a.phase)} · ${esc(a.location)}${trip}</div>
+        </div>`;
+      const actions = document.createElement('div');
+      actions.className = 'act-actions';
+      const edit = document.createElement('button');
+      edit.className = 'btn-ghost';
+      edit.textContent = 'Edit';
+      edit.onclick = () => { EDITING = { kind: 'activity', idx }; renderAdmin(); };
+      const del = document.createElement('button');
+      del.className = 'btn-ghost';
+      del.textContent = 'Delete';
+      del.onclick = () => deleteActivity(idx);
+      actions.appendChild(edit);
+      actions.appendChild(del);
+      row.appendChild(actions);
+      return row;
+    }
+  </script>
+
+  <script>
+    // ─── Question form ───
     function deleteQuestion(idx) {
-      if (!confirm(`Delete question "${CONFIG.questions[idx].label}"? Any activities tied to it will stop appearing.`)) return;
+      const q = CONFIG.questions[idx];
+      const tied = CONFIG.activities.filter(a => a.trigger && a.trigger.questionId === q.id).length;
+      const warning = tied
+        ? `\n\n${plural(tied, 'activity').replace('activitys', 'activities')} depend on it and will stop appearing until you re-point them.`
+        : '';
+      if (!confirm(`Delete question "${q.label}"?${warning}`)) return;
       CONFIG.questions.splice(idx, 1);
-      renderQuestionsList();
-      renderActivitiesList();
+      EDITING = null;
+      renderAdmin();
     }
 
-    function closeQuestionForm() {
-      document.getElementById('question-form-slot').innerHTML = '';
-    }
-
-    function openQuestionForm(idx) {
-      closeActivityForm();
+    function renderQuestionForm(slot, idx) {
       const existing = idx >= 0 ? CONFIG.questions[idx] : {
         id: null, type: 'stepper', label: '', sub: '', scopeGate: 'all',
         min: 0, max: 6, default: 0, options: [],
       };
-      const slot = document.getElementById('question-form-slot');
+      window._qfExisting = existing;
       slot.innerHTML = `
         <div class="q-card">
           <div class="field">
             <label class="field-label">Question text (what the user sees)</label>
-            <input type="text" id="qf-label" value="${(existing.label || '').replace(/"/g, '&quot;')}" placeholder="e.g. How many discovery workshops do you need?" />
+            <input type="text" id="qf-label" value="${attr(existing.label)}" placeholder="e.g. How many discovery workshops do you need?" />
           </div>
           <div class="field">
             <label class="field-label">Helper text (optional)</label>
-            <input type="text" id="qf-sub" value="${(existing.sub || '').replace(/"/g, '&quot;')}" placeholder="Extra context shown under the question" />
+            <input type="text" id="qf-sub" value="${attr(existing.sub)}" placeholder="Extra context shown under the question" />
           </div>
           <div class="field-row">
             <div class="field">
@@ -284,9 +537,8 @@
           </div>
           <div id="qf-type-fields"></div>
           <button class="btn-primary" onclick="saveQuestionForm(${idx})">Save question</button>
-          <button class="btn-ghost" onclick="closeQuestionForm()">Cancel</button>
+          <button class="btn-ghost" onclick="closeForm()">Cancel</button>
         </div>`;
-      window._qfExisting = existing;
       renderQuestionTypeFields();
       slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -316,7 +568,7 @@
           <div class="field">
             <label class="field-label">Checklist options</label>
             <div id="qf-options">${rows}</div>
-            <button class="btn-ghost" type="button" onclick="addOptionRow()">+ Add option</button>
+            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addOptionRow()">+ Add option</button>
           </div>`;
       }
     }
@@ -324,7 +576,7 @@
     function optionRowHtml(o) {
       return `
         <div class="option-row">
-          <input type="text" placeholder="Option text" value="${(o.label || '').replace(/"/g, '&quot;')}" data-role="opt-label" />
+          <input type="text" placeholder="Option text" value="${attr(o.label)}" data-role="opt-label" />
           <label><input type="checkbox" data-role="opt-default" ${o.default ? 'checked' : ''} /> checked by default</label>
           <label><input type="checkbox" data-role="opt-dfd-only" ${o.scopeGate === 'dfd' ? 'checked' : ''} /> DFD only</label>
           <button class="btn-x" type="button" onclick="this.closest('.option-row').remove()">✕</button>
@@ -339,14 +591,16 @@
       const existing = window._qfExisting;
       const label = document.getElementById('qf-label').value.trim();
       if (!label) { alert('Question text is required.'); return; }
-      const sub = document.getElementById('qf-sub').value.trim();
       const type = document.getElementById('qf-type').value;
-      const scopeGate = document.getElementById('qf-scope').value;
-
       const otherIds = CONFIG.questions.filter((q, i) => i !== idx).map(q => q.id);
       const id = existing.id || uniqueId(slugify(label), otherIds);
 
-      const updated = { id, type, label, sub, scopeGate };
+      const updated = {
+        id, type, label,
+        sub: document.getElementById('qf-sub').value.trim(),
+        scopeGate: document.getElementById('qf-scope').value,
+      };
+
       if (type === 'stepper') {
         updated.min = Number(document.getElementById('qf-min').value);
         updated.max = Number(document.getElementById('qf-max').value);
@@ -354,86 +608,70 @@
       } else if (type === 'toggle') {
         updated.default = document.getElementById('qf-default-toggle').checked;
       } else if (type === 'checklist') {
-        const rows = Array.from(document.querySelectorAll('#qf-options .option-row'));
-        updated.options = rows.map(row => {
+        const oldOptions = existing.options || [];
+        updated.options = Array.from(document.querySelectorAll('#qf-options .option-row')).map(row => {
           const optLabel = row.querySelector('[data-role="opt-label"]').value.trim();
-          const optDefault = row.querySelector('[data-role="opt-default"]').checked;
-          const optDfdOnly = row.querySelector('[data-role="opt-dfd-only"]').checked;
-          const existingOpt = existing.options && existing.options.find(o => o.label === optLabel);
-          const optId = (existingOpt && existingOpt.id) || uniqueId(slugify(optLabel), (existing.options || []).map(o => o.id));
-          return { id: optId, label: optLabel, default: optDefault, scopeGate: optDfdOnly ? 'dfd' : 'all' };
+          const existingOpt = oldOptions.find(o => o.label === optLabel);
+          return {
+            id: (existingOpt && existingOpt.id) || uniqueId(slugify(optLabel), oldOptions.map(o => o.id)),
+            label: optLabel,
+            default: row.querySelector('[data-role="opt-default"]').checked,
+            scopeGate: row.querySelector('[data-role="opt-dfd-only"]').checked ? 'dfd' : 'all',
+          };
         }).filter(o => o.label);
       }
 
       if (idx >= 0) CONFIG.questions[idx] = updated;
-      else CONFIG.questions.push(updated);
-      closeQuestionForm();
-      renderQuestionsList();
+      else { CONFIG.questions.push(updated); EXPANDED.add(`q:${id}`); }
+      EDITING = null;
+      renderAdmin();
     }
   </script>
 
   <script>
-    // ─── Activities: list + plain-language "show this when..." form ───
-    function describeTrigger(t) {
-      if (t.type === 'always') return 'Always included';
-      if (t.type === 'typeEquals') return `Only for ${t.value === 'migration' ? 'Migration' : 'New / Greenfield'} engagements`;
-      if (t.type === 'stepperGate') return `Only when "${questionLabelById(t.questionId)}" is answered with more than 0`;
-      if (t.type === 'stepperRepeat') return `Repeats once per unit of "${questionLabelById(t.questionId)}"`;
-      if (t.type === 'toggleOn') return `Only when "${questionLabelById(t.questionId)}" is turned on`;
-      if (t.type === 'checklistOption') return `Only when "${optionLabelById(t.questionId, t.optionId)}" is checked in "${questionLabelById(t.questionId)}"`;
-      if (t.type === 'checklistAny') return `Only when any option is checked in "${questionLabelById(t.questionId)}"`;
-      return 'Unknown';
-    }
-
-    function renderActivitiesList() {
-      const root = document.getElementById('activities-list');
-      root.innerHTML = '';
-      CONFIG.activities.forEach((a, idx) => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div class="list-item-text">
-            <div class="list-item-title">${a.description}</div>
-            <div class="list-item-sub">${a.phase} · ${describeTrigger(a.trigger)}</div>
-          </div>
-          <div class="list-item-actions">
-            <button class="btn-ghost" onclick="openActivityForm(${idx})">Edit</button>
-            <button class="btn-ghost" onclick="deleteActivity(${idx})">Delete</button>
-          </div>`;
-        root.appendChild(item);
-      });
-      const addBtn = document.createElement('button');
-      addBtn.className = 'btn-secondary';
-      addBtn.textContent = '+ Add activity';
-      addBtn.onclick = () => openActivityForm(-1);
-      root.appendChild(addBtn);
-    }
+    // ─── Activity form ───
+    const PHASES = ['Kickoff', 'Design', 'Staging', 'Implementation', 'Project Completion & Handover'];
 
     function deleteActivity(idx) {
       if (!confirm(`Delete activity "${CONFIG.activities[idx].description}"?`)) return;
       CONFIG.activities.splice(idx, 1);
-      renderActivitiesList();
+      EDITING = null;
+      renderAdmin();
     }
 
-    function closeActivityForm() {
-      document.getElementById('activity-form-slot').innerHTML = '';
+    function describeTrigger(t) {
+      if (!t) return 'Always included';
+      if (t.type === 'always') return 'Always included';
+      if (t.type === 'typeEquals') {
+        const ty = CONFIG.types.find(x => x.id === t.value);
+        return `Only for ${ty ? ty.name : t.value} engagements`;
+      }
+      const q = questionById(t.questionId);
+      const qName = q ? q.label : t.questionId;
+      if (t.type === 'stepperGate') return `When "${qName}" is more than zero`;
+      if (t.type === 'stepperRepeat') return `One line per unit of "${qName}"`;
+      if (t.type === 'toggleOn') return `When "${qName}" is turned on`;
+      if (t.type === 'checklistAny') return `When any option is checked in "${qName}"`;
+      if (t.type === 'checklistOption') {
+        const o = q && (q.options || []).find(o => o.id === t.optionId);
+        return `When "${o ? o.label : t.optionId}" is checked in "${qName}"`;
+      }
+      return 'Unknown condition';
     }
 
-    const PHASES = ['Kickoff', 'Design', 'Staging', 'Implementation', 'Project Completion & Handover'];
-
-    function openActivityForm(idx) {
-      closeQuestionForm();
+    function renderActivityForm(slot, idx, presetTrigger) {
       const existing = idx >= 0 ? CONFIG.activities[idx] : {
         id: null, phase: 'Implementation', description: '', skillRequired: 'Collaboration',
-        taskType: 'ArchiTech Activity', location: 'Office', trips: 0, trigger: { type: 'always' },
+        taskType: 'ArchiTech Activity', location: 'Office', trips: 0, trigger: presetTrigger,
       };
       window._afExisting = existing;
-      const slot = document.getElementById('activity-form-slot');
+      window._afTrigger = JSON.parse(JSON.stringify(existing.trigger || presetTrigger || { type: 'always' }));
+
       slot.innerHTML = `
-        <div class="q-card">
+        <div class="q-card" style="margin-top:8px;">
           <div class="field">
-            <label class="field-label">Description (use {{n}} where a count should be inserted, e.g. "Workshop {{n}} — discovery session")</label>
-            <textarea id="af-description">${(existing.description || '')}</textarea>
+            <label class="field-label">Description — use {{n}} where a count should be inserted, e.g. "Workshop {{n}} — discovery session"</label>
+            <textarea id="af-description">${esc(existing.description)}</textarea>
           </div>
           <div class="field-row">
             <div class="field">
@@ -452,102 +690,103 @@
             <input type="checkbox" id="af-onsite" ${existing.trips ? 'checked' : ''} />
             <span>Requires an onsite trip</span>
           </label>
-
           <div class="field">
-            <label class="field-label">Show this activity when...</label>
-            <div class="choice-group" id="af-trigger-group"></div>
+            <label class="field-label">Appears when</label>
+            <div class="q-sub" id="af-trigger-text" style="margin-bottom:8px;">${esc(describeTrigger(window._afTrigger))}</div>
+            <div id="af-trigger-editor"></div>
+            <button class="btn-ghost" type="button" id="af-trigger-toggle" style="margin-left:0;" onclick="toggleTriggerEditor()">Change condition</button>
           </div>
-
           <button class="btn-primary" onclick="saveActivityForm(${idx})">Save activity</button>
-          <button class="btn-ghost" onclick="closeActivityForm()">Cancel</button>
+          <button class="btn-ghost" onclick="closeForm()">Cancel</button>
         </div>`;
-      renderTriggerChoices(existing.trigger);
       slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function renderTriggerChoices(currentTrigger) {
-      const t = currentTrigger || { type: 'always' };
-      const mode = t.type === 'always' ? 'always' : t.type === 'typeEquals' ? 'type' : 'question';
-      const group = document.getElementById('af-trigger-group');
-
-      const questionOptions = CONFIG.questions.map(q => `<option value="${q.id}" ${t.questionId === q.id ? 'selected' : ''}>${q.label}</option>`).join('');
-
-      group.innerHTML = `
-        <label class="choice-row">
-          <input type="radio" name="af-mode" value="always" ${mode === 'always' ? 'checked' : ''} onchange="onTriggerModeChange()" />
-          <div class="choice-body"><div class="choice-title">Always</div></div>
-        </label>
-        <label class="choice-row">
-          <input type="radio" name="af-mode" value="type" ${mode === 'type' ? 'checked' : ''} onchange="onTriggerModeChange()" />
-          <div class="choice-body">
-            <div class="choice-title">Only for a specific engagement type</div>
-            <div class="choice-extra" id="af-type-extra" style="display:${mode === 'type' ? 'block' : 'none'};">
-              <select id="af-type-value" onchange="onTriggerModeChange()">
-                <option value="migration" ${t.value === 'migration' ? 'selected' : ''}>Migration</option>
-                <option value="new" ${t.value === 'new' ? 'selected' : ''}>New / Greenfield</option>
-              </select>
-            </div>
-          </div>
-        </label>
-        <label class="choice-row">
-          <input type="radio" name="af-mode" value="question" ${mode === 'question' ? 'checked' : ''} onchange="onTriggerModeChange()" />
-          <div class="choice-body">
-            <div class="choice-title">Based on a question's answer</div>
-            <div class="choice-extra" id="af-question-extra" style="display:${mode === 'question' ? 'block' : 'none'};">
-              <select id="af-question-id" onchange="renderQuestionConditionFields()" style="margin-bottom:10px;">
-                <option value="">Choose a question...</option>
-                ${questionOptions}
-              </select>
-              <div id="af-question-condition"></div>
-            </div>
-          </div>
-        </label>`;
-
-      if (mode === 'question' && t.questionId) {
-        renderQuestionConditionFields(t);
+    function toggleTriggerEditor() {
+      const editor = document.getElementById('af-trigger-editor');
+      const btn = document.getElementById('af-trigger-toggle');
+      if (editor.innerHTML) {
+        editor.innerHTML = '';
+        btn.textContent = 'Change condition';
+        return;
       }
+      btn.textContent = 'Keep current condition';
+      renderTriggerChoices(window._afTrigger);
+    }
+
+    function renderTriggerChoices(t) {
+      const mode = t.type === 'always' ? 'always' : t.type === 'typeEquals' ? 'type' : 'question';
+      const editor = document.getElementById('af-trigger-editor');
+      const typeOptions = CONFIG.types.map(x => `<option value="${attr(x.id)}" ${t.value === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+      const questionOptions = CONFIG.questions.map(q => `<option value="${attr(q.id)}" ${t.questionId === q.id ? 'selected' : ''}>${esc(q.label)}</option>`).join('');
+
+      editor.innerHTML = `
+        <div class="choice-group" style="margin-bottom:10px;">
+          <label class="choice-row">
+            <input type="radio" name="af-mode" value="always" ${mode === 'always' ? 'checked' : ''} onchange="onTriggerModeChange()" />
+            <div class="choice-body"><div class="choice-title">Always — every engagement</div></div>
+          </label>
+          <label class="choice-row">
+            <input type="radio" name="af-mode" value="type" ${mode === 'type' ? 'checked' : ''} onchange="onTriggerModeChange()" />
+            <div class="choice-body">
+              <div class="choice-title">Only for a specific engagement type</div>
+              <div class="choice-extra" id="af-type-extra" style="display:${mode === 'type' ? 'block' : 'none'};">
+                <select id="af-type-value">${typeOptions}</select>
+              </div>
+            </div>
+          </label>
+          <label class="choice-row">
+            <input type="radio" name="af-mode" value="question" ${mode === 'question' ? 'checked' : ''} onchange="onTriggerModeChange()" />
+            <div class="choice-body">
+              <div class="choice-title">Based on a question's answer</div>
+              <div class="choice-extra" id="af-question-extra" style="display:${mode === 'question' ? 'block' : 'none'};">
+                <select id="af-question-id" onchange="renderQuestionConditionFields()" style="margin-bottom:10px;">
+                  <option value="">Choose a question...</option>
+                  ${questionOptions}
+                </select>
+                <div id="af-question-condition"></div>
+              </div>
+            </div>
+          </label>
+        </div>`;
+
+      if (mode === 'question' && t.questionId) renderQuestionConditionFields(t);
     }
 
     function onTriggerModeChange() {
       const mode = document.querySelector('input[name="af-mode"]:checked').value;
       document.getElementById('af-type-extra').style.display = mode === 'type' ? 'block' : 'none';
       document.getElementById('af-question-extra').style.display = mode === 'question' ? 'block' : 'none';
-      if (mode === 'question' && !document.getElementById('af-question-condition').innerHTML) {
-        renderQuestionConditionFields();
-      }
+      if (mode === 'question' && !document.getElementById('af-question-condition').innerHTML) renderQuestionConditionFields();
     }
 
     function renderQuestionConditionFields(existingTrigger) {
       const qid = document.getElementById('af-question-id').value;
       const container = document.getElementById('af-question-condition');
       if (!qid) { container.innerHTML = ''; return; }
-      const q = CONFIG.questions.find(q => q.id === qid);
+      const q = questionById(qid);
       const t = existingTrigger && existingTrigger.questionId === qid ? existingTrigger : null;
 
       if (q.type === 'toggle') {
-        container.innerHTML = `<div class="q-sub">Fires when "${q.label}" is turned on.</div>`;
+        container.innerHTML = `<div class="q-sub">Included whenever "${esc(q.label)}" is turned on.</div>`;
       } else if (q.type === 'stepper') {
         const repeat = t && t.type === 'stepperRepeat';
         container.innerHTML = `
           <div class="choice-group">
             <label class="choice-row">
               <input type="radio" name="af-stepper-mode" value="gate" ${!repeat ? 'checked' : ''} />
-              <div class="choice-body"><div class="choice-title">Include once, if the answer is more than 0</div></div>
+              <div class="choice-body"><div class="choice-title">Include once, if the answer is more than zero</div></div>
             </label>
             <label class="choice-row">
               <input type="radio" name="af-stepper-mode" value="repeat" ${repeat ? 'checked' : ''} />
-              <div class="choice-body"><div class="choice-title">Repeat once per unit answered (e.g. one line per workshop)</div></div>
+              <div class="choice-body"><div class="choice-title">Repeat once per unit answered (one line per workshop, domain, etc)</div></div>
             </label>
           </div>`;
       } else if (q.type === 'checklist') {
-        const specific = t && t.type === 'checklistOption';
-        const optionChoices = (q.options || []).map(o => `<option value="${o.id}" ${t && t.optionId === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
+        const specific = !t || t.type === 'checklistOption';
+        const optionChoices = (q.options || []).map(o => `<option value="${attr(o.id)}" ${t && t.optionId === o.id ? 'selected' : ''}>${esc(o.label)}</option>`).join('');
         container.innerHTML = `
           <div class="choice-group">
-            <label class="choice-row">
-              <input type="radio" name="af-checklist-mode" value="any" ${!specific ? 'checked' : ''} onchange="toggleChecklistOptionPicker()" />
-              <div class="choice-body"><div class="choice-title">When any option is checked</div></div>
-            </label>
             <label class="choice-row">
               <input type="radio" name="af-checklist-mode" value="specific" ${specific ? 'checked' : ''} onchange="toggleChecklistOptionPicker()" />
               <div class="choice-body">
@@ -556,6 +795,10 @@
                   <select id="af-checklist-option-id">${optionChoices}</select>
                 </div>
               </div>
+            </label>
+            <label class="choice-row">
+              <input type="radio" name="af-checklist-mode" value="any" ${!specific ? 'checked' : ''} onchange="toggleChecklistOptionPicker()" />
+              <div class="choice-body"><div class="choice-title">When any option is checked</div></div>
             </label>
           </div>`;
       }
@@ -567,45 +810,50 @@
     }
 
     function buildTriggerFromForm() {
+      // Editor never opened — keep whatever the activity already had (or the preset).
+      if (!document.getElementById('af-trigger-editor').innerHTML) return window._afTrigger;
+
       const mode = document.querySelector('input[name="af-mode"]:checked').value;
       if (mode === 'always') return { type: 'always' };
       if (mode === 'type') return { type: 'typeEquals', value: document.getElementById('af-type-value').value };
 
       const questionId = document.getElementById('af-question-id').value;
-      if (!questionId) return { type: 'always' };
-      const q = CONFIG.questions.find(q => q.id === questionId);
+      if (!questionId) return window._afTrigger;
+      const q = questionById(questionId);
       if (q.type === 'toggle') return { type: 'toggleOn', questionId };
       if (q.type === 'stepper') {
         const stepperMode = document.querySelector('input[name="af-stepper-mode"]:checked').value;
         return { type: stepperMode === 'repeat' ? 'stepperRepeat' : 'stepperGate', questionId };
       }
-      if (q.type === 'checklist') {
-        const checklistMode = document.querySelector('input[name="af-checklist-mode"]:checked').value;
-        if (checklistMode === 'specific') {
-          return { type: 'checklistOption', questionId, optionId: document.getElementById('af-checklist-option-id').value };
-        }
-        return { type: 'checklistAny', questionId };
+      const checklistMode = document.querySelector('input[name="af-checklist-mode"]:checked').value;
+      if (checklistMode === 'specific') {
+        return { type: 'checklistOption', questionId, optionId: document.getElementById('af-checklist-option-id').value };
       }
-      return { type: 'always' };
+      return { type: 'checklistAny', questionId };
     }
 
     function saveActivityForm(idx) {
       const existing = window._afExisting;
       const description = document.getElementById('af-description').value.trim();
       if (!description) { alert('Description is required.'); return; }
-      const phase = document.getElementById('af-phase').value;
-      const location = document.getElementById('af-location').value;
-      const trips = document.getElementById('af-onsite').checked ? 1 : 0;
       const trigger = buildTriggerFromForm();
-
       const otherIds = CONFIG.activities.filter((a, i) => i !== idx).map(a => a.id);
-      const id = existing.id || uniqueId(slugify(description), otherIds);
 
-      const updated = { id, phase, description, skillRequired: 'Collaboration', taskType: 'ArchiTech Activity', location, trips, trigger };
+      const updated = {
+        id: existing.id || uniqueId(slugify(description), otherIds),
+        phase: document.getElementById('af-phase').value,
+        description,
+        skillRequired: 'Collaboration',
+        taskType: 'ArchiTech Activity',
+        location: document.getElementById('af-location').value,
+        trips: document.getElementById('af-onsite').checked ? 1 : 0,
+        trigger,
+      };
+
       if (idx >= 0) CONFIG.activities[idx] = updated;
       else CONFIG.activities.push(updated);
-      closeActivityForm();
-      renderActivitiesList();
+      EDITING = null;
+      renderAdmin();
     }
   </script>
 
