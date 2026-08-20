@@ -186,7 +186,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.2.0';
+    const ADMIN_VERSION = '0.3.0';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -557,12 +557,6 @@
       if (t.skill) meta.push(t.skill);
       if (t.taskType && t.taskType !== "ArchiTech Activity") meta.push(t.taskType);
       meta.push(describeEffort(t));
-      const trips = amountAt(t.trips);
-      if (trips) meta.push(trips + " round trip" + (trips === 1 ? "" : "s"));
-      if (amountAt(t.stays)) meta.push(amountAt(t.stays) + " overnight");
-      if (amountAt(t.documents)) meta.push(amountAt(t.documents) + " document");
-      if (amountAt(t.clientEffort)) meta.push(amountAt(t.clientEffort) + "h client");
-      if (amountAt(t.subcontractorEffort)) meta.push(amountAt(t.subcontractorEffort) + "h subcontractor");
       if (t.repeatPer) {
         const inp = inputById(t.repeatPer);
         meta.push("one line per " + (inp ? tokenOf(inp) : t.repeatPer));
@@ -732,8 +726,7 @@
         (t.showWhen && t.showWhen.input === inp.id) ||
         t.repeatPer === inp.id ||
         String(t.description).includes("{" + tokenOf(inp) + "}") ||
-        [t.trips, t.stays, t.documents, t.clientEffort, t.subcontractorEffort]
-          .concat((t.effort || []).flatMap(e => [e.business, e.after]))
+        (t.effort || []).flatMap(e => [e.business, e.after])
           .some(a => a && typeof a === "object" && (a.per || []).some(p => p.input === inp.id))      ).length;
       const warn = usedBy ? `\n\n${count(usedBy, 'task', 'tasks')} reference it and will break until you fix them.` : '';
       if (!confirm(`Delete "${inp.label}"?${warn}`)) return;
@@ -906,13 +899,6 @@
       renderAdmin();
     }
 
-    const COUNT_FIELDS = [
-      { key: 'stays', label: 'Overnight stays' },
-      { key: 'documents', label: 'Finished document outputs' },
-      { key: 'clientEffort', label: 'Client effort estimate (hours)' },
-      { key: 'subcontractorEffort', label: 'Subcontractor effort estimate (hours)' },
-    ];
-
     // ── amount editors: a base number, optionally scaling per variable ──
     function amountEditor(prefix, amount, label) {
       const a = (amount == null) ? { base: 0 } : (typeof amount === 'number' ? { base: amount } : amount);
@@ -1031,16 +1017,6 @@
           </div>
 
           <div class="field">
-            <label class="field-label">Travel and outputs</label>
-            ${amountEditor('tf-trips', existing.trips, 'Onsite round trips')}
-            ${COUNT_FIELDS.map(c => `
-              <div class="row-editor">
-                <span class="rate-label">${esc(c.label)}</span>
-                <input type="number" step="0.25" id="tf-${c.key}" value="${typeof existing[c.key] === 'number' ? existing[c.key] : ((existing[c.key] || {}).base || 0)}" oninput="updateTaskPreview()" />
-              </div>`).join('')}
-          </div>
-
-          <div class="field">
             <label class="field-label">One line per variable (optional)</label>
             <select id="tf-repeat" onchange="updateTaskPreview()">
               <option value="">Just one line</option>
@@ -1064,7 +1040,6 @@
 
       renderChips();
       renderEffortLines();
-      renderAmountRates('tf-trips');
       renderSubflowPicker(document.getElementById('tf-subflows'), existing.subflows);
       renderCondEditor(document.getElementById('tf-cond'), existing.showWhen, { alwaysLabel: 'No extra condition' });
       updateTaskPreview();
@@ -1151,10 +1126,9 @@
         const r = (CONFIG.roles || []).find(r => r.id === roleId);
         bits.push(`${r ? r.id : roleId} ${bh}h${ah ? ' + ' + ah + 'h after' : ''}`);
       });
-      const trips = amountAtDefaults('tf-trips');
       const repeat = document.getElementById('tf-repeat').value;
-      let text = hours || trips
-        ? `At the current defaults: ${bits.join(', ') || 'no hours'} = ${round2(hours)}h per line${trips ? `, ${trips} round trip${trips === 1 ? '' : 's'}` : ''}.`
+      let text = hours
+        ? `At the current defaults: ${bits.join(', ')} = ${round2(hours)}h per line.`
         : 'At the current defaults: nothing costed yet.';
       if (repeat) {
         const inp = inputById(repeat);
@@ -1190,7 +1164,6 @@
       renderChips();
       readEffortLines();
       renderEffortLines();
-      renderAmountRates('tf-trips');
       updateTaskPreview();
     }
 
@@ -1227,13 +1200,6 @@
         description,
       };
 
-      const trips = readAmount('tf-trips');
-      if (trips !== undefined) next.trips = trips;
-      COUNT_FIELDS.forEach(c => {
-        const v = Number(document.getElementById('tf-' + c.key).value || 0);
-        if (v) next[c.key] = v;
-      });
-
       next.subflows = readSubflowPicker();
       if (repeat) next.repeatPer = repeat;
       const cond = readCondEditor();
@@ -1242,7 +1208,7 @@
       // A repeating task already emits one line per unit, so scaling a line by
       // that same unit would count the effort twice.
       const clashes = [];
-      const amounts = [trips].concat(effort.flatMap(x => [x.business, x.after]));
+      const amounts = effort.flatMap(x => [x.business, x.after]);
       amounts.forEach(a => {
         if (a && typeof a === 'object') (a.per || []).forEach(p => { if (p.input === repeat) clashes.push(p.input); });
       });
@@ -1403,10 +1369,11 @@
             <input type="text" id="ff-locations" value="${attr(f.locations.join(', '))}" />
           </div>
           <div class="field">
-            <label class="field-label">Spreadsheet columns, in paste order</label>
+            <label class="field-label">Task-detail columns, in paste order</label>
+            <div class="q-sub" style="margin-bottom:8px;">The resource hours block is fixed by the PSE and pasted separately.</div>
             <div id="ff-columns">${f.columns.map(columnRowHtml).join('')}</div>
             <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addColumnRow()">+ Add column</button>
-            <button class="btn-ghost" type="button" onclick="usePseColumns()">Reset to the standard PSE columns</button>          </div>
+            <button class="btn-ghost" type="button" onclick="usePseColumns()">Reset to the standard task columns</button>          </div>
 
           <button class="btn-primary" onclick="saveFlowForm()">Save flow</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
@@ -1456,11 +1423,12 @@
         </div>`;
     }
 
-    // Puts the flow back to the 24 columns the PSE's Input_Tasks table expects.
+    // Puts the flow back to the four task-detail columns the PSE expects at
+    // column A. The resource block is fixed by the sheet and not configurable.
     function usePseColumns() {
-      if (!confirm('Replace this flow\'s columns with the standard 24 the PSE expects?')) return;
+      if (!confirm('Replace this flow\'s columns with the standard task-detail block?')) return;
       document.getElementById('ff-columns').innerHTML =
-        (CONFIG.pseColumns || []).map(columnRowHtml).join('');
+        (CONFIG.taskColumns || []).map(columnRowHtml).join('');
     }
 
     function addColumnRow() {

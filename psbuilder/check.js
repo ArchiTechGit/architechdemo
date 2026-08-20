@@ -65,20 +65,26 @@ check('eight skills', (config.skills || []).length, 8);
 check('skills start with Collaboration', (config.skills || [])[0], 'Collaboration');
 check('four task types', config.taskTypes,
   ['ArchiTech Activity', 'Client Dependency', 'ArchiTech Subcontractor Activity', 'ArchiTech Document Deliverable']);
-check('the PSE column block is 24 wide', (config.pseColumns || []).length, 24);
-check('the PSE block starts as the sheet does', (config.pseColumns || []).slice(0, 4).map(c => c.header),
+check('the task block is the four sheet columns', (config.taskColumns || []).map(c => c.header),
   ['Phase', 'Skill Required', 'Task Type', 'Description']);
-check('the PSE block ends on the fifth resource', (config.pseColumns || []).slice(-3).map(c => c.header),
+check('the resource block covers five resources', (config.resourceColumns || []).length, 15);
+check('the resource block starts at R1', (config.resourceColumns || []).slice(0, 3).map(c => c.header),
+  ['R1 Location', 'R1 Business Hours', 'R1 After Hours']);
+check('the resource block ends at R5', (config.resourceColumns || []).slice(-3).map(c => c.header),
   ['R5 Location', 'R5 Business Hours', 'R5 After Hours']);
-
+check('the blocks paste at A and J', config.pasteTargets, { task: 'A', resource: 'J' });
+// The two blocks must not overlap, or one would overwrite the other.
+check('no field appears in both blocks',
+  (config.taskColumns || []).map(c => c.from).filter(f => (config.resourceColumns || []).some(r => r.from === f)), []);
 // ── 3. config.json is internally consistent ─────────────────────────────
 section('Config integrity');
 const COND_KEYS = ['input', 'is', 'anySelected', 'isOn', 'moreThanZero'];
 const INPUT_TYPES = ['number', 'yesno', 'checklist', 'choice'];
-const COUNT_FIELDS = ['trips', 'stays', 'documents', 'clientEffort', 'subcontractorEffort'];
-const COLUMN_FIELDS = ['phase', 'skill', 'taskType', 'description'].concat(COUNT_FIELDS);
+// The PSE derives trips, stays and documents, and client or subcontractor
+// effort is typed into the sheet, so a task must not carry any of them.
+const RETIRED_FIELDS = ['trips', 'stays', 'documents', 'clientEffort', 'subcontractorEffort'];
+const COLUMN_FIELDS = ['phase', 'skill', 'taskType', 'description'];
 for (let n = 1; n <= 5; n++) COLUMN_FIELDS.push(`r${n}Location`, `r${n}Business`, `r${n}After`);
-
 const roleIds = (config.roles || []).map(r => r.id);
 const problems = [];
 const verticalIds = config.verticals.map(v => v.id);
@@ -203,8 +209,9 @@ config.flows.forEach(f => {
       problems.push(at(`task "${t.id}" repeats per "${t.repeatPer}", which is not a variable`));
     }
 
-    COUNT_FIELDS.forEach(k => checkAmount(t[k], `task "${t.id}" ${k}`, t.repeatPer));
-
+    RETIRED_FIELDS.forEach(k => {
+      if (t[k] !== undefined) problems.push(at(`task "${t.id}" still carries "${k}", which the PSE works out itself`));
+    });
     (t.effort || []).forEach((e, n) => {
       const label = `task "${t.id}" effort ${n + 1}`;
       if (!roleIds.includes(e.role)) problems.push(at(`${label} names unknown role "${e.role}"`));
@@ -269,7 +276,6 @@ function run(f, sub, ans) {
     slots,
     count: lines.length,
     hours: Math.round(lines.reduce((n, l) => n + E.totalHours(l), 0) * 100) / 100,
-    trips: lines.reduce((n, l) => n + Number(l.trips || 0), 0),
     shown: E.inputsToShow(resolved).map(i => i.id),
     ready: E.allRequiredAnswered(resolved),
   };
@@ -285,7 +291,7 @@ check('scope unanswered: cannot generate', r.ready, false);
 // These numbers come from the original WxCC build, before any of this.
 r = run(wxcc, 'migration', { scope: 'dfd' });
 check('migration + DFD on defaults: 56 tasks', r.count, 56);
-check('migration + DFD on defaults: 2 onsite round trips', r.trips, 2);
+check('no task carries a trip count any more', r.lines.every(l => l.trips === undefined), true);
 check('migration + DFD: every input visible', r.shown.length, wxcc.inputs.length);
 check('a repeating task numbers its lines', r.lines.filter(l => /^Workshop \d/.test(l.description)).map(l => l.description), [
   'Workshop 1 — discovery session', 'Workshop 2 — discovery session',
@@ -327,7 +333,7 @@ section('Effort and the PSE columns');
 const demo = {
   id: 'demo', name: 'Spectralink Handsets', vertical: 'collaboration',
   phases: ['Design', 'Implementation'], locations: ['Office', 'Client Site'],
-  columns: JSON.parse(JSON.stringify(config.pseColumns)),
+  columns: JSON.parse(JSON.stringify(config.taskColumns)),
   subflows: [{ id: 'new-install', name: 'New Install' }, { id: 'add', name: 'Add Handsets' }],
   inputs: [
     { id: 'devices', type: 'number', token: 'number of devices', label: 'How many handsets?', default: 50, min: 1, max: 5000 },
@@ -339,7 +345,6 @@ const demo = {
       effort: [{ role: 'SE', location: 'Office', business: { base: 1, per: [{ input: 'devices', each: 0.25 }] } }] },
     { id: 'survey', phase: 'Design', skill: 'Collaboration', taskType: 'ArchiTech Activity',
       description: 'Site survey across {sites} sites', subflows: ['new-install'],
-      trips: { base: 0, per: [{ input: 'sites', each: 1 }] }, stays: 1, documents: 1,
       effort: [
         { role: 'SA', location: 'Client Site', business: { base: 4, per: [{ input: 'sites', each: 2 }] } },
         { role: 'SE', location: 'Client Site', business: { base: 2 }, after: { base: 1 } },
@@ -348,7 +353,7 @@ const demo = {
       description: 'Site {#} of {sites} — after hours cutover', subflows: 'all', repeatPer: 'sites',
       effort: [{ role: 'SSE', location: 'Office', after: { base: 3 } }] },
     { id: 'client-uat', phase: 'Implementation', skill: 'Collaboration', taskType: 'Client Dependency',
-      description: 'Client completes UAT', subflows: 'all', clientEffort: 8 },
+      description: 'Client completes UAT', subflows: 'all' },
   ],
 };
 
@@ -359,8 +364,8 @@ check('the variable reads back into the text', r.lines.find(l => l.description.s
 check('a task outside this subflow is skipped', r.lines.some(l => l.description.startsWith('Site survey')), false);
 check('add subflow: enroll + one cutover + client UAT', r.count, 3);
 check('add subflow hours: 51 business + 3 after', r.hours, 54);
-check('client effort is carried, not counted as our hours',
-  r.lines.find(l => l.taskType === 'Client Dependency').clientEffort, 8);
+check('a client dependency still lists, with no hours of ours',
+  r.lines.find(l => l.taskType === 'Client Dependency').effortLines.length, 0);
 
 r = run(demo, 'new-install', { devices: 200, sites: 3 });
 check('roles claim slots in the order they appear', r.slots, ['SE', 'SA', 'SSE']);
@@ -373,26 +378,28 @@ check('after hours stay separate from business hours',
 check('repeating per variable emits one line each',
   r.lines.filter(l => l.description.includes('cutover')).map(l => l.description),
   ['Site 1 of 3 — after hours cutover', 'Site 2 of 3 — after hours cutover', 'Site 3 of 3 — after hours cutover']);
-check('counts scale with a variable too',
-  r.lines.find(l => l.description.startsWith('Site survey')).trips, 3);
-check('stays and documents are carried',
-  [r.lines.find(l => l.description.startsWith('Site survey')).stays,
-   r.lines.find(l => l.description.startsWith('Site survey')).documents], [1, 1]);
 check('total hours: 51 + 13 + 9', r.hours, 73);
 
-// The paste must line up with the sheet, column for column.
+// Each block must line up with the columns it is pasted into.
 const survey = r.lines.find(l => l.description.startsWith('Site survey'));
-check('the row is 24 columns wide', demo.columns.length, 24);
-check('a survey row lands where the sheet expects it',
-  demo.columns.map(c => { const v = survey[c.from]; return v == null ? '' : String(v); }),
-  ['Design', 'Collaboration', 'ArchiTech Activity', 'Site survey across 3 sites',
-   '3', '1', '1', '0', '0',
-   'Client Site', '2', '1',      // R1 = SE
-   'Client Site', '10', '',      // R2 = SA
-   '', '', '',                   // R3 = SSE, unused on this row
+const cell = (cols) => cols.map(c => { const v = survey[c.from]; return v == null ? '' : String(v); });
+
+check('the task block is four columns', config.taskColumns.length, 4);
+check('a task row lands where the sheet expects it', cell(config.taskColumns),
+  ['Design', 'Collaboration', 'ArchiTech Activity', 'Site survey across 3 sites']);
+
+check('the resource block is fifteen columns', config.resourceColumns.length, 15);
+check('a resource row lands where the sheet expects it', cell(config.resourceColumns),
+  ['Client Site', '2', '1',   // R1 = SE
+   'Client Site', '10', '',  // R2 = SA
+   '', '', '',               // R3 = SSE, unused on this row
    '', '', '',
    '', '', '']);
 
+// Nothing the PSE owns may leak into either block.
+check('neither block writes a PSE-owned column',
+  config.taskColumns.concat(config.resourceColumns)
+    .filter(c => RETIRED_FIELDS.includes(c.from)), []);
 // ── 6. Admin shows every task exactly once ──────────────────────────────
 section('Admin grouping');
 const adminSrc = scripts(adminHtml).find(s => s.includes('function sectionsForFlow'));

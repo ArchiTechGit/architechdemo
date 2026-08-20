@@ -97,10 +97,15 @@
     .summary-item .summary-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
     .summary-item .summary-value { font-size: 28px; font-weight: 700; color: var(--cyan); line-height: 1; }
 
-    #estimate-output {
-      width: 100%; min-height: 420px; background: var(--surface-1); border: 1px solid var(--border);
+
+    .out-block { margin-bottom: 22px; }
+    .out-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
+    .out-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .out-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+    #out-task, #out-resource {
+      width: 100%; min-height: 200px; background: var(--surface-1); border: 1px solid var(--border);
       border-radius: 10px; color: var(--text); font-family: 'SFMono-Regular', Consolas, monospace;
-      font-size: 12.5px; line-height: 1.7; padding: 18px 20px; white-space: pre; resize: vertical;
+      font-size: 12.5px; line-height: 1.7; padding: 16px 18px; white-space: pre; resize: vertical;
     }
 
     .step { display: none; }
@@ -144,14 +149,34 @@
       <div class="summary">
         <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
         <div class="summary-item"><div class="summary-label">Hours</div><div class="summary-value" id="sum-hours">0</div></div>
-        <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
+        <div class="summary-item"><div class="summary-label">Business / After</div><div class="summary-value" id="sum-split">0 / 0</div></div>
       </div>
-      <div class="q-sub" style="margin-top:-8px;" id="output-hint"></div>
-      <textarea id="estimate-output" readonly></textarea>
-      <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
-      <button class="btn-ghost" onclick="copyEstimate()">Copy to clipboard</button>
-    </div>
+      <div class="q-sub" id="slot-hint"></div>
 
+      <div class="out-block">
+        <div class="out-head">
+          <div>
+            <div class="out-title">1 · Task details</div>
+            <div class="out-note" id="hint-task"></div>
+          </div>
+          <button class="btn-ghost" onclick="copyBlock('task')">Copy</button>
+        </div>
+        <textarea id="out-task" readonly></textarea>
+      </div>
+
+      <div class="out-block">
+        <div class="out-head">
+          <div>
+            <div class="out-title">2 · Resource hours</div>
+            <div class="out-note" id="hint-resource"></div>
+          </div>
+          <button class="btn-ghost" onclick="copyBlock('resource')">Copy</button>
+        </div>
+        <textarea id="out-resource" readonly></textarea>
+      </div>
+
+      <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
+    </div>
     <div class="footer">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <div class="footer-note">
@@ -472,11 +497,6 @@
           skill: task.skill || "",
           taskType: task.taskType || "",
           description: fillText(task.description, resolved, index),
-          trips: amountOf(task.trips, resolved),
-          stays: amountOf(task.stays, resolved),
-          documents: amountOf(task.documents, resolved),
-          clientEffort: amountOf(task.clientEffort, resolved),
-          subcontractorEffort: amountOf(task.subcontractorEffort, resolved),
           effortLines: (task.effort || []).map(e => ({
             role: e.role,
             location: e.location || task.defaultLocation || "",
@@ -484,7 +504,6 @@
             after: amountOf(e.after, resolved),
           })).filter(e => e.role && (e.business || e.after)),
         });
-
         if (task.repeatPer) {
           const n = Number(resolved[task.repeatPer] || 0);
           for (let i = 1; i <= n; i++) emit(i);
@@ -516,6 +535,18 @@
       }
       return line;
     }
+    // Each block is a tab-separated grid with its own header row, so it can be
+    // pasted straight into the column it belongs to.
+    function blockText(cols, lines) {
+      return [cols.map(c => c.header).join("\t")].concat(
+        lines.map(l => cols.map(c => {
+          if (c.constant !== undefined) return c.constant;
+          const v = l[c.from];
+          return v == null ? "" : v;
+        }).join("\t"))
+      ).join("\n");
+    }
+
     function createEstimate() {
       const resolved = resolveInputs();
       const lines = buildTasks(resolved);
@@ -524,35 +555,33 @@
       const overflow = allSlots.slice(5);
       lines.forEach(l => applySlots(l, slots));
 
-      const cols = flow.columns;
-      const rows = [cols.map(c => c.header).join("\t")];
-      let trips = 0, hours = 0;
-      lines.forEach(l => {
-        rows.push(cols.map(c => {
-          if (c.constant !== undefined) return c.constant;
-          const v = l[c.from];
-          return v == null ? "" : v;
-        }).join("\t"));
-        trips += Number(l.trips || 0);
-        hours += totalHours(l);
-      });
+      const targets = CONFIG.pasteTargets || { task: "A", resource: "J" };
+      document.getElementById("out-task").value = blockText(flow.columns, lines);
+      document.getElementById("out-resource").value = blockText(CONFIG.resourceColumns, lines);
 
-      document.getElementById("estimate-output").value = rows.join("\n");
+      let business = 0, after = 0;
+      lines.forEach(l => l.effortLines.forEach(e => { business += e.business; after += e.after; }));
+
       document.getElementById("sum-tasks").textContent = lines.length;
-      document.getElementById("sum-hours").textContent = round2(hours);
-      document.getElementById("sum-trips").textContent = round2(trips);
+      document.getElementById("sum-hours").textContent = round2(business + after);
+      document.getElementById("sum-split").textContent = round2(business) + " / " + round2(after);
 
-      // The sheet needs its resource columns set to match, so spell it out.
+      // The sheet fixes one role per resource column, so say what to set.
       const mapping = slots.length
         ? "Set the resource columns on row 41 to: " +
-          slots.map((r, i) => "R" + (i + 1) + " = " + roleName(r)).join(", ") + ". "
-        : "No effort has been costed against these tasks yet. ";
+          slots.map((r, i) => "R" + (i + 1) + " = " + roleName(r)).join(", ") + "."
+        : "No effort has been costed against these tasks, so the resource block is empty.";
       const warn = overflow.length
-        ? "Note: " + overflow.map(roleName).join(", ") +
-          " could not fit, because the sheet only has five resource columns. Their hours are not in this paste. "
+        ? " " + overflow.map(roleName).join(", ") +
+          " could not fit: the sheet only has five resource columns, and their hours are not in this paste."
         : "";
-      document.getElementById("output-hint").textContent =
-        mapping + warn + "Tab-separated with a header row: select all, copy, then paste into the first task row of Project Technical Tasks.";
+      document.getElementById("slot-hint").textContent = mapping + warn;
+
+      document.getElementById("hint-task").textContent =
+        "Paste into column " + targets.task + " of Project Technical Tasks, on the first empty task row.";
+      document.getElementById("hint-resource").textContent =
+        "Paste into column " + targets.resource + " of the same rows. The columns in between are left alone, " +
+        "because the PSE works out trips, stays and documents itself.";
 
       hide("question-section");
       show("output-section");
@@ -562,12 +591,11 @@
       show('question-section');
     }
 
-    function copyEstimate() {
-      const el = document.getElementById('estimate-output');
+    function copyBlock(which) {
+      const el = document.getElementById(which === "task" ? "out-task" : "out-resource");
       el.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
     }
-
     loadConfig().then(renderFlows);
   </script>
 </body>

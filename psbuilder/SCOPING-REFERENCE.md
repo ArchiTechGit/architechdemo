@@ -3,9 +3,9 @@
 Reference for generating a Webex Contact Centre engagement task list without opening [psbuilder/index.html](index.html).
 This covers the **Webex Contact Centre** flow only. [config.json](config.json) holds one entry per flow, and each defines its own subflows, variables, tasks, phases and columns.
 Give me the inputs below in any format, I output the same TSV table the tool produces
-It emits the 24 columns of the PSE's `Input_Tasks` table, header row included, ready to paste into the first task row of **Project Technical Tasks**.
+It emits two paste blocks for the PSE's `Input_Tasks` table: the task details at column A, and the resource hours at column J. The columns in between are left alone, because the PSE works out trips, overnight stays and document outputs itself.
 
-Every task in this flow is `Skill Required` = **Collaboration** and `Task Type` = **ArchiTech Activity**. No effort has been costed against them yet, so the resource columns come out blank.
+Every task in this flow is `Skill Required` = **Collaboration** and `Task Type` = **ArchiTech Activity**. No effort has been costed against them yet, so the resource block comes out blank.
 
 ## Inputs needed
 
@@ -100,24 +100,22 @@ several subflows shows under each of them.
 
 ### What a task carries
 
-The shape comes from the PSE's `Input_Tasks` table, so a task can fill every
-column the sheet asks a human to fill:
+A task only holds what a human has to decide. Everything else in the sheet is
+either computed by the workbook or typed in there directly.
 
-| Task field | PSE column |
-|---|---|
-| `phase` | Phase |
-| `skill` | Skill Required |
-| `taskType` | Task Type |
-| `description` | Description |
-| `trips` | Onsite Round Trips |
-| `stays` | Overnight Stays |
-| `documents` | Finished Document Outputs |
-| `clientEffort` | Client Effort Estimate |
-| `subcontractorEffort` | Subcontractor Effort Estimate |
-| `effort[]` | R1–R5 Location / Business Hours / After Hours |
+| Task field | PSE column | Block |
+|---|---|---|
+| `phase` | Phase | 1, at column A |
+| `skill` | Skill Required | 1 |
+| `taskType` | Task Type | 1 |
+| `description` | Description | 1 |
+| `effort[]` | R1-R5 Location / Business Hours / After Hours | 2, at column J |
 
-Everything from column Z onward in the sheet is computed by the workbook, so the
-builder never writes it.
+Onsite round trips, overnight stays and finished document outputs are **not**
+authored here: the sheet has its own Recommended Trips/Stays/Docs column and
+works them out. Client and subcontractor effort are typed into the sheet too.
+That is why the output comes in two blocks rather than one wide one - pasting a
+single block would write empty cells over columns the PSE owns.
 
 ### Effort and roles
 

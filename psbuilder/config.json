@@ -47,86 +47,6 @@
         {
           "header": "Description",
           "from": "description"
-        },
-        {
-          "header": "Onsite Round Trips",
-          "from": "trips"
-        },
-        {
-          "header": "Overnight Stays",
-          "from": "stays"
-        },
-        {
-          "header": "Finished Document Outputs",
-          "from": "documents"
-        },
-        {
-          "header": "Client Effort Estimate",
-          "from": "clientEffort"
-        },
-        {
-          "header": "Subcontractor Effort Estimate",
-          "from": "subcontractorEffort"
-        },
-        {
-          "header": "R1 Location",
-          "from": "r1Location"
-        },
-        {
-          "header": "R1 Business Hours",
-          "from": "r1Business"
-        },
-        {
-          "header": "R1 After Hours",
-          "from": "r1After"
-        },
-        {
-          "header": "R2 Location",
-          "from": "r2Location"
-        },
-        {
-          "header": "R2 Business Hours",
-          "from": "r2Business"
-        },
-        {
-          "header": "R2 After Hours",
-          "from": "r2After"
-        },
-        {
-          "header": "R3 Location",
-          "from": "r3Location"
-        },
-        {
-          "header": "R3 Business Hours",
-          "from": "r3Business"
-        },
-        {
-          "header": "R3 After Hours",
-          "from": "r3After"
-        },
-        {
-          "header": "R4 Location",
-          "from": "r4Location"
-        },
-        {
-          "header": "R4 Business Hours",
-          "from": "r4Business"
-        },
-        {
-          "header": "R4 After Hours",
-          "from": "r4After"
-        },
-        {
-          "header": "R5 Location",
-          "from": "r5Location"
-        },
-        {
-          "header": "R5 Business Hours",
-          "from": "r5Business"
-        },
-        {
-          "header": "R5 After Hours",
-          "from": "r5After"
         }
       ],
       "subflows": [
@@ -1097,7 +1017,6 @@
           "id": "agent-training-task",
           "phase": "Project Completion & Handover",
           "description": "Agent training (desktop, call/chat handling, wrap-up codes) — {agent-training} sessions",
-          "trips": 1,
           "subflows": "all",
           "showWhen": {
             "input": "agent-training",
@@ -1112,7 +1031,6 @@
           "id": "supervisor-training-task",
           "phase": "Project Completion & Handover",
           "description": "Supervisor training (queue monitoring, reporting)",
-          "trips": 1,
           "subflows": "all",
           "showWhen": {
             "input": "supervisor-training",
@@ -1172,7 +1090,7 @@
     "ArchiTech Subcontractor Activity",
     "ArchiTech Document Deliverable"
   ],
-  "pseColumns": [
+  "taskColumns": [
     {
       "header": "Phase",
       "from": "phase"
@@ -1188,27 +1106,9 @@
     {
       "header": "Description",
       "from": "description"
-    },
-    {
-      "header": "Onsite Round Trips",
-      "from": "trips"
-    },
-    {
-      "header": "Overnight Stays",
-      "from": "stays"
-    },
-    {
-      "header": "Finished Document Outputs",
-      "from": "documents"
-    },
-    {
-      "header": "Client Effort Estimate",
-      "from": "clientEffort"
-    },
-    {
-      "header": "Subcontractor Effort Estimate",
-      "from": "subcontractorEffort"
-    },
+    }
+  ],
+  "resourceColumns": [
     {
       "header": "R1 Location",
       "from": "r1Location"
@@ -1269,5 +1169,9 @@
       "header": "R5 After Hours",
       "from": "r5After"
     }
-  ]
+  ],
+  "pasteTargets": {
+    "task": "A",
+    "resource": "J"
+  }
 }
