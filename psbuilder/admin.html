@@ -26,7 +26,7 @@
     }
 
     body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
-    .page { max-width: 820px; margin: 0 auto; padding: 48px 24px 100px; }
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 100px; }
 
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
     .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
@@ -34,7 +34,7 @@
     .header a:hover { color: var(--text); }
 
     .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
-    .page-desc  { font-size: 14.5px; color: var(--muted); line-height: 1.75; margin-bottom: 26px; max-width: 680px; }
+    .page-desc  { font-size: 14.5px; color: var(--muted); line-height: 1.75; margin-bottom: 26px; max-width: 700px; }
 
     .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
 
@@ -62,6 +62,13 @@
       width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
     .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
+    .chip { display: inline-block; background: var(--cyan-dim); border: 1px solid var(--cyan-mid); color: var(--cyan);
+      font-size: 11.5px; font-family: 'SFMono-Regular', Consolas, monospace; padding: 4px 9px; border-radius: 20px;
+      cursor: pointer; margin: 0 6px 6px 0; }
+    .chip:hover { background: var(--cyan-mid); }
+    .chip.plain { background: transparent; border-style: dashed; color: var(--muted); }
+    .chip.plain:hover { color: var(--cyan); border-color: var(--cyan-mid); background: transparent; }
+
     input[type="password"], input[type="text"], input[type="number"], select, textarea {
       width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
       background: var(--surface-1); color: var(--text); font-family: var(--font); font-size: 13.5px;
@@ -83,16 +90,18 @@
 
     .row-editor { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .row-editor input[type="text"] { flex: 1; }
-    .row-editor select { flex: 0 0 150px; }
+    .row-editor input[type="number"] { flex: 0 0 90px; }
+    .row-editor select { flex: 0 0 170px; }
     .row-editor label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
     .row-editor label input { width: auto; }
+    .row-editor .rate-label { flex: 1; font-size: 12.5px; color: var(--muted); }
 
-    .checkbox-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px; }
     .checkbox-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; }
     .checkbox-row span { font-size: 13px; }
 
-    .vbar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-    .vbar select { flex: 1; }
+    .fbar { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .fbar select { flex: 1; }
 
     .block { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); overflow: hidden; }
     .block-head { display: flex; align-items: center; gap: 12px; padding: 15px 18px; cursor: pointer; user-select: none; }
@@ -106,18 +115,14 @@
       border: 1px solid var(--cyan-mid); border-radius: 20px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap; }
     .block-count.zero { color: var(--faint); background: transparent; border-color: var(--border); }
     .block-actions { display: flex; flex-shrink: 0; }
-    .block-body { padding: 0 18px 16px 42px; }
-
-    .cond { margin-bottom: 16px; }
-    .cond:last-child { margin-bottom: 4px; }
-    .cond-head { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .cond-empty { font-size: 12.5px; color: var(--faint); font-style: italic; margin-bottom: 8px; }
+    .block-body { padding: 0 18px 16px 18px; }
 
     .act { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border);
       border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.02); }
     .act-text { flex: 1; min-width: 0; }
     .act-desc { font-size: 13px; line-height: 1.45; }
     .act-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    .act-hours { font-size: 11.5px; font-weight: 700; color: var(--cyan); flex-shrink: 0; white-space: nowrap; }
 
     .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 16px 0; margin-top: 24px;
       border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
@@ -154,15 +159,21 @@
     </div>
 
     <div id="admin-app" style="display:none;">
-      <div class="vbar">
-        <label class="field-label" style="margin:0;white-space:nowrap;">Solution</label>
-        <select id="vertical-select" onchange="switchVertical(this.value)"></select>
-        <button class="btn-ghost" onclick="openVerticalSettings()">Settings</button>
-        <button class="btn-ghost" onclick="addVertical()">+ New</button>
+      <div class="fbar">
+        <label class="field-label" style="margin:0;white-space:nowrap;">Flow</label>
+        <select id="flow-select" onchange="switchFlow(this.value)"></select>
+        <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
+        <button class="btn-ghost" onclick="openNewFlow()">+ New flow</button>
       </div>
-      <div id="vertical-settings-slot"></div>
+      <div id="flow-form-slot"></div>
       <p class="page-desc" id="admin-intro"></p>
-      <div id="admin-root"></div>
+
+      <div class="section-label">Variables and questions</div>
+      <div id="inputs-root"></div>
+      <div id="input-form-slot"></div>
+
+      <div class="section-label" style="margin-top:34px;">Tasks</div>
+      <div id="tasks-root"></div>
 
       <div class="save-bar">
         <button class="btn-primary" onclick="saveConfig()">Save to GitHub</button>
@@ -175,7 +186,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.0.1';
+    const ADMIN_VERSION = '0.1.0';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -203,7 +214,7 @@
         await fetchConfigFromGitHub();
         document.getElementById('token-gate').style.display = 'none';
         document.getElementById('admin-app').style.display = 'block';
-        activeVerticalId = (CONFIG.verticals.find(v => v.enabled !== false) || CONFIG.verticals[0]).id;
+        activeFlowId = CONFIG.flows.length ? CONFIG.flows[0].id : null;
         renderAdmin();
       } catch (e) {
         alert('Could not load config — check your token has Contents read/write on this repo. ' + e.message);
@@ -250,7 +261,7 @@
   </script>
 
   <script>
-    // ─── Helpers ───
+    // ─── Model helpers ───
     function esc(s) {
       return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
@@ -264,86 +275,94 @@
       return id;
     }
     function count(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
+    function round2(n) { return Math.round(Number(n || 0) * 100) / 100; }
 
-    // A condition reduced to a comparable string. Also the grouping key.
-    function condKey(c) {
-      if (!c || !c.question) return 'always';
-      return [
-        c.question,
-        c.is !== undefined ? 'is=' + c.is : '',
-        c.anySelected ? 'any' : '',
-        c.isOn ? 'on' : '',
-        c.moreThanZero ? 'gt0' : '',
-        c.repeatPerUnit ? 'each' : '',
-      ].filter(Boolean).join('|');
-    }
-    function condEqual(a, b) { return condKey(a) === condKey(b); }
+    let activeFlowId = null;
+    function F() { return CONFIG.flows.find(f => f.id === activeFlowId); }
+    function inputById(id) { return F().inputs.find(i => i.id === id); }
+    function tokenOf(inp) { return inp.token || inp.id; }
+    function numberInputs() { return F().inputs.filter(i => i.type === 'number'); }
 
-    let activeVerticalId = null;
-    function V() { return CONFIG.verticals.find(v => v.id === activeVerticalId); }
-    function questionById(id) { return V().questions.find(q => q.id === id); }
-
-    // Plain-language rendering of a condition, for labels and summaries.
-    function describeCond(c) {
-      if (!c || !c.question) return 'Always included';
-      const q = questionById(c.question);
-      const qName = q ? q.label : c.question;
-      if (c.is !== undefined) {
-        const o = q && (q.options || []).find(o => o.id === c.is);
-        const oName = o ? o.label : c.is;
-        return q && q.type === 'choice' ? `When "${oName}" is picked` : `When "${oName}" is ticked`;
-      }
-      if (c.anySelected) return `When anything is ticked in "${qName}"`;
-      if (c.isOn) return `When "${qName}" is on`;
-      if (c.moreThanZero) return `When "${qName}" is more than zero`;
-      if (c.repeatPerUnit) return `One line per unit of "${qName}"`;
-      return 'Unknown condition';
+    // The sections the admin lays tasks out in: one for tasks shared by every
+    // subflow, then one per subflow. A task listing several subflows shows up
+    // under each of them, which is the point of listing several.
+    function sectionsForFlow(f) {
+      return [{ id: 'all', name: 'All subflows', shared: true }]
+        .concat(f.subflows.map(s => ({ id: s.id, name: s.name, note: s.note })));
     }
 
-    // Every condition slot a question exposes, in display order.
-    function condsForQuestion(q) {
-      const perOption = (q.options || []).map(o => ({
-        label: q.type === 'choice' ? `When picked: ${o.label}` : `When ticked: ${o.label}`,
-        cond: { question: q.id, is: o.id },
-      }));
-      if (q.type === 'choice') return perOption;
-      if (q.type === 'checklist') {
-        return perOption.concat([{ label: 'When anything is ticked', cond: { question: q.id, anySelected: true } }]);
-      }
-      if (q.type === 'yesno') return [{ label: 'When on', cond: { question: q.id, isOn: true } }];
-      if (q.type === 'number') {
-        return [
-          { label: 'When more than zero', cond: { question: q.id, moreThanZero: true } },
-          { label: 'One line per unit answered', cond: { question: q.id, repeatPerUnit: true } },
-        ];
-      }
-      return [];
+    function tasksIn(section) {
+      return F().tasks.map((t, idx) => ({ t, idx })).filter(({ t }) => {
+        const m = t.subflows;
+        if (section.shared) return m === undefined || m === 'all';
+        return Array.isArray(m) && m.includes(section.id);
+      });
     }
 
-    function activitiesFor(cond) {
-      return V().activities.map((a, idx) => ({ a, idx })).filter(({ a }) => condEqual(a.showWhen, cond));
-    }
-
-    // Activities pointing at a question or option that no longer exists.
-    function orphanActivities() {
-      return V().activities.map((a, idx) => ({ a, idx })).filter(({ a }) => {
-        const c = a.showWhen;
-        if (!c || !c.question) return false;
-        const q = questionById(c.question);
-        if (!q) return true;
-        if (c.is !== undefined) return !(q.options || []).some(o => o.id === c.is);
+    // Tasks that can never appear: they name a subflow, input or option that is
+    // no longer there.
+    function orphanTasks() {
+      const f = F();
+      const subIds = f.subflows.map(s => s.id);
+      return f.tasks.map((t, idx) => ({ t, idx })).filter(({ t }) => {
+        const m = t.subflows;
+        if (Array.isArray(m) && !m.some(id => subIds.includes(id))) return true;
+        if (t.repeatPer && !f.inputs.some(i => i.id === t.repeatPer && i.type === 'number')) return true;
+        const c = t.showWhen;
+        if (!c || !c.input) return false;
+        const inp = f.inputs.find(i => i.id === c.input);
+        if (!inp) return true;
+        if (c.is !== undefined) return !(inp.options || []).some(o => o.id === c.is);
         return false;
       });
     }
 
-    const TYPE_NAMES = { choice: 'Pick one', checklist: 'Tick any', number: 'Number', yesno: 'Yes / No' };
+    const TYPE_NAMES = { number: 'Variable (number)', yesno: 'Yes / No', checklist: 'Tick any', choice: 'Pick one' };
+
+    function describeCond(c) {
+      if (!c || !c.input) return null;
+      const inp = inputById(c.input);
+      const name = inp ? inp.label : c.input;
+      if (c.is !== undefined) {
+        const o = inp && (inp.options || []).find(o => o.id === c.is);
+        return `only when "${o ? o.label : c.is}" is chosen`;
+      }
+      if (c.anySelected) return `only when anything is ticked in "${name}"`;
+      if (c.isOn) return `only when "${name}" is on`;
+      if (c.moreThanZero) return `only when "${name}" is above zero`;
+      return 'unknown condition';
+    }
+
+    // Hours at the flow's default answers, so authoring shows a real number.
+    function hoursAtDefaults(task) {
+      const h = task.hours || {};
+      let total = Number(h.base || 0);
+      (h.per || []).forEach(p => {
+        const inp = inputById(p.input);
+        const dflt = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
+        total += Number(dflt) * Number(p.hours || 0);
+      });
+      return round2(total);
+    }
+
+    function describeHours(task) {
+      const h = task.hours || {};
+      const bits = [];
+      if (h.base) bits.push(`${h.base}h base`);
+      (h.per || []).forEach(p => {
+        const inp = inputById(p.input);
+        bits.push(`${p.hours}h per ${inp ? tokenOf(inp) : p.input}`);
+      });
+      if (!bits.length) return 'no hours set';
+      return bits.join(' + ');
+    }
   </script>
 
   <script>
     // ─── Render ───
     // EDITING says which inline form is open so a full re-render restores it.
-    //   { kind:'question', idx }                 { kind:'vertical' }
-    //   { kind:'activity', idx }                 { kind:'activity-new', cond, anchor }
+    //   { kind:'flow' } { kind:'new-flow' } { kind:'input', idx }
+    //   { kind:'task', idx } { kind:'task-new', section }
     let EDITING = null;
     const EXPANDED = new Set();
 
@@ -352,82 +371,167 @@
       if (EXPANDED.has(key)) EXPANDED.delete(key); else EXPANDED.add(key);
       renderAdmin();
     }
-
-    function switchVertical(id) { activeVerticalId = id; EDITING = null; EXPANDED.clear(); renderAdmin(); }
+    function switchFlow(id) { activeFlowId = id; EDITING = null; EXPANDED.clear(); renderAdmin(); }
 
     function renderAdmin() {
-      const sel = document.getElementById('vertical-select');
-      sel.innerHTML = CONFIG.verticals.map(v =>
-        `<option value="${attr(v.id)}" ${v.id === activeVerticalId ? 'selected' : ''}>${esc(v.name)}${v.enabled === false ? ' (hidden)' : ''}</option>`
-      ).join('');
+      const sel = document.getElementById('flow-select');
+      sel.innerHTML = CONFIG.verticals.map(v => {
+        const flows = CONFIG.flows.filter(f => f.vertical === v.id);
+        if (!flows.length) return '';
+        return `<optgroup label="${attr(v.name)}">` + flows.map(f =>
+          `<option value="${attr(f.id)}" ${f.id === activeFlowId ? 'selected' : ''}>${esc(f.name)}${f.enabled === false ? ' (hidden)' : ''}</option>`
+        ).join('') + '</optgroup>';
+      }).join('');
 
-      const v = V();
-      document.getElementById('admin-intro').textContent =
-        `${count(v.activities.length, 'activity', 'activities')} driven by ${count(v.questions.length, 'question', 'questions')}. ` +
-        `Everything is grouped by what makes it appear — expand a group to see or change what it pulls in.`;
+      const fslot = document.getElementById('flow-form-slot');
+      fslot.innerHTML = '';
+      if (EDITING && EDITING.kind === 'new-flow') { renderNewFlowForm(fslot); return renderRest(true); }
+      if (EDITING && EDITING.kind === 'flow') renderFlowForm(fslot);
+      renderRest(false);
+    }
 
-      const vslot = document.getElementById('vertical-settings-slot');
-      vslot.innerHTML = '';
-      if (EDITING && EDITING.kind === 'vertical') renderVerticalForm(vslot);
+    function renderRest(hideRest) {
+      const f = F();
+      const intro = document.getElementById('admin-intro');
+      const inputsRoot = document.getElementById('inputs-root');
+      const tasksRoot = document.getElementById('tasks-root');
+      const inputSlot = document.getElementById('input-form-slot');
+      inputsRoot.innerHTML = '';
+      tasksRoot.innerHTML = '';
+      inputSlot.innerHTML = '';
 
-      const root = document.getElementById('admin-root');
-      root.innerHTML = '';
+      if (hideRest || !f) { intro.textContent = ''; return; }
 
-      root.appendChild(blockEl({
-        key: `${v.id}:always`,
-        name: 'Always included',
-        meta: 'Every estimate for this solution gets these — no question asked.',
-        conds: [{ label: null, cond: null }],
-      }));
+      const vertical = CONFIG.verticals.find(v => v.id === f.vertical);
+      intro.textContent =
+        `${f.name} sits under ${vertical ? vertical.name : f.vertical} and has ` +
+        `${count(f.subflows.length, 'subflow', 'subflows')}, ` +
+        `${count(f.inputs.length, 'input', 'inputs')} and ` +
+        `${count(f.tasks.length, 'task', 'tasks')}. ` +
+        `Tasks are grouped by the subflows they belong to.`;
 
-      const qHeading = document.createElement('div');
-      qHeading.className = 'section-label';
-      qHeading.style.marginTop = '32px';
-      qHeading.textContent = 'Driven by a question';
-      root.appendChild(qHeading);
+      renderInputs(inputsRoot);
+      if (EDITING && EDITING.kind === 'input') renderInputForm(inputSlot, EDITING.idx);
+      renderTaskSections(tasksRoot);
+    }
 
-      v.questions.forEach((q, qIdx) => {
-        const gate = q.showWhen ? ` · only ${describeCond(q.showWhen).replace(/^When /, 'when ')}` : '';
-        root.appendChild(blockEl({
-          key: `${v.id}:q:${q.id}`,
-          name: q.label,
-          meta: `${TYPE_NAMES[q.type] || q.type}${q.display === 'cards' ? ' · shown as big cards' : ''}${gate}`,
-          conds: condsForQuestion(q),
-          questionIdx: qIdx,
-        }));
+    function renderInputs(root) {
+      const f = F();
+      f.inputs.forEach((inp, idx) => {
+        const gate = describeCond(inp.showWhen);
+        const scope = Array.isArray(inp.subflows)
+          ? ' · ' + inp.subflows.map(id => (f.subflows.find(s => s.id === id) || {}).name || id).join(', ') + ' only'
+          : '';
+        const bits = [TYPE_NAMES[inp.type] || inp.type];
+        if (inp.type === 'number') bits.push('{' + tokenOf(inp) + '}');
+        if (gate) bits.push(gate);
+        const row = document.createElement('div');
+        row.className = 'act';
+        row.innerHTML = `
+          <div class="act-text">
+            <div class="act-desc">${esc(inp.label)}</div>
+            <div class="act-meta">${esc(bits.join(' · ') + scope)}</div>
+          </div>`;
+        const actions = document.createElement('div');
+        actions.className = 'block-actions';
+        const edit = document.createElement('button');
+        edit.className = 'btn-ghost';
+        edit.textContent = 'Edit';
+        edit.onclick = () => { EDITING = { kind: 'input', idx }; renderAdmin(); };
+        const del = document.createElement('button');
+        del.className = 'btn-ghost';
+        del.textContent = 'Delete';
+        del.onclick = () => deleteInput(idx);
+        actions.append(edit, del);
+        row.appendChild(actions);
+        root.appendChild(row);
+      });
+      const add = document.createElement('button');
+      add.className = 'btn-secondary';
+      add.textContent = '+ Add variable or question';
+      add.onclick = () => { EDITING = { kind: 'input', idx: -1 }; renderAdmin(); };
+      root.appendChild(add);
+    }
+
+    function renderTaskSections(root) {
+      const f = F();
+      sectionsForFlow(f).forEach(section => {
+        const key = `${f.id}:sec:${section.id}`;
+        const matches = tasksIn(section);
+        const editingInside = EDITING && (
+          (EDITING.kind === 'task-new' && EDITING.section === section.id) ||
+          (EDITING.kind === 'task' && matches.some(m => m.idx === EDITING.idx))
+        );
+        const open = EXPANDED.has(key) || editingInside;
+        const hours = round2(matches.reduce((n, m) => n + hoursAtDefaults(m.t), 0));
+
+        const block = document.createElement('div');
+        block.className = 'block';
+        const head = document.createElement('div');
+        head.className = 'block-head';
+        head.innerHTML = `
+          <span class="block-chevron ${open ? 'open' : ''}">&#9654;</span>
+          <div class="block-title">
+            <div class="block-name">${esc(section.name)}</div>
+            <div class="block-meta">${section.shared
+              ? 'Included in every subflow'
+              : esc(section.note || 'Only this subflow') + ' · plus everything in All subflows'}</div>
+          </div>
+          <span class="block-count ${matches.length === 0 ? 'zero' : ''}">${matches.length === 0 ? 'none' : count(matches.length, 'task', 'tasks') + (hours ? ` · ${hours}h` : '')}</span>`;
+        head.onclick = () => toggleExpand(key);
+        block.appendChild(head);
+
+        if (open) {
+          const body = document.createElement('div');
+          body.className = 'block-body';
+          matches.forEach(({ t, idx }) => {
+            body.appendChild(taskEl(t, idx));
+            if (EDITING && EDITING.kind === 'task' && EDITING.idx === idx) {
+              const slot = document.createElement('div');
+              body.appendChild(slot);
+              renderTaskForm(slot, idx, section);
+            }
+          });
+          if (!matches.length) {
+            const empty = document.createElement('div');
+            empty.className = 'q-sub';
+            empty.style.cssText = 'font-style:italic;margin-bottom:8px;color:var(--faint);';
+            empty.textContent = 'No tasks yet.';
+            body.appendChild(empty);
+          }
+          const add = document.createElement('button');
+          add.className = 'btn-add';
+          add.textContent = '+ Add task here';
+          add.onclick = () => { EDITING = { kind: 'task-new', section: section.id }; renderAdmin(); };
+          body.appendChild(add);
+          if (EDITING && EDITING.kind === 'task-new' && EDITING.section === section.id) {
+            const slot = document.createElement('div');
+            body.appendChild(slot);
+            renderTaskForm(slot, -1, section);
+          }
+          block.appendChild(body);
+        }
+        root.appendChild(block);
       });
 
-      const addQ = document.createElement('button');
-      addQ.className = 'btn-secondary';
-      addQ.textContent = '+ Add question';
-      addQ.onclick = () => { EDITING = { kind: 'question', idx: -1 }; renderAdmin(); };
-      root.appendChild(addQ);
-
-      if (EDITING && EDITING.kind === 'question') {
-        const slot = document.createElement('div');
-        slot.style.marginTop = '12px';
-        root.appendChild(slot);
-        renderQuestionForm(slot, EDITING.idx);
-      }
-
-      const orphans = orphanActivities();
+      const orphans = orphanTasks();
       if (orphans.length) {
         const warn = document.createElement('div');
         warn.className = 'section-label';
-        warn.style.cssText = 'margin-top:32px;color:var(--amber);';
+        warn.style.cssText = 'margin-top:30px;color:var(--amber);';
         warn.textContent = 'Not connected to anything — these will never appear';
         root.appendChild(warn);
         const box = document.createElement('div');
         box.className = 'block';
         const body = document.createElement('div');
         body.className = 'block-body';
-        body.style.padding = '16px 18px';
-        orphans.forEach(({ a, idx }) => {
-          body.appendChild(activityEl(a, idx));
-          if (EDITING && EDITING.kind === 'activity' && EDITING.idx === idx) {
+        body.style.paddingTop = '16px';
+        orphans.forEach(({ t, idx }) => {
+          body.appendChild(taskEl(t, idx));
+          if (EDITING && EDITING.kind === 'task' && EDITING.idx === idx) {
             const slot = document.createElement('div');
             body.appendChild(slot);
-            renderActivityForm(slot, idx, a.showWhen);
+            renderTaskForm(slot, idx, { id: 'all', name: 'All subflows', shared: true });
           }
         });
         box.appendChild(body);
@@ -435,114 +539,38 @@
       }
     }
 
-    function blockEl({ key, name, meta, conds, questionIdx }) {
-      const block = document.createElement('div');
-      block.className = 'block';
-
-      const total = conds.reduce((n, c) => n + activitiesFor(c.cond).length, 0);
-      const editingInside = EDITING && (
-        (EDITING.kind === 'activity-new' && conds.some(c => condKey(c.cond) === EDITING.anchor)) ||
-        (EDITING.kind === 'activity' && conds.some(c => condEqual(V().activities[EDITING.idx].showWhen, c.cond)))
-      );
-      const open = EXPANDED.has(key) || editingInside;
-
-      const head = document.createElement('div');
-      head.className = 'block-head';
-      head.innerHTML = `
-        <span class="block-chevron ${open ? 'open' : ''}">&#9654;</span>
-        <div class="block-title">
-          <div class="block-name">${esc(name)}</div>
-          <div class="block-meta">${esc(meta)}</div>
-        </div>
-        <span class="block-count ${total === 0 ? 'zero' : ''}">${total === 0 ? 'none' : count(total, 'activity', 'activities')}</span>`;
-      head.onclick = () => toggleExpand(key);
-
-      if (questionIdx !== undefined) {
-        const actions = document.createElement('div');
-        actions.className = 'block-actions';
-        const edit = document.createElement('button');
-        edit.className = 'btn-ghost';
-        edit.textContent = 'Edit';
-        edit.onclick = (e) => { e.stopPropagation(); EDITING = { kind: 'question', idx: questionIdx }; renderAdmin(); };
-        const del = document.createElement('button');
-        del.className = 'btn-ghost';
-        del.textContent = 'Delete';
-        del.onclick = (e) => { e.stopPropagation(); deleteQuestion(questionIdx); };
-        actions.append(edit, del);
-        head.appendChild(actions);
-      }
-      block.appendChild(head);
-      if (!open) return block;
-
-      const body = document.createElement('div');
-      body.className = 'block-body';
-      if (questionIdx === undefined) body.style.paddingLeft = '18px';
-
-      conds.forEach(c => {
-        const wrap = document.createElement('div');
-        wrap.className = 'cond';
-        const matches = activitiesFor(c.cond);
-
-        if (c.label) {
-          const h = document.createElement('div');
-          h.className = 'cond-head';
-          h.textContent = c.label;
-          wrap.appendChild(h);
-        }
-        if (!matches.length) {
-          const empty = document.createElement('div');
-          empty.className = 'cond-empty';
-          empty.textContent = 'No activities yet.';
-          wrap.appendChild(empty);
-        }
-        matches.forEach(({ a, idx }) => {
-          wrap.appendChild(activityEl(a, idx));
-          if (EDITING && EDITING.kind === 'activity' && EDITING.idx === idx) {
-            const slot = document.createElement('div');
-            wrap.appendChild(slot);
-            renderActivityForm(slot, idx, a.showWhen);
-          }
-        });
-
-        const add = document.createElement('button');
-        add.className = 'btn-add';
-        add.textContent = '+ Add activity here';
-        add.onclick = () => {
-          EDITING = { kind: 'activity-new', cond: c.cond, anchor: condKey(c.cond) };
-          renderAdmin();
-        };
-        wrap.appendChild(add);
-
-        if (EDITING && EDITING.kind === 'activity-new' && EDITING.anchor === condKey(c.cond)) {
-          const slot = document.createElement('div');
-          wrap.appendChild(slot);
-          renderActivityForm(slot, -1, EDITING.cond);
-        }
-        body.appendChild(wrap);
-      });
-
-      block.appendChild(body);
-      return block;
-    }
-
-    function activityEl(a, idx) {
+    function taskEl(t, idx) {
+      const f = F();
       const row = document.createElement('div');
       row.className = 'act';
+      const meta = [t.phase, t.location].filter(Boolean);
+      if (t.trips) meta.push('onsite trip');
+      if (t.repeatPer) {
+        const inp = inputById(t.repeatPer);
+        meta.push('one line per ' + (inp ? tokenOf(inp) : t.repeatPer));
+      }
+      const gate = describeCond(t.showWhen);
+      if (gate) meta.push(gate);
+      if (Array.isArray(t.subflows) && t.subflows.length > 1) {
+        meta.push('shared by ' + t.subflows.length + ' subflows');
+      }
+      const hrs = hoursAtDefaults(t);
       row.innerHTML = `
         <div class="act-text">
-          <div class="act-desc">${esc(a.description)}</div>
-          <div class="act-meta">${esc(a.phase)} · ${esc(a.location || '')}${a.trips ? ' · onsite trip' : ''}</div>
-        </div>`;
+          <div class="act-desc">${esc(t.description)}</div>
+          <div class="act-meta">${esc(meta.join(' · '))}</div>
+        </div>
+        <span class="act-hours" title="${attr(describeHours(t))}">${hrs ? hrs + 'h' : '—'}</span>`;
       const actions = document.createElement('div');
       actions.className = 'block-actions';
       const edit = document.createElement('button');
       edit.className = 'btn-ghost';
       edit.textContent = 'Edit';
-      edit.onclick = () => { EDITING = { kind: 'activity', idx }; renderAdmin(); };
+      edit.onclick = () => { EDITING = { kind: 'task', idx }; renderAdmin(); };
       const del = document.createElement('button');
       del.className = 'btn-ghost';
       del.textContent = 'Delete';
-      del.onclick = () => deleteActivity(idx);
+      del.onclick = () => deleteTask(idx);
       actions.append(edit, del);
       row.appendChild(actions);
       return row;
@@ -551,39 +579,37 @@
 
   <script>
     // ─── Reusable condition editor ───
-    // Used by questions, checklist options and activities alike. `earlierOnly`
-    // limits the picker to questions above this one, so conditions cannot loop.
+    // `pool` limits the picker to inputs asked earlier, so conditions cannot loop.
     function renderCondEditor(container, cond, opts) {
       const o = opts || {};
-      const pool = o.questions || V().questions;
-      const mode = (cond && cond.question) ? 'answer' : 'always';
-      const qOptions = pool.map(q =>
-        `<option value="${attr(q.id)}" ${cond && cond.question === q.id ? 'selected' : ''}>${esc(q.label)}</option>`
+      const pool = o.inputs || F().inputs;
+      const mode = (cond && cond.input) ? 'answer' : 'always';
+      const list = pool.map(i =>
+        `<option value="${attr(i.id)}" ${cond && cond.input === i.id ? 'selected' : ''}>${esc(i.label)}</option>`
       ).join('');
 
       container.innerHTML = `
         <div class="choice-group">
           <label class="choice-row">
             <input type="radio" name="ce-mode" value="always" ${mode === 'always' ? 'checked' : ''} onchange="ceModeChange()" />
-            <div class="choice-body"><div class="choice-title">${esc(o.alwaysLabel || 'Always')}</div></div>
+            <div class="choice-body"><div class="choice-title">${esc(o.alwaysLabel || 'No extra condition')}</div></div>
           </label>
           <label class="choice-row">
             <input type="radio" name="ce-mode" value="answer" ${mode === 'answer' ? 'checked' : ''} onchange="ceModeChange()" />
             <div class="choice-body">
               <div class="choice-title">Only when an earlier answer says so</div>
               <div class="choice-extra" id="ce-answer-extra" style="display:${mode === 'answer' ? 'block' : 'none'};">
-                ${pool.length ? '' : '<div class="q-sub">No earlier questions to depend on yet.</div>'}
-                <select id="ce-question" onchange="ceRenderDetail()" style="margin-bottom:10px;">
-                  <option value="">Choose a question...</option>${qOptions}
+                ${pool.length ? '' : '<div class="q-sub">Nothing earlier to depend on yet.</div>'}
+                <select id="ce-input" onchange="ceRenderDetail()" style="margin-bottom:10px;">
+                  <option value="">Choose one...</option>${list}
                 </select>
                 <div id="ce-detail"></div>
               </div>
             </div>
           </label>
         </div>`;
-      window._ceAllowRepeat = !!o.allowRepeat;
       window._ceCond = cond;
-      if (mode === 'answer' && cond.question) ceRenderDetail(cond);
+      if (mode === 'answer' && cond.input) ceRenderDetail(cond);
     }
 
     function ceModeChange() {
@@ -593,46 +619,36 @@
     }
 
     function ceRenderDetail(existing) {
-      const qid = document.getElementById('ce-question').value;
+      const id = document.getElementById('ce-input').value;
       const detail = document.getElementById('ce-detail');
-      if (!qid) { detail.innerHTML = ''; return; }
-      const q = questionById(qid);
-      const c = existing && existing.question === qid ? existing : (window._ceCond && window._ceCond.question === qid ? window._ceCond : null);
+      if (!id) { detail.innerHTML = ''; return; }
+      const inp = inputById(id);
+      const c = (existing && existing.input === id) ? existing
+        : (window._ceCond && window._ceCond.input === id ? window._ceCond : null);
 
-      if (q.type === 'yesno') {
-        detail.innerHTML = `<div class="q-sub">Applies whenever "${esc(q.label)}" is switched on.</div>`;
+      if (inp.type === 'yesno') {
+        detail.innerHTML = `<div class="q-sub">Applies whenever "${esc(inp.label)}" is switched on.</div>`;
         return;
       }
-      if (q.type === 'number') {
-        const rows = [`
-          <label class="choice-row">
-            <input type="radio" name="ce-num" value="gt0" ${!(c && c.repeatPerUnit) ? 'checked' : ''} />
-            <div class="choice-body"><div class="choice-title">When the answer is more than zero</div></div>
-          </label>`];
-        if (window._ceAllowRepeat) rows.push(`
-          <label class="choice-row">
-            <input type="radio" name="ce-num" value="each" ${c && c.repeatPerUnit ? 'checked' : ''} />
-            <div class="choice-body"><div class="choice-title">Repeat once per unit answered (one line per workshop, domain, etc)</div></div>
-          </label>`);
-        detail.innerHTML = `<div class="choice-group">${rows.join('')}</div>`;
+      if (inp.type === 'number') {
+        detail.innerHTML = `<div class="q-sub">Applies whenever "${esc(inp.label)}" is above zero.</div>`;
         return;
       }
-      // choice or checklist
-      const optionList = (q.options || []).map(op =>
+      const optionList = (inp.options || []).map(op =>
         `<option value="${attr(op.id)}" ${c && c.is === op.id ? 'selected' : ''}>${esc(op.label)}</option>`
       ).join('');
       const specific = !c || c.is !== undefined;
-      const anyRow = q.type === 'checklist' ? `
-          <label class="choice-row">
-            <input type="radio" name="ce-opt" value="any" ${!specific ? 'checked' : ''} onchange="ceToggleOptionPicker()" />
-            <div class="choice-body"><div class="choice-title">When anything at all is ticked</div></div>
-          </label>` : '';
+      const anyRow = inp.type === 'checklist' ? `
+        <label class="choice-row">
+          <input type="radio" name="ce-opt" value="any" ${!specific ? 'checked' : ''} onchange="ceToggleOptionPicker()" />
+          <div class="choice-body"><div class="choice-title">When anything at all is ticked</div></div>
+        </label>` : '';
       detail.innerHTML = `
         <div class="choice-group">
           <label class="choice-row">
             <input type="radio" name="ce-opt" value="specific" ${specific ? 'checked' : ''} onchange="ceToggleOptionPicker()" />
             <div class="choice-body">
-              <div class="choice-title">${q.type === 'choice' ? 'When this option is picked' : 'When this option is ticked'}</div>
+              <div class="choice-title">When one specific option is chosen</div>
               <div class="choice-extra" id="ce-opt-extra" style="display:${specific ? 'block' : 'none'};">
                 <select id="ce-option">${optionList}</select>
               </div>
@@ -647,98 +663,129 @@
       document.getElementById('ce-opt-extra').style.display = mode === 'specific' ? 'block' : 'none';
     }
 
-    // Reads the editor back out. Returns undefined for "always".
     function readCondEditor() {
       const modeEl = document.querySelector('input[name="ce-mode"]:checked');
       if (!modeEl || modeEl.value === 'always') return undefined;
-      const qid = document.getElementById('ce-question').value;
-      if (!qid) return undefined;
-      const q = questionById(qid);
-      if (q.type === 'yesno') return { question: qid, isOn: true };
-      if (q.type === 'number') {
-        const which = document.querySelector('input[name="ce-num"]:checked');
-        return which && which.value === 'each'
-          ? { question: qid, repeatPerUnit: true }
-          : { question: qid, moreThanZero: true };
-      }
+      const id = document.getElementById('ce-input').value;
+      if (!id) return undefined;
+      const inp = inputById(id);
+      if (inp.type === 'yesno') return { input: id, isOn: true };
+      if (inp.type === 'number') return { input: id, moreThanZero: true };
       const which = document.querySelector('input[name="ce-opt"]:checked');
-      if (which && which.value === 'any') return { question: qid, anySelected: true };
-      return { question: qid, is: document.getElementById('ce-option').value };
+      if (which && which.value === 'any') return { input: id, anySelected: true };
+      return { input: id, is: document.getElementById('ce-option').value };
+    }
+
+    // ─── Subflow membership editor ───
+    function renderSubflowPicker(container, member) {
+      const f = F();
+      const all = member === undefined || member === 'all';
+      container.innerHTML = `
+        <label class="checkbox-row">
+          <input type="checkbox" id="sf-all" ${all ? 'checked' : ''} onchange="sfToggleAll()" />
+          <span>Every subflow</span>
+        </label>
+        <div id="sf-list" style="padding-left:24px;display:${all ? 'none' : 'block'};">
+          ${f.subflows.map(s => `
+            <label class="checkbox-row">
+              <input type="checkbox" data-subflow="${attr(s.id)}" ${!all && member.includes(s.id) ? 'checked' : ''} />
+              <span>${esc(s.name)}</span>
+            </label>`).join('')}
+        </div>`;
+    }
+
+    function sfToggleAll() {
+      document.getElementById('sf-list').style.display = document.getElementById('sf-all').checked ? 'none' : 'block';
+    }
+
+    function readSubflowPicker() {
+      if (document.getElementById('sf-all').checked) return 'all';
+      const picked = Array.from(document.querySelectorAll('#sf-list [data-subflow]'))
+        .filter(el => el.checked).map(el => el.dataset.subflow);
+      return picked.length ? picked : 'all';
     }
   </script>
 
   <script>
-    // ─── Question form ───
-    function deleteQuestion(idx) {
-      const v = V();
-      const q = v.questions[idx];
-      const tied = v.activities.filter(a => a.showWhen && a.showWhen.question === q.id).length;
-      const dependants = v.questions.filter(x => x.showWhen && x.showWhen.question === q.id).length;
-      let warn = '';
-      if (tied) warn += `\n\n${count(tied, 'activity', 'activities')} depend on it and will stop appearing.`;
-      if (dependants) warn += `\n${count(dependants, 'question', 'questions')} are gated on it and will always show.`;
-      if (!confirm(`Delete question "${q.label}"?${warn}`)) return;
-      v.questions.splice(idx, 1);
+    // ─── Variable / question form ───
+    function deleteInput(idx) {
+      const f = F();
+      const inp = f.inputs[idx];
+      const usedBy = f.tasks.filter(t =>
+        (t.showWhen && t.showWhen.input === inp.id) ||
+        t.repeatPer === inp.id ||
+        ((t.hours || {}).per || []).some(p => p.input === inp.id) ||
+        String(t.description).includes('{' + tokenOf(inp) + '}')
+      ).length;
+      const warn = usedBy ? `\n\n${count(usedBy, 'task', 'tasks')} reference it and will break until you fix them.` : '';
+      if (!confirm(`Delete "${inp.label}"?${warn}`)) return;
+      f.inputs.splice(idx, 1);
       EDITING = null;
       renderAdmin();
     }
 
-    function renderQuestionForm(slot, idx) {
-      const v = V();
-      const existing = idx >= 0 ? v.questions[idx] : {
-        id: null, type: 'number', label: '', help: '', min: 0, max: 6, default: 0, options: [],
+    function renderInputForm(slot, idx) {
+      const f = F();
+      const existing = idx >= 0 ? f.inputs[idx] : {
+        id: null, type: 'number', label: '', help: '', min: 0, max: 1000, default: 0, options: [],
       };
-      window._qf = existing;
-      // Only questions above this one may be depended on.
-      const pool = v.questions.slice(0, idx >= 0 ? idx : v.questions.length);
+      window._if = existing;
+      const pool = f.inputs.slice(0, idx >= 0 ? idx : f.inputs.length);
 
       slot.innerHTML = `
         <div class="q-card">
           <div class="field">
-            <label class="field-label">Question text — what the user sees</label>
-            <input type="text" id="qf-label" value="${attr(existing.label)}" placeholder="e.g. How many discovery workshops do you need?" />
+            <label class="field-label">Question text — what the user is asked</label>
+            <input type="text" id="if-label" value="${attr(existing.label)}" placeholder="e.g. How many handsets are in scope?" />
           </div>
           <div class="field">
             <label class="field-label">Helper text (optional)</label>
-            <input type="text" id="qf-help" value="${attr(existing.help)}" placeholder="Extra context shown under the question" />
+            <input type="text" id="if-help" value="${attr(existing.help)}" placeholder="Extra context shown under the question" />
           </div>
           <div class="field-row">
             <div class="field">
               <label class="field-label">Answer type</label>
-              <select id="qf-type" onchange="renderQuestionTypeFields()">
-                <option value="number" ${existing.type === 'number' ? 'selected' : ''}>Number — how many</option>
+              <select id="if-type" onchange="renderInputTypeFields()">
+                <option value="number" ${existing.type === 'number' ? 'selected' : ''}>Variable — a number you can bill against</option>
                 <option value="yesno" ${existing.type === 'yesno' ? 'selected' : ''}>Yes / No</option>
-                <option value="checklist" ${existing.type === 'checklist' ? 'selected' : ''}>Tick any — several options</option>
-                <option value="choice" ${existing.type === 'choice' ? 'selected' : ''}>Pick one — one of several</option>
+                <option value="checklist" ${existing.type === 'checklist' ? 'selected' : ''}>Tick any</option>
+                <option value="choice" ${existing.type === 'choice' ? 'selected' : ''}>Pick one</option>
               </select>
             </div>
-            <div class="field" id="qf-display-field"></div>
+            <div class="field" id="if-extra-field"></div>
           </div>
-          <div id="qf-type-fields"></div>
+          <div id="if-type-fields"></div>
           <div class="field">
-            <label class="field-label">Ask this question</label>
-            <div id="qf-cond"></div>
+            <label class="field-label">Ask it in</label>
+            <div id="if-subflows"></div>
           </div>
-          <button class="btn-primary" onclick="saveQuestionForm(${idx})">Save question</button>
+          <div class="field">
+            <label class="field-label">Ask it only if</label>
+            <div id="if-cond"></div>
+          </div>
+          <button class="btn-primary" onclick="saveInputForm(${idx})">Save</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
         </div>`;
 
-      renderQuestionTypeFields();
-      renderCondEditor(document.getElementById('qf-cond'), existing.showWhen,
-        { questions: pool, alwaysLabel: 'Always ask it', allowRepeat: false });
+      renderInputTypeFields();
+      renderSubflowPicker(document.getElementById('if-subflows'), existing.subflows);
+      renderCondEditor(document.getElementById('if-cond'), existing.showWhen,
+        { inputs: pool, alwaysLabel: 'Always ask it' });
       slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function renderQuestionTypeFields() {
-      const type = document.getElementById('qf-type').value;
-      const e = window._qf;
-      const box = document.getElementById('qf-type-fields');
-      const displayField = document.getElementById('qf-display-field');
+    function renderInputTypeFields() {
+      const type = document.getElementById('if-type').value;
+      const e = window._if;
+      const box = document.getElementById('if-type-fields');
+      const extra = document.getElementById('if-extra-field');
 
-      // "Big cards" only makes sense for a pick-one question.
-      displayField.innerHTML = type === 'choice' ? `
+      extra.innerHTML = type === 'number' ? `
+        <label class="field-label">Variable name used in task text</label>
+        <input type="text" id="if-token" value="${attr(e.token || e.id || '')}" placeholder="e.g. number of devices" />`
+        : type === 'choice' ? `
         <label class="field-label">Appearance</label>
-        <select id="qf-display">
+        <select id="if-display">
           <option value="" ${e.display !== 'cards' ? 'selected' : ''}>Normal radio list</option>
           <option value="cards" ${e.display === 'cards' ? 'selected' : ''}>Big cards (like a wizard step)</option>
         </select>` : '';
@@ -746,243 +793,489 @@
       if (type === 'number') {
         box.innerHTML = `
           <div class="field-row">
-            <div class="field"><label class="field-label">Minimum</label><input type="number" id="qf-min" value="${e.min != null ? e.min : 0}" /></div>
-            <div class="field"><label class="field-label">Maximum</label><input type="number" id="qf-max" value="${e.max != null ? e.max : 6}" /></div>
-            <div class="field"><label class="field-label">Starts at</label><input type="number" id="qf-default" value="${e.default != null ? e.default : 0}" /></div>
+            <div class="field"><label class="field-label">Minimum</label><input type="number" id="if-min" value="${e.min != null ? e.min : 0}" /></div>
+            <div class="field"><label class="field-label">Maximum</label><input type="number" id="if-max" value="${e.max != null ? e.max : 1000}" /></div>
+            <div class="field"><label class="field-label">Starts at</label><input type="number" id="if-default" value="${e.default != null ? e.default : 0}" /></div>
           </div>`;
       } else if (type === 'yesno') {
         box.innerHTML = `
           <label class="checkbox-row field">
-            <input type="checkbox" id="qf-default-toggle" ${e.default ? 'checked' : ''} />
+            <input type="checkbox" id="if-default-toggle" ${e.default ? 'checked' : ''} />
             <span>On by default</span>
           </label>`;
       } else {
-        const isChoice = type === 'choice';
-        const rows = (e.options && e.options.length ? e.options : [{ label: '' }]).map(o => optionRowHtml(o, isChoice)).join('');
+        const rows = (e.options && e.options.length ? e.options : [{ label: '' }]).map(optionRowHtml).join('');
         box.innerHTML = `
           <div class="field">
-            <label class="field-label">Options${isChoice ? ' — the user picks exactly one' : ''}</label>
-            <div id="qf-options">${rows}</div>
+            <label class="field-label">Options</label>
+            <div id="if-options">${rows}</div>
             <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addOptionRow()">+ Add option</button>
-            ${isChoice ? '<div class="q-sub" style="margin-top:8px;">Leave every option unticked below and this becomes a required step: later questions stay hidden until it is answered.</div>' : ''}
           </div>`;
       }
     }
 
-    function optionRowHtml(o, isChoice) {
-      const gated = o.showWhen ? ' · gated' : '';
+    function optionRowHtml(o) {
       return `
         <div class="row-editor" data-option-id="${attr(o.id || '')}">
           <input type="text" placeholder="Option text" value="${attr(o.label)}" data-role="opt-label" />
-          <label><input type="checkbox" data-role="opt-default" ${o.default ? 'checked' : ''} /> ${isChoice ? 'preselected' : 'ticked by default'}${gated}</label>
+          <label><input type="checkbox" data-role="opt-default" ${o.default ? 'checked' : ''} /> on by default${o.showWhen ? ' · gated' : ''}</label>
           <button class="btn-x" type="button" onclick="this.closest('.row-editor').remove()">&#10005;</button>
         </div>`;
     }
 
     function addOptionRow() {
-      const isChoice = document.getElementById('qf-type').value === 'choice';
-      document.getElementById('qf-options').insertAdjacentHTML('beforeend', optionRowHtml({ label: '' }, isChoice));
+      document.getElementById('if-options').insertAdjacentHTML('beforeend', optionRowHtml({ label: '' }));
     }
 
-    function saveQuestionForm(idx) {
-      const v = V();
-      const e = window._qf;
-      const label = document.getElementById('qf-label').value.trim();
+    function saveInputForm(idx) {
+      const f = F();
+      const e = window._if;
+      const label = document.getElementById('if-label').value.trim();
       if (!label) { alert('Question text is required.'); return; }
-      const type = document.getElementById('qf-type').value;
-      const taken = v.questions.filter((q, i) => i !== idx).map(q => q.id);
+      const type = document.getElementById('if-type').value;
+      const taken = f.inputs.filter((i, n) => n !== idx).map(i => i.id);
       const id = e.id || uniqueId(slugify(label), taken);
 
       const next = { id, type, label };
-      const help = document.getElementById('qf-help').value.trim();
+      const help = document.getElementById('if-help').value.trim();
       if (help) next.help = help;
 
-      const displayEl = document.getElementById('qf-display');
-      if (displayEl && displayEl.value === 'cards') next.display = 'cards';
+      if (type === 'number') {
+        const token = document.getElementById('if-token').value.trim();
+        if (token && token !== id) next.token = token;
+        next.min = Number(document.getElementById('if-min').value);
+        next.max = Number(document.getElementById('if-max').value);
+        next.default = Number(document.getElementById('if-default').value);
+      } else if (type === 'yesno') {
+        next.default = document.getElementById('if-default-toggle').checked;
+      } else {
+        const displayEl = document.getElementById('if-display');
+        if (displayEl && displayEl.value === 'cards') next.display = 'cards';
+        const old = e.options || [];
+        next.options = Array.from(document.querySelectorAll('#if-options .row-editor')).map(row => {
+          const optLabel = row.querySelector('[data-role="opt-label"]').value.trim();
+          const prev = old.find(o => o.id === row.dataset.optionId) || old.find(o => o.label === optLabel);
+          const opt = { id: prev ? prev.id : uniqueId(slugify(optLabel), old.map(o => o.id)), label: optLabel };
+          if (prev && prev.note) opt.note = prev.note;
+          if (row.querySelector('[data-role="opt-default"]').checked) opt.default = true;
+          if (prev && prev.showWhen) opt.showWhen = prev.showWhen;
+          return opt;
+        }).filter(o => o.label);
+      }
 
+      const subflows = readSubflowPicker();
+      if (subflows !== 'all') next.subflows = subflows;
       const cond = readCondEditor();
       if (cond) next.showWhen = cond;
 
-      if (type === 'number') {
-        next.min = Number(document.getElementById('qf-min').value);
-        next.max = Number(document.getElementById('qf-max').value);
-        next.default = Number(document.getElementById('qf-default').value);
-      } else if (type === 'yesno') {
-        next.default = document.getElementById('qf-default-toggle').checked;
-      } else {
-        const old = e.options || [];
-        next.options = Array.from(document.querySelectorAll('#qf-options .row-editor')).map(row => {
-          const optLabel = row.querySelector('[data-role="opt-label"]').value.trim();
-          const prevId = row.dataset.optionId;
-          const prev = old.find(o => o.id === prevId) || old.find(o => o.label === optLabel);
-          const opt = { id: prev ? prev.id : uniqueId(slugify(optLabel), old.map(o => o.id)), label: optLabel };
-          if (row.querySelector('[data-role="opt-default"]').checked) opt.default = true;
-          if (prev && prev.showWhen) opt.showWhen = prev.showWhen; // per-option gating is preserved, not edited here
-          return opt;
-        }).filter(o => o.label);
-        // A pick-one with no preselected option is a required step.
-        if (type === 'choice' && !next.options.some(o => o.default)) delete next.default;
-      }
-
-      if (idx >= 0) v.questions[idx] = next;
-      else { v.questions.push(next); EXPANDED.add(`${v.id}:q:${id}`); }
+      if (idx >= 0) f.inputs[idx] = next;
+      else f.inputs.push(next);
       EDITING = null;
       renderAdmin();
     }
   </script>
 
   <script>
-    // ─── Activity form ───
-    function deleteActivity(idx) {
-      if (!confirm(`Delete activity "${V().activities[idx].description}"?`)) return;
-      V().activities.splice(idx, 1);
+    // ─── Task form ───
+    function deleteTask(idx) {
+      if (!confirm(`Delete task "${F().tasks[idx].description}"?`)) return;
+      F().tasks.splice(idx, 1);
       EDITING = null;
       renderAdmin();
     }
 
-    function renderActivityForm(slot, idx, presetCond) {
-      const v = V();
-      const existing = idx >= 0 ? v.activities[idx] : {
-        id: null, phase: v.phases[v.phases.length > 3 ? 3 : 0], description: '',
-        location: v.locations[0], trips: 0, showWhen: presetCond,
+    function renderTaskForm(slot, idx, section) {
+      const f = F();
+      const existing = idx >= 0 ? f.tasks[idx] : {
+        id: null, phase: f.phases[0], description: '', location: f.locations[0], trips: 0,
+        subflows: section.shared ? 'all' : [section.id], hours: { base: 0 },
       };
-      window._af = existing;
-      window._afCond = existing.showWhen || presetCond || undefined;
+      window._tf = existing;
+      window._tfRates = JSON.parse(JSON.stringify((existing.hours || {}).per || []));
+
+      const numbers = numberInputs();
+      const chips = numbers.map(i =>
+        `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
+      ).join('') + '<span class="chip plain" onclick="createVariableInline()">+ New variable</span>';
 
       slot.innerHTML = `
         <div class="q-card" style="margin-top:8px;">
           <div class="field">
-            <label class="field-label">Description — use {{n}} where a count should be inserted, e.g. "Workshop {{n}} — discovery session"</label>
-            <textarea id="af-description">${esc(existing.description)}</textarea>
+            <label class="field-label">Description</label>
+            <textarea id="tf-description">${esc(existing.description)}</textarea>
+            <div class="q-sub" style="margin-top:8px;">Insert a variable: ${chips}</div>
+            ${existing.repeatPer || numbers.length ? '<div class="q-sub" style="margin-top:4px;">Use <b>{#}</b> for the line number when this task repeats.</div>' : ''}
           </div>
           <div class="field-row">
             <div class="field">
               <label class="field-label">Phase</label>
-              <select id="af-phase">${v.phases.map(p => `<option ${existing.phase === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
+              <select id="tf-phase">${f.phases.map(p => `<option ${existing.phase === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
             </div>
             <div class="field">
               <label class="field-label">Location</label>
-              <select id="af-location">${v.locations.map(l => `<option ${existing.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+              <select id="tf-location">${f.locations.map(l => `<option ${existing.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
             </div>
           </div>
           <label class="checkbox-row field">
-            <input type="checkbox" id="af-onsite" ${existing.trips ? 'checked' : ''} />
+            <input type="checkbox" id="tf-onsite" ${existing.trips ? 'checked' : ''} />
             <span>Counts as an onsite trip</span>
           </label>
+
           <div class="field">
-            <label class="field-label">Appears when</label>
-            <div class="q-sub" style="margin-bottom:8px;">${esc(describeCond(window._afCond))}</div>
-            <div id="af-cond"></div>
-            <button class="btn-ghost" type="button" id="af-cond-toggle" style="margin-left:0;" onclick="toggleActivityCond()">Change condition</button>
+            <label class="field-label">Hours</label>
+            <div class="row-editor">
+              <span class="rate-label">Base hours, however big the job is</span>
+              <input type="number" step="0.25" id="tf-base" value="${(existing.hours || {}).base || 0}" oninput="updateHoursPreview()" />
+            </div>
+            <div id="tf-rates"></div>
+            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addRateRow()">+ Bill per variable</button>
+            <div class="q-sub" style="margin-top:8px;" id="tf-hours-preview"></div>
           </div>
-          <button class="btn-primary" onclick="saveActivityForm(${idx})">Save activity</button>
+
+          <div class="field">
+            <label class="field-label">One line per variable (optional)</label>
+            <select id="tf-repeat" onchange="updateHoursPreview()">
+              <option value="">Just one line</option>
+              ${numbers.map(i => `<option value="${attr(i.id)}" ${existing.repeatPer === i.id ? 'selected' : ''}>One line per ${esc(tokenOf(i))}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Include it in</label>
+            <div id="tf-subflows"></div>
+          </div>
+          <div class="field">
+            <label class="field-label">Include it only if</label>
+            <div id="tf-cond"></div>
+          </div>
+
+          <button class="btn-primary" onclick="saveTaskForm(${idx})">Save task</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
         </div>`;
+
+      renderRateRows();
+      renderSubflowPicker(document.getElementById('tf-subflows'), existing.subflows);
+      renderCondEditor(document.getElementById('tf-cond'), existing.showWhen, { alwaysLabel: 'No extra condition' });
+      updateHoursPreview();
       slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function toggleActivityCond() {
-      const box = document.getElementById('af-cond');
-      const btn = document.getElementById('af-cond-toggle');
-      if (box.innerHTML) {
-        box.innerHTML = '';
-        btn.textContent = 'Change condition';
-        return;
-      }
-      btn.textContent = 'Keep current condition';
-      renderCondEditor(box, window._afCond, { alwaysLabel: 'Always — every estimate', allowRepeat: true });
+    function renderRateRows() {
+      const box = document.getElementById('tf-rates');
+      const numbers = numberInputs();
+      box.innerHTML = window._tfRates.map((r, n) => `
+        <div class="row-editor" data-rate="${n}">
+          <select data-role="rate-input" onchange="readRateRows();updateHoursPreview()" style="flex:1;">
+            ${numbers.map(i => `<option value="${attr(i.id)}" ${r.input === i.id ? 'selected' : ''}>per ${esc(tokenOf(i))}</option>`).join('')}
+          </select>
+          <input type="number" step="0.25" data-role="rate-hours" value="${r.hours}" oninput="readRateRows();updateHoursPreview()" />
+          <span class="rate-label" style="flex:0 0 auto;">hours each</span>
+          <button class="btn-x" type="button" onclick="removeRateRow(${n})">&#10005;</button>
+        </div>`).join('');
     }
 
-    function saveActivityForm(idx) {
-      const v = V();
-      const e = window._af;
-      const description = document.getElementById('af-description').value.trim();
+    function readRateRows() {
+      window._tfRates = Array.from(document.querySelectorAll('#tf-rates .row-editor')).map(row => ({
+        input: row.querySelector('[data-role="rate-input"]').value,
+        hours: Number(row.querySelector('[data-role="rate-hours"]').value),
+      }));
+    }
+
+    function addRateRow() {
+      const numbers = numberInputs();
+      if (!numbers.length) { alert('Add a number variable first, then you can bill per unit of it.'); return; }
+      readRateRows();
+      window._tfRates.push({ input: numbers[0].id, hours: 0 });
+      renderRateRows();
+      updateHoursPreview();
+    }
+
+    function removeRateRow(n) {
+      readRateRows();
+      window._tfRates.splice(n, 1);
+      renderRateRows();
+      updateHoursPreview();
+    }
+
+    function updateHoursPreview() {
+      const base = Number(document.getElementById('tf-base').value || 0);
+      const repeat = document.getElementById('tf-repeat').value;
+      let per = base;
+      const bits = [`${base}h base`];
+      window._tfRates.forEach(r => {
+        const inp = inputById(r.input);
+        const dflt = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
+        per += Number(dflt) * Number(r.hours || 0);
+        bits.push(`${r.hours}h x ${dflt} ${inp ? tokenOf(inp) : r.input}`);
+      });
+      let text = `At the current defaults: ${bits.join(' + ')} = ${round2(per)}h per line.`;
+      if (repeat) {
+        const inp = inputById(repeat);
+        const n = inp ? (inp.default != null ? inp.default : (inp.min || 0)) : 0;
+        text += ` Repeated ${n} times, that is ${round2(per * n)}h.`;
+      }
+      document.getElementById('tf-hours-preview').textContent = text;
+    }
+
+    // Drops {token} in at the caret, so a variable can be woven into the text.
+    function insertToken(token) {
+      const box = document.getElementById('tf-description');
+      const at = box.selectionStart != null ? box.selectionStart : box.value.length;
+      const text = '{' + token + '}';
+      box.value = box.value.slice(0, at) + text + box.value.slice(box.selectionEnd != null ? box.selectionEnd : at);
+      box.focus();
+      box.selectionStart = box.selectionEnd = at + text.length;
+    }
+
+    // Creates a variable without leaving the task being written.
+    function createVariableInline() {
+      const label = prompt('What is the user asked?', 'How many devices are in scope?');
+      if (!label || !label.trim()) return;
+      const token = prompt('Short name to use inside task text:', 'number of devices');
+      if (!token || !token.trim()) return;
+      const dflt = Number(prompt('Starting value:', '1'));
+      const f = F();
+      const id = uniqueId(slugify(token), f.inputs.map(i => i.id));
+      const input = {
+        id, type: 'number', label: label.trim(), min: 0, max: 100000,
+        default: isNaN(dflt) ? 0 : dflt,
+      };
+      if (token.trim() !== id) input.token = token.trim();
+      f.inputs.push(input);
+      insertToken(tokenOf(input));
+      // Refresh the chip row and rate dropdowns against the new variable.
+      const chipRow = document.querySelector('#tf-description').parentElement.querySelector('.q-sub');
+      chipRow.innerHTML = 'Insert a variable: ' + numberInputs().map(i =>
+        `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
+      ).join('') + '<span class="chip plain" onclick="createVariableInline()">+ New variable</span>';
+      renderRateRows();
+      updateHoursPreview();
+    }
+
+    function saveTaskForm(idx) {
+      const f = F();
+      const e = window._tf;
+      const description = document.getElementById('tf-description').value.trim();
       if (!description) { alert('Description is required.'); return; }
+      readRateRows();
 
-      // Untouched editor means keep the condition it came in with.
-      const cond = document.getElementById('af-cond').innerHTML ? readCondEditor() : window._afCond;
-      const taken = v.activities.filter((a, i) => i !== idx).map(a => a.id);
-
+      const taken = f.tasks.filter((t, n) => n !== idx).map(t => t.id);
       const next = {
         id: e.id || uniqueId(slugify(description), taken),
-        phase: document.getElementById('af-phase').value,
+        phase: document.getElementById('tf-phase').value,
         description,
-        location: document.getElementById('af-location').value,
+        location: document.getElementById('tf-location').value,
       };
-      if (document.getElementById('af-onsite').checked) next.trips = 1;
+      if (document.getElementById('tf-onsite').checked) next.trips = 1;
+
+      next.subflows = readSubflowPicker();
+
+      const repeat = document.getElementById('tf-repeat').value;
+      if (repeat) next.repeatPer = repeat;
+
+      const cond = readCondEditor();
       if (cond) next.showWhen = cond;
 
-      if (idx >= 0) v.activities[idx] = next;
-      else v.activities.push(next);
+      const base = Number(document.getElementById('tf-base').value || 0);
+      const rates = window._tfRates.filter(r => r.input && r.hours);
+      // A repeating task already emits one line per unit; billing per that same
+      // unit on every line would count the effort twice.
+      const clash = rates.find(r => r.input === repeat);
+      if (clash) {
+        const inp = inputById(clash.input);
+        alert(`This task already emits one line per ${inp ? tokenOf(inp) : clash.input}, so billing per that same variable would double count. Remove one of the two.`);
+        return;
+      }
+      next.hours = rates.length ? { base, per: rates } : { base };
+
+      if (idx >= 0) f.tasks[idx] = next;
+      else f.tasks.push(next);
       EDITING = null;
       renderAdmin();
     }
   </script>
 
   <script>
-    // ─── Vertical settings ───
-    function openVerticalSettings() { EDITING = { kind: 'vertical' }; renderAdmin(); }
+    // ─── Flow settings and new flows ───
+    function openFlowSettings() { EDITING = { kind: 'flow' }; renderAdmin(); }
+    function openNewFlow() { EDITING = { kind: 'new-flow' }; renderAdmin(); }
 
-    function addVertical() {
-      const name = prompt('Name of the new solution (e.g. Wireless, Meeting Rooms):', '');
-      if (!name || !name.trim()) return;
-      const model = V();
-      const id = uniqueId(slugify(name), CONFIG.verticals.map(v => v.id));
-      CONFIG.verticals.push({
-        id, name: name.trim(), note: 'Available', enabled: true,
-        phases: model.phases.slice(),
-        locations: model.locations.slice(),
-        columns: JSON.parse(JSON.stringify(model.columns)),
-        questions: [], activities: [],
-      });
-      switchVertical(id);
+    function splitList(str) { return str.split(',').map(s => s.trim()).filter(Boolean); }
+
+    function renderNewFlowForm(slot) {
+      slot.innerHTML = `
+        <div class="q-card">
+          <div class="q-label" style="margin-bottom:12px;">Start a new flow</div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Name</label>
+              <input type="text" id="nf-name" placeholder="e.g. Spectralink Handsets" />
+            </div>
+            <div class="field">
+              <label class="field-label">Solution vertical</label>
+              <select id="nf-vertical">${CONFIG.verticals.map(v => `<option value="${attr(v.id)}">${esc(v.name)}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">How many subflows?</label>
+            <div class="stepper" style="display:flex;align-items:center;gap:12px;">
+              <button class="btn-ghost" type="button" style="margin:0;" onclick="stepSubflowCount(-1)">&minus;</button>
+              <span id="nf-count" style="font-size:18px;font-weight:700;color:var(--cyan);min-width:22px;text-align:center;">3</span>
+              <button class="btn-ghost" type="button" style="margin:0;" onclick="stepSubflowCount(1)">+</button>
+            </div>
+            <div class="q-sub" style="margin-top:6px;">The variations of this work, e.g. a new install versus an upgrade.</div>
+          </div>
+          <div class="field" id="nf-names"></div>
+          <button class="btn-primary" onclick="createFlow()">Create flow</button>
+          <button class="btn-ghost" onclick="closeForm()">Cancel</button>
+        </div>`;
+      window._nfCount = 3;
+      renderSubflowNameFields();
+      slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function stepSubflowCount(delta) {
+      // Keep whatever has been typed before redrawing the list.
+      const typed = Array.from(document.querySelectorAll('#nf-names [data-sf]')).map(el => el.value);
+      window._nfCount = Math.max(1, Math.min(12, window._nfCount + delta));
+      document.getElementById('nf-count').textContent = window._nfCount;
+      renderSubflowNameFields(typed);
+    }
+
+    function renderSubflowNameFields(typed) {
+      const box = document.getElementById('nf-names');
+      let html = '<label class="field-label">Name each subflow</label>';
+      for (let n = 0; n < window._nfCount; n++) {
+        html += `<input type="text" data-sf="${n}" value="${attr((typed && typed[n]) || '')}" placeholder="Subflow ${n + 1}" style="margin-bottom:8px;" />`;
+      }
+      box.innerHTML = html;
+    }
+
+    function createFlow() {
+      const name = document.getElementById('nf-name').value.trim();
+      if (!name) { alert('Give the flow a name.'); return; }
+      const names = Array.from(document.querySelectorAll('#nf-names [data-sf]'))
+        .map(el => el.value.trim()).filter(Boolean);
+      if (!names.length) { alert('Name at least one subflow.'); return; }
+
+      const model = F();
+      const id = uniqueId(slugify(name), CONFIG.flows.map(f => f.id));
+      const subIds = [];
+      const flow = {
+        id,
+        name,
+        vertical: document.getElementById('nf-vertical').value,
+        note: '',
+        enabled: true,
+        // Seeded from the current flow so a new one is not starting from nothing.
+        phases: model ? model.phases.slice() : ['Design', 'Implementation', 'Project Completion & Handover'],
+        locations: model ? model.locations.slice() : ['Office', 'Client Site'],
+        columns: model ? JSON.parse(JSON.stringify(model.columns)) : [
+          { header: 'Phase', from: 'phase' },
+          { header: 'Description', from: 'description' },
+          { header: 'Hours', from: 'hours' },
+        ],
+        subflows: names.map(n => {
+          const sid = uniqueId(slugify(n), subIds);
+          subIds.push(sid);
+          return { id: sid, name: n };
+        }),
+        inputs: [],
+        tasks: [],
+      };
+      CONFIG.flows.push(flow);
+      switchFlow(id);
+      EXPANDED.add(`${id}:sec:all`);
+      renderAdmin();
+    }
+
+    function renderFlowForm(slot) {
+      const f = F();
+      slot.innerHTML = `
+        <div class="q-card">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Name</label>
+              <input type="text" id="ff-name" value="${attr(f.name)}" />
+            </div>
+            <div class="field">
+              <label class="field-label">Solution vertical</label>
+              <select id="ff-vertical">${CONFIG.verticals.map(v =>
+                `<option value="${attr(v.id)}" ${f.vertical === v.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Note shown on the card</label>
+              <input type="text" id="ff-note" value="${attr(f.note)}" />
+            </div>
+            <div class="field">
+              <label class="field-label">What the subflow step is called</label>
+              <input type="text" id="ff-subflow-label" value="${attr(f.subflowLabel || '')}" placeholder="Type of work" />
+            </div>
+          </div>
+          <label class="checkbox-row field">
+            <input type="checkbox" id="ff-enabled" ${f.enabled !== false ? 'checked' : ''} />
+            <span>Selectable in the builder (untick to hide it while you build it out)</span>
+          </label>
+
+          <div class="field">
+            <label class="field-label">Subflows</label>
+            <div id="ff-subflows">${f.subflows.map(s => `
+              <div class="row-editor" data-sub-id="${attr(s.id)}">
+                <input type="text" value="${attr(s.name)}" data-role="sub-name" />
+                <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
+              </div>`).join('')}</div>
+            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addSubflowRow()">+ Add subflow</button>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Phases, in the order they should appear</label>
+            <input type="text" id="ff-phases" value="${attr(f.phases.join(', '))}" />
+          </div>
+          <div class="field">
+            <label class="field-label">Locations a task can be delivered from</label>
+            <input type="text" id="ff-locations" value="${attr(f.locations.join(', '))}" />
+          </div>
+          <div class="field">
+            <label class="field-label">Spreadsheet columns, in paste order</label>
+            <div id="ff-columns">${f.columns.map(columnRowHtml).join('')}</div>
+            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addColumnRow()">+ Add column</button>
+          </div>
+
+          <button class="btn-primary" onclick="saveFlowForm()">Save flow</button>
+          <button class="btn-ghost" onclick="closeForm()">Cancel</button>
+          ${CONFIG.flows.length > 1 ? '<button class="btn-ghost" onclick="deleteFlow()">Delete flow</button>' : ''}
+        </div>`;
+      slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function addSubflowRow() {
+      document.getElementById('ff-subflows').insertAdjacentHTML('beforeend', `
+        <div class="row-editor" data-sub-id="">
+          <input type="text" value="" data-role="sub-name" placeholder="New subflow" />
+          <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
+        </div>`);
+    }
+
+    function removeSubflowRow(btn) {
+      const row = btn.closest('.row-editor');
+      const id = row.dataset.subId;
+      if (id) {
+        const used = F().tasks.filter(t => Array.isArray(t.subflows) && t.subflows.includes(id)).length;
+        if (used && !confirm(`${count(used, 'task', 'tasks')} belong only to this subflow and will be left stranded. Remove it anyway?`)) return;
+      }
+      row.remove();
     }
 
     const COLUMN_SOURCES = [
       { value: 'phase', label: 'The phase' },
       { value: 'description', label: 'The description' },
       { value: 'location', label: 'The location' },
+      { value: 'hours', label: 'The hours' },
       { value: 'trips', label: 'Onsite trips' },
       { value: '', label: 'Fixed text...' },
     ];
-
-    function renderVerticalForm(slot) {
-      const v = V();
-      slot.innerHTML = `
-        <div class="q-card">
-          <div class="field-row">
-            <div class="field">
-              <label class="field-label">Name</label>
-              <input type="text" id="vf-name" value="${attr(v.name)}" />
-            </div>
-            <div class="field">
-              <label class="field-label">Note shown on the card</label>
-              <input type="text" id="vf-note" value="${attr(v.note)}" />
-            </div>
-          </div>
-          <label class="checkbox-row field">
-            <input type="checkbox" id="vf-enabled" ${v.enabled !== false ? 'checked' : ''} />
-            <span>Selectable in the builder (untick to hide it while you build it out)</span>
-          </label>
-          <div class="field">
-            <label class="field-label">Phases — in the order they should appear</label>
-            <input type="text" id="vf-phases" value="${attr(v.phases.join(', '))}" />
-          </div>
-          <div class="field">
-            <label class="field-label">Locations an activity can be delivered from</label>
-            <input type="text" id="vf-locations" value="${attr(v.locations.join(', '))}" />
-          </div>
-          <div class="field">
-            <label class="field-label">Spreadsheet columns — the order they are pasted in</label>
-            <div id="vf-columns">${v.columns.map(columnRowHtml).join('')}</div>
-            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addColumnRow()">+ Add column</button>
-          </div>
-          <button class="btn-primary" onclick="saveVerticalForm()">Save solution</button>
-          <button class="btn-ghost" onclick="closeForm()">Cancel</button>
-          ${CONFIG.verticals.length > 1 ? '<button class="btn-ghost" onclick="deleteVertical()">Delete solution</button>' : ''}
-        </div>`;
-      slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
 
     function columnRowHtml(c) {
       const isConstant = c.constant !== undefined;
@@ -999,46 +1292,65 @@
     }
 
     function addColumnRow() {
-      document.getElementById('vf-columns').insertAdjacentHTML('beforeend', columnRowHtml({ header: '', from: 'description' }));
+      document.getElementById('ff-columns').insertAdjacentHTML('beforeend', columnRowHtml({ header: '', from: 'description' }));
     }
 
-    function splitList(str) {
-      return str.split(',').map(s => s.trim()).filter(Boolean);
-    }
-
-    function saveVerticalForm() {
-      const v = V();
-      const name = document.getElementById('vf-name').value.trim();
+    function saveFlowForm() {
+      const f = F();
+      const name = document.getElementById('ff-name').value.trim();
       if (!name) { alert('Name is required.'); return; }
-      const phases = splitList(document.getElementById('vf-phases').value);
-      const locations = splitList(document.getElementById('vf-locations').value);
+      const phases = splitList(document.getElementById('ff-phases').value);
+      const locations = splitList(document.getElementById('ff-locations').value);
       if (!phases.length) { alert('At least one phase is required.'); return; }
       if (!locations.length) { alert('At least one location is required.'); return; }
 
-      const columns = Array.from(document.querySelectorAll('#vf-columns .row-editor')).map(row => {
+      const subIds = [];
+      const subflows = Array.from(document.querySelectorAll('#ff-subflows .row-editor')).map(row => {
+        const subName = row.querySelector('[data-role="sub-name"]').value.trim();
+        if (!subName) return null;
+        const id = row.dataset.subId || uniqueId(slugify(subName), f.subflows.map(s => s.id).concat(subIds));
+        subIds.push(id);
+        const prev = f.subflows.find(s => s.id === id);
+        return prev ? Object.assign({}, prev, { name: subName }) : { id, name: subName };
+      }).filter(Boolean);
+      if (!subflows.length) { alert('At least one subflow is required.'); return; }
+
+      const columns = Array.from(document.querySelectorAll('#ff-columns .row-editor')).map(row => {
         const header = row.querySelector('[data-role="col-header"]').value.trim();
         const source = row.querySelector('[data-role="col-source"]').value;
-        return source
-          ? { header, from: source }
-          : { header, constant: row.querySelector('[data-role="col-constant"]').value };
+        return source ? { header, from: source } : { header, constant: row.querySelector('[data-role="col-constant"]').value };
       }).filter(c => c.header);
       if (!columns.length) { alert('At least one column is required.'); return; }
 
-      v.name = name;
-      v.note = document.getElementById('vf-note').value.trim();
-      v.enabled = document.getElementById('vf-enabled').checked;
-      v.phases = phases;
-      v.locations = locations;
-      v.columns = columns;
+      // Tasks and inputs pointing at a removed subflow would silently vanish,
+      // so they fall back to every subflow instead.
+      const kept = subflows.map(s => s.id);
+      [f.tasks, f.inputs].forEach(list => list.forEach(item => {
+        if (!Array.isArray(item.subflows)) return;
+        const trimmed = item.subflows.filter(id => kept.includes(id));
+        if (!trimmed.length) delete item.subflows;
+        else item.subflows = trimmed;
+      }));
+
+      f.name = name;
+      f.vertical = document.getElementById('ff-vertical').value;
+      f.note = document.getElementById('ff-note').value.trim();
+      const subflowLabel = document.getElementById('ff-subflow-label').value.trim();
+      if (subflowLabel) f.subflowLabel = subflowLabel; else delete f.subflowLabel;
+      f.enabled = document.getElementById('ff-enabled').checked;
+      f.subflows = subflows;
+      f.phases = phases;
+      f.locations = locations;
+      f.columns = columns;
       EDITING = null;
       renderAdmin();
     }
 
-    function deleteVertical() {
-      const v = V();
-      if (!confirm(`Delete the whole "${v.name}" solution, including its ${count(v.questions.length, 'question', 'questions')} and ${count(v.activities.length, 'activity', 'activities')}?`)) return;
-      CONFIG.verticals = CONFIG.verticals.filter(x => x.id !== v.id);
-      switchVertical(CONFIG.verticals[0].id);
+    function deleteFlow() {
+      const f = F();
+      if (!confirm(`Delete the whole "${f.name}" flow, including its ${count(f.inputs.length, 'input', 'inputs')} and ${count(f.tasks.length, 'task', 'tasks')}?`)) return;
+      CONFIG.flows = CONFIG.flows.filter(x => x.id !== f.id);
+      switchFlow(CONFIG.flows.length ? CONFIG.flows[0].id : null);
     }
   </script>
 </body>

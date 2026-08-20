@@ -1,16 +1,16 @@
 # PS Engagement Builder — Scoping Reference
 
 Reference for generating a Webex Contact Centre engagement task list without opening [psbuilder/index.html](index.html).
-This covers the **Webex Contact Centre** solution only — it is one of several verticals in [config.json](config.json), and each one defines its own questions, activities, phases and columns.
+This covers the **Webex Contact Centre** flow only. [config.json](config.json) holds one entry per flow, and each defines its own subflows, variables, tasks, phases and columns.
 Give me the inputs below in any format, I output the same TSV table the tool produces
 (header row: `Phase	Skill Required	Task Type	Description`, paste-ready into the engagement spreadsheet).
 
-For this vertical, `Skill Required` is always **Collaboration** and `Task Type` is always **ArchiTech Activity** — both are fixed column values in its config, so only `Phase` and `Description` vary per task.
+For this flow, `Skill Required` is always **Collaboration** and `Task Type` is always **ArchiTech Activity** — both are fixed column values in its config, so only `Phase` and `Description` vary per task. No hours have been costed for this flow yet, so it has no Hours column.
 
 ## Inputs needed
 
-1. **Solution** — currently only `Webex Contact Centre` is live (Wireless / Cisco Spaces exist as empty, hidden verticals).
-2. **Engagement Type** — `New / Greenfield` or `Migration`.
+1. **Flow** — `Webex Contact Centre`, under the Collaboration vertical.
+2. **Subflow** — `New / Greenfield` or `Migration`.
 3. **Engagement Scope** — `Digital Front Door` (DFD: core CC + AI Agent + AI Assistant/CRM + omnichannel) or `Standard Contact Centre` (routing/IVR/queue/agent config only, no AI/digital layer).
 4. **Scoping question answers** (see below) — only ask the ones gated to your scope.
 
@@ -78,30 +78,61 @@ Any question you omit, I'll use the tool's default. I'll output the full TSV blo
 
 ## How this is wired
 
-Nothing above is hardcoded in the page. [config.json](config.json) holds a list of
-solution verticals; this document describes the `wxcc` one. Each vertical carries its
-own questions, activities, phases, locations and spreadsheet columns, so adding a new
-vertical is a data change made through [admin.html](admin.html), not a code change.
+Nothing above is hardcoded in the page. [config.json](config.json) is a list of
+verticals and a list of flows, and the whole tool is driven from it:
 
-Engagement Type and Engagement Scope are not special concepts — they are ordinary
-`choice` questions that happen to be asked first and rendered as big cards. A `choice`
-question with no preselected option is treated as required, which is what keeps later
-questions hidden until it is answered.
+```
+Vertical      Collaboration | Secure Networking | Integrated Workspaces
+  Flow        "Webex Contact Centre", "Spectralink Handsets", ...
+    Subflows  the variations of the work, one is picked per estimate
+    Inputs    variables (numbers) and questions (pick one / tick any / yes-no)
+    Tasks     each in "all" subflows or a named list, each with hours
+```
 
-Every gate in the table above is the same `showWhen` condition, and the same shape works
-on a question, on a single checklist option, or on an activity:
+So adding a flow, a subflow or a task is a data change made through
+[admin.html](admin.html), never a code change.
+
+### Subflows
+
+A task carries `subflows: "all"` or a list of subflow ids. That is what the admin
+page groups by: an **All subflows** section plus one per subflow. A task naming
+several subflows shows under each of them.
+
+### Variables and hours
+
+A number input is a variable. Its `token` is what you write in braces inside a
+task description, and its id is what the hours math bills against:
+
+```json
+{
+  "description": "Enroll {number of devices} Spectralink Handsets to MDM",
+  "hours": { "base": 1, "per": [{ "input": "devices", "hours": 0.25 }] }
+}
+```
+
+On 200 handsets that reads "Enroll 200 Spectralink Handsets to MDM" and costs
+`1 + 200 x 0.25` = 51 hours. Hours are linear only: a base plus a rate per unit.
+
+A task can also carry `repeatPer: "<variable>"`, which emits one line per unit
+instead of one line total, and `{#}` in the description becomes the line number.
+A task cannot both repeat per a variable and bill per that same variable, since
+that would count the effort twice.
+
+### Extra conditions
+
+On top of subflow membership, an input, a checklist option or a task may carry a
+`showWhen`:
 
 | Condition | Meaning |
 |---|---|
-| *(absent)* | always |
-| `{question, is}` | that option is picked or ticked |
-| `{question, anySelected}` | anything is ticked in that checklist |
-| `{question, isOn}` | that yes/no is on |
-| `{question, moreThanZero}` | that number is above zero; `{{n}}` becomes the total |
-| `{question, repeatPerUnit}` | one line per unit; `{{n}}` becomes 1, 2, 3... |
+| *(absent)* | no extra condition |
+| `{input, is}` | that option is picked or ticked |
+| `{input, anySelected}` | anything is ticked in that checklist |
+| `{input, isOn}` | that yes/no is on |
+| `{input, moreThanZero}` | that variable is above zero |
 
-Answers resolve in a single forward pass, so a condition may only depend on an earlier
-question, a hidden question can never satisfy a condition, and a hidden option can never
-count as ticked.
+Answers resolve in a single forward pass, so a condition may only depend on an
+earlier input, a hidden input can never satisfy a condition, and a hidden option
+can never count as ticked.
 
-Run `node psbuilder/check.js` to verify the config and all of the above behaviour.
+Run `node psbuilder/check.js` to verify the config and all of the above.

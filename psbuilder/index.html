@@ -62,6 +62,7 @@
       color: var(--text); font-size: 16px; cursor: pointer; font-family: var(--font);
     }
     .stepper button:hover { border-color: var(--cyan-mid); }
+    .stepper .stepper-input { width: 90px; text-align: center; font-size: 18px; font-weight: 700; color: var(--cyan); background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; font-family: var(--font); }
     .stepper .stepper-value { font-size: 20px; font-weight: 700; color: var(--cyan); min-width: 28px; text-align: center; }
 
     .toggle-row { display: flex; align-items: center; gap: 12px; cursor: pointer; }
@@ -116,18 +117,22 @@
     <div class="header">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <span class="header-badge">Internal Sizing Tool · POC</span>
-      <a href="./admin.html" style="color:var(--muted);font-size:11px;text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;">Manage activities →</a>
+      <a href="./admin.html" style="color:var(--muted);font-size:11px;text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;">Manage flows →</a>
     </div>
 
     <div class="page-title">PS Engagement Builder</div>
     <div class="page-desc">
-      Pick a solution, answer a short set of scoping questions, then generate a line-by-line task list.
-      Baseline tasks common to every engagement are added automatically.
-      Effort estimates aren't calculated here — fill hours in manually once tasks are pasted in.
+      Pick a flow, pick the type of work, answer a short set of scoping questions, then generate a
+      line-by-line task list with hours. Tasks common to every variation are added automatically.
     </div>
 
-    <div class="section-label">1 · Solution</div>
-    <div class="product-grid" id="vertical-grid"></div>
+    <div class="section-label">1 · Flow</div>
+    <div id="flow-list"></div>
+
+    <div id="subflow-section" class="step">
+      <div class="section-label" id="subflow-label">2 · Type of work</div>
+      <div class="scope-grid" id="subflow-grid"></div>
+    </div>
 
     <div id="question-section" class="step">
       <div id="question-root"></div>
@@ -138,6 +143,7 @@
       <div class="section-label">Task List</div>
       <div class="summary">
         <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
+        <div class="summary-item"><div class="summary-label">Hours</div><div class="summary-value" id="sum-hours">0</div></div>
         <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
       </div>
       <div class="q-sub" style="margin-top:-8px;" id="output-hint"></div>
@@ -149,18 +155,19 @@
     <div class="footer">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <div class="footer-note">
-        Internal scoping tool — generates a task list only. Effort hours are not calculated here.
+        Internal scoping tool. Hours come from the base and per-unit rates set against each task.
         <a href="/" target="_self">← Back to demos</a>
       </div>
     </div>
   </div>
 
   <script>
-    // Nothing here knows about Webex, contact centres, or any other vertical:
-    // the form shape, phases, output columns and every condition come from
-    // config.json, so a new vertical needs no code changes.
+    // Nothing here knows about any particular solution: the flows, their
+    // subflows, inputs, tasks, hours and output columns all come from
+    // config.json, so a new flow needs no code changes.
     let CONFIG = null;
-    let vertical = null;
+    let flow = null;
+    let subflow = null;
     let answers = {};
 
     async function loadConfig() {
@@ -168,187 +175,268 @@
       CONFIG = await res.json();
     }
 
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ─── Subflow membership ─────────────────────────────────────────────
+    // "all" or a list of subflow ids. Applies to inputs and tasks alike.
+    function inSubflow(member, subflowId) {
+      if (member === undefined || member === null || member === 'all') return true;
+      return Array.isArray(member) ? member.includes(subflowId) : member === subflowId;
+    }
+
     // ─── Condition engine ───────────────────────────────────────────────
-    // One condition shape covers every gate, whether it sits on a question,
-    // a checklist option, or an activity.
     function condMet(cond, resolved) {
       if (!cond) return true;
-      const a = resolved[cond.question];
+      const a = resolved[cond.input];
       if (a === undefined || a === null) return false;
       if (cond.is !== undefined) return Array.isArray(a) ? a.includes(cond.is) : a === cond.is;
       if (cond.anySelected) return Array.isArray(a) && a.length > 0;
       if (cond.isOn) return a === true;
-      if (cond.moreThanZero || cond.repeatPerUnit) return Number(a) > 0;
+      if (cond.moreThanZero) return Number(a) > 0;
       return true;
     }
 
-    function defaultFor(q) {
-      if (q.type === 'checklist') return (q.options || []).filter(o => o.default).map(o => o.id);
-      if (q.type === 'number') return q.default != null ? q.default : (q.min || 0);
-      if (q.type === 'yesno') return q.default === true;
+    function defaultFor(inp) {
+      if (inp.type === 'checklist') return (inp.options || []).filter(o => o.default).map(o => o.id);
+      if (inp.type === 'number') return inp.default != null ? inp.default : (inp.min || 0);
+      if (inp.type === 'yesno') return inp.default === true;
       return null; // a choice starts unanswered
     }
 
-    function visibleOptions(q, resolved) {
-      return (q.options || []).filter(o => condMet(o.showWhen, resolved));
+    function visibleOptions(inp, resolved) {
+      return (inp.options || []).filter(o => condMet(o.showWhen, resolved));
     }
 
-    // Single forward pass, so a hidden question can never satisfy a condition
-    // and a hidden checklist option can never count as checked.
-    function resolveAnswers() {
+    function activeInputs() {
+      return flow.inputs.filter(i => inSubflow(i.subflows, subflow));
+    }
+
+    // Single forward pass, so a hidden input can never satisfy a condition and
+    // a hidden option can never count as ticked.
+    function resolveInputs() {
       const resolved = {};
-      vertical.questions.forEach(q => {
-        if (!condMet(q.showWhen, resolved)) return;
-        let val = answers[q.id];
-        if (val === undefined) val = defaultFor(q);
-        if (q.type === 'checklist') {
-          const allowed = visibleOptions(q, resolved).map(o => o.id);
+      activeInputs().forEach(inp => {
+        if (!condMet(inp.showWhen, resolved)) return;
+        let val = answers[inp.id];
+        if (val === undefined) val = defaultFor(inp);
+        if (inp.type === 'checklist') {
+          const allowed = visibleOptions(inp, resolved).map(o => o.id);
           val = (val || []).filter(id => allowed.includes(id));
         }
-        resolved[q.id] = val;
+        resolved[inp.id] = val;
       });
       return resolved;
     }
 
-    // A choice with no default must be answered before later questions appear.
-    function isRequired(q) { return q.type === 'choice' && q.default === undefined; }
+    // A choice with no default must be answered before later inputs appear.
+    function isRequired(inp) { return inp.type === 'choice' && inp.default === undefined; }
 
-    function questionsToShow(resolved) {
+    function inputsToShow(resolved) {
       const out = [];
-      for (const q of vertical.questions) {
-        if (!condMet(q.showWhen, resolved)) continue;
-        out.push(q);
-        const a = resolved[q.id];
-        if (isRequired(q) && (a === null || a === undefined)) break;
+      for (const inp of activeInputs()) {
+        if (!condMet(inp.showWhen, resolved)) continue;
+        out.push(inp);
+        const a = resolved[inp.id];
+        if (isRequired(inp) && (a === null || a === undefined)) break;
       }
       return out;
     }
 
     function allRequiredAnswered(resolved) {
-      return vertical.questions
-        .filter(q => condMet(q.showWhen, resolved) && isRequired(q))
-        .every(q => resolved[q.id] !== null && resolved[q.id] !== undefined);
+      return activeInputs()
+        .filter(i => condMet(i.showWhen, resolved) && isRequired(i))
+        .every(i => resolved[i.id] !== null && resolved[i.id] !== undefined);
     }
 
-    // ─── Rendering ──────────────────────────────────────────────────────
-    function esc(s) {
-      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    function renderVerticals() {
-      const root = document.getElementById('vertical-grid');
-      root.innerHTML = '';
-      CONFIG.verticals.forEach(v => {
-        const card = document.createElement('div');
-        const disabled = v.enabled === false;
-        card.className = 'pick-card' + (disabled ? ' disabled' : '') + (vertical && vertical.id === v.id ? ' selected' : '');
-        card.innerHTML = '<div class="pick-name">' + esc(v.name) + '</div><div class="pick-note">' + esc(v.note || '') + '</div>';
-        if (!disabled) card.onclick = () => selectVertical(v.id);
-        root.appendChild(card);
+    // ─── Text and hours ─────────────────────────────────────────────────
+    // {#} is the 1-based line number on a repeating task. {anything else} is
+    // looked up as an input, by token first and then by id.
+    function fillText(str, resolved, index) {
+      return String(str == null ? '' : str).replace(/\{([^{}]+)\}/g, (whole, raw) => {
+        const key = raw.trim();
+        if (key === '#') return index != null ? index : whole;
+        const inp = flow.inputs.find(i => (i.token || i.id) === key) || flow.inputs.find(i => i.id === key);
+        if (!inp) return whole;
+        const v = resolved[inp.id];
+        return v == null ? whole : v;
       });
     }
 
-    function selectVertical(id) {
-      vertical = CONFIG.verticals.find(v => v.id === id);
+    function hoursFor(task, resolved) {
+      const h = task.hours || {};
+      let total = Number(h.base || 0);
+      (h.per || []).forEach(p => {
+        total += Number(resolved[p.input] || 0) * Number(p.hours || 0);
+      });
+      return Math.round(total * 100) / 100;
+    }
+
+    // ─── Rendering ──────────────────────────────────────────────────────
+    function renderFlows() {
+      const root = document.getElementById('flow-list');
+      root.innerHTML = '';
+      CONFIG.verticals.forEach(v => {
+        const flows = CONFIG.flows.filter(f => f.vertical === v.id);
+        const label = document.createElement('div');
+        label.className = 'pick-note';
+        label.style.cssText = 'margin:0 0 8px;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;font-size:10px;color:var(--faint);';
+        label.textContent = v.name;
+        root.appendChild(label);
+
+        if (!flows.length) {
+          const none = document.createElement('div');
+          none.className = 'pick-note';
+          none.style.cssText = 'margin-bottom:22px;font-style:italic;';
+          none.textContent = 'No flows built yet.';
+          root.appendChild(none);
+          return;
+        }
+        const grid = document.createElement('div');
+        grid.className = 'product-grid';
+        flows.forEach(f => {
+          const card = document.createElement('div');
+          const disabled = f.enabled === false;
+          card.className = 'pick-card' + (disabled ? ' disabled' : '') + (flow && flow.id === f.id ? ' selected' : '');
+          card.innerHTML = '<div class="pick-name">' + esc(f.name) + '</div><div class="pick-note">' + esc(f.note || '') + '</div>';
+          if (!disabled) card.onclick = () => selectFlow(f.id);
+          grid.appendChild(card);
+        });
+        root.appendChild(grid);
+      });
+    }
+
+    function selectFlow(id) {
+      flow = CONFIG.flows.find(f => f.id === id);
+      subflow = null;
       answers = {};
-      renderVerticals();
+      renderFlows();
+      hide('question-section');
+      hide('output-section');
+      document.getElementById('subflow-label').textContent = '2 · ' + (flow.subflowLabel || 'Type of work');
+      renderSubflows();
+      show('subflow-section');
+      // A flow with a single subflow does not need to be asked about it.
+      if (flow.subflows.length === 1) selectSubflow(flow.subflows[0].id);
+    }
+
+    function renderSubflows() {
+      const grid = document.getElementById('subflow-grid');
+      grid.innerHTML = '';
+      flow.subflows.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'pick-card' + (subflow === s.id ? ' selected' : '');
+        card.innerHTML = '<div class="pick-name">' + esc(s.name) + '</div><div class="pick-note">' + esc(s.note || '') + '</div>';
+        card.onclick = () => selectSubflow(s.id);
+        grid.appendChild(card);
+      });
+    }
+
+    function selectSubflow(id) {
+      subflow = id;
+      answers = {};
+      renderSubflows();
       hide('output-section');
       show('question-section');
       renderQuestions();
     }
 
     function renderQuestions() {
-      const resolved = resolveAnswers();
+      const resolved = resolveInputs();
       const root = document.getElementById('question-root');
       root.innerHTML = '';
 
       let cardIndex = 0;
-      questionsToShow(resolved).forEach(q => {
-        if (q.type === 'choice' && q.display === 'cards') {
-          root.appendChild(cardQuestion(q, resolved, cardIndex++));
+      inputsToShow(resolved).forEach(inp => {
+        if (inp.type === 'choice' && inp.display === 'cards') {
+          root.appendChild(cardInput(inp, resolved, cardIndex++));
         } else {
-          root.appendChild(standardQuestion(q, resolved));
+          root.appendChild(standardInput(inp, resolved));
         }
       });
 
       document.getElementById('create-btn').style.display = allRequiredAnswered(resolved) ? 'inline-block' : 'none';
     }
 
-    // A choice question flagged display:"cards" gets the big picker treatment.
-    function cardQuestion(q, resolved, cardIndex) {
+    // A choice input flagged display:"cards" gets the big picker treatment.
+    function cardInput(inp, resolved, cardIndex) {
       const wrap = document.createElement('div');
       const label = document.createElement('div');
       label.className = 'section-label';
-      label.textContent = (cardIndex + 2) + ' · ' + q.label;
+      label.textContent = (cardIndex + 3) + ' · ' + inp.label;
       wrap.appendChild(label);
       const grid = document.createElement('div');
       grid.className = 'scope-grid';
-      visibleOptions(q, resolved).forEach(o => {
+      visibleOptions(inp, resolved).forEach(o => {
         const card = document.createElement('div');
-        card.className = 'pick-card' + (resolved[q.id] === o.id ? ' selected' : '');
+        card.className = 'pick-card' + (resolved[inp.id] === o.id ? ' selected' : '');
         card.innerHTML = '<div class="pick-name">' + esc(o.label) + '</div><div class="pick-note">' + esc(o.note || '') + '</div>';
-        card.onclick = () => { answers[q.id] = o.id; renderQuestions(); };
+        card.onclick = () => { answers[inp.id] = o.id; renderQuestions(); };
         grid.appendChild(card);
       });
       wrap.appendChild(grid);
       return wrap;
     }
 
-    function standardQuestion(q, resolved) {
+    function standardInput(inp, resolved) {
       const card = document.createElement('div');
       card.className = 'q-card';
-      const val = resolved[q.id];
-      const help = q.help ? '<div class="q-sub">' + esc(q.help) + '</div>' : '';
+      const val = resolved[inp.id];
+      const help = inp.help ? '<div class="q-sub">' + esc(inp.help) + '</div>' : '';
 
-      if (q.type === 'number') {
+      if (inp.type === 'number') {
         card.innerHTML =
-          '<div class="q-label">' + esc(q.label) + '</div>' + help +
+          '<div class="q-label">' + esc(inp.label) + '</div>' + help +
           '<div class="stepper">' +
             '<button data-step="-1">&minus;</button>' +
-            '<span class="stepper-value">' + val + '</span>' +
+            '<input type="number" class="stepper-input" value="' + val + '" />' +
             '<button data-step="1">+</button>' +
           '</div>';
+        const box = card.querySelector('.stepper-input');
+        const min = inp.min != null ? inp.min : 0;
+        const max = inp.max != null ? inp.max : 999999;
+        const commit = (n) => {
+          answers[inp.id] = Math.max(min, Math.min(max, isNaN(n) ? min : n));
+          renderQuestions();
+        };
         card.querySelectorAll('[data-step]').forEach(btn => {
-          btn.onclick = () => {
-            const min = q.min != null ? q.min : 0;
-            const max = q.max != null ? q.max : 99;
-            answers[q.id] = Math.max(min, Math.min(max, Number(val) + Number(btn.dataset.step)));
-            renderQuestions();
-          };
+          btn.onclick = () => commit(Number(val) + Number(btn.dataset.step));
         });
-      } else if (q.type === 'yesno') {
+        box.onchange = () => commit(Math.round(Number(box.value)));
+      } else if (inp.type === 'yesno') {
         card.innerHTML =
           '<div class="toggle-row ' + (val ? 'on' : '') + '">' +
             '<div class="toggle-switch"></div>' +
             '<div>' +
-              '<div class="q-label" style="margin-bottom:2px;">' + esc(q.label) + '</div>' +
-              (q.help ? '<div class="toggle-text" style="color:var(--muted);">' + esc(q.help) + '</div>' : '') +
+              '<div class="q-label" style="margin-bottom:2px;">' + esc(inp.label) + '</div>' +
+              (inp.help ? '<div class="toggle-text" style="color:var(--muted);">' + esc(inp.help) + '</div>' : '') +
             '</div>' +
           '</div>';
-        card.querySelector('.toggle-row').onclick = () => { answers[q.id] = !val; renderQuestions(); };
-      } else if (q.type === 'checklist') {
-        card.innerHTML = '<div class="q-label">' + esc(q.label) + '</div>' + help + '<div class="checklist"></div>';
+        card.querySelector('.toggle-row').onclick = () => { answers[inp.id] = !val; renderQuestions(); };
+      } else if (inp.type === 'checklist') {
+        card.innerHTML = '<div class="q-label">' + esc(inp.label) + '</div>' + help + '<div class="checklist"></div>';
         const list = card.querySelector('.checklist');
-        visibleOptions(q, resolved).forEach(o => {
+        visibleOptions(inp, resolved).forEach(o => {
           const row = document.createElement('label');
           row.className = 'check-row';
           row.innerHTML = '<input type="checkbox"' + ((val || []).includes(o.id) ? ' checked' : '') + '><span>' + esc(o.label) + '</span>';
           row.querySelector('input').onchange = (e) => {
             const next = new Set(val || []);
             if (e.target.checked) next.add(o.id); else next.delete(o.id);
-            answers[q.id] = [...next];
+            answers[inp.id] = [...next];
             renderQuestions();
           };
           list.appendChild(row);
         });
-      } else if (q.type === 'choice') {
-        card.innerHTML = '<div class="q-label">' + esc(q.label) + '</div>' + help + '<div class="checklist"></div>';
+      } else if (inp.type === 'choice') {
+        card.innerHTML = '<div class="q-label">' + esc(inp.label) + '</div>' + help + '<div class="checklist"></div>';
         const list = card.querySelector('.checklist');
-        visibleOptions(q, resolved).forEach(o => {
+        visibleOptions(inp, resolved).forEach(o => {
           const row = document.createElement('label');
           row.className = 'check-row';
-          row.innerHTML = '<input type="radio" name="q-' + esc(q.id) + '"' + (val === o.id ? ' checked' : '') + '><span>' + esc(o.label) + '</span>';
-          row.querySelector('input').onchange = () => { answers[q.id] = o.id; renderQuestions(); };
+          row.innerHTML = '<input type="radio" name="i-' + esc(inp.id) + '"' + (val === o.id ? ' checked' : '') + '><span>' + esc(o.label) + '</span>';
+          row.querySelector('input').onchange = () => { answers[inp.id] = o.id; renderQuestions(); };
           list.appendChild(row);
         });
       }
@@ -360,40 +448,42 @@
 
     // ─── Output ─────────────────────────────────────────────────────────
     function buildTasks(resolved) {
-      const tasks = [];
-      vertical.activities.forEach(act => {
-        const push = (n) => tasks.push(Object.assign({}, act, {
-          description: n === undefined ? act.description : String(act.description).replace(/\{\{n\}\}/g, n),
+      const out = [];
+      flow.tasks.forEach(task => {
+        if (!inSubflow(task.subflows, subflow)) return;
+        if (!condMet(task.showWhen, resolved)) return;
+
+        const emit = (index) => out.push(Object.assign({}, task, {
+          description: fillText(task.description, resolved, index),
+          hours: hoursFor(task, resolved),
         }));
-        const c = act.showWhen;
-        if (!c) { push(); return; }
-        if (!condMet(c, resolved)) return;
-        if (c.repeatPerUnit) {
-          const n = Number(resolved[c.question]);
-          for (let i = 1; i <= n; i++) push(i);
-        } else if (c.moreThanZero) {
-          push(Number(resolved[c.question]));
+
+        if (task.repeatPer) {
+          const n = Number(resolved[task.repeatPer] || 0);
+          for (let i = 1; i <= n; i++) emit(i);
         } else {
-          push();
+          emit();
         }
       });
-      return tasks;
+      return out;
     }
 
     function createEstimate() {
-      const resolved = resolveAnswers();
+      const resolved = resolveInputs();
       const tasks = buildTasks(resolved);
-      const cols = vertical.columns;
+      const cols = flow.columns;
 
       const lines = [cols.map(c => c.header).join('\t')];
-      let trips = 0;
+      let trips = 0, hours = 0;
       tasks.forEach(t => {
         lines.push(cols.map(c => c.constant !== undefined ? c.constant : (t[c.from] != null ? t[c.from] : '')).join('\t'));
         trips += Number(t.trips || 0);
+        hours += Number(t.hours || 0);
       });
 
       document.getElementById('estimate-output').value = lines.join('\n');
       document.getElementById('sum-tasks').textContent = tasks.length;
+      document.getElementById('sum-hours').textContent = Math.round(hours * 100) / 100;
       document.getElementById('sum-trips').textContent = trips;
       document.getElementById('output-hint').textContent =
         'Tab-separated, header row included. Click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as ' +
@@ -414,7 +504,7 @@
       document.execCommand('copy');
     }
 
-    loadConfig().then(renderVerticals);
+    loadConfig().then(renderFlows);
   </script>
 </body>
 </html>

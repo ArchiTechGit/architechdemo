@@ -1,8 +1,23 @@
 {
   "verticals": [
     {
+      "id": "collaboration",
+      "name": "Collaboration"
+    },
+    {
+      "id": "secure-networking",
+      "name": "Secure Networking"
+    },
+    {
+      "id": "integrated-workspaces",
+      "name": "Integrated Workspaces"
+    }
+  ],
+  "flows": [
+    {
       "id": "wxcc",
       "name": "Webex Contact Centre",
+      "vertical": "collaboration",
       "note": "Available",
       "enabled": true,
       "phases": [
@@ -34,30 +49,24 @@
           "from": "description"
         }
       ],
-      "questions": [
+      "subflows": [
         {
-          "id": "engagement-type",
-          "type": "choice",
-          "display": "cards",
-          "label": "Engagement Type",
-          "options": [
-            {
-              "id": "new",
-              "label": "New / Greenfield",
-              "note": "Brand-new WxCC deployment, nothing to migrate off."
-            },
-            {
-              "id": "migration",
-              "label": "Migration",
-              "note": "Customer is moving off another contact centre platform onto WxCC."
-            }
-          ]
+          "id": "new",
+          "name": "New / Greenfield",
+          "note": "Brand-new WxCC deployment, nothing to migrate off."
         },
+        {
+          "id": "migration",
+          "name": "Migration",
+          "note": "Customer is moving off another contact centre platform onto WxCC."
+        }
+      ],
+      "inputs": [
         {
           "id": "scope",
           "type": "choice",
-          "display": "cards",
           "label": "Engagement Scope",
+          "display": "cards",
           "options": [
             {
               "id": "dfd",
@@ -110,7 +119,7 @@
               "id": "crm",
               "label": "CRM environment access confirmed",
               "showWhen": {
-                "question": "scope",
+                "input": "scope",
                 "is": "dfd"
               }
             }
@@ -122,7 +131,7 @@
           "label": "How many AI Agent bots / knowledge domains need to be built?",
           "help": "e.g. billing enquiries, product support, appointment booking — one domain per distinct topic area. Set to 0 to skip AI Agent entirely.",
           "showWhen": {
-            "question": "scope",
+            "input": "scope",
             "is": "dfd"
           },
           "min": 0,
@@ -135,7 +144,7 @@
           "label": "Include AI Assistant + CRM integration for agents?",
           "help": "Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to CRM. CRM platform is whatever the customer runs (Dynamics, Salesforce, ServiceNow, etc).",
           "showWhen": {
-            "question": "scope",
+            "input": "scope",
             "is": "dfd"
           },
           "default": true
@@ -146,7 +155,7 @@
           "label": "Which omnichannel channels are in scope for build?",
           "help": "Each selected channel adds its build + integration task. Selecting any channel also adds an OmniChannel testing pass.",
           "showWhen": {
-            "question": "scope",
+            "input": "scope",
             "is": "dfd"
           },
           "options": [
@@ -223,15 +232,17 @@
           "default": true
         }
       ],
-      "activities": [
+      "tasks": [
         {
           "id": "legacy-review",
           "phase": "Design",
           "description": "Legacy platform environment review & migration mapping",
           "location": "Office",
-          "showWhen": {
-            "question": "engagement-type",
-            "is": "migration"
+          "subflows": [
+            "migration"
+          ],
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -239,9 +250,11 @@
           "phase": "Staging",
           "description": "Legacy platform parallel-run validation",
           "location": "Office",
-          "showWhen": {
-            "question": "engagement-type",
-            "is": "migration"
+          "subflows": [
+            "migration"
+          ],
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -249,175 +262,282 @@
           "phase": "Project Completion & Handover",
           "description": "Legacy platform decommission",
           "location": "Office",
-          "showWhen": {
-            "question": "engagement-type",
-            "is": "migration"
+          "subflows": [
+            "migration"
+          ],
+          "hours": {
+            "base": 0
           }
         },
         {
           "id": "kickoff",
           "phase": "Kickoff",
           "description": "Kick Off Session with Stakeholders",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "existing-env-review",
           "phase": "Design",
           "description": "WxCC — Existing Environment Review",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "skills-team-queue-design",
           "phase": "Design",
           "description": "WxCC — Skills, Team, Queue Design",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "design-doc-signoff",
           "phase": "Design",
           "description": "Design Documentation & Sign-off",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "a2q-process",
           "phase": "Staging",
           "description": "WxCC A2Q Process",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "tenant-provisioning",
           "phase": "Staging",
           "description": "Webex Contact Centre tenant provisioning and validation",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "tenant-org-settings",
           "phase": "Implementation",
           "description": "Tenant & Org General Settings",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "site-config",
           "phase": "Implementation",
           "description": "Site Configuration",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "teams-config",
           "phase": "Implementation",
           "description": "Teams Configuration",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "queue-config",
           "phase": "Implementation",
           "description": "Queue Configuration",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "skills-based-routing",
           "phase": "Implementation",
           "description": "Skills Based Routing Configuration",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "entry-point-config",
           "phase": "Implementation",
           "description": "Entry Point Configurations",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "channel-cx-settings",
           "phase": "Implementation",
           "description": "Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "voice-ivr-build",
           "phase": "Implementation",
           "description": "Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "business-hours-config",
           "phase": "Implementation",
           "description": "Business hours and holiday treatment configuration",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "wrapup-code-config",
           "phase": "Implementation",
           "description": "Wrap-up code configuration",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "agent-desktop-layout",
           "phase": "Implementation",
           "description": "Agent Desktop layout customisation",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "functional-test-plan-doc",
           "phase": "Implementation",
           "description": "Detailed Functional Test Plan Document",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "functional-testing-voice",
           "phase": "Implementation",
           "description": "Detailed Functional Testing — Voice",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "uat-plan",
           "phase": "Implementation",
           "description": "User Acceptance Testing Plan",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "uat-execution",
           "phase": "Implementation",
           "description": "User Acceptance Testing Execution (assistance)",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "remediations",
           "phase": "Implementation",
           "description": "Remediations",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "quick-ref-guide",
           "phase": "Project Completion & Handover",
           "description": "Quick Reference Guide development",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "production-cutover",
           "phase": "Project Completion & Handover",
           "description": "Production cutover",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "hypercare",
           "phase": "Project Completion & Handover",
           "description": "Hypercare support period",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "as-built-doc",
           "phase": "Project Completion & Handover",
           "description": "As-built documentation",
-          "location": "Office"
+          "location": "Office",
+          "subflows": "all",
+          "hours": {
+            "base": 0
+          }
         },
         {
           "id": "workshop-discovery",
           "phase": "Design",
-          "description": "Workshop {{n}} — discovery session",
+          "description": "Workshop {#} — discovery session",
           "location": "Office",
-          "showWhen": {
-            "question": "workshops",
-            "repeatPerUnit": true
+          "subflows": "all",
+          "repeatPer": "workshops",
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -425,9 +545,13 @@
           "phase": "Staging",
           "description": "SMS asset provisioning",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "staging-channels",
+            "input": "staging-channels",
             "is": "sms"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -435,9 +559,13 @@
           "phase": "Staging",
           "description": "Webex Connect account/asset setup",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "staging-channels",
+            "input": "staging-channels",
             "is": "webexconnect"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -445,9 +573,13 @@
           "phase": "Staging",
           "description": "Facebook Business Manager / Meta setup",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "staging-channels",
+            "input": "staging-channels",
             "is": "facebook"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -455,9 +587,13 @@
           "phase": "Staging",
           "description": "Instagram DM custom channel setup",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "staging-channels",
+            "input": "staging-channels",
             "is": "instagram"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -465,9 +601,13 @@
           "phase": "Staging",
           "description": "Email channel asset setup + mailbox routing",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "staging-channels",
+            "input": "staging-channels",
             "is": "email"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -475,9 +615,13 @@
           "phase": "Staging",
           "description": "CRM environment access confirmed",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "staging-channels",
+            "input": "staging-channels",
             "is": "crm"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -485,9 +629,13 @@
           "phase": "Implementation",
           "description": "Knowledge base content sourcing",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "agent-domains",
+            "input": "agent-domains",
             "moreThanZero": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -495,9 +643,13 @@
           "phase": "Implementation",
           "description": "Intent-based routing configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "agent-domains",
+            "input": "agent-domains",
             "moreThanZero": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -505,9 +657,13 @@
           "phase": "Implementation",
           "description": "Knowledge accuracy testing",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "agent-domains",
+            "input": "agent-domains",
             "moreThanZero": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -515,9 +671,13 @@
           "phase": "Implementation",
           "description": "Agent Detailed Testing & Remediation",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "agent-domains",
+            "input": "agent-domains",
             "moreThanZero": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -525,19 +685,24 @@
           "phase": "Implementation",
           "description": "Detailed Functional Testing — AI Agent",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "agent-domains",
+            "input": "agent-domains",
             "moreThanZero": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
           "id": "ai-agent-domain-build",
           "phase": "Implementation",
-          "description": "AI Agent build — knowledge domain {{n}} FAQ",
+          "description": "AI Agent build — knowledge domain {#} FAQ",
           "location": "Office",
-          "showWhen": {
-            "question": "agent-domains",
-            "repeatPerUnit": true
+          "subflows": "all",
+          "repeatPer": "agent-domains",
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -545,9 +710,13 @@
           "phase": "Design",
           "description": "Workshop — AI Assistant Use Cases",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -555,9 +724,13 @@
           "phase": "Design",
           "description": "Workshop — CRM Field Mapping",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -565,9 +738,13 @@
           "phase": "Staging",
           "description": "CRM environment access and credentials confirmed",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -575,9 +752,13 @@
           "phase": "Implementation",
           "description": "Screen-pop configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -585,9 +766,13 @@
           "phase": "Implementation",
           "description": "Call transcription and summarisation enablement",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -595,9 +780,13 @@
           "phase": "Implementation",
           "description": "Suggested response configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -605,9 +794,13 @@
           "phase": "Implementation",
           "description": "Wrap-up and task automation configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -615,9 +808,13 @@
           "phase": "Implementation",
           "description": "Write-back mapping (notes, summaries, outcomes into CRM)",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -625,9 +822,13 @@
           "phase": "Implementation",
           "description": "Detailed Functional Testing — AI Assistant",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "ai-assistant",
+            "input": "ai-assistant",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -635,9 +836,13 @@
           "phase": "Implementation",
           "description": "Web chat widget (branding, pre-chat form, reason codes)",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "webchat"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -645,9 +850,13 @@
           "phase": "Implementation",
           "description": "SMS flow configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "sms-flow"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -655,9 +864,13 @@
           "phase": "Implementation",
           "description": "Email routing and triage configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "email-routing"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -665,9 +878,13 @@
           "phase": "Implementation",
           "description": "Facebook Messenger integration and testing",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "fb-messenger"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -675,9 +892,13 @@
           "phase": "Implementation",
           "description": "Instagram DM custom channel integration and testing",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "instagram-dm"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -685,9 +906,13 @@
           "phase": "Implementation",
           "description": "Quick Button integration — external SMS sender API",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "qb-api"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -695,9 +920,13 @@
           "phase": "Implementation",
           "description": "Quick Button integration — external SMS agent desktop",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "is": "qb-desktop"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -705,9 +934,13 @@
           "phase": "Design",
           "description": "Workshop — Omnichannel Scope",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "anySelected": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -715,9 +948,13 @@
           "phase": "Implementation",
           "description": "Detailed Functional Testing — OmniChannel",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "omni-channels",
+            "input": "omni-channels",
             "anySelected": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -725,9 +962,13 @@
           "phase": "Implementation",
           "description": "Topic analytics configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "reporting",
+            "input": "reporting",
             "is": "topic-analytics"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -735,9 +976,13 @@
           "phase": "Implementation",
           "description": "Analyzer dashboard setup",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "reporting",
+            "input": "reporting",
             "is": "analyzer-dashboard"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -745,9 +990,13 @@
           "phase": "Implementation",
           "description": "Dashboard embedding into Agent Desktop",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "reporting",
+            "input": "reporting",
             "is": "dashboard-embed"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -755,20 +1004,28 @@
           "phase": "Implementation",
           "description": "Journey Data Service configuration",
           "location": "Office",
+          "subflows": "all",
           "showWhen": {
-            "question": "reporting",
+            "input": "reporting",
             "is": "journey-data"
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
           "id": "agent-training-task",
           "phase": "Project Completion & Handover",
-          "description": "Agent training (desktop, call/chat handling, wrap-up codes) — {{n}} sessions",
+          "description": "Agent training (desktop, call/chat handling, wrap-up codes) — {agent-training} sessions",
           "location": "Client Site",
           "trips": 1,
+          "subflows": "all",
           "showWhen": {
-            "question": "agent-training",
+            "input": "agent-training",
             "moreThanZero": true
+          },
+          "hours": {
+            "base": 0
           }
         },
         {
@@ -777,86 +1034,16 @@
           "description": "Supervisor training (queue monitoring, reporting)",
           "location": "Client Site",
           "trips": 1,
+          "subflows": "all",
           "showWhen": {
-            "question": "supervisor-training",
+            "input": "supervisor-training",
             "isOn": true
+          },
+          "hours": {
+            "base": 0
           }
         }
       ]
-    },
-    {
-      "id": "wireless",
-      "name": "Wireless",
-      "note": "Coming soon",
-      "enabled": false,
-      "phases": [
-        "Kickoff",
-        "Design",
-        "Staging",
-        "Implementation",
-        "Project Completion & Handover"
-      ],
-      "locations": [
-        "Office",
-        "Client Site"
-      ],
-      "columns": [
-        {
-          "header": "Phase",
-          "from": "phase"
-        },
-        {
-          "header": "Skill Required",
-          "constant": "Collaboration"
-        },
-        {
-          "header": "Task Type",
-          "constant": "ArchiTech Activity"
-        },
-        {
-          "header": "Description",
-          "from": "description"
-        }
-      ],
-      "questions": [],
-      "activities": []
-    },
-    {
-      "id": "spaces",
-      "name": "Cisco Spaces",
-      "note": "Coming soon",
-      "enabled": false,
-      "phases": [
-        "Kickoff",
-        "Design",
-        "Staging",
-        "Implementation",
-        "Project Completion & Handover"
-      ],
-      "locations": [
-        "Office",
-        "Client Site"
-      ],
-      "columns": [
-        {
-          "header": "Phase",
-          "from": "phase"
-        },
-        {
-          "header": "Skill Required",
-          "constant": "Collaboration"
-        },
-        {
-          "header": "Task Type",
-          "constant": "ArchiTech Activity"
-        },
-        {
-          "header": "Description",
-          "from": "description"
-        }
-      ],
-      "questions": [],
-      "activities": []
     }
   ]
 }
