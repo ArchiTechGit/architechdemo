@@ -58,6 +58,11 @@
       padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: var(--font); width: 100%; text-align: left; }
     .btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
 
+    .btn-move { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px;
+      width: 26px; height: 26px; border-radius: 6px; cursor: pointer; flex-shrink: 0; padding: 0; }
+    .btn-move:hover:not(:disabled) { color: var(--cyan); border-color: var(--cyan-mid); }
+    .btn-move:disabled { opacity: 0.25; cursor: default; }
+
     .btn-x { background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer;
       width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
     .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
@@ -189,7 +194,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.3.1';
+    const ADMIN_VERSION = '0.4.0';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -412,6 +417,50 @@
     // EDITING says which inline form is open so a full re-render restores it.
     //   { kind:'flow' } { kind:'new-flow' } { kind:'input', idx }
     //   { kind:'task', idx } { kind:'task-new', section }
+    // A condition may only look at an input asked earlier, so a move that would
+    // put a dependency after its dependant has to be refused.
+    function firstBrokenDependency(list) {
+      const pos = new Map(list.map((i, n) => [i.id, n]));
+      for (let n = 0; n < list.length; n++) {
+        const conds = [list[n].showWhen]
+          .concat((list[n].options || []).map(o => o.showWhen))
+          .filter(Boolean);
+        for (const c of conds) {
+          if (pos.get(c.input) >= n) return { dependant: list[n], on: c.input };
+        }
+      }
+      return null;
+    }
+
+    function moveInput(idx, delta) {
+      const f = F();
+      const to = idx + delta;
+      if (to < 0 || to >= f.inputs.length) return;
+      const next = f.inputs.slice();
+      const held = next[idx];
+      next[idx] = next[to];
+      next[to] = held;
+      const broken = firstBrokenDependency(next);
+      if (broken) {
+        const on = inputById(broken.on);
+        alert(`Cannot move that: "${broken.dependant.label}" only shows when "${on ? on.label : broken.on}" ` +
+              `has been answered, so it has to stay after it.`);
+        return;
+      }
+      f.inputs = next;
+      renderAdmin();
+    }
+
+    function moveSubflow(idx, delta) {
+      const f = F();
+      const to = idx + delta;
+      if (to < 0 || to >= f.subflows.length) return;
+      const held = f.subflows[idx];
+      f.subflows[idx] = f.subflows[to];
+      f.subflows[to] = held;
+      renderAdmin();
+    }
+
     let EDITING = null;
     const EXPANDED = new Set();
 
@@ -483,6 +532,19 @@
           </div>`;
         const actions = document.createElement('div');
         actions.className = 'block-actions';
+        const up = document.createElement('button');
+        up.className = 'btn-move';
+        up.textContent = '\u25b2';
+        up.title = 'Ask this earlier';
+        up.disabled = idx === 0;
+        up.onclick = () => moveInput(idx, -1);
+        const down = document.createElement('button');
+        down.className = 'btn-move';
+        down.textContent = '\u25bc';
+        down.title = 'Ask this later';
+        down.disabled = idx === f.inputs.length - 1;
+        down.onclick = () => moveInput(idx, 1);
+        actions.append(up, down);
         const edit = document.createElement('button');
         edit.className = 'btn-ghost';
         edit.textContent = 'Edit';
@@ -551,7 +613,12 @@
           const add = document.createElement('button');
           add.className = 'btn-add';
           add.textContent = '+ Add task here';
-          add.onclick = () => { EDITING = { kind: 'task-new', section: section.id }; renderAdmin(); };
+          add.onclick = () => {
+            // Pin it, or saving would collapse the section and lose your place.
+            EXPANDED.add(key);
+            EDITING = { kind: 'task-new', section: section.id };
+            renderAdmin();
+          };
           body.appendChild(add);
           if (EDITING && EDITING.kind === 'task-new' && EDITING.section === section.id) {
             const slot = document.createElement('div');
@@ -1017,7 +1084,7 @@
     function renderTaskForm(slot, idx, section) {
       const f = F();
       const existing = idx >= 0 ? f.tasks[idx] : {
-        id: null, phase: f.phases[0], description: '',
+        id: null, phase: CONFIG.phases[0], description: '',
         skill: (CONFIG.skills || [])[0], taskType: (CONFIG.taskTypes || [])[0],
         subflows: section.shared ? 'all' : [section.id], effort: [],
       };
@@ -1036,7 +1103,7 @@
           <div class="field-row">
             <div class="field">
               <label class="field-label">Phase</label>
-              <select id="tf-phase">${f.phases.map(p => `<option ${existing.phase === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
+              <select id="tf-phase">${CONFIG.phases.map(p => `<option ${existing.phase === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
             </div>
             <div class="field">
               <label class="field-label">Skill required</label>
@@ -1104,7 +1171,7 @@
               ${roles.map(r => `<option value="${attr(r.id)}" ${e.role === r.id ? 'selected' : ''}>${esc(r.name)}</option>`).join('')}
             </select>
             <select data-role="eff-location" onchange="readEffortLines()" style="flex:0 0 150px;">
-              ${f.locations.map(l => `<option ${e.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}
+              ${CONFIG.locations.map(l => `<option ${e.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}
             </select>
             <button class="btn-x" type="button" onclick="removeEffortLine(${n})">&#10005;</button>
           </div>
@@ -1138,7 +1205,7 @@
       if (document.querySelector('[data-effort]')) readEffortLines();
       const used = window._tfEffort.map(e => e.role);
       const next = roles.find(r => !used.includes(r.id)) || roles[0];
-      window._tfEffort.push({ role: next.id, location: F().locations[0], business: 0, after: 0 });
+      window._tfEffort.push({ role: next.id, location: CONFIG.locations[0], business: 0, after: 0 });
       renderEffortLines();
       updateTaskPreview();
     }
@@ -1389,30 +1456,21 @@
           </label>
 
           <div class="field">
-            <label class="field-label">Subflows</label>
-            <div id="ff-subflows">${f.subflows.map(s => `
+            <label class="field-label">Subflows, in the order they are offered</label>
+            <div id="ff-subflows">${f.subflows.map((s, n) => `
               <div class="row-editor" data-sub-id="${attr(s.id)}">
+                <button class="btn-move" type="button" onclick="moveSubflow(${n}, -1)" ${n === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
+                <button class="btn-move" type="button" onclick="moveSubflow(${n}, 1)" ${n === f.subflows.length - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
                 <input type="text" value="${attr(s.name)}" data-role="sub-name" />
                 <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
               </div>`).join('')}</div>
             <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addSubflowRow()">+ Add subflow</button>
           </div>
 
-          <div class="field">
-            <label class="field-label">Phases, in the order they should appear</label>
-            <input type="text" id="ff-phases" value="${attr(f.phases.join(', '))}" />
+          <div class="q-sub" style="margin-bottom:14px;">
+            Phases, locations and the spreadsheet columns are fixed by the PSE, so they
+            are the same for every flow and are not editable here.
           </div>
-          <div class="field">
-            <label class="field-label">Locations a task can be delivered from</label>
-            <input type="text" id="ff-locations" value="${attr(f.locations.join(', '))}" />
-          </div>
-          <div class="field">
-            <label class="field-label">Task-detail columns, in paste order</label>
-            <div class="q-sub" style="margin-bottom:8px;">The resource hours block is fixed by the PSE and pasted separately.</div>
-            <div id="ff-columns">${f.columns.map(columnRowHtml).join('')}</div>
-            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addColumnRow()">+ Add column</button>
-            <button class="btn-ghost" type="button" onclick="usePseColumns()">Reset to the standard task columns</button>          </div>
-
           <button class="btn-primary" onclick="saveFlowForm()">Save flow</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
           ${CONFIG.flows.length > 1 ? '<button class="btn-ghost" onclick="deleteFlow()">Delete flow</button>' : ''}
@@ -1438,50 +1496,10 @@
       row.remove();
     }
 
-    const COLUMN_SOURCES = [
-      { value: 'phase', label: 'The phase' },
-      { value: 'description', label: 'The description' },
-      { value: 'location', label: 'The location' },
-      { value: 'hours', label: 'The hours' },
-      { value: 'trips', label: 'Onsite trips' },
-      { value: '', label: 'Fixed text...' },
-    ];
-
-    function columnRowHtml(c) {
-      const isConstant = c.constant !== undefined;
-      const sel = COLUMN_SOURCES.map(s =>
-        `<option value="${s.value}" ${(isConstant && s.value === '') || (!isConstant && s.value === c.from) ? 'selected' : ''}>${esc(s.label)}</option>`
-      ).join('');
-      return `
-        <div class="row-editor">
-          <input type="text" placeholder="Column header" value="${attr(c.header)}" data-role="col-header" />
-          <select data-role="col-source" onchange="this.closest('.row-editor').querySelector('[data-role=col-constant]').style.display = this.value ? 'none' : 'block';">${sel}</select>
-          <input type="text" placeholder="Fixed value" value="${attr(isConstant ? c.constant : '')}" data-role="col-constant" style="display:${isConstant ? 'block' : 'none'};" />
-          <button class="btn-x" type="button" onclick="this.closest('.row-editor').remove()">&#10005;</button>
-        </div>`;
-    }
-
-    // Puts the flow back to the four task-detail columns the PSE expects at
-    // column A. The resource block is fixed by the sheet and not configurable.
-    function usePseColumns() {
-      if (!confirm('Replace this flow\'s columns with the standard task-detail block?')) return;
-      document.getElementById('ff-columns').innerHTML =
-        (CONFIG.taskColumns || []).map(columnRowHtml).join('');
-    }
-
-    function addColumnRow() {
-      document.getElementById('ff-columns').insertAdjacentHTML('beforeend', columnRowHtml({ header: '', from: 'description' }));
-    }
-
     function saveFlowForm() {
       const f = F();
       const name = document.getElementById('ff-name').value.trim();
       if (!name) { alert('Name is required.'); return; }
-      const phases = splitList(document.getElementById('ff-phases').value);
-      const locations = splitList(document.getElementById('ff-locations').value);
-      if (!phases.length) { alert('At least one phase is required.'); return; }
-      if (!locations.length) { alert('At least one location is required.'); return; }
-
       const subIds = [];
       const subflows = Array.from(document.querySelectorAll('#ff-subflows .row-editor')).map(row => {
         const subName = row.querySelector('[data-role="sub-name"]').value.trim();
@@ -1492,13 +1510,6 @@
         return prev ? Object.assign({}, prev, { name: subName }) : { id, name: subName };
       }).filter(Boolean);
       if (!subflows.length) { alert('At least one subflow is required.'); return; }
-
-      const columns = Array.from(document.querySelectorAll('#ff-columns .row-editor')).map(row => {
-        const header = row.querySelector('[data-role="col-header"]').value.trim();
-        const source = row.querySelector('[data-role="col-source"]').value;
-        return source ? { header, from: source } : { header, constant: row.querySelector('[data-role="col-constant"]').value };
-      }).filter(c => c.header);
-      if (!columns.length) { alert('At least one column is required.'); return; }
 
       // Tasks and inputs pointing at a removed subflow would silently vanish,
       // so they fall back to every subflow instead.
@@ -1517,8 +1528,8 @@
       if (subflowLabel) f.subflowLabel = subflowLabel; else delete f.subflowLabel;
       f.enabled = document.getElementById('ff-enabled').checked;
       f.subflows = subflows;
-      f.phases = phases;
-      f.locations = locations;
+      CONFIG.phases = phases;
+      CONFIG.locations = locations;
       f.columns = columns;
       EDITING = null;
       renderAdmin();

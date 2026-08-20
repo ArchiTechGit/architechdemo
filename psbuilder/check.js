@@ -78,6 +78,12 @@ check('seven engineer roles', (config.roles || []).map(r => r.id),
   ['TA', 'SE', 'SSE', 'SCE', 'SA', 'AC', 'SC']);
 check('eight skills', (config.skills || []).length, 8);
 check('skills start with Collaboration', (config.skills || [])[0], 'Collaboration');
+check('the five sheet phases', config.phases,
+  ['Kickoff', 'Design', 'Staging', 'Implementation', 'Project Completion & Handover']);
+check('the two sheet locations', config.locations, ['Office', 'Client Site']);
+// These are the same for every flow, so no flow may override them.
+check('no flow overrides a PSE-fixed list',
+  config.flows.filter(f => f.phases || f.locations || f.columns).map(f => f.id), []);
 check('four task types', config.taskTypes,
   ['ArchiTech Activity', 'Client Dependency', 'ArchiTech Subcontractor Activity', 'ArchiTech Document Deliverable']);
 check('the task block is the four sheet columns', (config.taskColumns || []).map(c => c.header),
@@ -107,17 +113,11 @@ check('vertical ids are unique', verticalIds.length, new Set(verticalIds).size);
 
 config.flows.forEach(f => {
   const at = (what) => `flow ${f.id}: ${what}`;
-  ['id', 'name', 'vertical', 'phases', 'locations', 'columns', 'subflows', 'inputs', 'tasks'].forEach(k => {
+  ['id', 'name', 'vertical', 'subflows', 'inputs', 'tasks'].forEach(k => {
     if (f[k] === undefined) problems.push(at(`missing "${k}"`));
   });
   if (!verticalIds.includes(f.vertical)) problems.push(at(`sits in unknown vertical "${f.vertical}"`));
   if (!(f.subflows || []).length) problems.push(at('has no subflows'));
-  if (!(f.columns || []).length) problems.push(at('has no output columns'));
-
-  (f.columns || []).forEach(c => {
-    if (c.from === undefined && c.constant === undefined) problems.push(at(`column "${c.header}" has neither from nor constant`));
-    if (c.from && !COLUMN_FIELDS.includes(c.from)) problems.push(at(`column "${c.header}" reads unknown field "${c.from}"`));
-  });
 
   const subIds = (f.subflows || []).map(s => s.id);
   if (subIds.length !== new Set(subIds).size) problems.push(at('has duplicate subflow ids'));
@@ -210,7 +210,7 @@ config.flows.forEach(f => {
     if (seenT.has(t.id)) problems.push(at(`duplicate task id "${t.id}"`));
     seenT.add(t.id);
     if (!t.description) problems.push(at(`task "${t.id}" has no description`));
-    if (!f.phases.includes(t.phase)) problems.push(at(`task "${t.id}" uses phase "${t.phase}", which this flow does not define`));
+    if (!config.phases.includes(t.phase)) problems.push(at(`task "${t.id}" uses phase "${t.phase}", which the PSE does not offer`));
 
     // The three PSE dropdowns.
     if (!t.skill) problems.push(at(`task "${t.id}" has no skill`));
@@ -230,8 +230,8 @@ config.flows.forEach(f => {
     (t.effort || []).forEach((e, n) => {
       const label = `task "${t.id}" effort ${n + 1}`;
       if (!roleIds.includes(e.role)) problems.push(at(`${label} names unknown role "${e.role}"`));
-      if (e.location && !f.locations.includes(e.location)) {
-        problems.push(at(`${label} uses location "${e.location}", which this flow does not define`));
+      if (e.location && !config.locations.includes(e.location)) {
+        problems.push(at(`${label} uses location "${e.location}", which the PSE does not offer`));
       }
       if (!e.business && !e.after) problems.push(at(`${label} has no hours against it`));
       checkAmount(e.business, `${label} business hours`, t.repeatPer);
@@ -241,8 +241,8 @@ config.flows.forEach(f => {
     if (usedRoles.length !== new Set(usedRoles).size) {
       problems.push(at(`task "${t.id}" has two effort lines for the same role`));
     }
-    if (t.defaultLocation && !f.locations.includes(t.defaultLocation)) {
-      problems.push(at(`task "${t.id}" defaults to location "${t.defaultLocation}", which this flow does not define`));
+    if (t.defaultLocation && !config.locations.includes(t.defaultLocation)) {
+      problems.push(at(`task "${t.id}" defaults to location "${t.defaultLocation}", which the PSE does not offer`));
     }
 
     // Every {brace} must resolve, and {#} only means something when repeating.
@@ -347,8 +347,6 @@ section('Effort and the PSE columns');
 // Mirrors the worked example: a handset rollout billed per device.
 const demo = {
   id: 'demo', name: 'Spectralink Handsets', vertical: 'collaboration',
-  phases: ['Design', 'Implementation'], locations: ['Office', 'Client Site'],
-  columns: JSON.parse(JSON.stringify(config.taskColumns)),
   subflows: [{ id: 'new-install', name: 'New Install' }, { id: 'add', name: 'Add Handsets' }],
   inputs: [
     { id: 'devices', type: 'number', token: 'number of devices', label: 'How many handsets?', default: 50, min: 1, max: 5000 },
@@ -424,6 +422,24 @@ check('the first row is data, not column names',
 check('neither block writes a PSE-owned column',
   config.taskColumns.concat(config.resourceColumns)
     .filter(c => RETIRED_FIELDS.includes(c.from)), []);
+// ── 5b. Reordering questions keeps dependencies in front of dependants ──
+section('Question order');
+const brokenSrc = (adminHtml.match(/function firstBrokenDependency\([\s\S]*?\n    \}/) || [''])[0];
+check('admin can spot a broken dependency', brokenSrc.length > 0, true);
+if (brokenSrc) {
+  const broken = new Function(brokenSrc + '; return firstBrokenDependency;')();
+  // The shipped config must already be in a valid order.
+  config.flows.forEach(f => {
+    check(f.id + ': questions are in a workable order', broken(f.inputs), null);
+  });
+  // And a deliberate swap that puts a gate after its dependant must be caught.
+  const a = { id: 'scope', type: 'choice', label: 'Scope', options: [{ id: 'dfd', label: 'DFD' }] };
+  const b = { id: 'domains', type: 'number', label: 'Domains', showWhen: { input: 'scope', is: 'dfd' } };
+  check('a valid order passes', broken([a, b]), null);
+  check('an invalid order is caught', (broken([b, a]) || {}).on, 'scope');
+}
+
+
 // ── 6. Admin shows every task exactly once ──────────────────────────────
 section('Admin grouping');
 const adminSrc = scripts(adminHtml).find(s => s.includes('function sectionsForFlow'));

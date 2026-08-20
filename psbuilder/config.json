@@ -20,35 +20,6 @@
       "vertical": "collaboration",
       "note": "Available",
       "enabled": true,
-      "phases": [
-        "Kickoff",
-        "Design",
-        "Staging",
-        "Implementation",
-        "Project Completion & Handover"
-      ],
-      "locations": [
-        "Office",
-        "Client Site"
-      ],
-      "columns": [
-        {
-          "header": "Phase",
-          "from": "phase"
-        },
-        {
-          "header": "Skill Required",
-          "from": "skill"
-        },
-        {
-          "header": "Task Type",
-          "from": "taskType"
-        },
-        {
-          "header": "Description",
-          "from": "description"
-        }
-      ],
       "subflows": [
         {
           "id": "new",
@@ -1173,5 +1144,16 @@
   "pasteTargets": {
     "task": "A",
     "resource": "J"
-  }
+  },
+  "phases": [
+    "Kickoff",
+    "Design",
+    "Staging",
+    "Implementation",
+    "Project Completion & Handover"
+  ],
+  "locations": [
+    "Office",
+    "Client Site"
+  ]
 }

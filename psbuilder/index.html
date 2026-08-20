@@ -547,7 +547,7 @@
     // The columns between the two blocks, which must not be written to.
     function gapLabel() {
       const targets = CONFIG.pasteTargets || { task: "A", resource: "J" };
-      const first = targets.task.charCodeAt(0) + (flow.columns.length || 0);
+      const first = targets.task.charCodeAt(0) + (CONFIG.taskColumns.length || 0);
       const last = targets.resource.charCodeAt(0) - 1;
       if (first > last) return "in between";
       return String.fromCharCode(first) + "–" + String.fromCharCode(last);
@@ -562,7 +562,7 @@
       lines.forEach(l => applySlots(l, slots));
 
       const targets = CONFIG.pasteTargets || { task: "A", resource: "J" };
-      document.getElementById("out-task").value = blockText(flow.columns, lines);
+      document.getElementById("out-task").value = blockText(CONFIG.taskColumns, lines);
       document.getElementById("out-resource").value = blockText(CONFIG.resourceColumns, lines);
 
       let business = 0, after = 0;
@@ -584,7 +584,7 @@
       document.getElementById("slot-hint").textContent = mapping + warn;
 
       document.getElementById("hint-task").textContent =
-        flow.columns.map(c => c.header).join(" · ") +
+        CONFIG.taskColumns.map(c => c.header).join(" · ") +
         " — paste at column " + targets.task + ", on the first empty task row. No header row is included.";
       document.getElementById("hint-resource").textContent =
         "Location · Business · After, five times over — paste at column " + targets.resource +
