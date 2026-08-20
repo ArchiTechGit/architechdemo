@@ -91,6 +91,48 @@ check('startup reuses the stored token', /if \(stored\) tryToken\(stored, false\
 check('the token can be forgotten on purpose', /function forgetToken\(\)/.test(adminHtml), true);
 check('failures explain the status', /function explainFailure\(status\)/.test(adminHtml), true);
 
+// ── 1d. Creating a flow actually creates one ───────────────────────────
+section('New flow');
+{
+  const grab = (re) => (adminHtml.match(re) || [null])[0];
+  const src = [
+    grab(/function slugify\([\s\S]*?\n    \}/),
+    grab(/function uniqueId\([\s\S]*?\n    \}/),
+    grab(/function createFlow\(\)[\s\S]*?\n    \}/),
+  ];
+  check('admin has the pieces of the new-flow step', src.every(Boolean), true);
+  if (src.every(Boolean)) {
+    // A throwaway config, so the real one is untouched.
+    const draft = JSON.parse(JSON.stringify(config));
+    const fields = { 'nf-name': { value: 'Spectralink Handsets' }, 'nf-vertical': { value: 'collaboration' } };
+    const subflowEls = [{ value: 'New install' }, { value: 'Add handsets' }, { value: 'Upgrade handsets' }];
+    const doc = {
+      getElementById: id => fields[id] || { value: '' },
+      querySelectorAll: () => subflowEls,
+    };
+    let switched = null;
+    const alerts = [];
+    const createFlow = new Function('document', 'CONFIG', 'alert', 'switchFlow', 'EXPANDED', 'renderAdmin',
+      src.join('\n') + '; return createFlow;')(
+      doc, draft, m => alerts.push(m), id => { switched = id; }, new Set(), () => {});
+    createFlow();
+
+    check('it raised no complaint', alerts, []);
+    check('it switched to the new flow', switched, 'spectralink-handsets');
+    const made = draft.flows.find(f => f.id === switched);
+    check('the flow exists', !!made, true);
+    if (made) {
+      // Phases, locations and columns are global; a flow carrying them was the
+      // bug that made this button do nothing.
+      check('it carries only what a flow owns', Object.keys(made).sort(),
+        ['enabled', 'id', 'inputs', 'name', 'note', 'subflows', 'tasks', 'vertical']);
+      check('it named all three subflows', made.subflows.map(s => s.name),
+        ['New install', 'Add handsets', 'Upgrade handsets']);
+      check('it starts empty', [made.inputs.length, made.tasks.length], [0, 0]);
+    }
+  }
+}
+
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
 section('PSE lists');
 check('seven engineer roles', (config.roles || []).map(r => r.id),

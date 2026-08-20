@@ -219,7 +219,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.6.0';
+    const ADMIN_VERSION = '0.6.1';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -1094,7 +1094,7 @@
           </div>
           <div class="field">
             <label class="field-label">Helper text (optional)</label>
-            <input type="text" id="if-help" value="${attr(existing.help)}" placeholder="Extra context shown under the question" />
+            <input type="text" id="if-help" value="${attr(existing.help)}" placeholder="e.g. Count every handset being touched, new or replaced" />
           </div>
           <div class="field-row">
             <div class="field">
@@ -1171,7 +1171,7 @@
     function optionRowHtml(o) {
       return `
         <div class="row-editor" data-option-id="${attr(o.id || '')}">
-          <input type="text" placeholder="Option text" value="${attr(o.label)}" data-role="opt-label" />
+          <input type="text" placeholder="e.g. Web chat widget" value="${attr(o.label)}" data-role="opt-label" />
           <label><input type="checkbox" data-role="opt-default" ${o.default ? 'checked' : ''} /> on by default${o.showWhen ? ' · gated' : ''}</label>
           <button class="btn-x" type="button" onclick="this.closest('.row-editor').remove()">&#10005;</button>
         </div>`;
@@ -1334,7 +1334,7 @@
         <div class="q-card" style="margin-top:8px;">
           <div class="field">
             <label class="field-label">Description</label>
-            <textarea id="tf-description">${esc(existing.description)}</textarea>
+            <textarea id="tf-description" placeholder="e.g. Enroll {number of devices} handsets to MDM">${esc(existing.description)}</textarea>
             <div class="q-sub" style="margin-top:8px;" id="tf-chips"></div>
           </div>
 
@@ -1620,7 +1620,7 @@
       const box = document.getElementById('nf-names');
       let html = '<label class="field-label">Name each subflow</label>';
       for (let n = 0; n < window._nfCount; n++) {
-        html += `<input type="text" data-sf="${n}" value="${attr((typed && typed[n]) || '')}" placeholder="Subflow ${n + 1}" style="margin-bottom:8px;" />`;
+        html += `<input type="text" data-sf="${n}" value="${attr((typed && typed[n]) || '')}" placeholder="${['e.g. New install', 'e.g. Add handsets', 'e.g. Upgrade handsets'][n] || 'e.g. Another variation'}" style="margin-bottom:8px;" />`;
       }
       box.innerHTML = html;
     }
@@ -1632,23 +1632,16 @@
         .map(el => el.value.trim()).filter(Boolean);
       if (!names.length) { alert('Name at least one subflow.'); return; }
 
-      const model = F();
       const id = uniqueId(slugify(name), CONFIG.flows.map(f => f.id));
       const subIds = [];
+      // Phases, locations and the column blocks come from the config, not from
+      // here: they are the same for every flow.
       const flow = {
         id,
         name,
         vertical: document.getElementById('nf-vertical').value,
         note: '',
         enabled: true,
-        // Seeded from the current flow so a new one is not starting from nothing.
-        phases: model ? model.phases.slice() : ['Design', 'Implementation', 'Project Completion & Handover'],
-        locations: model ? model.locations.slice() : ['Office', 'Client Site'],
-        columns: model ? JSON.parse(JSON.stringify(model.columns)) : [
-          { header: 'Phase', from: 'phase' },
-          { header: 'Description', from: 'description' },
-          { header: 'Hours', from: 'hours' },
-        ],
         subflows: names.map(n => {
           const sid = uniqueId(slugify(n), subIds);
           subIds.push(sid);
@@ -1670,7 +1663,7 @@
           <div class="field-row">
             <div class="field">
               <label class="field-label">Name</label>
-              <input type="text" id="ff-name" value="${attr(f.name)}" />
+              <input type="text" id="ff-name" value="${attr(f.name)}" placeholder="e.g. Spectralink Handsets" />
             </div>
             <div class="field">
               <label class="field-label">Solution vertical</label>
@@ -1681,7 +1674,7 @@
           <div class="field-row">
             <div class="field">
               <label class="field-label">Note shown on the card</label>
-              <input type="text" id="ff-note" value="${attr(f.note)}" />
+              <input type="text" id="ff-note" value="${attr(f.note)}" placeholder="e.g. Handset rollouts and upgrades" />
             </div>
             <div class="field">
               <label class="field-label">What the subflow step is called</label>
@@ -1698,7 +1691,7 @@
             <div class="q-sub" style="margin-bottom:8px;">Drag a row to reorder it.</div>
             <div id="ff-subflows">${f.subflows.map(s => `
               <div class="row-editor" data-sub-id="${attr(s.id)}">
-                <input type="text" value="${attr(s.name)}" data-role="sub-name" />
+                <input type="text" value="${attr(s.name)}" data-role="sub-name" placeholder="e.g. New install" />
                 <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
               </div>`).join('')}</div>
             <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addSubflowRow()">+ Add subflow</button>
