@@ -41,10 +41,40 @@
       padding: clamp(40px, 8vw, 72px) 24px 96px;
     }
 
-    .page { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(36px, 6vw, 52px); width: 100%; max-width: 620px; }
+    .page { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(36px, 6vw, 52px); width: 100%; max-width: 1120px; }
     .brand-logo { width: 100%; max-width: 300px; height: auto; }
 
-    .toc { display: flex; flex-direction: column; gap: clamp(28px, 5vw, 40px); width: 100%; }
+    .toc { width: 100%; }
+
+    .toc-columns { display: flex; align-items: flex-start; gap: clamp(32px, 5vw, 56px); width: 100%; }
+    .toc-column { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: clamp(28px, 5vw, 40px); }
+    .toc-column + .toc-column { border-left: 1px solid var(--border); padding-left: clamp(32px, 5vw, 56px); }
+
+    .column-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      opacity: 0.75;
+    }
+    .column-empty {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-3);
+    }
+
+    @media (max-width: 900px) {
+      .toc-columns { flex-direction: column; }
+      .toc-column + .toc-column {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid var(--border);
+        padding-top: clamp(28px, 5vw, 40px);
+      }
+    }
 
     .chapter {
       display: flex;
@@ -57,6 +87,7 @@
     .chapter:nth-of-type(1) { animation-delay: 0.05s; }
     .chapter:nth-of-type(2) { animation-delay: 0.15s; }
     .chapter:nth-of-type(3) { animation-delay: 0.25s; }
+    .chapter:nth-of-type(4) { animation-delay: 0.35s; }
     @keyframes rise {
       to { opacity: 1; transform: translateY(0); }
     }
@@ -154,122 +185,146 @@
     <img class="brand-logo" src="/brand_assets/logo_darkbackground.png" alt="" width="2700" height="826" />
 
     <nav class="toc" aria-label="Demos">
-      <section class="chapter">
-        <div class="chapter-head">
-          <span class="chapter-num" aria-hidden="true">01</span>
-          <h2 class="chapter-title">Decoy - WxCC Integration Simulator</h2>
-        </div>
-        <div class="entries">
-          <a href="/decoy/alayacare/dashboard/" class="entry">
-            <span class="entry-num">01</span>
-            <span class="entry-label">ArchiTech Care (Alayacare)</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="/decoy/dynamics/dashboard/" class="entry">
-            <span class="entry-num">02</span>
-            <span class="entry-label">ArchiTech Dynamics (Dynamics 365)</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="/decoy/epic/patients/" class="entry">
-            <span class="entry-num">03</span>
-            <span class="entry-label">ArchiTech Health (Epic)</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
-      </section>
+      <div class="toc-columns">
+        <div class="toc-column">
+          <div class="column-label">Collaboration</div>
 
-      <section class="chapter">
-        <div class="chapter-head">
-          <span class="chapter-num" aria-hidden="true">02</span>
-          <h2 class="chapter-title">WxCC Demos</h2>
-        </div>
-        <div class="entries">
-          <a href="/wxccworkflowdemo/dist/" class="entry">
-            <span class="entry-num">01</span>
-            <span class="entry-label">Digital Patient Experience DHF26 Demo</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
-      </section>
+          <section class="chapter">
+            <div class="chapter-head">
+              <span class="chapter-num" aria-hidden="true">01</span>
+              <h2 class="chapter-title">Decoy - WxCC Integration Simulator</h2>
+            </div>
+            <div class="entries">
+              <a href="/decoy/alayacare/dashboard/" class="entry">
+                <span class="entry-num">01</span>
+                <span class="entry-label">ArchiTech Care (Alayacare)</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="/decoy/dynamics/dashboard/" class="entry">
+                <span class="entry-num">02</span>
+                <span class="entry-label">ArchiTech Dynamics (Dynamics 365)</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="/decoy/epic/patients/" class="entry">
+                <span class="entry-num">03</span>
+                <span class="entry-label">ArchiTech Health (Epic)</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </section>
 
-      <section class="chapter">
-        <div class="chapter-head">
-          <span class="chapter-num" aria-hidden="true">03</span>
-          <h2 class="chapter-title">Webex CC Resources</h2>
-        </div>
-        <div class="entries">
-          <a href="/wxccresources/" class="entry">
-            <span class="entry-num">01</span>
-            <span class="entry-label">WxCC Documentation Hub</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="/aicalculator/" class="entry">
-            <span class="entry-num">02</span>
-            <span class="entry-label">Webex Contact Centre AI Calculator</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
-      </section>
+          <section class="chapter">
+            <div class="chapter-head">
+              <span class="chapter-num" aria-hidden="true">02</span>
+              <h2 class="chapter-title">WxCC Demos</h2>
+            </div>
+            <div class="entries">
+              <a href="/wxccworkflowdemo/dist/" class="entry">
+                <span class="entry-num">01</span>
+                <span class="entry-label">Digital Patient Experience DHF26 Demo</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </section>
 
-      <section class="chapter">
-        <div class="chapter-head">
-          <span class="chapter-num" aria-hidden="true">04</span>
-          <h2 class="chapter-title">Health Transformation Lab</h2>
-        </div>
-        <div class="entries">
-          <a href="https://sairamdgitte.github.io/patient-emr-dashboard/" class="entry">
-            <span class="entry-num">01</span>
-            <span class="entry-label">EMR Simulation</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="/htllaunch/" class="entry">
-            <span class="entry-num">02</span>
-            <span class="entry-label">HTL Launch Demo</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=k-6cv-9idUuql7x3qcIvw5H-11sqsnlBoXZlqZOlJiJURDdCRTJETEJMVVZSTVJNR1gyNEdNOTBIUy4u&rc0f43d5610414b93852ab6aa01caed5f=Carlos%20Mendoza&rc00b0b2eeb844468a2c0db526e270d7b=%221972-07-18%22&r4a00257b3f304058b434c00e631788c5=%222026-08-18%22&r72072ff0ff2743c3967211c85b543a29=%22Afternoon%22" class="entry entry-sub">
-            <span class="entry-num">&rarr;</span>
-            <span class="entry-label">Referral Form</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
-      </section>
+          <section class="chapter">
+            <div class="chapter-head">
+              <span class="chapter-num" aria-hidden="true">03</span>
+              <h2 class="chapter-title">Webex CC Resources</h2>
+            </div>
+            <div class="entries">
+              <a href="/wxccresources/" class="entry">
+                <span class="entry-num">01</span>
+                <span class="entry-label">WxCC Documentation Hub</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="/aicalculator/" class="entry">
+                <span class="entry-num">02</span>
+                <span class="entry-label">Webex Contact Centre AI Calculator</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </section>
 
-      <section class="chapter">
-        <div class="chapter-head">
-          <span class="chapter-num" aria-hidden="true">05</span>
-          <h2 class="chapter-title">Work in Progress</h2>
+          <section class="chapter">
+            <div class="chapter-head">
+              <span class="chapter-num" aria-hidden="true">04</span>
+              <h2 class="chapter-title">Work in Progress</h2>
+            </div>
+            <div class="entries">
+              <a href="/discovery/" class="entry">
+                <span class="entry-num">01</span>
+                <span class="entry-label">Discovery Assessment</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="/wxccroi-public/" class="entry">
+                <span class="entry-num">02</span>
+                <span class="entry-label">Digital Front Door ROI Calculator</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </section>
         </div>
-        <div class="entries">
-          <a href="/discovery/" class="entry">
-            <span class="entry-num">01</span>
-            <span class="entry-label">Discovery Assessment</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="/wxccroi-public/" class="entry">
-            <span class="entry-num">02</span>
-            <span class="entry-label">Digital Front Door ROI Calculator</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <a href="/psbuilder/" class="entry">
-            <span class="entry-num">03</span>
-            <span class="entry-label">PS Engagement Builder</span>
-            <span class="entry-leader"></span>
-            <span class="entry-arrow" aria-hidden="true">&rarr;</span>
-          </a>
+
+        <div class="toc-column">
+          <div class="column-label">Secure Networking</div>
+          <p class="column-empty">Coming soon.</p>
         </div>
-      </section>
+
+        <div class="toc-column">
+          <div class="column-label">General Tools</div>
+
+          <section class="chapter">
+            <div class="chapter-head">
+              <span class="chapter-num" aria-hidden="true">01</span>
+              <h2 class="chapter-title">Health Transformation Lab</h2>
+            </div>
+            <div class="entries">
+              <a href="https://sairamdgitte.github.io/patient-emr-dashboard/" class="entry">
+                <span class="entry-num">01</span>
+                <span class="entry-label">EMR Simulation</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="/htllaunch/" class="entry">
+                <span class="entry-num">02</span>
+                <span class="entry-label">HTL Launch Demo</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=k-6cv-9idUuql7x3qcIvw5H-11sqsnlBoXZlqZOlJiJURDdCRTJETEJMVVZSTVJNR1gyNEdNOTBIUy4u&rc0f43d5610414b93852ab6aa01caed5f=Carlos%20Mendoza&rc00b0b2eeb844468a2c0db526e270d7b=%221972-07-18%22&r4a00257b3f304058b434c00e631788c5=%222026-08-18%22&r72072ff0ff2743c3967211c85b543a29=%22Afternoon%22" class="entry entry-sub">
+                <span class="entry-num">&rarr;</span>
+                <span class="entry-label">Referral Form</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="chapter">
+            <div class="chapter-head">
+              <span class="chapter-num" aria-hidden="true">02</span>
+              <h2 class="chapter-title">PS Tools</h2>
+            </div>
+            <div class="entries">
+              <a href="/psbuilder/" class="entry">
+                <span class="entry-num">01</span>
+                <span class="entry-label">PS Engagement Builder</span>
+                <span class="entry-leader"></span>
+                <span class="entry-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </section>
+        </div>
+      </div>
     </nav>
   </main>
   <footer class="site-footer">
