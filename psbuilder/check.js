@@ -10,6 +10,7 @@ const DIR = path.join(__dirname);
 const config = JSON.parse(fs.readFileSync(path.join(DIR, 'config.json'), 'utf8'));
 const indexHtml = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
 const adminHtml = fs.readFileSync(path.join(DIR, 'admin.html'), 'utf8');
+const E = require(path.join(DIR, 'engine.js'));
 
 let failures = 0;
 function check(name, actual, expected) {
@@ -37,6 +38,24 @@ section('Pages compile');
   const called = [...html.matchAll(/on(?:click|change)="([A-Za-z_$][\w$]*)\(/g)].map(m => m[1]);
   check(`${name} inline handlers all defined`, [...new Set(called)].filter(c => !defined.has(c)), []);
 });
+
+// ── 1a. One engine, used by both pages ─────────────────────────────────
+section('Shared engine');
+['index.html', 'admin.html'].forEach(name => {
+  const html = name === 'index.html' ? indexHtml : adminHtml;
+  check(name + ' loads the shared engine', /<script src="\.\/engine\.js"><\/script>/.test(html), true);
+});
+// A page redefining these would be a second copy free to drift.
+const ENGINE_OWNED = ['condMet', 'resolve', 'buildLines', 'amountOf', 'assignSlots', 'applySlots', 'blockText', 'estimate'];
+['index.html', 'admin.html'].forEach(name => {
+  const html = name === 'index.html' ? indexHtml : adminHtml;
+  const scriptBody = scripts(html).join('\n');
+  check(name + ' does not redefine engine internals',
+    ENGINE_OWNED.filter(fn => scriptBody.includes('function ' + fn + '(')), []);
+});
+check('the engine exports what the pages need',
+  ENGINE_OWNED.filter(fn => typeof E[fn] !== 'function'), []);
+
 
 // ── 1b. The admin version is present, shown, and really interpolated ───
 section('Admin version');
@@ -265,37 +284,22 @@ config.flows.forEach(f => {
 });
 check('no config problems', problems, []);
 
-// ── 4. The builder engine, run out of index.html ────────────────────────
-section('Builder engine');
-const engineSrc = scripts(indexHtml).find(s => s.includes('function condMet'))
-  .replace('loadConfig().then(renderFlows);', '');
-const E = new Function(`return (function(){
-  ${engineSrc}
-  return {
-    setConfig: (c) => { CONFIG = c; },
-    set: (f, s, a) => { flow = f; subflow = s; answers = a; },
-    resolveInputs, buildTasks, inputsToShow, allRequiredAnswered,
-    amountOf, assignSlots, applySlots, totalHours, fillText, roleName, blockText,
-  };
-})()`)();
-E.setConfig(config);
+// ── 4. The engine ──────────────────────────────────────────────────────
+section('Engine');
 
 function run(f, sub, ans) {
-  E.set(f, sub, ans || {});
-  const resolved = E.resolveInputs();
-  const lines = E.buildTasks(resolved);
-  const slots = E.assignSlots(lines).slice(0, 5);
-  lines.forEach(l => E.applySlots(l, slots));
+  const out = E.estimate(config, f, sub, ans || {});
   return {
-    lines,
-    slots,
-    count: lines.length,
-    hours: Math.round(lines.reduce((n, l) => n + E.totalHours(l), 0) * 100) / 100,
-    shown: E.inputsToShow(resolved).map(i => i.id),
-    ready: E.allRequiredAnswered(resolved),
+    lines: out.lines,
+    slots: out.slots,
+    count: out.lines.length,
+    hours: out.hours,
+    business: out.business,
+    after: out.after,
+    shown: E.inputsToShow(f, sub, out.resolved).map(i => i.id),
+    ready: E.allRequiredAnswered(f, sub, out.resolved),
   };
 }
-
 const wxcc = config.flows.find(f => f.id === 'wxcc');
 check('wxcc kept both engagement types as subflows', wxcc.subflows.map(s => s.id), ['new', 'migration']);
 
