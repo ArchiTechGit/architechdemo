@@ -126,7 +126,7 @@
 <body>
   <div class="page">
     <div class="header">
-      <span class="header-badge">PS BUILDER — ADMIN</span>
+      <span class="header-badge">PS BUILDER — ADMIN <span id="version-badge" style="color:var(--faint);letter-spacing:0.1em;"></span></span>
       <a href="./index.html">← Back to the builder</a>
     </div>
 
@@ -173,6 +173,10 @@
 
   <script>
     // ─── GitHub load / save ───
+    // Bump this whenever admin behaviour changes. It shows in the header, the
+    // browser tab, and the commit message of every config save.
+    const ADMIN_VERSION = '2.0.0';
+
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
     const CONFIG_PATH = 'psbuilder/config.json';
@@ -219,7 +223,7 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: 'chore(psbuilder): update config via admin',
+          message: `chore(psbuilder): update config via admin v${ADMIN_VERSION}`,
           content: utf8ToBase64(JSON.stringify(CONFIG, null, 2) + '\n'),
           sha: CONFIG_SHA,
           branch: 'master',
@@ -238,7 +242,11 @@
       statusEl.innerHTML = `Saved — <a href="${data.commit.html_url}" target="_blank" style="color:var(--cyan);">view commit</a>`;
     }
 
-    window.addEventListener('DOMContentLoaded', () => { if (GITHUB_TOKEN) saveTokenAndLoad(); });
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('version-badge').textContent = 'v' + ADMIN_VERSION;
+      document.title = 'PS Builder — Admin v' + ADMIN_VERSION;
+      if (GITHUB_TOKEN) saveTokenAndLoad();
+    });
   </script>
 
   <script>

@@ -41,6 +41,28 @@ section('Pages compile');
   check(`${name} inline handlers all defined`, missing, []);
 });
 
+// ── 1b. The admin version is present, shown, and really interpolated ───
+section('Admin version');
+const versionMatch = adminHtml.match(/const ADMIN_VERSION = '([^']+)'/);
+check('admin declares a version', !!versionMatch, true);
+if (versionMatch) {
+  const parts = versionMatch[1].split('.');
+  check('version looks like semver', parts.length === 3 && parts.every(n => /^[0-9]+$/.test(n)), true);
+
+  // The commit message must interpolate the constant, not carry it literally.
+  const msgLine = (adminHtml.match(/message: .*update config via admin.*/) || [''])[0];
+  check('save message references the version', msgLine.indexOf('${ADMIN_VERSION}') !== -1, true);
+  const expr = msgLine.replace(/^\s*message:\s*/, '').replace(/,\s*$/, '');
+  check('save message interpolates at runtime',
+    new Function('ADMIN_VERSION', 'return ' + expr)('9.9.9'),
+    'chore(psbuilder): update config via admin v9.9.9');
+
+  check('page title carries the version',
+    adminHtml.indexOf("document.title = 'PS Builder \u2014 Admin v' + ADMIN_VERSION") !== -1, true);
+  check('header badge carries the version',
+    adminHtml.indexOf("textContent = 'v' + ADMIN_VERSION") !== -1, true);
+}
+
 // ── 2. config.json is internally consistent ─────────────────────────────
 section('Config integrity');
 const CONDITION_KEYS = ['question', 'is', 'anySelected', 'isOn', 'moreThanZero', 'repeatPerUnit'];
