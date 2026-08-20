@@ -260,7 +260,7 @@ const E = new Function(`return (function(){
     setConfig: (c) => { CONFIG = c; },
     set: (f, s, a) => { flow = f; subflow = s; answers = a; },
     resolveInputs, buildTasks, inputsToShow, allRequiredAnswered,
-    amountOf, assignSlots, applySlots, totalHours, fillText, roleName,
+    amountOf, assignSlots, applySlots, totalHours, fillText, roleName, blockText,
   };
 })()`)();
 E.setConfig(config);
@@ -397,6 +397,15 @@ check('a resource row lands where the sheet expects it', cell(config.resourceCol
    '', '', '']);
 
 // Nothing the PSE owns may leak into either block.
+// The blocks land on rows that already exist, so a header row would push every
+// task down one.
+check('the task block has one row per task, no header',
+  E.blockText(config.taskColumns, r.lines).split(String.fromCharCode(10)).length, r.lines.length);
+check('the resource block has one row per task, no header',
+  E.blockText(config.resourceColumns, r.lines).split(String.fromCharCode(10)).length, r.lines.length);
+check('the first row is data, not column names',
+  E.blockText(config.taskColumns, r.lines).split(String.fromCharCode(10))[0].startsWith('Phase'), false);
+
 check('neither block writes a PSE-owned column',
   config.taskColumns.concat(config.resourceColumns)
     .filter(c => RETIRED_FIELDS.includes(c.from)), []);

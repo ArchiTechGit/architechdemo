@@ -3,7 +3,7 @@
 Reference for generating a Webex Contact Centre engagement task list without opening [psbuilder/index.html](index.html).
 This covers the **Webex Contact Centre** flow only. [config.json](config.json) holds one entry per flow, and each defines its own subflows, variables, tasks, phases and columns.
 Give me the inputs below in any format, I output the same TSV table the tool produces
-It emits two paste blocks for the PSE's `Input_Tasks` table: the task details at column A, and the resource hours at column J. The columns in between are left alone, because the PSE works out trips, overnight stays and document outputs itself.
+It emits two paste blocks for the PSE's `Input_Tasks` table: the task details at column A, and the resource hours at column J. Neither carries a header row, because both land on task rows that already exist. The columns in between are never written to - the PSE works out trips, overnight stays and document outputs itself, and overwriting them would break the sheet.
 
 Every task in this flow is `Skill Required` = **Collaboration** and `Task Type` = **ArchiTech Activity**. No effort has been costed against them yet, so the resource block comes out blank.
 
