@@ -1,113 +1,862 @@
 {
-  "products": [
-    { "id": "wxcc", "name": "Webex Contact Centre", "note": "Available", "enabled": true },
-    { "id": "wireless", "name": "Wireless", "note": "Coming soon", "enabled": false },
-    { "id": "spaces", "name": "Cisco Spaces", "note": "Coming soon", "enabled": false }
-  ],
-  "types": [
-    { "id": "new", "name": "New / Greenfield", "desc": "Brand-new WxCC deployment, nothing to migrate off." },
-    { "id": "migration", "name": "Migration", "desc": "Customer is moving off another contact centre platform onto WxCC." }
-  ],
-  "scopes": [
-    { "id": "dfd", "name": "Digital Front Door", "desc": "Core CC plus an AI Agent, AI Assistant/CRM integration and omnichannel layer." },
-    { "id": "standard", "name": "Standard Contact Centre", "desc": "Core routing/IVR/queue/agent config only. No AI or digital layer." }
-  ],
-  "questions": [
-    { "id": "workshops", "type": "stepper", "label": "How many discovery workshops do you need?", "sub": "Covers agent experience mapping, knowledge scripting, use-case gathering, CRM field mapping, omnichannel scope.", "min": 0, "max": 6, "default": 4, "scopeGate": "all" },
-    { "id": "staging-channels", "type": "checklist", "label": "Which channels need environment staging / provisioning?", "sub": "Drives the Staging phase task list.", "scopeGate": "all", "options": [
-      { "id": "sms", "label": "SMS asset provisioning", "default": false, "scopeGate": "all" },
-      { "id": "webexconnect", "label": "Webex Connect account/asset setup", "default": false, "scopeGate": "all" },
-      { "id": "facebook", "label": "Facebook Business Manager / Meta setup", "default": false, "scopeGate": "all" },
-      { "id": "instagram", "label": "Instagram DM custom channel setup", "default": false, "scopeGate": "all" },
-      { "id": "email", "label": "Email channel asset setup + mailbox routing", "default": false, "scopeGate": "all" },
-      { "id": "crm", "label": "CRM environment access confirmed", "default": false, "scopeGate": "dfd" }
-    ]},
-    { "id": "agent-domains", "type": "stepper", "label": "How many AI Agent bots / knowledge domains need to be built?", "sub": "e.g. billing enquiries, product support, appointment booking — one domain per distinct topic area. Set to 0 to skip AI Agent entirely.", "min": 0, "max": 6, "default": 2, "scopeGate": "dfd" },
-    { "id": "ai-assistant", "type": "toggle", "label": "Include AI Assistant + CRM integration for agents?", "sub": "Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to CRM. CRM platform is whatever the customer runs (Dynamics, Salesforce, ServiceNow, etc).", "default": true, "scopeGate": "dfd" },
-    { "id": "omni-channels", "type": "checklist", "label": "Which omnichannel channels are in scope for build?", "sub": "Each selected channel adds its build + integration task. Selecting any channel also adds an OmniChannel testing pass.", "scopeGate": "dfd", "options": [
-      { "id": "webchat", "label": "Web chat widget (branding, pre-chat form, reason codes)", "default": true, "scopeGate": "all" },
-      { "id": "sms-flow", "label": "SMS flow configuration", "default": true, "scopeGate": "all" },
-      { "id": "email-routing", "label": "Email routing and triage configuration", "default": true, "scopeGate": "all" },
-      { "id": "fb-messenger", "label": "Facebook Messenger integration and testing", "default": false, "scopeGate": "all" },
-      { "id": "instagram-dm", "label": "Instagram DM custom channel integration and testing", "default": false, "scopeGate": "all" },
-      { "id": "qb-api", "label": "Quick Button integration — external SMS sender API", "default": false, "scopeGate": "all" },
-      { "id": "qb-desktop", "label": "Quick Button integration — external SMS agent desktop", "default": false, "scopeGate": "all" }
-    ]},
-    { "id": "reporting", "type": "checklist", "label": "Which reporting / analytics components are needed?", "sub": "Optional on every engagement type.", "scopeGate": "all", "options": [
-      { "id": "topic-analytics", "label": "Topic analytics configuration", "default": false, "scopeGate": "all" },
-      { "id": "analyzer-dashboard", "label": "Analyzer dashboard setup", "default": false, "scopeGate": "all" },
-      { "id": "dashboard-embed", "label": "Dashboard embedding into Agent Desktop", "default": false, "scopeGate": "all" },
-      { "id": "journey-data", "label": "Journey Data Service configuration", "default": false, "scopeGate": "all" }
-    ]},
-    { "id": "agent-training", "type": "stepper", "label": "How many agent training sessions are needed?", "sub": "Delivered at client site.", "min": 0, "max": 6, "default": 2, "scopeGate": "all" },
-    { "id": "supervisor-training", "type": "toggle", "label": "Include supervisor training (queue monitoring, reporting)?", "default": true, "scopeGate": "all" }
-  ],
-  "activities": [
-    { "id": "legacy-review", "phase": "Design", "description": "Legacy platform environment review & migration mapping", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "typeEquals", "value": "migration" } },
-    { "id": "legacy-parallel-run", "phase": "Staging", "description": "Legacy platform parallel-run validation", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "typeEquals", "value": "migration" } },
-    { "id": "legacy-decommission", "phase": "Project Completion & Handover", "description": "Legacy platform decommission", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "typeEquals", "value": "migration" } },
-    { "id": "kickoff", "phase": "Kickoff", "description": "Kick Off Session with Stakeholders", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "existing-env-review", "phase": "Design", "description": "WxCC — Existing Environment Review", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "skills-team-queue-design", "phase": "Design", "description": "WxCC — Skills, Team, Queue Design", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "design-doc-signoff", "phase": "Design", "description": "Design Documentation & Sign-off", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "a2q-process", "phase": "Staging", "description": "WxCC A2Q Process", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "tenant-provisioning", "phase": "Staging", "description": "Webex Contact Centre tenant provisioning and validation", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "tenant-org-settings", "phase": "Implementation", "description": "Tenant & Org General Settings", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "site-config", "phase": "Implementation", "description": "Site Configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "teams-config", "phase": "Implementation", "description": "Teams Configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "queue-config", "phase": "Implementation", "description": "Queue Configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "skills-based-routing", "phase": "Implementation", "description": "Skills Based Routing Configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "entry-point-config", "phase": "Implementation", "description": "Entry Point Configurations", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "channel-cx-settings", "phase": "Implementation", "description": "Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "voice-ivr-build", "phase": "Implementation", "description": "Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "business-hours-config", "phase": "Implementation", "description": "Business hours and holiday treatment configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "wrapup-code-config", "phase": "Implementation", "description": "Wrap-up code configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "agent-desktop-layout", "phase": "Implementation", "description": "Agent Desktop layout customisation", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "functional-test-plan-doc", "phase": "Implementation", "description": "Detailed Functional Test Plan Document", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "functional-testing-voice", "phase": "Implementation", "description": "Detailed Functional Testing — Voice", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "uat-plan", "phase": "Implementation", "description": "User Acceptance Testing Plan", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "uat-execution", "phase": "Implementation", "description": "User Acceptance Testing Execution (assistance)", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "remediations", "phase": "Implementation", "description": "Remediations", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "quick-ref-guide", "phase": "Project Completion & Handover", "description": "Quick Reference Guide development", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "production-cutover", "phase": "Project Completion & Handover", "description": "Production cutover", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "hypercare", "phase": "Project Completion & Handover", "description": "Hypercare support period", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "as-built-doc", "phase": "Project Completion & Handover", "description": "As-built documentation", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "always" } },
-    { "id": "workshop-discovery", "phase": "Design", "description": "Workshop {{n}} — discovery session", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperRepeat", "questionId": "workshops" } },
-    { "id": "staging-sms", "phase": "Staging", "description": "SMS asset provisioning", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "staging-channels", "optionId": "sms" } },
-    { "id": "staging-webexconnect", "phase": "Staging", "description": "Webex Connect account/asset setup", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "staging-channels", "optionId": "webexconnect" } },
-    { "id": "staging-facebook", "phase": "Staging", "description": "Facebook Business Manager / Meta setup", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "staging-channels", "optionId": "facebook" } },
-    { "id": "staging-instagram", "phase": "Staging", "description": "Instagram DM custom channel setup", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "staging-channels", "optionId": "instagram" } },
-    { "id": "staging-email", "phase": "Staging", "description": "Email channel asset setup + mailbox routing", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "staging-channels", "optionId": "email" } },
-    { "id": "staging-crm", "phase": "Staging", "description": "CRM environment access confirmed", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "staging-channels", "optionId": "crm" } },
-    { "id": "kb-content-sourcing", "phase": "Implementation", "description": "Knowledge base content sourcing", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperGate", "questionId": "agent-domains" } },
-    { "id": "intent-routing-config", "phase": "Implementation", "description": "Intent-based routing configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperGate", "questionId": "agent-domains" } },
-    { "id": "kb-accuracy-testing", "phase": "Implementation", "description": "Knowledge accuracy testing", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperGate", "questionId": "agent-domains" } },
-    { "id": "ai-agent-testing-remediation", "phase": "Implementation", "description": "Agent Detailed Testing & Remediation", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperGate", "questionId": "agent-domains" } },
-    { "id": "functional-testing-ai-agent", "phase": "Implementation", "description": "Detailed Functional Testing — AI Agent", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperGate", "questionId": "agent-domains" } },
-    { "id": "ai-agent-domain-build", "phase": "Implementation", "description": "AI Agent build — knowledge domain {{n}} FAQ", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "stepperRepeat", "questionId": "agent-domains" } },
-    { "id": "workshop-ai-assistant-usecases", "phase": "Design", "description": "Workshop — AI Assistant Use Cases", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "workshop-crm-field-mapping", "phase": "Design", "description": "Workshop — CRM Field Mapping", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "crm-access-confirmed", "phase": "Staging", "description": "CRM environment access and credentials confirmed", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "screen-pop-config", "phase": "Implementation", "description": "Screen-pop configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "call-transcription-config", "phase": "Implementation", "description": "Call transcription and summarisation enablement", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "suggested-response-config", "phase": "Implementation", "description": "Suggested response configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "wrapup-task-automation-config", "phase": "Implementation", "description": "Wrap-up and task automation configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "writeback-mapping-config", "phase": "Implementation", "description": "Write-back mapping (notes, summaries, outcomes into CRM)", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "functional-testing-ai-assistant", "phase": "Implementation", "description": "Detailed Functional Testing — AI Assistant", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "toggleOn", "questionId": "ai-assistant" } },
-    { "id": "omni-webchat", "phase": "Implementation", "description": "Web chat widget (branding, pre-chat form, reason codes)", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "webchat" } },
-    { "id": "omni-sms-flow", "phase": "Implementation", "description": "SMS flow configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "sms-flow" } },
-    { "id": "omni-email-routing", "phase": "Implementation", "description": "Email routing and triage configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "email-routing" } },
-    { "id": "omni-fb-messenger", "phase": "Implementation", "description": "Facebook Messenger integration and testing", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "fb-messenger" } },
-    { "id": "omni-instagram-dm", "phase": "Implementation", "description": "Instagram DM custom channel integration and testing", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "instagram-dm" } },
-    { "id": "omni-qb-api", "phase": "Implementation", "description": "Quick Button integration — external SMS sender API", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "qb-api" } },
-    { "id": "omni-qb-desktop", "phase": "Implementation", "description": "Quick Button integration — external SMS agent desktop", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "omni-channels", "optionId": "qb-desktop" } },
-    { "id": "workshop-omnichannel-scope", "phase": "Design", "description": "Workshop — Omnichannel Scope", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistAny", "questionId": "omni-channels" } },
-    { "id": "functional-testing-omnichannel", "phase": "Implementation", "description": "Detailed Functional Testing — OmniChannel", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistAny", "questionId": "omni-channels" } },
-    { "id": "topic-analytics-config", "phase": "Implementation", "description": "Topic analytics configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "reporting", "optionId": "topic-analytics" } },
-    { "id": "analyzer-dashboard-setup", "phase": "Implementation", "description": "Analyzer dashboard setup", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "reporting", "optionId": "analyzer-dashboard" } },
-    { "id": "dashboard-embed-config", "phase": "Implementation", "description": "Dashboard embedding into Agent Desktop", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "reporting", "optionId": "dashboard-embed" } },
-    { "id": "journey-data-config", "phase": "Implementation", "description": "Journey Data Service configuration", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Office", "trips": 0, "trigger": { "type": "checklistOption", "questionId": "reporting", "optionId": "journey-data" } },
-    { "id": "agent-training-task", "phase": "Project Completion & Handover", "description": "Agent training (desktop, call/chat handling, wrap-up codes) — {{n}} sessions", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Client Site", "trips": 1, "trigger": { "type": "stepperGate", "questionId": "agent-training" } },
-    { "id": "supervisor-training-task", "phase": "Project Completion & Handover", "description": "Supervisor training (queue monitoring, reporting)", "skillRequired": "Collaboration", "taskType": "ArchiTech Activity", "location": "Client Site", "trips": 1, "trigger": { "type": "toggleOn", "questionId": "supervisor-training" } }
+  "verticals": [
+    {
+      "id": "wxcc",
+      "name": "Webex Contact Centre",
+      "note": "Available",
+      "enabled": true,
+      "phases": [
+        "Kickoff",
+        "Design",
+        "Staging",
+        "Implementation",
+        "Project Completion & Handover"
+      ],
+      "locations": [
+        "Office",
+        "Client Site"
+      ],
+      "columns": [
+        {
+          "header": "Phase",
+          "from": "phase"
+        },
+        {
+          "header": "Skill Required",
+          "constant": "Collaboration"
+        },
+        {
+          "header": "Task Type",
+          "constant": "ArchiTech Activity"
+        },
+        {
+          "header": "Description",
+          "from": "description"
+        }
+      ],
+      "questions": [
+        {
+          "id": "engagement-type",
+          "type": "choice",
+          "display": "cards",
+          "label": "Engagement Type",
+          "options": [
+            {
+              "id": "new",
+              "label": "New / Greenfield",
+              "note": "Brand-new WxCC deployment, nothing to migrate off."
+            },
+            {
+              "id": "migration",
+              "label": "Migration",
+              "note": "Customer is moving off another contact centre platform onto WxCC."
+            }
+          ]
+        },
+        {
+          "id": "scope",
+          "type": "choice",
+          "display": "cards",
+          "label": "Engagement Scope",
+          "options": [
+            {
+              "id": "dfd",
+              "label": "Digital Front Door",
+              "note": "Core CC plus an AI Agent, AI Assistant/CRM integration and omnichannel layer."
+            },
+            {
+              "id": "standard",
+              "label": "Standard Contact Centre",
+              "note": "Core routing/IVR/queue/agent config only. No AI or digital layer."
+            }
+          ]
+        },
+        {
+          "id": "workshops",
+          "type": "number",
+          "label": "How many discovery workshops do you need?",
+          "help": "Covers agent experience mapping, knowledge scripting, use-case gathering, CRM field mapping, omnichannel scope.",
+          "min": 0,
+          "max": 6,
+          "default": 4
+        },
+        {
+          "id": "staging-channels",
+          "type": "checklist",
+          "label": "Which channels need environment staging / provisioning?",
+          "help": "Drives the Staging phase task list.",
+          "options": [
+            {
+              "id": "sms",
+              "label": "SMS asset provisioning"
+            },
+            {
+              "id": "webexconnect",
+              "label": "Webex Connect account/asset setup"
+            },
+            {
+              "id": "facebook",
+              "label": "Facebook Business Manager / Meta setup"
+            },
+            {
+              "id": "instagram",
+              "label": "Instagram DM custom channel setup"
+            },
+            {
+              "id": "email",
+              "label": "Email channel asset setup + mailbox routing"
+            },
+            {
+              "id": "crm",
+              "label": "CRM environment access confirmed",
+              "showWhen": {
+                "question": "scope",
+                "is": "dfd"
+              }
+            }
+          ]
+        },
+        {
+          "id": "agent-domains",
+          "type": "number",
+          "label": "How many AI Agent bots / knowledge domains need to be built?",
+          "help": "e.g. billing enquiries, product support, appointment booking — one domain per distinct topic area. Set to 0 to skip AI Agent entirely.",
+          "showWhen": {
+            "question": "scope",
+            "is": "dfd"
+          },
+          "min": 0,
+          "max": 6,
+          "default": 2
+        },
+        {
+          "id": "ai-assistant",
+          "type": "yesno",
+          "label": "Include AI Assistant + CRM integration for agents?",
+          "help": "Screen-pop, transcription/summarisation, suggested responses, wrap-up automation, write-back to CRM. CRM platform is whatever the customer runs (Dynamics, Salesforce, ServiceNow, etc).",
+          "showWhen": {
+            "question": "scope",
+            "is": "dfd"
+          },
+          "default": true
+        },
+        {
+          "id": "omni-channels",
+          "type": "checklist",
+          "label": "Which omnichannel channels are in scope for build?",
+          "help": "Each selected channel adds its build + integration task. Selecting any channel also adds an OmniChannel testing pass.",
+          "showWhen": {
+            "question": "scope",
+            "is": "dfd"
+          },
+          "options": [
+            {
+              "id": "webchat",
+              "label": "Web chat widget (branding, pre-chat form, reason codes)",
+              "default": true
+            },
+            {
+              "id": "sms-flow",
+              "label": "SMS flow configuration",
+              "default": true
+            },
+            {
+              "id": "email-routing",
+              "label": "Email routing and triage configuration",
+              "default": true
+            },
+            {
+              "id": "fb-messenger",
+              "label": "Facebook Messenger integration and testing"
+            },
+            {
+              "id": "instagram-dm",
+              "label": "Instagram DM custom channel integration and testing"
+            },
+            {
+              "id": "qb-api",
+              "label": "Quick Button integration — external SMS sender API"
+            },
+            {
+              "id": "qb-desktop",
+              "label": "Quick Button integration — external SMS agent desktop"
+            }
+          ]
+        },
+        {
+          "id": "reporting",
+          "type": "checklist",
+          "label": "Which reporting / analytics components are needed?",
+          "help": "Optional on every engagement type.",
+          "options": [
+            {
+              "id": "topic-analytics",
+              "label": "Topic analytics configuration"
+            },
+            {
+              "id": "analyzer-dashboard",
+              "label": "Analyzer dashboard setup"
+            },
+            {
+              "id": "dashboard-embed",
+              "label": "Dashboard embedding into Agent Desktop"
+            },
+            {
+              "id": "journey-data",
+              "label": "Journey Data Service configuration"
+            }
+          ]
+        },
+        {
+          "id": "agent-training",
+          "type": "number",
+          "label": "How many agent training sessions are needed?",
+          "help": "Delivered at client site.",
+          "min": 0,
+          "max": 6,
+          "default": 2
+        },
+        {
+          "id": "supervisor-training",
+          "type": "yesno",
+          "label": "Include supervisor training (queue monitoring, reporting)?",
+          "default": true
+        }
+      ],
+      "activities": [
+        {
+          "id": "legacy-review",
+          "phase": "Design",
+          "description": "Legacy platform environment review & migration mapping",
+          "location": "Office",
+          "showWhen": {
+            "question": "engagement-type",
+            "is": "migration"
+          }
+        },
+        {
+          "id": "legacy-parallel-run",
+          "phase": "Staging",
+          "description": "Legacy platform parallel-run validation",
+          "location": "Office",
+          "showWhen": {
+            "question": "engagement-type",
+            "is": "migration"
+          }
+        },
+        {
+          "id": "legacy-decommission",
+          "phase": "Project Completion & Handover",
+          "description": "Legacy platform decommission",
+          "location": "Office",
+          "showWhen": {
+            "question": "engagement-type",
+            "is": "migration"
+          }
+        },
+        {
+          "id": "kickoff",
+          "phase": "Kickoff",
+          "description": "Kick Off Session with Stakeholders",
+          "location": "Office"
+        },
+        {
+          "id": "existing-env-review",
+          "phase": "Design",
+          "description": "WxCC — Existing Environment Review",
+          "location": "Office"
+        },
+        {
+          "id": "skills-team-queue-design",
+          "phase": "Design",
+          "description": "WxCC — Skills, Team, Queue Design",
+          "location": "Office"
+        },
+        {
+          "id": "design-doc-signoff",
+          "phase": "Design",
+          "description": "Design Documentation & Sign-off",
+          "location": "Office"
+        },
+        {
+          "id": "a2q-process",
+          "phase": "Staging",
+          "description": "WxCC A2Q Process",
+          "location": "Office"
+        },
+        {
+          "id": "tenant-provisioning",
+          "phase": "Staging",
+          "description": "Webex Contact Centre tenant provisioning and validation",
+          "location": "Office"
+        },
+        {
+          "id": "tenant-org-settings",
+          "phase": "Implementation",
+          "description": "Tenant & Org General Settings",
+          "location": "Office"
+        },
+        {
+          "id": "site-config",
+          "phase": "Implementation",
+          "description": "Site Configuration",
+          "location": "Office"
+        },
+        {
+          "id": "teams-config",
+          "phase": "Implementation",
+          "description": "Teams Configuration",
+          "location": "Office"
+        },
+        {
+          "id": "queue-config",
+          "phase": "Implementation",
+          "description": "Queue Configuration",
+          "location": "Office"
+        },
+        {
+          "id": "skills-based-routing",
+          "phase": "Implementation",
+          "description": "Skills Based Routing Configuration",
+          "location": "Office"
+        },
+        {
+          "id": "entry-point-config",
+          "phase": "Implementation",
+          "description": "Entry Point Configurations",
+          "location": "Office"
+        },
+        {
+          "id": "channel-cx-settings",
+          "phase": "Implementation",
+          "description": "Channel/CX settings (voice, chat, SMS, email, Messenger, Instagram)",
+          "location": "Office"
+        },
+        {
+          "id": "voice-ivr-build",
+          "phase": "Implementation",
+          "description": "Voice IVR/flow build (greetings, menus, text-to-speech, VIP treatment)",
+          "location": "Office"
+        },
+        {
+          "id": "business-hours-config",
+          "phase": "Implementation",
+          "description": "Business hours and holiday treatment configuration",
+          "location": "Office"
+        },
+        {
+          "id": "wrapup-code-config",
+          "phase": "Implementation",
+          "description": "Wrap-up code configuration",
+          "location": "Office"
+        },
+        {
+          "id": "agent-desktop-layout",
+          "phase": "Implementation",
+          "description": "Agent Desktop layout customisation",
+          "location": "Office"
+        },
+        {
+          "id": "functional-test-plan-doc",
+          "phase": "Implementation",
+          "description": "Detailed Functional Test Plan Document",
+          "location": "Office"
+        },
+        {
+          "id": "functional-testing-voice",
+          "phase": "Implementation",
+          "description": "Detailed Functional Testing — Voice",
+          "location": "Office"
+        },
+        {
+          "id": "uat-plan",
+          "phase": "Implementation",
+          "description": "User Acceptance Testing Plan",
+          "location": "Office"
+        },
+        {
+          "id": "uat-execution",
+          "phase": "Implementation",
+          "description": "User Acceptance Testing Execution (assistance)",
+          "location": "Office"
+        },
+        {
+          "id": "remediations",
+          "phase": "Implementation",
+          "description": "Remediations",
+          "location": "Office"
+        },
+        {
+          "id": "quick-ref-guide",
+          "phase": "Project Completion & Handover",
+          "description": "Quick Reference Guide development",
+          "location": "Office"
+        },
+        {
+          "id": "production-cutover",
+          "phase": "Project Completion & Handover",
+          "description": "Production cutover",
+          "location": "Office"
+        },
+        {
+          "id": "hypercare",
+          "phase": "Project Completion & Handover",
+          "description": "Hypercare support period",
+          "location": "Office"
+        },
+        {
+          "id": "as-built-doc",
+          "phase": "Project Completion & Handover",
+          "description": "As-built documentation",
+          "location": "Office"
+        },
+        {
+          "id": "workshop-discovery",
+          "phase": "Design",
+          "description": "Workshop {{n}} — discovery session",
+          "location": "Office",
+          "showWhen": {
+            "question": "workshops",
+            "repeatPerUnit": true
+          }
+        },
+        {
+          "id": "staging-sms",
+          "phase": "Staging",
+          "description": "SMS asset provisioning",
+          "location": "Office",
+          "showWhen": {
+            "question": "staging-channels",
+            "is": "sms"
+          }
+        },
+        {
+          "id": "staging-webexconnect",
+          "phase": "Staging",
+          "description": "Webex Connect account/asset setup",
+          "location": "Office",
+          "showWhen": {
+            "question": "staging-channels",
+            "is": "webexconnect"
+          }
+        },
+        {
+          "id": "staging-facebook",
+          "phase": "Staging",
+          "description": "Facebook Business Manager / Meta setup",
+          "location": "Office",
+          "showWhen": {
+            "question": "staging-channels",
+            "is": "facebook"
+          }
+        },
+        {
+          "id": "staging-instagram",
+          "phase": "Staging",
+          "description": "Instagram DM custom channel setup",
+          "location": "Office",
+          "showWhen": {
+            "question": "staging-channels",
+            "is": "instagram"
+          }
+        },
+        {
+          "id": "staging-email",
+          "phase": "Staging",
+          "description": "Email channel asset setup + mailbox routing",
+          "location": "Office",
+          "showWhen": {
+            "question": "staging-channels",
+            "is": "email"
+          }
+        },
+        {
+          "id": "staging-crm",
+          "phase": "Staging",
+          "description": "CRM environment access confirmed",
+          "location": "Office",
+          "showWhen": {
+            "question": "staging-channels",
+            "is": "crm"
+          }
+        },
+        {
+          "id": "kb-content-sourcing",
+          "phase": "Implementation",
+          "description": "Knowledge base content sourcing",
+          "location": "Office",
+          "showWhen": {
+            "question": "agent-domains",
+            "moreThanZero": true
+          }
+        },
+        {
+          "id": "intent-routing-config",
+          "phase": "Implementation",
+          "description": "Intent-based routing configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "agent-domains",
+            "moreThanZero": true
+          }
+        },
+        {
+          "id": "kb-accuracy-testing",
+          "phase": "Implementation",
+          "description": "Knowledge accuracy testing",
+          "location": "Office",
+          "showWhen": {
+            "question": "agent-domains",
+            "moreThanZero": true
+          }
+        },
+        {
+          "id": "ai-agent-testing-remediation",
+          "phase": "Implementation",
+          "description": "Agent Detailed Testing & Remediation",
+          "location": "Office",
+          "showWhen": {
+            "question": "agent-domains",
+            "moreThanZero": true
+          }
+        },
+        {
+          "id": "functional-testing-ai-agent",
+          "phase": "Implementation",
+          "description": "Detailed Functional Testing — AI Agent",
+          "location": "Office",
+          "showWhen": {
+            "question": "agent-domains",
+            "moreThanZero": true
+          }
+        },
+        {
+          "id": "ai-agent-domain-build",
+          "phase": "Implementation",
+          "description": "AI Agent build — knowledge domain {{n}} FAQ",
+          "location": "Office",
+          "showWhen": {
+            "question": "agent-domains",
+            "repeatPerUnit": true
+          }
+        },
+        {
+          "id": "workshop-ai-assistant-usecases",
+          "phase": "Design",
+          "description": "Workshop — AI Assistant Use Cases",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "workshop-crm-field-mapping",
+          "phase": "Design",
+          "description": "Workshop — CRM Field Mapping",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "crm-access-confirmed",
+          "phase": "Staging",
+          "description": "CRM environment access and credentials confirmed",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "screen-pop-config",
+          "phase": "Implementation",
+          "description": "Screen-pop configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "call-transcription-config",
+          "phase": "Implementation",
+          "description": "Call transcription and summarisation enablement",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "suggested-response-config",
+          "phase": "Implementation",
+          "description": "Suggested response configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "wrapup-task-automation-config",
+          "phase": "Implementation",
+          "description": "Wrap-up and task automation configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "writeback-mapping-config",
+          "phase": "Implementation",
+          "description": "Write-back mapping (notes, summaries, outcomes into CRM)",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "functional-testing-ai-assistant",
+          "phase": "Implementation",
+          "description": "Detailed Functional Testing — AI Assistant",
+          "location": "Office",
+          "showWhen": {
+            "question": "ai-assistant",
+            "isOn": true
+          }
+        },
+        {
+          "id": "omni-webchat",
+          "phase": "Implementation",
+          "description": "Web chat widget (branding, pre-chat form, reason codes)",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "webchat"
+          }
+        },
+        {
+          "id": "omni-sms-flow",
+          "phase": "Implementation",
+          "description": "SMS flow configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "sms-flow"
+          }
+        },
+        {
+          "id": "omni-email-routing",
+          "phase": "Implementation",
+          "description": "Email routing and triage configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "email-routing"
+          }
+        },
+        {
+          "id": "omni-fb-messenger",
+          "phase": "Implementation",
+          "description": "Facebook Messenger integration and testing",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "fb-messenger"
+          }
+        },
+        {
+          "id": "omni-instagram-dm",
+          "phase": "Implementation",
+          "description": "Instagram DM custom channel integration and testing",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "instagram-dm"
+          }
+        },
+        {
+          "id": "omni-qb-api",
+          "phase": "Implementation",
+          "description": "Quick Button integration — external SMS sender API",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "qb-api"
+          }
+        },
+        {
+          "id": "omni-qb-desktop",
+          "phase": "Implementation",
+          "description": "Quick Button integration — external SMS agent desktop",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "is": "qb-desktop"
+          }
+        },
+        {
+          "id": "workshop-omnichannel-scope",
+          "phase": "Design",
+          "description": "Workshop — Omnichannel Scope",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "anySelected": true
+          }
+        },
+        {
+          "id": "functional-testing-omnichannel",
+          "phase": "Implementation",
+          "description": "Detailed Functional Testing — OmniChannel",
+          "location": "Office",
+          "showWhen": {
+            "question": "omni-channels",
+            "anySelected": true
+          }
+        },
+        {
+          "id": "topic-analytics-config",
+          "phase": "Implementation",
+          "description": "Topic analytics configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "reporting",
+            "is": "topic-analytics"
+          }
+        },
+        {
+          "id": "analyzer-dashboard-setup",
+          "phase": "Implementation",
+          "description": "Analyzer dashboard setup",
+          "location": "Office",
+          "showWhen": {
+            "question": "reporting",
+            "is": "analyzer-dashboard"
+          }
+        },
+        {
+          "id": "dashboard-embed-config",
+          "phase": "Implementation",
+          "description": "Dashboard embedding into Agent Desktop",
+          "location": "Office",
+          "showWhen": {
+            "question": "reporting",
+            "is": "dashboard-embed"
+          }
+        },
+        {
+          "id": "journey-data-config",
+          "phase": "Implementation",
+          "description": "Journey Data Service configuration",
+          "location": "Office",
+          "showWhen": {
+            "question": "reporting",
+            "is": "journey-data"
+          }
+        },
+        {
+          "id": "agent-training-task",
+          "phase": "Project Completion & Handover",
+          "description": "Agent training (desktop, call/chat handling, wrap-up codes) — {{n}} sessions",
+          "location": "Client Site",
+          "trips": 1,
+          "showWhen": {
+            "question": "agent-training",
+            "moreThanZero": true
+          }
+        },
+        {
+          "id": "supervisor-training-task",
+          "phase": "Project Completion & Handover",
+          "description": "Supervisor training (queue monitoring, reporting)",
+          "location": "Client Site",
+          "trips": 1,
+          "showWhen": {
+            "question": "supervisor-training",
+            "isOn": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "wireless",
+      "name": "Wireless",
+      "note": "Coming soon",
+      "enabled": false,
+      "phases": [
+        "Kickoff",
+        "Design",
+        "Staging",
+        "Implementation",
+        "Project Completion & Handover"
+      ],
+      "locations": [
+        "Office",
+        "Client Site"
+      ],
+      "columns": [
+        {
+          "header": "Phase",
+          "from": "phase"
+        },
+        {
+          "header": "Skill Required",
+          "constant": "Collaboration"
+        },
+        {
+          "header": "Task Type",
+          "constant": "ArchiTech Activity"
+        },
+        {
+          "header": "Description",
+          "from": "description"
+        }
+      ],
+      "questions": [],
+      "activities": []
+    },
+    {
+      "id": "spaces",
+      "name": "Cisco Spaces",
+      "note": "Coming soon",
+      "enabled": false,
+      "phases": [
+        "Kickoff",
+        "Design",
+        "Staging",
+        "Implementation",
+        "Project Completion & Handover"
+      ],
+      "locations": [
+        "Office",
+        "Client Site"
+      ],
+      "columns": [
+        {
+          "header": "Phase",
+          "from": "phase"
+        },
+        {
+          "header": "Skill Required",
+          "constant": "Collaboration"
+        },
+        {
+          "header": "Task Type",
+          "constant": "ArchiTech Activity"
+        },
+        {
+          "header": "Description",
+          "from": "description"
+        }
+      ],
+      "questions": [],
+      "activities": []
+    }
   ]
 }

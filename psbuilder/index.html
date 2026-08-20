@@ -121,37 +121,26 @@
 
     <div class="page-title">PS Engagement Builder</div>
     <div class="page-desc">
-      Pick a product, engagement type and engagement scope, answer a short set of scoping questions,
-      then generate a line-by-line task list. Baseline tasks common to every engagement are added automatically.
+      Pick a solution, answer a short set of scoping questions, then generate a line-by-line task list.
+      Baseline tasks common to every engagement are added automatically.
       Effort estimates aren't calculated here — fill hours in manually once tasks are pasted in.
     </div>
 
-    <div class="section-label">1 · Product</div>
-    <div class="product-grid" id="product-grid"></div>
-
-    <div id="type-section" class="step">
-      <div class="section-label">2 · Engagement Type</div>
-      <div class="scope-grid" id="type-grid"></div>
-    </div>
-
-    <div id="scope-section" class="step">
-      <div class="section-label">3 · Engagement Scope</div>
-      <div class="scope-grid" id="scope-grid"></div>
-    </div>
+    <div class="section-label">1 · Solution</div>
+    <div class="product-grid" id="vertical-grid"></div>
 
     <div id="question-section" class="step">
-      <div class="section-label">4 · Scoping Questions</div>
       <div id="question-root"></div>
-      <button class="btn-primary" onclick="createEstimate()">Create Estimate →</button>
+      <button class="btn-primary" id="create-btn" onclick="createEstimate()">Create Estimate →</button>
     </div>
 
     <div id="output-section" class="step">
-      <div class="section-label">5 · Task List</div>
+      <div class="section-label">Task List</div>
       <div class="summary">
         <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
         <div class="summary-item"><div class="summary-label">Onsite trips</div><div class="summary-value" id="sum-trips">0</div></div>
       </div>
-      <div class="q-sub" style="margin-top:-8px;">Tab-separated, header row included — click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as Phase / Skill Required / Task Type / Description.</div>
+      <div class="q-sub" style="margin-top:-8px;" id="output-hint"></div>
       <textarea id="estimate-output" readonly></textarea>
       <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
       <button class="btn-ghost" onclick="copyEstimate()">Copy to clipboard</button>
@@ -167,215 +156,248 @@
   </div>
 
   <script>
+    // Nothing here knows about Webex, contact centres, or any other vertical:
+    // the form shape, phases, output columns and every condition come from
+    // config.json, so a new vertical needs no code changes.
     let CONFIG = null;
+    let vertical = null;
+    let answers = {};
 
     async function loadConfig() {
       const res = await fetch('./config.json');
       CONFIG = await res.json();
     }
 
-    // ─── Trigger evaluation: turns config.activities + current question state into the flat task list ───
-    function fillTemplate(str, n) {
-      return str.replace(/\{\{n\}\}/g, n);
+    // ─── Condition engine ───────────────────────────────────────────────
+    // One condition shape covers every gate, whether it sits on a question,
+    // a checklist option, or an activity.
+    function condMet(cond, resolved) {
+      if (!cond) return true;
+      const a = resolved[cond.question];
+      if (a === undefined || a === null) return false;
+      if (cond.is !== undefined) return Array.isArray(a) ? a.includes(cond.is) : a === cond.is;
+      if (cond.anySelected) return Array.isArray(a) && a.length > 0;
+      if (cond.isOn) return a === true;
+      if (cond.moreThanZero || cond.repeatPerUnit) return Number(a) > 0;
+      return true;
     }
 
-    function evaluateActivities(typeId, scopeId, questionsArr) {
-      const byId = {};
-      questionsArr.forEach(q => { byId[q.id] = q; });
+    function defaultFor(q) {
+      if (q.type === 'checklist') return (q.options || []).filter(o => o.default).map(o => o.id);
+      if (q.type === 'number') return q.default != null ? q.default : (q.min || 0);
+      if (q.type === 'yesno') return q.default === true;
+      return null; // a choice starts unanswered
+    }
 
-      const lines = [];
-      CONFIG.activities.forEach(activity => {
-        const t = activity.trigger;
-        const push = (n) => lines.push({
-          phase: activity.phase,
-          task: n === undefined ? activity.description : fillTemplate(activity.description, n),
-          location: activity.location,
-          trips: activity.trips,
-        });
+    function visibleOptions(q, resolved) {
+      return (q.options || []).filter(o => condMet(o.showWhen, resolved));
+    }
 
-        if (t.type === 'always') {
-          push();
-        } else if (t.type === 'typeEquals') {
-          if (typeId === t.value) push();
-        } else if (t.type === 'stepperGate') {
-          const q = byId[t.questionId];
-          if (q && q.value > 0) push(q.value);
-        } else if (t.type === 'stepperRepeat') {
-          const q = byId[t.questionId];
-          const n = q ? q.value : 0;
-          for (let i = 1; i <= n; i++) push(i);
-        } else if (t.type === 'toggleOn') {
-          const q = byId[t.questionId];
-          if (q && q.value) push();
-        } else if (t.type === 'checklistOption') {
-          const q = byId[t.questionId];
-          const opt = q && q.options.find(o => o.id === t.optionId);
-          if (opt && opt.checked) push();
-        } else if (t.type === 'checklistAny') {
-          const q = byId[t.questionId];
-          if (q && q.options.some(o => o.checked)) push();
+    // Single forward pass, so a hidden question can never satisfy a condition
+    // and a hidden checklist option can never count as checked.
+    function resolveAnswers() {
+      const resolved = {};
+      vertical.questions.forEach(q => {
+        if (!condMet(q.showWhen, resolved)) return;
+        let val = answers[q.id];
+        if (val === undefined) val = defaultFor(q);
+        if (q.type === 'checklist') {
+          const allowed = visibleOptions(q, resolved).map(o => o.id);
+          val = (val || []).filter(id => allowed.includes(id));
         }
+        resolved[q.id] = val;
       });
-      return lines;
+      return resolved;
     }
 
-    let selectedProduct = null;
-    let selectedType = null;
-    let selectedScope = null;
-    let questions = [];
+    // A choice with no default must be answered before later questions appear.
+    function isRequired(q) { return q.type === 'choice' && q.default === undefined; }
 
-    function renderProducts() {
-      const root = document.getElementById('product-grid');
+    function questionsToShow(resolved) {
+      const out = [];
+      for (const q of vertical.questions) {
+        if (!condMet(q.showWhen, resolved)) continue;
+        out.push(q);
+        const a = resolved[q.id];
+        if (isRequired(q) && (a === null || a === undefined)) break;
+      }
+      return out;
+    }
+
+    function allRequiredAnswered(resolved) {
+      return vertical.questions
+        .filter(q => condMet(q.showWhen, resolved) && isRequired(q))
+        .every(q => resolved[q.id] !== null && resolved[q.id] !== undefined);
+    }
+
+    // ─── Rendering ──────────────────────────────────────────────────────
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderVerticals() {
+      const root = document.getElementById('vertical-grid');
       root.innerHTML = '';
-      CONFIG.products.forEach(p => {
+      CONFIG.verticals.forEach(v => {
         const card = document.createElement('div');
-        card.className = 'pick-card' + (!p.enabled ? ' disabled' : '') + (selectedProduct === p.id ? ' selected' : '');
-        card.innerHTML = `<div class="pick-name">${p.name}</div><div class="pick-note">${p.note}</div>`;
-        if (p.enabled) card.onclick = () => selectProduct(p.id);
+        const disabled = v.enabled === false;
+        card.className = 'pick-card' + (disabled ? ' disabled' : '') + (vertical && vertical.id === v.id ? ' selected' : '');
+        card.innerHTML = '<div class="pick-name">' + esc(v.name) + '</div><div class="pick-note">' + esc(v.note || '') + '</div>';
+        if (!disabled) card.onclick = () => selectVertical(v.id);
         root.appendChild(card);
       });
     }
 
-    function selectProduct(id) {
-      selectedProduct = id;
-      renderProducts();
-      show('type-section');
-      renderTypes();
-    }
-
-    function renderTypes() {
-      const root = document.getElementById('type-grid');
-      root.innerHTML = '';
-      CONFIG.types.forEach(t => {
-        const card = document.createElement('div');
-        card.className = 'pick-card' + (selectedType === t.id ? ' selected' : '');
-        card.innerHTML = `<div class="pick-name">${t.name}</div><div class="pick-note">${t.desc}</div>`;
-        card.onclick = () => selectType(t.id);
-        root.appendChild(card);
-      });
-    }
-
-    function selectType(id) {
-      selectedType = id;
-      renderTypes();
-      show('scope-section');
-      renderScopes();
-      if (selectedScope) buildAndShowQuestions();
-    }
-
-    function renderScopes() {
-      const root = document.getElementById('scope-grid');
-      root.innerHTML = '';
-      CONFIG.scopes.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'pick-card' + (selectedScope === s.id ? ' selected' : '');
-        card.innerHTML = `<div class="pick-name">${s.name}</div><div class="pick-note">${s.desc}</div>`;
-        card.onclick = () => selectScope(s.id);
-        root.appendChild(card);
-      });
-    }
-
-    function selectScope(id) {
-      selectedScope = id;
-      renderScopes();
-      buildAndShowQuestions();
-    }
-
-    function buildAndShowQuestions() {
-      questions = CONFIG.questions
-        .filter(q => q.scopeGate === 'all' || q.scopeGate === selectedScope)
-        .map(q => {
-          const copy = JSON.parse(JSON.stringify(q));
-          if (copy.type === 'stepper' || copy.type === 'toggle') copy.value = copy.default;
-          if (copy.type === 'checklist') {
-            copy.options = copy.options
-              .filter(o => o.scopeGate === 'all' || o.scopeGate === selectedScope)
-              .map(o => Object.assign({}, o, { checked: o.default }));
-          }
-          return copy;
-        });
+    function selectVertical(id) {
+      vertical = CONFIG.verticals.find(v => v.id === id);
+      answers = {};
+      renderVerticals();
+      hide('output-section');
       show('question-section');
       renderQuestions();
     }
 
     function renderQuestions() {
+      const resolved = resolveAnswers();
       const root = document.getElementById('question-root');
       root.innerHTML = '';
-      questions.forEach(q => {
-        const card = document.createElement('div');
-        card.className = 'q-card';
 
-        if (q.type === 'stepper') {
-          card.innerHTML = `
-            <div class="q-label">${q.label}</div>
-            <div class="q-sub">${q.sub}</div>
-            <div class="stepper">
-              <button onclick="stepQuestion('${q.id}', -1)">−</button>
-              <span class="stepper-value" id="val-${q.id}">${q.value}</span>
-              <button onclick="stepQuestion('${q.id}', 1)">+</button>
-            </div>`;
-        } else if (q.type === 'toggle') {
-          card.innerHTML = `
-            <div class="toggle-row ${q.value ? 'on' : ''}" id="row-${q.id}" onclick="toggleQuestion('${q.id}')">
-              <div class="toggle-switch"></div>
-              <div>
-                <div class="q-label" style="margin-bottom:2px;">${q.label}</div>
-                ${q.sub ? `<div class="toggle-text" style="color:var(--muted);">${q.sub}</div>` : ''}
-              </div>
-            </div>`;
-        } else if (q.type === 'checklist') {
-          const rows = q.options.filter(o => o.visible !== false).map(o => `
-            <label class="check-row">
-              <input type="checkbox" ${o.checked ? 'checked' : ''} onchange="toggleOption('${q.id}','${o.id}', this.checked)">
-              <span>${o.label}</span>
-            </label>`).join('');
-          card.innerHTML = `
-            <div class="q-label">${q.label}</div>
-            <div class="q-sub">${q.sub}</div>
-            <div class="checklist">${rows}</div>`;
+      let cardIndex = 0;
+      questionsToShow(resolved).forEach(q => {
+        if (q.type === 'choice' && q.display === 'cards') {
+          root.appendChild(cardQuestion(q, resolved, cardIndex++));
+        } else {
+          root.appendChild(standardQuestion(q, resolved));
         }
-        root.appendChild(card);
       });
+
+      document.getElementById('create-btn').style.display = allRequiredAnswered(resolved) ? 'inline-block' : 'none';
     }
 
-    function stepQuestion(id, delta) {
-      const q = questions.find(q => q.id === id);
-      q.value = Math.max(q.min, Math.min(q.max, q.value + delta));
-      document.getElementById(`val-${id}`).textContent = q.value;
+    // A choice question flagged display:"cards" gets the big picker treatment.
+    function cardQuestion(q, resolved, cardIndex) {
+      const wrap = document.createElement('div');
+      const label = document.createElement('div');
+      label.className = 'section-label';
+      label.textContent = (cardIndex + 2) + ' · ' + q.label;
+      wrap.appendChild(label);
+      const grid = document.createElement('div');
+      grid.className = 'scope-grid';
+      visibleOptions(q, resolved).forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'pick-card' + (resolved[q.id] === o.id ? ' selected' : '');
+        card.innerHTML = '<div class="pick-name">' + esc(o.label) + '</div><div class="pick-note">' + esc(o.note || '') + '</div>';
+        card.onclick = () => { answers[q.id] = o.id; renderQuestions(); };
+        grid.appendChild(card);
+      });
+      wrap.appendChild(grid);
+      return wrap;
     }
-    function toggleQuestion(id) {
-      const q = questions.find(q => q.id === id);
-      q.value = !q.value;
-      document.getElementById(`row-${id}`).classList.toggle('on', q.value);
-    }
-    function toggleOption(qid, oid, checked) {
-      const q = questions.find(q => q.id === qid);
-      q.options.find(o => o.id === oid).checked = checked;
+
+    function standardQuestion(q, resolved) {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      const val = resolved[q.id];
+      const help = q.help ? '<div class="q-sub">' + esc(q.help) + '</div>' : '';
+
+      if (q.type === 'number') {
+        card.innerHTML =
+          '<div class="q-label">' + esc(q.label) + '</div>' + help +
+          '<div class="stepper">' +
+            '<button data-step="-1">&minus;</button>' +
+            '<span class="stepper-value">' + val + '</span>' +
+            '<button data-step="1">+</button>' +
+          '</div>';
+        card.querySelectorAll('[data-step]').forEach(btn => {
+          btn.onclick = () => {
+            const min = q.min != null ? q.min : 0;
+            const max = q.max != null ? q.max : 99;
+            answers[q.id] = Math.max(min, Math.min(max, Number(val) + Number(btn.dataset.step)));
+            renderQuestions();
+          };
+        });
+      } else if (q.type === 'yesno') {
+        card.innerHTML =
+          '<div class="toggle-row ' + (val ? 'on' : '') + '">' +
+            '<div class="toggle-switch"></div>' +
+            '<div>' +
+              '<div class="q-label" style="margin-bottom:2px;">' + esc(q.label) + '</div>' +
+              (q.help ? '<div class="toggle-text" style="color:var(--muted);">' + esc(q.help) + '</div>' : '') +
+            '</div>' +
+          '</div>';
+        card.querySelector('.toggle-row').onclick = () => { answers[q.id] = !val; renderQuestions(); };
+      } else if (q.type === 'checklist') {
+        card.innerHTML = '<div class="q-label">' + esc(q.label) + '</div>' + help + '<div class="checklist"></div>';
+        const list = card.querySelector('.checklist');
+        visibleOptions(q, resolved).forEach(o => {
+          const row = document.createElement('label');
+          row.className = 'check-row';
+          row.innerHTML = '<input type="checkbox"' + ((val || []).includes(o.id) ? ' checked' : '') + '><span>' + esc(o.label) + '</span>';
+          row.querySelector('input').onchange = (e) => {
+            const next = new Set(val || []);
+            if (e.target.checked) next.add(o.id); else next.delete(o.id);
+            answers[q.id] = [...next];
+            renderQuestions();
+          };
+          list.appendChild(row);
+        });
+      } else if (q.type === 'choice') {
+        card.innerHTML = '<div class="q-label">' + esc(q.label) + '</div>' + help + '<div class="checklist"></div>';
+        const list = card.querySelector('.checklist');
+        visibleOptions(q, resolved).forEach(o => {
+          const row = document.createElement('label');
+          row.className = 'check-row';
+          row.innerHTML = '<input type="radio" name="q-' + esc(q.id) + '"' + (val === o.id ? ' checked' : '') + '><span>' + esc(o.label) + '</span>';
+          row.querySelector('input').onchange = () => { answers[q.id] = o.id; renderQuestions(); };
+          list.appendChild(row);
+        });
+      }
+      return card;
     }
 
     function show(id) { document.getElementById(id).classList.add('active'); }
     function hide(id) { document.getElementById(id).classList.remove('active'); }
 
-    // Matches the first 4 columns of the source Excel sheet, so a select-all + copy
-    // pastes straight into the sheet with each field landing in its own column.
-    const SHEET_COLUMNS = ['Phase', 'Skill Required', 'Task Type', 'Description'];
-
-    function tsvRow(cells) { return cells.join('\t'); }
+    // ─── Output ─────────────────────────────────────────────────────────
+    function buildTasks(resolved) {
+      const tasks = [];
+      vertical.activities.forEach(act => {
+        const push = (n) => tasks.push(Object.assign({}, act, {
+          description: n === undefined ? act.description : String(act.description).replace(/\{\{n\}\}/g, n),
+        }));
+        const c = act.showWhen;
+        if (!c) { push(); return; }
+        if (!condMet(c, resolved)) return;
+        if (c.repeatPerUnit) {
+          const n = Number(resolved[c.question]);
+          for (let i = 1; i <= n; i++) push(i);
+        } else if (c.moreThanZero) {
+          push(Number(resolved[c.question]));
+        } else {
+          push();
+        }
+      });
+      return tasks;
+    }
 
     function createEstimate() {
-      const tasks = evaluateActivities(selectedType, selectedScope, questions);
+      const resolved = resolveAnswers();
+      const tasks = buildTasks(resolved);
+      const cols = vertical.columns;
 
-      const lines = [tsvRow(SHEET_COLUMNS)];
-      let totalTrips = 0;
-
+      const lines = [cols.map(c => c.header).join('\t')];
+      let trips = 0;
       tasks.forEach(t => {
-        lines.push(tsvRow([t.phase, 'Collaboration', 'ArchiTech Activity', t.task]));
-        totalTrips += t.trips;
+        lines.push(cols.map(c => c.constant !== undefined ? c.constant : (t[c.from] != null ? t[c.from] : '')).join('\t'));
+        trips += Number(t.trips || 0);
       });
 
       document.getElementById('estimate-output').value = lines.join('\n');
       document.getElementById('sum-tasks').textContent = tasks.length;
-      document.getElementById('sum-trips').textContent = totalTrips;
+      document.getElementById('sum-trips').textContent = trips;
+      document.getElementById('output-hint').textContent =
+        'Tab-separated, header row included. Click "Copy to clipboard", then paste directly into a cell in your engagement spreadsheet. Columns land as ' +
+        cols.map(c => c.header).join(' / ') + '.';
 
       hide('question-section');
       show('output-section');
@@ -392,9 +414,7 @@
       document.execCommand('copy');
     }
 
-    loadConfig().then(() => {
-      renderProducts();
-    });
+    loadConfig().then(renderVerticals);
   </script>
 </body>
 </html>
