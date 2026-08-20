@@ -58,11 +58,14 @@
       padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: var(--font); width: 100%; text-align: left; }
     .btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
 
-    .btn-move { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px;
-      width: 26px; height: 26px; border-radius: 6px; cursor: pointer; flex-shrink: 0; padding: 0; }
-    .btn-move:hover:not(:disabled) { color: var(--cyan); border-color: var(--cyan-mid); }
-    .btn-move:disabled { opacity: 0.25; cursor: default; }
-
+    .drag-row { cursor: grab; }
+    .drag-row:active { cursor: grabbing; }
+    .drag-row.dragging { opacity: 0.35; }
+    .drag-row.drop-above { box-shadow: inset 0 2px 0 0 var(--cyan); }
+    .drag-row.drop-below { box-shadow: inset 0 -2px 0 0 var(--cyan); }
+    .grip { color: var(--faint); font-size: 14px; line-height: 1; user-select: none;
+      flex-shrink: 0; letter-spacing: 2px; padding: 0 2px; }
+    .drag-row:hover .grip { color: var(--cyan); }
     .btn-x { background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer;
       width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
     .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
@@ -194,7 +197,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.4.0';
+    const ADMIN_VERSION = '0.5.0';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -432,35 +435,110 @@
       return null;
     }
 
-    function moveInput(idx, delta) {
+    // ── drag to reorder ──
+    // DRAG holds which list is moving and the row it started on. Dropping on a
+    // row inserts above or below it depending on which way you came from.
+    let DRAG = null;
+
+    function clearDropMarks() {
+      document.querySelectorAll('.drop-above, .drop-below')
+        .forEach(el => el.classList.remove('drop-above', 'drop-below'));
+    }
+
+    function makeDraggable(row, kind, idx) {
+      row.classList.add('drag-row');
+      row.draggable = true;
+      row.tabIndex = 0;
+      row.dataset.dragIndex = idx;
+
+      row.ondragstart = (ev) => {
+        DRAG = { kind, from: idx };
+        row.classList.add('dragging');
+        ev.dataTransfer.effectAllowed = 'move';
+        // Firefox refuses to start a drag unless some data is set.
+        ev.dataTransfer.setData('text/plain', String(idx));
+      };
+      row.ondragend = () => { row.classList.remove('dragging'); clearDropMarks(); DRAG = null; };
+      row.ondragover = (ev) => {
+        if (!DRAG || DRAG.kind !== kind || DRAG.from === idx) return;
+        ev.preventDefault();
+        row.classList.remove('drop-above', 'drop-below');
+        row.classList.add(DRAG.from < idx ? 'drop-below' : 'drop-above');
+      };
+      row.ondragleave = () => row.classList.remove('drop-above', 'drop-below');
+      row.ondrop = (ev) => {
+        if (!DRAG || DRAG.kind !== kind) return;
+        ev.preventDefault();
+        clearDropMarks();
+        const from = DRAG.from;
+        DRAG = null;
+        if (from !== idx) reorder(kind, from, idx);
+      };
+      // Dragging is mouse-only, so keep a keyboard route open.
+      row.onkeydown = (ev) => {
+        if (!ev.altKey) return;
+        if (ev.key === 'ArrowUp' && idx > 0) { ev.preventDefault(); reorder(kind, idx, idx - 1); }
+        if (ev.key === 'ArrowDown') { ev.preventDefault(); reorder(kind, idx, idx + 1); }
+      };
+
+      const grip = document.createElement('span');
+      grip.className = 'grip';
+      grip.textContent = '\u22ee\u22ee';
+      grip.title = 'Drag to reorder, or Alt with the arrow keys';
+      row.insertBefore(grip, row.firstChild);
+      return row;
+    }
+
+    function reorder(kind, from, to) {
+      if (kind === 'input') return reorderInputs(from, to);
+      if (kind === 'subflow') return reorderSubflowRows(from, to);
+    }
+
+    function moved(list, from, to) {
+      const next = list.slice();
+      const held = next.splice(from, 1)[0];
+      next.splice(to, 0, held);
+      return next;
+    }
+
+    function reorderInputs(from, to) {
       const f = F();
-      const to = idx + delta;
       if (to < 0 || to >= f.inputs.length) return;
-      const next = f.inputs.slice();
-      const held = next[idx];
-      next[idx] = next[to];
-      next[to] = held;
+      const next = moved(f.inputs, from, to);
       const broken = firstBrokenDependency(next);
       if (broken) {
-        const on = inputById(broken.on);
-        alert(`Cannot move that: "${broken.dependant.label}" only shows when "${on ? on.label : broken.on}" ` +
-              `has been answered, so it has to stay after it.`);
+        const on = next.find(i => i.id === broken.on);
+        alert(`Cannot move that: "${broken.dependant.label}" only shows once ` +
+              `"${on ? on.label : broken.on}" has been answered, so it has to stay after it.`);
         return;
       }
       f.inputs = next;
       renderAdmin();
     }
 
-    function moveSubflow(idx, delta) {
-      const f = F();
-      const to = idx + delta;
-      if (to < 0 || to >= f.subflows.length) return;
-      const held = f.subflows[idx];
-      f.subflows[idx] = f.subflows[to];
-      f.subflows[to] = held;
-      renderAdmin();
+    // Subflow rows are reordered in the open form, not the model, so nothing
+    // else typed into the form is lost. saveFlowForm reads them in DOM order.
+    function reorderSubflowRows(from, to) {
+      const list = document.getElementById('ff-subflows');
+      const rows = Array.from(list.children);
+      if (to < 0 || to >= rows.length) return;
+      const dragged = rows[from];
+      const target = rows[to];
+      list.insertBefore(dragged, from < to ? target.nextSibling : target);
+      wireSubflowDrag();
+      dragged.focus();
     }
 
+    // Re-indexes the rows after a move, since the handlers close over position.
+    function wireSubflowDrag() {
+      const list = document.getElementById('ff-subflows');
+      if (!list) return;
+      Array.from(list.children).forEach((row, n) => {
+        const grip = row.querySelector('.grip');
+        if (grip) grip.remove();
+        makeDraggable(row, 'subflow', n);
+      });
+    }
     let EDITING = null;
     const EXPANDED = new Set();
 
@@ -532,19 +610,6 @@
           </div>`;
         const actions = document.createElement('div');
         actions.className = 'block-actions';
-        const up = document.createElement('button');
-        up.className = 'btn-move';
-        up.textContent = '\u25b2';
-        up.title = 'Ask this earlier';
-        up.disabled = idx === 0;
-        up.onclick = () => moveInput(idx, -1);
-        const down = document.createElement('button');
-        down.className = 'btn-move';
-        down.textContent = '\u25bc';
-        down.title = 'Ask this later';
-        down.disabled = idx === f.inputs.length - 1;
-        down.onclick = () => moveInput(idx, 1);
-        actions.append(up, down);
         const edit = document.createElement('button');
         edit.className = 'btn-ghost';
         edit.textContent = 'Edit';
@@ -555,7 +620,7 @@
         del.onclick = () => deleteInput(idx);
         actions.append(edit, del);
         row.appendChild(actions);
-        root.appendChild(row);
+        root.appendChild(makeDraggable(row, 'input', idx));
       });
       const add = document.createElement('button');
       add.className = 'btn-secondary';
@@ -1457,10 +1522,9 @@
 
           <div class="field">
             <label class="field-label">Subflows, in the order they are offered</label>
-            <div id="ff-subflows">${f.subflows.map((s, n) => `
+            <div class="q-sub" style="margin-bottom:8px;">Drag a row to reorder it.</div>
+            <div id="ff-subflows">${f.subflows.map(s => `
               <div class="row-editor" data-sub-id="${attr(s.id)}">
-                <button class="btn-move" type="button" onclick="moveSubflow(${n}, -1)" ${n === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
-                <button class="btn-move" type="button" onclick="moveSubflow(${n}, 1)" ${n === f.subflows.length - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
                 <input type="text" value="${attr(s.name)}" data-role="sub-name" />
                 <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
               </div>`).join('')}</div>
@@ -1475,6 +1539,7 @@
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
           ${CONFIG.flows.length > 1 ? '<button class="btn-ghost" onclick="deleteFlow()">Delete flow</button>' : ''}
         </div>`;
+      wireSubflowDrag();
       slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -1484,6 +1549,7 @@
           <input type="text" value="" data-role="sub-name" placeholder="New subflow" />
           <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
         </div>`);
+      wireSubflowDrag();
     }
 
     function removeSubflowRow(btn) {
