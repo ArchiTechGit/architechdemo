@@ -205,6 +205,45 @@ check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(a
 check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
 
 // ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Forms render into the page');
+{
+  // Editing a task wiped the task list. renderTaskForm draws a form that finds
+  // its own fields with document.getElementById, so every container above it
+  // has to be in the document first. All three call sites built the slot inside
+  // a detached block-body and attached it afterwards, so the lookup returned
+  // null and the render died half-way through the list.
+  //
+  // This is a source-order check because the fault is invisible in any single
+  // line. check-dom.js proves the behaviour against a real DOM; this is the
+  // cheap guard that runs with no dependencies.
+  const render = adminFiles.find(f => f.name === 'admin-render.js').src;
+  const attachedBefore = (fnName) => {
+    const start = render.indexOf('function ' + fnName);
+    const body = render.slice(start, render.indexOf('\nfunction ', start + 1));
+    const calls = [...body.matchAll(/renderTaskForm\(/g)].map(m => m.index);
+    return calls.every(at => {
+      const before = body.slice(0, at);
+      // The nearest enclosing containers must already be on the page.
+      return /root\.appendChild\((?:block|box)\)/.test(before)
+        && /(?:block|box)\.appendChild\(body\)/.test(before);
+    });
+  };
+  check('every task form is drawn into a container already on the page',
+    attachedBefore('renderTaskSections'), true);
+
+  // renderChips guarded with `if (!box) return`, so it quietly drew nothing for
+  // as long as this bug existed -- which is why the variable chips never showed
+  // and why nobody noticed the cause. A helper that cannot find its container
+  // must fail, not shrug.
+  const forms = adminFiles.find(f => f.name === 'admin-forms.js').src;
+  ['renderChips', 'renderEffortLines'].forEach(fn => {
+    const start = forms.indexOf('function ' + fn + '(');
+    const body = forms.slice(start, start + 400);
+    check(fn + ' does not silently skip a missing container',
+      /if \(!box\) return;/.test(body), false);
+  });
+}
+
 section('Asset versioning');
 {
   // A flow deleted in the admin kept showing, then "create estimate" stopped

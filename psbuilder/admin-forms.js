@@ -460,8 +460,11 @@ function renderTaskForm(slot, idx, section) {
 }
 
 function renderChips() {
+  // No guard here on purpose. This used to return quietly when the container
+  // was missing, so the variable chips silently never appeared and the real
+  // fault -- a form being drawn before its slot was attached -- stayed hidden
+  // for as long as it did. Let it be loud.
   const box = document.getElementById('tf-chips');
-  if (!box) return;
   box.innerHTML = 'Insert a variable: ' + numberInputs().map(i =>
     `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
   ).join('') + '<span class="chip chip--ghost" onclick="createVariableInline()">+ New variable</span>' +

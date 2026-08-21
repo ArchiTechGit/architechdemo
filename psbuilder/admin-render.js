@@ -399,10 +399,15 @@ function renderTaskSections(root) {
       <span class="block-count ${matches.length === 0 ? 'zero' : ''}">${matches.length === 0 ? 'none' : count(matches.length, 'task', 'tasks') + (hours ? ` · ${hours}h` : '')}</span>`;
     head.onclick = () => toggleExpand(key);
     block.appendChild(head);
+    // Attached now, not at the end: renderTaskForm draws a form that finds its
+    // own fields with getElementById, so every ancestor has to be in the
+    // document first or the lookup returns null.
+    root.appendChild(block);
 
     if (open) {
       const body = document.createElement('div');
       body.className = 'block-body';
+      block.appendChild(body);
       matches.forEach(({ t, idx }) => {
         body.appendChild(taskEl(t, idx));
         if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
@@ -433,9 +438,7 @@ function renderTaskSections(root) {
         body.appendChild(slot);
         renderTaskForm(slot, -1, section);
       }
-      block.appendChild(body);
     }
-    root.appendChild(block);
   });
 
   const orphans = orphanTasks();
@@ -447,9 +450,11 @@ function renderTaskSections(root) {
     root.appendChild(warn);
     const box = document.createElement('div');
     box.className = 'block';
+    root.appendChild(box);
     const body = document.createElement('div');
     body.className = 'block-body';
     body.style.paddingTop = '16px';
+    box.appendChild(body);
     orphans.forEach(({ t, idx }) => {
       body.appendChild(taskEl(t, idx));
       if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
@@ -458,8 +463,6 @@ function renderTaskSections(root) {
         renderTaskForm(slot, editingTaskIndex(), { id: 'all', name: 'All subflows', shared: true });
       }
     });
-    box.appendChild(body);
-    root.appendChild(box);
   }
 }
 
