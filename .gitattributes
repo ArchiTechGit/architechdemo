@@ -1,0 +1,8 @@
+# core.autocrlf=true was rewriting these to CRLF on every checkout, which
+# silently defeats multi-line patch anchors and shows the whole file as
+# changed. The tool is a static site served as-is; LF everywhere.
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
