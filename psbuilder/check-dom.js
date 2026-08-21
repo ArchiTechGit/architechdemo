@@ -194,5 +194,36 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── the help page ───────────────────────
+section('Help: the live reference');
+{
+  const { window, errors, $, $$ } = boot('help.html', []);
+  check('the help page runs without error', errors, []);
+  // It fetches its own config, which jsdom will not serve. Call the loader with
+  // fetch stubbed, which is the same path the page takes.
+  window.fetch = () => Promise.resolve({ ok: true, json: async () => CONFIG });
+  return (async () => {
+    await window.eval('loadReference()');
+    check('it lists every flow', $$('#hp-live .q-card').length, CONFIG.flows.length);
+    // The prose promises a variable table; this is the part that would silently
+    // go stale if it were written by hand.
+    const tokens = $$('#hp-live .hp-token').map(el => el.textContent);
+    const expected = CONFIG.flows.flatMap(f => (f.inputs || []).map(i => '{' + (i.token || i.id) + '}'));
+    check('and every variable of every flow',
+      expected.filter(t => !tokens.includes(t)), []);
+    check('and every repeating task',
+      CONFIG.flows.flatMap(f => (f.tasks || []).filter(t => t.repeatPer))
+        .filter(t => !$('#hp-live').textContent.includes(t.description)), []);
+    check('it fills in the real roles',
+      CONFIG.roles.filter(r => !$('#hp-roles').textContent.includes(r.name)), []);
+    check('and the real locations',
+      CONFIG.locations.filter(l => !$('#hp-locations').textContent.includes(l)), []);
+    check('nothing threw while building it', errors, []);
+
+    console.log(failures ? `\n${failures} CHECK(S) FAILED` : '\nALL INTERACTION CHECKS PASSED');
+    process.exit(failures ? 1 : 0);
+  })();
+}
+
 console.log(failures ? `\n${failures} CHECK(S) FAILED` : '\nALL INTERACTION CHECKS PASSED');
 process.exit(failures ? 1 : 0);

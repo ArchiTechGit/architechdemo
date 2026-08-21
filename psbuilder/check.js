@@ -16,6 +16,10 @@ const adminFiles = ADMIN_SCRIPTS.map(f => ({ name: f, src: fs.readFileSync(path.
 const adminHtml = [adminMarkup].concat(adminFiles.map(f => f.src)).join('\n');
 const E = require(path.join(DIR, 'engine.js'));
 const uiCss = fs.readFileSync(path.join(DIR, 'ui.css'), 'utf8');
+// The help page is prose, but it is still a page on the site and is held to the
+// same rules: one h1, a main landmark, versioned assets, somewhere to report a
+// failure, and no redefining anything the shared sheet owns.
+const helpHtml = fs.readFileSync(path.join(DIR, 'help.html'), 'utf8');
 
 let failures = 0;
 function check(name, actual, expected) {
@@ -183,8 +187,7 @@ check('and says it capped', E.repeatCount(100000).clamped, true);
 
 // ── 1g. The accessibility layer is present ─────────────────────────────
 section('Accessibility');
-['index.html', 'admin.html'].forEach(name => {
-  const html = name === 'index.html' ? indexHtml : adminHtml;
+[['index.html', indexHtml], ['admin.html', adminHtml], ['help.html', helpHtml]].forEach(([name, html]) => {
   check(name + ' has exactly one h1', (html.match(/<h1\b/g) || []).length, 1);
   check(name + ' has a main landmark', /<main[\s>]/.test(html), true);
   check(name + ' loads the shared stylesheet', /href="\.\/ui\.css\?v=[\d.]+"/.test(html), true);
@@ -205,6 +208,39 @@ check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(a
 check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
 
 // ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Help page')
+{
+  // A help page that describes mechanics the tool no longer has is worse than
+  // none, so the parts that could drift are read from config.json at load
+  // rather than written into the prose.
+  check('it reads the config rather than restating it',
+    /fetch\(`\.\/config\.json\?t=\$\{Date\.now\(\)\}`, \{ cache: 'no-store' \}\)/.test(helpHtml), true);
+  check('and names no flow, token or role in its markup',
+    config.flows.map(f => f.name).concat(config.roles.map(r => r.name))
+      .filter(n => helpHtml.split('<script>')[0].includes(n)), []);
+  check('it fills the role list from the config', /id="hp-roles"/.test(helpHtml), true);
+  check('and the location list too', /id="hp-locations"/.test(helpHtml), true);
+  check('a failed reference load says so', /could not be loaded/.test(helpHtml), true);
+
+  // The three mechanisms it exists to separate.
+  ['Variables', 'Line numbers', 'Hours'].forEach(h =>
+    check('it covers ' + h, helpHtml.includes(h), true));
+  // The numbers that are limits, not prose, and would be wrong if they changed.
+  check('it quotes the real repeat cap',
+    helpHtml.includes(String(E.MAX_LINES_PER_TASK)), true);
+  check('and the real paste columns',
+    ['task', 'resource'].every(k => new RegExp('>' + config.pasteTargets[k] + '<').test(helpHtml)), true);
+  const slots = Number(E.RESOURCE_SLOTS);
+  const spelled = ['zero','one','two','three','four','five','six','seven','eight'][slots] || String(slots);
+  check('and the real number of resource slots', helpHtml.toLowerCase().includes(spelled), true);
+
+  // Both pages should be able to reach it, or nobody will find it.
+  [['index.html', indexHtml], ['admin.html', adminMarkup]].forEach(([name, html]) =>
+    check(name + ' links to it', /href="\.\/help\.html"/.test(html), true));
+  check('and it links back to both',
+    /href="\.\/index\.html"/.test(helpHtml) && /href="\.\/admin\.html"/.test(helpHtml), true);
+}
+
 section('Forms render into the page');
 {
   // Editing a task wiped the task list. renderTaskForm draws a form that finds
@@ -254,7 +290,7 @@ section('Asset versioning');
   // handler threw and the button looked dead. Versioned URLs make a mixed set
   // impossible: one page only ever requests the files it shipped with.
   const LOCAL = ['ui.css'].concat(ADMIN_SCRIPTS).concat(['engine.js']);
-  const pages = [['index.html', indexHtml], ['admin.html', adminMarkup]];
+  const pages = [['index.html', indexHtml], ['admin.html', adminMarkup], ['help.html', helpHtml]];
 
   const bare = [];
   pages.forEach(([name, html]) => {
@@ -345,8 +381,7 @@ section('Shared styling');
   });
   check('the shared sheet defines a real set of rules', owned.length > 25, true);
 
-  ['index.html', 'admin.html'].forEach(name => {
-    const html = name === 'index.html' ? indexHtml : adminHtml;
+  [['index.html', indexHtml], ['admin.html', adminHtml], ['help.html', helpHtml]].forEach(([name, html]) => {
     const own = (html.split('<style>')[1] || '').split('</style>')[0].replace(/\/\*[\s\S]*?\*\//g, '');
     const redefined = [];
     own.split('}').forEach(chunk => {
@@ -1083,8 +1118,8 @@ section('Interface copy');
 // ── 6. Admin shows every task exactly once ──────────────────────────────
 section('Typography')
 {
-  const pageCss = ['index.html', 'admin.html'].map((n, i) =>
-    (([indexHtml, adminMarkup][i]).split('<style>')[1] || '').split('</style>')[0]);
+  const pageCss = [indexHtml, adminMarkup, helpHtml].map(h =>
+    (h.split('<style>')[1] || '').split('</style>')[0]);
   const allCss = [uiCss, ...pageCss].join('\n');
 
   // Resolve a token to the size it reaches on a wide window.
@@ -1098,8 +1133,14 @@ section('Typography')
   [...uiCss.matchAll(/--(fs-[a-z]+):\s*([^;]+);/g)].forEach(m => { tok[m[1]] = px(m[2].trim()); });
 
   check('the scale is defined once, in the shared sheet', Object.keys(tok).length > 3, true);
+  // Read the :root block itself. Testing everything after the word ':root'
+  // caught any later rule that merely used a step, which is allowed.
+  const rootBlock = c => {
+    const at = c.indexOf(':root');
+    return at === -1 ? '' : c.slice(at, c.indexOf('}', at) + 1);
+  };
   check('and no page defines its own step',
-    pageCss.filter(c => /--fs-/.test(c.split(':root')[1] || '')).length, 0);
+    pageCss.filter(c => /--fs-[a-z]+s*:/.test(rootBlock(c))).length, 0);
 
   // The whole point. Adjacent steps 1.1x apart are the flat scale with extra
   // tokens; the first pass at this shipped a 1.14x gap at the top.

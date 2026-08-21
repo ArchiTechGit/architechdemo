@@ -24,7 +24,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.9.7" />
+  <link rel="stylesheet" href="./ui.css?v=0.9.8" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -84,7 +84,10 @@
     <header class="header">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <span class="header-badge">Internal Sizing Tool · POC</span>
-      <a href="./admin.html" style="color:var(--muted);font-size:var(--fs-micro);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;">Manage flows →</a>
+      <span>
+        <a href="./help.html">How it works</a>
+        <a href="./admin.html">Manage flows →</a>
+      </span>
     </header>
 
     <h1 class="page-title">PS Engagement Builder</h1>
@@ -155,7 +158,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js?v=0.9.7"></script>
+  <script src="./engine.js?v=0.9.8"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from

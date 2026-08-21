@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How the PS Builder works — ArchiTech</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script>
+    // Same reporter as the other two pages: inline, first, and dependent on
+    // nothing, so it still works when the thing that broke is one of the files
+    // below it.
+    window.addEventListener("error", reportFatal);
+    window.addEventListener("unhandledrejection", reportFatal);
+    function reportFatal(e) {
+      var box = document.getElementById("fatal");
+      if (!box) return;
+      var why = (e && (e.message || (e.reason && e.reason.message))) || "a script failed";
+      box.style.display = "block";
+      box.textContent = "This page did not finish loading, so what you are seeing may be "
+        + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
+    }
+  </script>
+  <link rel="stylesheet" href="./ui.css?v=0.9.8" />
+  <style>
+    :root { --page-width: 820px; }
+
+    /* Reading copy, not interface copy: wider measure than a form needs and a
+       looser line so a long passage does not feel like a spec sheet. */
+    .hp-body { font-size: var(--fs-body); line-height: 1.8; color: var(--muted); max-width: 68ch; }
+    .hp-body + .hp-body { margin-top: 14px; }
+    .hp-body strong { color: var(--text); font-weight: 700; }
+    .hp-body code, .hp-token {
+      font-family: var(--font-mono); font-size: 0.9em; color: var(--cyan);
+      background: var(--cyan-dim); border-radius: 4px; padding: 1px 5px;
+    }
+
+    .hp-section { margin-bottom: 44px; }
+    .hp-h2 {
+      font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    /* The number is a marker, not a heading: these really are three separate
+       mechanisms people confuse, so they are worth counting. */
+    .hp-h2 span { font-family: var(--font-mono); color: var(--muted); font-weight: 400; margin-right: 10px; }
+
+    /* A worked example. Mono, because it is what you would actually type. */
+    .hp-eg {
+      font-family: var(--font-mono); font-size: var(--fs-ui); line-height: 1.9;
+      background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--cyan);
+      border-radius: 0 8px 8px 0; padding: 14px 16px; margin: 14px 0;
+      color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere;
+    }
+    .hp-eg em { color: var(--muted); font-style: normal; }
+
+    .hp-note { margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div id="fatal" class="notice" role="alert" style="display:none;"></div>
+
+    <header class="header">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <span class="header-badge">PS Builder — Help</span>
+      <span>
+        <a href="./admin.html">Manage flows</a>
+        <a href="./index.html">← Back to the builder</a>
+      </span>
+    </header>
+
+    <h1 class="page-title">How the builder works</h1>
+    <main>
+      <div class="page-desc">
+        Three mechanisms decide what comes out of a flow: variables put an answer into a sentence,
+        repeat-per turns one task into many rows, and effort lines put hours against a task. They are
+        easy to mix up, so each one is set out separately below.
+      </div>
+
+      <!-- ── 1 ───────────────────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2"><span>01</span>Variables</div>
+        <p class="hp-body">
+          A variable is a question you write once and then refer to by name inside any task
+          description. Wrap its token in braces — <code>{agent-training}</code> — and the answer is
+          substituted when the estimate is generated.
+        </p>
+        <div class="hp-eg">Agent training (desktop, call/chat handling, wrap-up codes) — {agent-training} sessions
+<em>answer 4  →</em>  Agent training (desktop, call/chat handling, wrap-up codes) — 4 sessions</div>
+        <p class="hp-body">
+          This stays <strong>one task and one row</strong>. The number only changes the wording.
+        </p>
+        <p class="hp-body hp-note">
+          In the task form, the chips under <strong>Description</strong> insert these for you. If a
+          token matches no variable it is left in the text exactly as written, so
+          <code>{tpyo}</code> reaches the spreadsheet as <code>{tpyo}</code> — the builder will not
+          warn you, though the task importer does.
+        </p>
+      </section>
+
+      <!-- ── 2 ───────────────────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2"><span>02</span>Line numbers, and repeating a task</div>
+        <p class="hp-body">
+          This one is different: it makes a single task come out as <strong>several rows</strong>.
+          Set <strong>Repeat per</strong> on the task to a number variable, and it emits one row per
+          unit. Inside the description, <code>{#}</code> becomes the row number.
+        </p>
+        <div class="hp-eg">Workshop {#} — discovery session      <em>repeat per {workshops}</em>
+
+<em>answer 3  →</em>  Workshop 1 — discovery session
+          Workshop 2 — discovery session
+          Workshop 3 — discovery session</div>
+        <p class="hp-body">
+          Each row carries the <strong>full hours</strong> of the task. That is the whole point of
+          repeating rather than mentioning: three workshops cost three workshops.
+        </p>
+        <p class="hp-body hp-note">
+          <code>{#}</code> on a task with no repeat set is left literal. Only <strong>number</strong>
+          variables can drive a repeat. The cap is 200 rows per task — ask for more and you get 200
+          plus a notice saying what was clamped.
+        </p>
+      </section>
+
+      <!-- ── the distinction people actually get wrong ────────────────────── -->
+      <section class="hp-section">
+        <div class="section-label">Which one do I want</div>
+        <div class="scroll-x">
+          <table class="data-table">
+            <tr>
+              <th>You want</th><th>Use</th><th>Rows out</th><th>Hours</th>
+            </tr>
+            <tr>
+              <td>One activity that mentions a quantity</td>
+              <td><span class="hp-token">{token}</span> in the text</td>
+              <td class="num">1</td>
+              <td>Counted once</td>
+            </tr>
+            <tr>
+              <td>Each unit is its own deliverable, its own PSE row</td>
+              <td>Repeat per + <span class="hp-token">{#}</span></td>
+              <td class="num">n</td>
+              <td>Counted per row</td>
+            </tr>
+          </table>
+        </div>
+        <p class="hp-body hp-note">
+          These stack, and that is the easiest way to double-count: a task repeating per
+          <code>{workshops}</code> <em>and</em> scaling its hours per <code>{workshops}</code>
+          multiplies. Pick one.
+        </p>
+      </section>
+
+      <!-- ── 3 ───────────────────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2"><span>03</span>Hours</div>
+        <p class="hp-body">
+          Open a task and find <strong>Who does the work, and for how long</strong>, then press
+          <strong>+ Add resource</strong>. Each resource line is four things:
+        </p>
+        <div class="scroll-x">
+          <table class="data-table">
+            <tr><th>Field</th><th>What it is</th></tr>
+            <tr><td>Role</td><td id="hp-roles">The engineer doing the work</td></tr>
+            <tr><td>Location</td><td id="hp-locations">Where they do it</td></tr>
+            <tr><td>Business hours</td><td>Hours in normal time, in 0.25 steps</td></tr>
+            <tr><td>After hours</td><td>Hours out of hours, in 0.25 steps</td></tr>
+          </table>
+        </div>
+        <p class="hp-body hp-note">
+          Add a line per role if a task needs more than one. A task with no resource lines reads
+          <em>"No effort costed against this task yet"</em> and contributes nothing.
+        </p>
+
+        <div class="section-label" style="margin-top:30px;">Hours that scale</div>
+        <p class="hp-body">
+          Under each hours field is <strong>+ Scale with a variable</strong>, which gives you a base
+          plus a rate:
+        </p>
+        <div class="hp-eg">Business hours   2
+  plus  0.5  per agent-domains
+
+<em>6 domains  →</em>  2 + (6 × 0.5) = 5 hours</div>
+        <p class="hp-body">
+          Only number variables can be scaled against, and only linearly — there are no tiers or
+          thresholds. If pricing needs a step change, make it a separate task with a condition.
+        </p>
+      </section>
+
+      <!-- ── the spreadsheet ──────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2"><span>04</span>Getting it into the PSE</div>
+        <p class="hp-body">
+          The builder gives you <strong>two</strong> blocks to copy rather than one, because pasting
+          a single wide block over the sheet would overwrite the columns it calculates from — the
+          round trips, stays and document counts.
+        </p>
+        <div class="scroll-x">
+          <table class="data-table">
+            <tr><th>Block</th><th>Paste at</th><th>Holds</th></tr>
+            <tr>
+              <td>1 · Task details</td>
+              <td><span class="hp-token">A</span></td>
+              <td>Phase, skill required, task type, description</td>
+            </tr>
+            <tr>
+              <td>2 · Resource hours</td>
+              <td><span class="hp-token">J</span></td>
+              <td>Five resource slots — location, business hours, after hours each</td>
+            </tr>
+          </table>
+        </div>
+        <p class="hp-body hp-note">
+          The sheet fixes one role per resource column on <strong>row 41</strong>, not per row, so
+          the builder assigns each role you have used to a slot and tells you which slot got which
+          role. There are only five columns: use more than five distinct roles in one subflow and
+          you get a notice naming the ones that will not fit.
+        </p>
+        <p class="hp-body hp-note">
+          Paste both blocks at the same row. Block 2 is generated in the same order as block 1, so
+          the two line up only if they start level.
+        </p>
+      </section>
+
+      <!-- ── live reference ───────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="section-label">What is configured right now</div>
+        <p class="hp-body">
+          Read from <code>config.json</code> when this page loads, so it cannot fall out of date
+          with the flows themselves.
+        </p>
+        <div id="hp-live" class="q-sub" style="margin-top:16px;">Loading…</div>
+      </section>
+    </main>
+
+    <div class="footer">
+      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <div class="footer-note">
+        Internal tool. The PSE workbook owns the commercials — this only produces the task list and
+        the hours against it.
+      </div>
+    </div>
+  </div>
+
+  <script src="./engine.js?v=0.9.8"></script>
+  <script>
+    const esc = PSEngine.esc;
+
+    // The same no-store read the builder uses. A helpful page that describes a
+    // config it was served ten minutes ago is worse than no page.
+    async function loadReference() {
+      const res = await fetch(`./config.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`config.json could not be read (${res.status})`);
+      const config = await res.json();
+
+      document.getElementById('hp-roles').textContent =
+        (config.roles || []).map(r => r.name).join(', ');
+      document.getElementById('hp-locations').textContent =
+        (config.locations || []).join(' or ');
+
+      const box = document.getElementById('hp-live');
+      box.innerHTML = (config.flows || []).map(f => {
+        const vertical = (config.verticals || []).find(v => v.id === f.vertical);
+        const repeats = (f.tasks || []).filter(t => t.repeatPer);
+        const tokens = (f.inputs || []).map(i => `
+          <tr>
+            <td><span class="hp-token">{${esc(i.token || i.id)}}</span></td>
+            <td>${esc(i.type)}</td>
+            <td>${esc(i.label || '')}</td>
+          </tr>`).join('');
+
+        return `
+          <div class="q-card">
+            <div class="q-label">${esc(f.name)}${f.enabled === false ? ' — hidden' : ''}</div>
+            <div class="q-sub q-sub--spaced">
+              ${esc(vertical ? vertical.name : f.vertical)} ·
+              ${(f.subflows || []).length} subflow${(f.subflows || []).length === 1 ? '' : 's'} ·
+              ${(f.tasks || []).length} task${(f.tasks || []).length === 1 ? '' : 's'}
+            </div>
+            ${tokens ? `<div class="scroll-x"><table class="data-table">
+              <tr><th>Variable</th><th>Type</th><th>Question</th></tr>${tokens}
+            </table></div>` : '<div class="q-sub">No variables yet.</div>'}
+            ${repeats.length ? `<div class="scroll-x"><table class="data-table">
+              <tr><th>Repeats one row per</th><th>Task</th></tr>
+              ${repeats.map(t => `<tr>
+                <td><span class="hp-token">{${esc(t.repeatPer)}}</span></td>
+                <td>${esc(t.description)}</td>
+              </tr>`).join('')}
+            </table></div>` : ''}
+          </div>`;
+      }).join('') || '<div class="q-sub">No flows are configured yet.</div>';
+    }
+
+    loadReference().catch(err => {
+      // Say what went wrong rather than leaving "Loading…" forever.
+      document.getElementById('hp-live').innerHTML =
+        '<div class="notice">The live reference could not be loaded, so the list of variables '
+        + 'below is missing. Everything above still applies. (' + esc(err.message) + ')</div>';
+    });
+  </script>
+</body>
+</html>
