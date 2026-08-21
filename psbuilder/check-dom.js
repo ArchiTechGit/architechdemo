@@ -150,6 +150,82 @@ section('Admin: editing things');
   check('and raises no error', errors, []);
   window.eval('closeForm();');
 
+  // ── the hours panel ──
+  // It is the reason a task exists, so it leads the form and shows a running
+  // total rather than sitting fourth with the same weight as "Skill required".
+  openAll();
+  errors.length = 0;
+  click([...$$('#tasks-root .act')[0].parentElement.querySelectorAll('button')]
+    .find(b => b.textContent.trim() === 'Edit'));
+  check('the task form leads with the hours panel', !!$('.tf-hours'), true);
+  check('the hours come before the phase',
+    $('#tf-description').compareDocumentPosition($('.tf-hours')) & 4 ? true : false, true);
+  check('and the phase comes after the hours',
+    $('.tf-hours').compareDocumentPosition($('#tf-phase')) & 4 ? true : false, true);
+  check('the repeat sits inside the panel, with the hours it multiplies',
+    !!$('.tf-hours #tf-repeat'), true);
+  check('the panel shows a running total', !!$('#tf-hours-total'), true);
+  check('which reads as nothing before any resource is added',
+    $('#tf-hours-total').textContent.trim(), '—');
+  window.eval('addEffortLine();');
+  check('adding a resource adds a line', $$('[data-effort]').length, 1);
+  // amountEditor names the plain figure <prefix>-base; the rest of the prefix
+  // belongs to the scale-with-a-variable rows under it.
+  window.eval("document.getElementById('tf-eff0-bh-base').value = 3; updateTaskPreview();");
+  check('and the total follows what is typed', $('#tf-hours-total').textContent.trim(), '3h');
+  check('none of that threw', errors, []);
+  window.eval('closeForm();');
+
+  // ── reordering tasks ──
+  // Drag needs a DataTransfer, which jsdom does not implement, so this drives
+  // the keyboard route. Both end in reorderTasks, which is the part that can be
+  // wrong.
+  openAll();
+  const flowOf = () => window.eval('JSON.stringify(F().tasks.map(t => t.id))');
+  const before = JSON.parse(flowOf());
+  const firstRow = $$('#tasks-root .act')[0];
+  check('task rows are draggable', firstRow.classList.contains('drag-row'), true);
+  check('and carry a grip', !!firstRow.querySelector('.grip'), true);
+  // The section is in the kind so a row cannot be dropped into another section.
+  const kinds = [...new Set($$('#tasks-root .act').map(r => r.dataset.dragKind))];
+  check('each section is its own drag scope', kinds.length > 1, true);
+  check('and every scope is a task scope', kinds.filter(k => !k.startsWith('task:')), []);
+
+  errors.length = 0;
+  const sendAlt = (row, key) => row.dispatchEvent(new window.KeyboardEvent('keydown',
+    { key, altKey: true, bubbles: true }));
+  // The rows on screen belong to one section, and its tasks are scattered
+  // through the array rather than adjacent, so the slots are what to watch.
+  const scope = firstRow.dataset.dragKind;
+  const slots = $$('#tasks-root .act')
+    .filter(r => r.dataset.dragKind === scope)
+    .map(r => Number(r.dataset.dragIndex));
+  const moving = before[slots[0]];
+  sendAlt(firstRow, 'ArrowDown');
+  const after = JSON.parse(flowOf());
+
+  check('Alt with an arrow moves the task', after[slots[0]] !== moving, true);
+  check('and moves it one place among the rows it can see',
+    after[slots[1]], moving);
+  check('nothing is lost or duplicated', after.slice().sort(), before.slice().sort());
+
+  // The invariant that matters. A section's tasks are interleaved with other
+  // sections', so a naive splice would carry this task past a task belonging to
+  // a subflow nobody was looking at, quietly reordering its output.
+  const outsiders = before
+    .map((id, i) => ({ id, i }))
+    .filter(x => !slots.includes(x.i));
+  check('and moves nothing that belongs to another section',
+    outsiders.filter(x => after[x.i] !== x.id).map(x => x.id), []);
+
+  check('the row keeps focus, so it can be moved again',
+    window.document.activeElement && window.document.activeElement.dataset.dragKind, scope);
+  check('reordering raises no error', errors, []);
+
+  // Reversible, which the splice version was not.
+  sendAlt(window.document.activeElement, 'ArrowUp');
+  check('and moving it back restores the original order exactly', JSON.parse(flowOf()), before);
+
   // ── the preview ──
   errors.length = 0;
   window.eval('togglePreview();');

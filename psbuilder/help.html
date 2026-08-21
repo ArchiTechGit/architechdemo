@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.9.8" />
+  <link rel="stylesheet" href="./ui.css?v=0.9.9" />
   <style>
     :root { --page-width: 820px; }
 
@@ -42,9 +42,6 @@
       font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: -0.01em;
       margin-bottom: 6px;
     }
-    /* The number is a marker, not a heading: these really are three separate
-       mechanisms people confuse, so they are worth counting. */
-    .hp-h2 span { font-family: var(--font-mono); color: var(--muted); font-weight: 400; margin-right: 10px; }
 
     /* A worked example. Mono, because it is what you would actually type. */
     .hp-eg {
@@ -74,132 +71,145 @@
     <h1 class="page-title">How the builder works</h1>
     <main>
       <div class="page-desc">
-        Three mechanisms decide what comes out of a flow: variables put an answer into a sentence,
-        repeat-per turns one task into many rows, and effort lines put hours against a task. They are
-        easy to mix up, so each one is set out separately below.
+        A <strong>flow</strong> is one kind of engagement. A <strong>subflow</strong> is a variation
+        of it — a new build against a migration, say — and a task can belong to one subflow, several,
+        or all of them. Everything below is about the tasks.
       </div>
 
-      <!-- ── 1 ───────────────────────────────────────────────────────────── -->
+      <!-- Hours first: it is the question that brings people here. -->
       <section class="hp-section">
-        <div class="hp-h2"><span>01</span>Variables</div>
+        <div class="hp-h2">Putting hours on a task</div>
         <p class="hp-body">
-          A variable is a question you write once and then refer to by name inside any task
-          description. Wrap its token in braces — <code>{agent-training}</code> — and the answer is
-          substituted when the estimate is generated.
-        </p>
-        <div class="hp-eg">Agent training (desktop, call/chat handling, wrap-up codes) — {agent-training} sessions
-<em>answer 4  →</em>  Agent training (desktop, call/chat handling, wrap-up codes) — 4 sessions</div>
-        <p class="hp-body">
-          This stays <strong>one task and one row</strong>. The number only changes the wording.
-        </p>
-        <p class="hp-body hp-note">
-          In the task form, the chips under <strong>Description</strong> insert these for you. If a
-          token matches no variable it is left in the text exactly as written, so
-          <code>{tpyo}</code> reaches the spreadsheet as <code>{tpyo}</code> — the builder will not
-          warn you, though the task importer does.
-        </p>
-      </section>
-
-      <!-- ── 2 ───────────────────────────────────────────────────────────── -->
-      <section class="hp-section">
-        <div class="hp-h2"><span>02</span>Line numbers, and repeating a task</div>
-        <p class="hp-body">
-          This one is different: it makes a single task come out as <strong>several rows</strong>.
-          Set <strong>Repeat per</strong> on the task to a number variable, and it emits one row per
-          unit. Inside the description, <code>{#}</code> becomes the row number.
-        </p>
-        <div class="hp-eg">Workshop {#} — discovery session      <em>repeat per {workshops}</em>
-
-<em>answer 3  →</em>  Workshop 1 — discovery session
-          Workshop 2 — discovery session
-          Workshop 3 — discovery session</div>
-        <p class="hp-body">
-          Each row carries the <strong>full hours</strong> of the task. That is the whole point of
-          repeating rather than mentioning: three workshops cost three workshops.
-        </p>
-        <p class="hp-body hp-note">
-          <code>{#}</code> on a task with no repeat set is left literal. Only <strong>number</strong>
-          variables can drive a repeat. The cap is 200 rows per task — ask for more and you get 200
-          plus a notice saying what was clamped.
-        </p>
-      </section>
-
-      <!-- ── the distinction people actually get wrong ────────────────────── -->
-      <section class="hp-section">
-        <div class="section-label">Which one do I want</div>
-        <div class="scroll-x">
-          <table class="data-table">
-            <tr>
-              <th>You want</th><th>Use</th><th>Rows out</th><th>Hours</th>
-            </tr>
-            <tr>
-              <td>One activity that mentions a quantity</td>
-              <td><span class="hp-token">{token}</span> in the text</td>
-              <td class="num">1</td>
-              <td>Counted once</td>
-            </tr>
-            <tr>
-              <td>Each unit is its own deliverable, its own PSE row</td>
-              <td>Repeat per + <span class="hp-token">{#}</span></td>
-              <td class="num">n</td>
-              <td>Counted per row</td>
-            </tr>
-          </table>
-        </div>
-        <p class="hp-body hp-note">
-          These stack, and that is the easiest way to double-count: a task repeating per
-          <code>{workshops}</code> <em>and</em> scaling its hours per <code>{workshops}</code>
-          multiplies. Pick one.
-        </p>
-      </section>
-
-      <!-- ── 3 ───────────────────────────────────────────────────────────── -->
-      <section class="hp-section">
-        <div class="hp-h2"><span>03</span>Hours</div>
-        <p class="hp-body">
-          Open a task and find <strong>Who does the work, and for how long</strong>, then press
-          <strong>+ Add resource</strong>. Each resource line is four things:
+          Open a task and the first panel is <strong>Who does the work, and for how long</strong>.
+          Press <strong>+ Add resource</strong> and set four things: the role, whether it happens in
+          the office or on site, and the hours split between normal time and after hours.
         </p>
         <div class="scroll-x">
           <table class="data-table">
-            <tr><th>Field</th><th>What it is</th></tr>
+            <tr><th>Field</th><th>What goes in it</th></tr>
             <tr><td>Role</td><td id="hp-roles">The engineer doing the work</td></tr>
             <tr><td>Location</td><td id="hp-locations">Where they do it</td></tr>
-            <tr><td>Business hours</td><td>Hours in normal time, in 0.25 steps</td></tr>
-            <tr><td>After hours</td><td>Hours out of hours, in 0.25 steps</td></tr>
+            <tr><td>Business hours</td><td>Hours in normal time, in quarter-hour steps</td></tr>
+            <tr><td>After hours</td><td>Hours outside normal time, in quarter-hour steps</td></tr>
           </table>
         </div>
-        <p class="hp-body hp-note">
-          Add a line per role if a task needs more than one. A task with no resource lines reads
-          <em>"No effort costed against this task yet"</em> and contributes nothing.
+
+        <p class="hp-body">
+          Add a resource per role if a task needs more than one. The figure at the top right of the
+          panel is the running total for one line of output, so you can watch it as you type. A task
+          with no resources contributes nothing and says so.
         </p>
 
-        <div class="section-label" style="margin-top:30px;">Hours that scale</div>
+        <div class="section-label" style="margin-top:30px;">When the hours depend on an answer</div>
         <p class="hp-body">
-          Under each hours field is <strong>+ Scale with a variable</strong>, which gives you a base
-          plus a rate:
+          Under each hours box is <strong>+ Scale with a variable</strong>. That gives you a fixed
+          amount plus a rate per unit:
         </p>
         <div class="hp-eg">Business hours   2
   plus  0.5  per agent-domains
 
 <em>6 domains  →</em>  2 + (6 × 0.5) = 5 hours</div>
         <p class="hp-body">
-          Only number variables can be scaled against, and only linearly — there are no tiers or
-          thresholds. If pricing needs a step change, make it a separate task with a condition.
+          Only questions that produce a number can be scaled against, and only in a straight line —
+          there are no tiers or minimums. If the price steps at a threshold, make it a second task
+          and put a condition on it.
+        </p>
+      </section>
+
+      <!-- ── the two things that look the same and are not ────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2">Using an answer in the task text</div>
+        <p class="hp-body">
+          A <strong>variable</strong> is a question you write once and can then refer to by name
+          anywhere in a task description. Put its name in braces and the answer replaces it when the
+          estimate is generated. The chips under the description will insert one for you.
+        </p>
+        <div class="hp-eg">Agent training — {agent-training} sessions
+<em>answer 4  →</em>  Agent training — 4 sessions</div>
+        <p class="hp-body">
+          This is <strong>one task and one row</strong>. The answer only changes the wording, not the
+          hours.
+        </p>
+        <p class="hp-body hp-note">
+          A name that matches no variable is left exactly as typed, so
+          <code>{tpyo}</code> reaches the spreadsheet as <code>{tpyo}</code>. The builder will not
+          warn you about that, though the task importer does.
+        </p>
+      </section>
+
+      <section class="hp-section">
+        <div class="hp-h2">Getting several rows from one task</div>
+        <p class="hp-body">
+          This is the one people mix up with the last one. In the hours panel, set
+          <strong>How many lines</strong> to <em>One line per…</em> a number variable. The task then
+          comes out once per unit, and <code>{#}</code> in the description becomes the row number.
+        </p>
+        <div class="hp-eg">Workshop {#} — discovery session      <em>How many lines: one line per workshops</em>
+
+<em>answer 3  →</em>  Workshop 1 — discovery session
+          Workshop 2 — discovery session
+          Workshop 3 — discovery session</div>
+        <p class="hp-body">
+          Every row carries the <strong>full hours</strong> of the task. That is the whole difference:
+          three workshops cost three workshops, where the training example above costs one.
+        </p>
+        <p class="hp-body hp-note">
+          <code>{#}</code> in a task set to <em>Just one line</em> stays as written. The limit is 200
+          rows from one task — ask for more and you get 200 and a notice saying so.
+        </p>
+      </section>
+
+      <section class="hp-section">
+        <div class="section-label">So which one do I want</div>
+        <div class="scroll-x">
+          <table class="data-table">
+            <tr><th>You want</th><th>Set</th><th>Rows</th><th>Hours counted</th></tr>
+            <tr>
+              <td>One job, and the text should mention a number</td>
+              <td>A <span class="hp-token">{variable}</span> in the description</td>
+              <td class="num">1</td>
+              <td>Once</td>
+            </tr>
+            <tr>
+              <td>Each unit is its own job, with its own row and its own cost</td>
+              <td>How many lines, plus <span class="hp-token">{#}</span></td>
+              <td class="num">one each</td>
+              <td>Per row</td>
+            </tr>
+          </table>
+        </div>
+        <div class="notice">
+          Doing both multiplies. A task set to one line per <span class="hp-token">{workshops}</span>
+          whose hours also scale per <span class="hp-token">{workshops}</span> costs the square of
+          what you meant. Pick one.
+        </div>
+      </section>
+
+      <!-- ── order ────────────────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2">Putting the tasks in order</div>
+        <p class="hp-body">
+          Rows come out in the order the tasks are listed, so the order is worth getting right —
+          it is what the estimate reads like top to bottom. Drag a task by the grip on its left, or
+          focus it and hold <strong>Alt</strong> with the up and down arrows.
+        </p>
+        <p class="hp-body">
+          A task only moves among the rows shown beside it. Moving something inside
+          <em>All subflows</em> cannot disturb the order of a subflow you are not looking at.
         </p>
       </section>
 
       <!-- ── the spreadsheet ──────────────────────────────────────────────── -->
       <section class="hp-section">
-        <div class="hp-h2"><span>04</span>Getting it into the PSE</div>
+        <div class="hp-h2">Getting it into the PSE</div>
         <p class="hp-body">
-          The builder gives you <strong>two</strong> blocks to copy rather than one, because pasting
-          a single wide block over the sheet would overwrite the columns it calculates from — the
-          round trips, stays and document counts.
+          The builder gives you <strong>two</strong> blocks to copy rather than one, because a single
+          wide block would paste over the columns the sheet works out for itself — the round trips,
+          the overnight stays and the document counts.
         </p>
         <div class="scroll-x">
           <table class="data-table">
-            <tr><th>Block</th><th>Paste at</th><th>Holds</th></tr>
+            <tr><th>Copy this</th><th>Paste at column</th><th>It holds</th></tr>
             <tr>
               <td>1 · Task details</td>
               <td><span class="hp-token">A</span></td>
@@ -208,19 +218,19 @@
             <tr>
               <td>2 · Resource hours</td>
               <td><span class="hp-token">J</span></td>
-              <td>Five resource slots — location, business hours, after hours each</td>
+              <td>Five resource slots — location, normal hours, after hours each</td>
             </tr>
           </table>
         </div>
         <p class="hp-body hp-note">
-          The sheet fixes one role per resource column on <strong>row 41</strong>, not per row, so
-          the builder assigns each role you have used to a slot and tells you which slot got which
-          role. There are only five columns: use more than five distinct roles in one subflow and
-          you get a notice naming the ones that will not fit.
+          Start both at the same row. The second block is built in the same order as the first, so
+          they only line up if they begin level.
         </p>
         <p class="hp-body hp-note">
-          Paste both blocks at the same row. Block 2 is generated in the same order as block 1, so
-          the two line up only if they start level.
+          The sheet holds the role for each resource column on <strong>row 41</strong>, once, rather
+          than on every row — so the builder picks a column per role and tells you which went where.
+          There are only five columns. Use more than five roles across one subflow and you get a
+          notice naming the ones that will not fit.
         </p>
       </section>
 
@@ -244,7 +254,7 @@
     </div>
   </div>
 
-  <script src="./engine.js?v=0.9.8"></script>
+  <script src="./engine.js?v=0.9.9"></script>
   <script>
     const esc = PSEngine.esc;
 

@@ -408,6 +408,35 @@ function renderTaskForm(slot, idx, section) {
         <div class="q-sub" style="margin-top:8px;" id="tf-chips"></div>
       </div>
 
+      <!-- The hours are what the task is for, so they lead, and the repeat
+           sits with them because it multiplies them. -->
+      <div class="tf-hours">
+        <div class="tf-hours-head">
+          <div>
+            <div class="tf-hours-title">Who does the work, and for how long</div>
+            <div class="q-sub">Add a line per role. Hours can scale with a variable.</div>
+          </div>
+          <div>
+            <div class="stat-label">Per line</div>
+            <div id="tf-hours-total" class="tf-hours-figure">&mdash;</div>
+          </div>
+        </div>
+        <div id="tf-effort"></div>
+        <button class="btn-secondary" type="button" onclick="addEffortLine()">+ Add resource</button>
+
+        <div class="tf-hours-repeat">
+          <label class="field-label">How many lines</label>
+          <select id="tf-repeat" onchange="updateTaskPreview()">
+            <option value="">Just one line</option>
+            ${numberInputs().map(i => `<option value="${attr(i.id)}" ${existing.repeatPer === i.id ? 'selected' : ''}>One line per ${esc(tokenOf(i))}</option>`).join('')}
+          </select>
+          <div class="q-sub" style="margin-top:6px;">
+            One line per variable repeats the whole task, hours and all. Put {#} in the
+            description to number the lines.
+          </div>
+        </div>
+      </div>
+
       <div class="field-row">
         <div class="field">
           <label class="field-label">Phase</label>
@@ -421,20 +450,6 @@ function renderTaskForm(slot, idx, section) {
       <div class="field">
         <label class="field-label">Task type</label>
         <select id="tf-tasktype" onchange="updateTaskPreview()">${(CONFIG.taskTypes || []).map(t => `<option ${existing.taskType === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
-      </div>
-
-      <div class="field">
-        <label class="field-label">Who does the work, and for how long</label>
-        <div id="tf-effort"></div>
-        <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addEffortLine()">+ Add resource</button>
-      </div>
-
-      <div class="field">
-        <label class="field-label">One line per variable (optional)</label>
-        <select id="tf-repeat" onchange="updateTaskPreview()">
-          <option value="">Just one line</option>
-          ${numberInputs().map(i => `<option value="${attr(i.id)}" ${existing.repeatPer === i.id ? 'selected' : ''}>One line per ${esc(tokenOf(i))}</option>`).join('')}
-        </select>
       </div>
 
       <div class="field">
@@ -543,6 +558,11 @@ function updateTaskPreview() {
     const r = (CONFIG.roles || []).find(r => r.id === roleId);
     bits.push(`${r ? r.id : roleId} ${bh}h${ah ? ' + ' + ah + 'h after' : ''}`);
   });
+  // The figure in the panel head, so the number is visible while you type it
+  // rather than only in the sentence underneath.
+  const badge = document.getElementById('tf-hours-total');
+  if (badge) badge.textContent = hours ? round2(hours) + 'h' : '\u2014';
+
   const repeat = document.getElementById('tf-repeat').value;
   let text = hours
     ? `At the current defaults: ${bits.join(', ')} = ${round2(hours)}h per line.`

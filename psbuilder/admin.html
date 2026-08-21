@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.9.8" />
+  <link rel="stylesheet" href="./ui.css?v=0.9.9" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
@@ -39,6 +39,32 @@
     .field-label { font-size: var(--fs-ui); font-weight: 700; color: var(--muted); margin-bottom: 6px; display: block; }
     .field-row { display: flex; gap: 10px; }
     .field-row .field { flex: 1; min-width: 0; }
+
+    /* The hours are the reason a task exists, and they used to be the fourth
+       field down carrying the same weight as "Skill required". This is the one
+       part of the form allowed to look like the important one. */
+    .tf-hours {
+      background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
+      border-radius: 12px; padding: 18px 20px; margin-bottom: 18px;
+    }
+    .tf-hours-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .tf-hours-title { font-size: var(--fs-body); font-weight: 700; margin-bottom: 3px; }
+    /* The running total, in the data face like every other figure in the tool. */
+    .tf-hours-figure {
+      font-family: var(--font-mono); font-size: 26px; font-weight: 700;
+      color: var(--cyan); line-height: 1; letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums; text-align: right;
+    }
+    /* The repeat multiplies the hours above it, so it sits inside the same panel
+       rather than looking like an unrelated setting further down. */
+    .tf-hours-repeat { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--cyan-mid); }
+    @media (max-width: 620px) {
+      .tf-hours { padding: 14px 16px; }
+      .tf-hours-figure { text-align: left; }
+    }
 
     .choice-group { display: flex; flex-direction: column; gap: 8px; }
     .choice-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
@@ -196,12 +222,12 @@
     </main>
   </div>
 
-  <script src="./engine.js?v=0.9.8"></script>
-  <script src="./admin-github.js?v=0.9.8"></script>
-  <script src="./admin-render.js?v=0.9.8"></script>
-  <script src="./admin-forms.js?v=0.9.8"></script>
-  <script src="./admin-import.js?v=0.9.8"></script>
-  <script src="./admin-preview.js?v=0.9.8"></script>
+  <script src="./engine.js?v=0.9.9"></script>
+  <script src="./admin-github.js?v=0.9.9"></script>
+  <script src="./admin-render.js?v=0.9.9"></script>
+  <script src="./admin-forms.js?v=0.9.9"></script>
+  <script src="./admin-import.js?v=0.9.9"></script>
+  <script src="./admin-preview.js?v=0.9.9"></script>
 
 </body>
 </html>

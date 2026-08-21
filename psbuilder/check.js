@@ -222,9 +222,34 @@ section('Help page')
   check('and the location list too', /id="hp-locations"/.test(helpHtml), true);
   check('a failed reference load says so', /could not be loaded/.test(helpHtml), true);
 
-  // The three mechanisms it exists to separate.
-  ['Variables', 'Line numbers', 'Hours'].forEach(h =>
-    check('it covers ' + h, helpHtml.includes(h), true));
+  // The three mechanisms it exists to separate, named by the thing you actually
+  // set rather than by a heading, so rewording a heading does not break this and
+  // dropping a mechanism does.
+  [['adding hours', '+ Add resource'],
+   ['hours that scale', 'Scale with a variable'],
+   ['using an answer in the text', '{agent-training}'],
+   ['getting several rows out', 'How many lines'],
+   ['the line number', '{#}'],
+   ['reordering', 'Alt'],
+  ].forEach(([what, needle]) =>
+    check('it covers ' + what, helpHtml.includes(needle), true));
+
+  // Every interface label the page quotes has to be a label that exists. It told
+  // people to set "Repeat per", which was never the name of anything.
+  const QUOTED_LABELS = [
+    'Who does the work, and for how long',
+    '+ Add resource',
+    'Scale with a variable',
+    'How many lines',
+    'Just one line',
+  ];
+  const formSrc = adminFiles.find(f => f.name === 'admin-forms.js').src;
+  check('every label it quotes is one the form really uses',
+    QUOTED_LABELS.filter(l => !formSrc.includes(l)), []);
+  check('and it really does quote them',
+    QUOTED_LABELS.filter(l => !helpHtml.includes(l)), []);
+  check('the label that never existed is gone',
+    /Repeat per/i.test(helpHtml), false);
   // The numbers that are limits, not prose, and would be wrong if they changed.
   check('it quotes the real repeat cap',
     helpHtml.includes(String(E.MAX_LINES_PER_TASK)), true);

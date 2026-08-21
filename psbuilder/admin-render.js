@@ -142,11 +142,12 @@ function clearDropMarks() {
     .forEach(el => el.classList.remove('drop-above', 'drop-below'));
 }
 
-function makeDraggable(row, kind, idx) {
+function makeDraggable(row, kind, idx, siblings) {
   row.classList.add('drag-row');
   row.draggable = true;
   row.tabIndex = 0;
   row.dataset.dragIndex = idx;
+  row.dataset.dragKind = kind;
 
   row.ondragstart = (ev) => {
     DRAG = { kind, from: idx };
@@ -169,13 +170,26 @@ function makeDraggable(row, kind, idx) {
     clearDropMarks();
     const from = DRAG.from;
     DRAG = null;
-    if (from !== idx) reorder(kind, from, idx);
+    if (from !== idx) reorder(kind, from, idx, siblings);
   };
-  // Dragging is mouse-only, so keep a keyboard route open.
+  // Dragging is mouse-only, so keep a keyboard route open. Without siblings the
+  // next position is the next index; with them it is the next row on screen,
+  // which for a task is somewhere else in the array entirely.
+  const step = (dir) => {
+    if (!siblings) return idx + dir;
+    const at = siblings.indexOf(idx);
+    if (at < 0) return -1;
+    return siblings[at + dir] == null ? -1 : siblings[at + dir];
+  };
   row.onkeydown = (ev) => {
     if (!ev.altKey) return;
-    if (ev.key === 'ArrowUp' && idx > 0) { ev.preventDefault(); reorder(kind, idx, idx - 1); }
-    if (ev.key === 'ArrowDown') { ev.preventDefault(); reorder(kind, idx, idx + 1); }
+    if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') return;
+    const to = step(ev.key === 'ArrowUp' ? -1 : 1);
+    if (to < 0) return;
+    ev.preventDefault();
+    // Remember what to put the focus back on: renderAdmin rebuilds the row.
+    REFOCUS = { kind, idx: to };
+    reorder(kind, idx, to, siblings);
   };
 
   const grip = document.createElement('span');
@@ -186,9 +200,47 @@ function makeDraggable(row, kind, idx) {
   return row;
 }
 
-function reorder(kind, from, to) {
+// Set just before a keyboard move so the row can be found again after the
+// re-render. Without it Alt+Down moves once and then focus is gone.
+let REFOCUS = null;
+
+function reorder(kind, from, to, siblings) {
   if (kind === 'input') return reorderInputs(from, to);
   if (kind === 'subflow') return reorderSubflowRows(from, to);
+  // Every task section shares one handler; the section is in the kind only so
+  // that a row cannot be dropped into a different section.
+  if (kind.startsWith('task:')) return reorderTasks(from, to, siblings);
+}
+
+// The order of f.tasks is the order the lines come out, so this is the only
+// control over where a task lands in the sheet.
+//
+// A section's tasks are not adjacent in the array -- the rows on screen are the
+// members of one subflow, scattered through a list that holds every subflow's.
+// So the move happens among their own slots: the tasks are lifted out, reordered
+// between themselves, and written back into the same positions. Splicing the
+// flat array instead would carry the task past whatever sat in between, silently
+// reordering a subflow nobody was looking at, and would not be reversible.
+function reorderTasks(from, to, slots) {
+  const f = F();
+  if (!Array.isArray(slots)) return;
+  const a = slots.indexOf(from);
+  const b = slots.indexOf(to);
+  if (a < 0 || b < 0 || a === b) return;
+  const held = slots.map(i => f.tasks[i]);
+  const next = moved(held, a, b);
+  slots.forEach((slot, n) => { f.tasks[slot] = next[n]; });
+  renderAdmin();
+}
+
+// Called at the end of a render, once the rows exist again.
+function restoreFocus() {
+  if (!REFOCUS) return;
+  const { kind, idx } = REFOCUS;
+  REFOCUS = null;
+  const row = document.querySelector(
+    '.drag-row[data-drag-kind="' + kind + '"][data-drag-index="' + idx + '"]');
+  if (row) row.focus();
 }
 
 function moved(list, from, to) {
@@ -298,6 +350,7 @@ function renderAdmin() {
   if (EDITING && EDITING.kind === 'new-flow') { renderNewFlowForm(fslot); return renderRest(true); }
   if (EDITING && EDITING.kind === 'flow') renderFlowForm(fslot);
   renderRest(false);
+  restoreFocus();
 }
 
 function renderRest(hideRest) {
@@ -408,8 +461,11 @@ function renderTaskSections(root) {
       const body = document.createElement('div');
       body.className = 'block-body';
       block.appendChild(body);
+      // The visible order within this section, so Alt with an arrow key steps
+      // to the next row on screen rather than the next slot in the array.
+      const order = matches.map(m => m.idx);
       matches.forEach(({ t, idx }) => {
-        body.appendChild(taskEl(t, idx));
+        body.appendChild(makeDraggable(taskEl(t, idx), 'task:' + section.id, idx, order));
         if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
           const slot = document.createElement('div');
           body.appendChild(slot);
@@ -455,8 +511,9 @@ function renderTaskSections(root) {
     body.className = 'block-body';
     body.style.paddingTop = '16px';
     box.appendChild(body);
+    const orphanOrder = orphans.map(m => m.idx);
     orphans.forEach(({ t, idx }) => {
-      body.appendChild(taskEl(t, idx));
+      body.appendChild(makeDraggable(taskEl(t, idx), 'task:orphans', idx, orphanOrder));
       if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
         const slot = document.createElement('div');
         body.appendChild(slot);
