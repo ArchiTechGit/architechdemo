@@ -294,6 +294,71 @@ section('Admin structure');
   check('no function is defined in two files', twice, []);
 }
 
+// ── 1k. Narrower windows and coarser pointers ──────────────────────────
+section('Adaptation');
+{
+  const pageCss = (name) => {
+    const html = name === 'index.html' ? indexHtml : adminMarkup;
+    return (html.split('<style>')[1] || '').split('</style>')[0];
+  };
+
+  // The real narrow case is a window beside the spreadsheet, not a phone.
+  check('the shared sheet has a narrow-window breakpoint', /@media \(max-width: 860px\)/.test(uiCss), true);
+  check('and a tighter one below that', /@media \(max-width: 620px\)/.test(uiCss), true);
+
+  // A touchscreen laptop is wide and still fingers, so width cannot detect it.
+  check('targets key off the pointer, not the width', /@media \(pointer: coarse\)/.test(uiCss), true);
+  {
+    const coarse = (uiCss.split('@media (pointer: coarse)')[1] || '').split(String.fromCharCode(125) + String.fromCharCode(10) + String.fromCharCode(125))[0];
+    // Buttons carry actions and get the full comfortable target; a chip is an
+    // inline token in flowing text, so it gets the smaller floor.
+    const sized = {};
+    coarse.replace(/([.][\w-]+)[^{]*\{([^}]*)\}/g, (whole, sel, body) => {
+      const h = (body.match(/min-height:\s*(\d+)px/) || [])[1];
+      if (h) sized[sel] = Number(h);
+      return whole;
+    });
+    const buttons = Object.entries(sized).filter(([sel]) => sel.startsWith('.btn'));
+    check('every button reaches 40px for a finger',
+      buttons.filter(([, h]) => h < 40).map(([sel]) => sel), []);
+    check('an inline chip reaches at least 32px', (sized['.chip'] || 0) >= 32, true);
+    check('and the close button reaches 44px', /\.btn-x \{[^}]*min-height: 44px/.test(coarse), true);
+  }
+
+  // Rows dense enough to overflow have to give way somewhere.
+  const adminCss = pageCss('admin.html');
+  const narrow = (adminCss.split('@media (max-width: 860px)')[1] || '');
+  ['.fbar', '.field-row', '.row-editor'].forEach(sel => {
+    check('at a narrow width ' + sel + ' wraps', new RegExp(sel.replace('.', '\\.') + ' \\{[^}]*flex-wrap: wrap').test(narrow), true);
+  });
+  check('a long save message wraps under its button', /\.save-bar \{[^}]*flex-wrap: wrap/.test(adminCss), true);
+
+  // Going three cards straight to one wastes the width a half window still has.
+  {
+    const idx = pageCss('index.html');
+    check('the card grid steps through two columns', /repeat\(2, 1fr\)/.test(idx), true);
+    check('and reaches one column eventually', /grid-template-columns: 1fr/.test(idx), true);
+  }
+
+  // The one thing that really breaks a page: a wide table with no scroller.
+  adminFiles.forEach(({ name, src }) => {
+    const tables = (src.match(/class="data-table/g) || []).length;
+    if (!tables) return;
+    const scrollers = (src.match(/overflow-x:\s*auto/g) || []).length;
+    check(name + ' wraps each wide table in a scroller', scrollers >= tables, true);
+  });
+
+  // A growing flex child with no room to shrink pushes the whole row wide.
+  const allCss = uiCss + String.fromCharCode(10) + adminCss + String.fromCharCode(10) + pageCss('index.html');
+  const stuck = [];
+  allCss.replace(/([.#][\w-]+(?:[^{,]*)?)\s*\{([^}]*)\}/g, (whole, sel, body) => {
+    // flex:1 with no basis and no min-width cannot go below its content.
+    if (/flex:\s*1\s*;/.test(body) && !/min-width/.test(body)) stuck.push(sel.trim());
+    return whole;
+  });
+  check('no growing row is stuck at its content width', stuck, []);
+}
+
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
 section('PSE lists');
 check('seven engineer roles', (config.roles || []).map(r => r.id),

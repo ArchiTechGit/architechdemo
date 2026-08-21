@@ -12,7 +12,10 @@
 
     /* ─── Step 1 & 2: card pickers ─── */
     .product-grid, .scope-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
-    @media (max-width: 720px) { .product-grid, .scope-grid { grid-template-columns: 1fr; } }
+    /* Three cards, then two, then one. Going straight from three to one wastes
+       the width a half-screen window still has. */
+    @media (max-width: 860px) { .product-grid, .scope-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+    @media (max-width: 560px) { .product-grid, .scope-grid { grid-template-columns: 1fr; } }
     .pick-card {
       background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;
       padding: 18px; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none;
@@ -43,7 +46,7 @@
     .checklist { display: flex; flex-direction: column; gap: 10px; }
 
     .out-block { margin-bottom: 22px; }
-    .out-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
+    .out-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
     .out-title { font-size: 13px; font-weight: 700; color: var(--text); }
     .out-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
     #out-task, #out-resource {

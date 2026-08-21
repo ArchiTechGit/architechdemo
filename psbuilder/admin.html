@@ -21,26 +21,26 @@
     .field { margin-bottom: 14px; }
     .field-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
     .field-row { display: flex; gap: 10px; }
-    .field-row .field { flex: 1; }
+    .field-row .field { flex: 1; min-width: 0; }
 
     .choice-group { display: flex; flex-direction: column; gap: 8px; }
     .choice-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
     .choice-row:hover { border-color: var(--cyan-mid); }
     .choice-row input[type="radio"] { margin-top: 3px; width: auto; accent-color: var(--cyan); }
-    .choice-row .choice-body { flex: 1; }
+    .choice-row .choice-body { flex: 1; min-width: 0; }
     .choice-row .choice-title { font-size: 13px; font-weight: 600; }
     .choice-row .choice-extra { margin-top: 8px; }
 
     .row-editor { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .row-editor input[type="text"] { flex: 1; }
+    .row-editor input[type="text"] { flex: 1; min-width: 0; }
     .row-editor input[type="number"] { flex: 0 0 90px; }
     .row-editor select { flex: 0 0 170px; }
     .row-editor label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
     .row-editor label input { width: auto; }
-    .row-editor .rate-label { flex: 1; font-size: 12.5px; color: var(--muted); }
+    .row-editor .rate-label { flex: 1; min-width: 0; font-size: 12.5px; color: var(--muted); }
 
     .fbar { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-    .fbar select { flex: 1; }
+    .fbar select { flex: 1; min-width: 0; }
 
     .block { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); overflow: hidden; }
     .block-head { display: flex; align-items: center; gap: 12px; padding: 15px 18px; cursor: pointer; user-select: none; }
@@ -82,7 +82,26 @@
     .im-note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 10px 0; }
 
     .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 16px 0; margin-top: 24px;
-      border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+      border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+    /* The flow bar needs about 606px laid out in one line, and the editor rows
+       pin two selects to a width they cannot shrink below. Both give way here
+       rather than pushing the page sideways. */
+    @media (max-width: 860px) {
+      .fbar { flex-wrap: wrap; }
+      .fbar select { flex: 1 1 200px; }
+      .field-row { flex-wrap: wrap; }
+      .field-row .field { min-width: 200px; }
+      .row-editor { flex-wrap: wrap; }
+      .row-editor select { flex: 1 1 170px; }
+      .row-editor input[type="number"] { flex: 0 1 90px; }
+    }
+
+    @media (max-width: 620px) {
+      .field-row .field { min-width: 100%; }
+      .block-body { padding-left: 12px; padding-right: 12px; }
+      .pv-answer input[type="number"], .pv-answer select { min-width: 100%; }
+    }
   </style>
 </head>
 <body>
