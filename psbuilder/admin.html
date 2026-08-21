@@ -194,7 +194,7 @@
         <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
         <button class="btn-ghost" onclick="togglePreview()">Preview</button>
         <button class="btn-ghost" onclick="openNewFlow()">+ New flow</button>
-        <button class="btn-ghost" id="signed-in" onclick="forgetToken()" title="Clear the token stored in this browser">Token saved</button>
+        <button class="btn-ghost" onclick="forgetToken()" title="Clear the token stored in this browser">Token saved</button>
       </div>
       <div id="flow-form-slot"></div>
       <div id="preview-slot"></div>
@@ -219,7 +219,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.6.1';
+    const ADMIN_VERSION = '0.6.2';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -330,10 +330,10 @@
 
   <script>
     // ─── Model helpers ───
-    function esc(s) {
-      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-    function attr(s) { return esc(s).replace(/"/g, '&quot;'); }
+    // Shared with the builder, so the two cannot escape differently.
+    const esc = PSEngine.esc;
+    const attr = PSEngine.attr;
+    const round2 = PSEngine.round2;
     function slugify(s) {
       return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'item';
     }
@@ -343,7 +343,6 @@
       return id;
     }
     function count(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
-    function round2(n) { return Math.round(Number(n || 0) * 100) / 100; }
 
     let activeFlowId = null;
     function F() { return CONFIG.flows.find(f => f.id === activeFlowId); }
@@ -1443,7 +1442,8 @@
       if (document.querySelector('[data-effort]')) readEffortLines();
       const used = window._tfEffort.map(e => e.role);
       const next = roles.find(r => !used.includes(r.id)) || roles[0];
-      window._tfEffort.push({ role: next.id, location: CONFIG.locations[0], business: 0, after: 0 });
+      const startAt = (window._tf && window._tf.defaultLocation) || CONFIG.locations[0];
+      window._tfEffort.push({ role: next.id, location: startAt, business: 0, after: 0 });
       renderEffortLines();
       updateTaskPreview();
     }

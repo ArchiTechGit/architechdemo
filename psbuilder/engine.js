@@ -6,6 +6,14 @@
 const PSEngine = (function () {
   function round2(n) { return Math.round(Number(n || 0) * 100) / 100; }
 
+  // Both pages build HTML out of config values, so the escaping lives here
+  // rather than being copied into each of them.
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function attr(s) { return esc(s).replace(/"/g, '&quot;'); }
+
   // ── subflow membership ──
   // "all" (or absent) means every subflow; otherwise a list of subflow ids.
   function inSubflow(member, subflowId) {
@@ -203,7 +211,7 @@ const PSEngine = (function () {
   }
 
   return {
-    round2, inSubflow, condMet, defaultFor, visibleOptions, activeInputs,
+    round2, esc, attr, inSubflow, condMet, defaultFor, visibleOptions, activeInputs,
     resolve, isRequired, inputsToShow, allRequiredAnswered,
     amountOf, fillText, buildLines, totalHours,
     assignSlots, applySlots, blockText, roleName, estimate,

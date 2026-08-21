@@ -213,8 +213,7 @@
           ],
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "legacy-parallel-run",
@@ -225,8 +224,7 @@
           ],
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "legacy-decommission",
@@ -237,8 +235,7 @@
           ],
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "kickoff",
@@ -247,8 +244,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "existing-env-review",
@@ -257,8 +253,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "skills-team-queue-design",
@@ -267,8 +262,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "design-doc-signoff",
@@ -277,8 +271,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "a2q-process",
@@ -287,8 +280,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "tenant-provisioning",
@@ -297,8 +289,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "tenant-org-settings",
@@ -307,8 +298,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "site-config",
@@ -317,8 +307,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "teams-config",
@@ -327,8 +316,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "queue-config",
@@ -337,8 +325,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "skills-based-routing",
@@ -347,8 +334,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "entry-point-config",
@@ -357,8 +343,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "channel-cx-settings",
@@ -367,8 +352,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "voice-ivr-build",
@@ -377,8 +361,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "business-hours-config",
@@ -387,8 +370,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "wrapup-code-config",
@@ -397,8 +379,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "agent-desktop-layout",
@@ -407,8 +388,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "functional-test-plan-doc",
@@ -417,8 +397,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "functional-testing-voice",
@@ -427,8 +406,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "uat-plan",
@@ -437,8 +415,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "uat-execution",
@@ -447,8 +424,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "remediations",
@@ -457,8 +433,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "quick-ref-guide",
@@ -467,8 +442,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "production-cutover",
@@ -477,8 +451,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "hypercare",
@@ -487,8 +460,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "as-built-doc",
@@ -497,8 +469,7 @@
           "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "workshop-discovery",
@@ -508,8 +479,7 @@
           "repeatPer": "workshops",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "staging-sms",
@@ -522,8 +492,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "staging-webexconnect",
@@ -536,8 +505,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "staging-facebook",
@@ -550,8 +518,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "staging-instagram",
@@ -564,8 +531,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "staging-email",
@@ -578,8 +544,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "staging-crm",
@@ -592,8 +557,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "kb-content-sourcing",
@@ -606,8 +570,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "intent-routing-config",
@@ -620,8 +583,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "kb-accuracy-testing",
@@ -634,8 +596,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "ai-agent-testing-remediation",
@@ -648,8 +609,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "functional-testing-ai-agent",
@@ -662,8 +622,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "ai-agent-domain-build",
@@ -673,8 +632,7 @@
           "repeatPer": "agent-domains",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "workshop-ai-assistant-usecases",
@@ -687,8 +645,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "workshop-crm-field-mapping",
@@ -701,8 +658,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "crm-access-confirmed",
@@ -715,8 +671,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "screen-pop-config",
@@ -729,8 +684,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "call-transcription-config",
@@ -743,8 +697,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "suggested-response-config",
@@ -757,8 +710,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "wrapup-task-automation-config",
@@ -771,8 +723,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "writeback-mapping-config",
@@ -785,8 +736,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "functional-testing-ai-assistant",
@@ -799,8 +749,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-webchat",
@@ -813,8 +762,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-sms-flow",
@@ -827,8 +775,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-email-routing",
@@ -841,8 +788,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-fb-messenger",
@@ -855,8 +801,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-instagram-dm",
@@ -869,8 +814,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-qb-api",
@@ -883,8 +827,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "omni-qb-desktop",
@@ -897,8 +840,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "workshop-omnichannel-scope",
@@ -911,8 +853,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "functional-testing-omnichannel",
@@ -925,8 +866,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "topic-analytics-config",
@@ -939,8 +879,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "analyzer-dashboard-setup",
@@ -953,8 +892,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "dashboard-embed-config",
@@ -967,8 +905,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "journey-data-config",
@@ -981,8 +918,7 @@
           },
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
-          "effort": [],
-          "defaultLocation": "Office"
+          "effort": []
         },
         {
           "id": "agent-training-task",

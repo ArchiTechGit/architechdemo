@@ -46,7 +46,8 @@ section('Shared engine');
   check(name + ' loads the shared engine', /<script src="\.\/engine\.js"><\/script>/.test(html), true);
 });
 // A page redefining these would be a second copy free to drift.
-const ENGINE_OWNED = ['condMet', 'resolve', 'buildLines', 'amountOf', 'assignSlots', 'applySlots', 'blockText', 'estimate'];
+const ENGINE_OWNED = ['condMet', 'resolve', 'buildLines', 'amountOf', 'assignSlots', 'applySlots',
+  'blockText', 'estimate', 'esc', 'attr', 'round2', 'visibleOptions'];
 ['index.html', 'admin.html'].forEach(name => {
   const html = name === 'index.html' ? indexHtml : adminHtml;
   const scriptBody = scripts(html).join('\n');
@@ -493,9 +494,9 @@ if (!adminSrc) {
   failures++;
   console.log('FAIL  admin exposes its task grouping');
 } else {
-  const A = new Function('CONFIG', `${adminSrc}
+  const A = new Function('CONFIG', 'PSEngine', `${adminSrc}
     return { use: (id) => { activeFlowId = id; }, sectionsForFlow, tasksIn, orphanTasks };
-  `)(config);
+  `)(config, E);
 
   config.flows.forEach(f => {
     A.use(f.id);
