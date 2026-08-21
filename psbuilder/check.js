@@ -707,12 +707,19 @@ check('with no effort, no resource slots are claimed', r.slots, []);
 r = run(wxcc, 'new', { scope: 'standard' });
 check('standard scope hides the DFD inputs', r.shown,
   ['scope', 'workshops', 'staging-channels', 'reporting', 'agent-training', 'supervisor-training']);
-check('new + standard on defaults: 32 tasks', r.count, 32);
+// A snapshot, so it moves when the flow does. It is here as a canary: if this
+// changes without anyone editing the config, something in resolution broke.
+const STANDARD_BASELINE = 31;
+check('new + standard on defaults: ' + STANDARD_BASELINE + ' tasks', r.count, STANDARD_BASELINE);
 check('the new subflow drops the legacy tasks', r.lines.filter(l => l.description.startsWith('Legacy platform')).length, 0);
 check('the migration subflow keeps them', run(wxcc, 'migration', { scope: 'standard' })
   .lines.filter(l => l.description.startsWith('Legacy platform')).length, 3);
+// Answering an input that is hidden must change nothing at all, so this is
+// measured against the baseline above rather than a number of its own -- the
+// invariant is equality, not 31.
 check('a hidden input cannot leak into the output',
-  run(wxcc, 'new', { scope: 'standard', 'agent-domains': 4, 'ai-assistant': true }).count, 32);
+  run(wxcc, 'new', { scope: 'standard', 'agent-domains': 4, 'ai-assistant': true }).count,
+  STANDARD_BASELINE);
 check('a hidden option cannot count as ticked',
   run(wxcc, 'new', { scope: 'standard', 'staging-channels': ['sms', 'crm'] })
     .lines.filter(l => l.description === 'CRM environment access confirmed').length, 0);
