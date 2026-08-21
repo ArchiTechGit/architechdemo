@@ -205,6 +205,25 @@ check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(a
 check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
 
 // ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Config freshness');
+{
+  // GitHub Pages serves config.json with max-age=600. A plain fetch handed the
+  // builder a copy up to ten minutes old, which is how a flow deleted in the
+  // admin kept appearing on the front page. The admin reads through the GitHub
+  // API and so never saw it.
+  const load = indexHtml.slice(indexHtml.indexOf('async function loadConfig'), indexHtml.indexOf('async function loadConfig') + 900);
+  check('the builder reads config.json exactly once', (indexHtml.match(/fetch\(`?\.\/config\.json/g) || []).length, 1);
+  check('and never from the HTTP cache', /cache:\s*'no-store'/.test(load), true);
+  check('and defeats the CDN edge too', /config\.json\?t=\$\{Date\.now\(\)\}/.test(load), true);
+
+  // The admin must keep reading through the API, which is authoritative. Going
+  // through the Pages copy would let it edit a stale config and then write the
+  // stale version back, silently undoing whatever it had missed.
+  const gh = adminFiles.find(f => f.name === 'admin-github.js').src;
+  check('the admin reads config through the GitHub API', /api\.github\.com/.test(gh), true);
+  check('and not through the published copy', /fetch\(\s*[`'"]\.\/config\.json/.test(gh), false);
+}
+
 section('Failure handling');
 check('a failed config load is explained', indexHtml.includes('showLoadFailure'), true);
 check('the load checks the response', indexHtml.includes('if (!res.ok) throw'), true);

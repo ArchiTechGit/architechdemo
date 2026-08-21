@@ -147,7 +147,16 @@
     let answers = {};
 
     async function loadConfig() {
-      const res = await fetch('./config.json');
+      // GitHub Pages serves this with Cache-Control: max-age=600, so a plain
+      // fetch could hand back a copy up to ten minutes old. That is how a flow
+      // deleted in the admin went on appearing here: the admin reads through
+      // api.github.com and saw the truth, while this page was served a stale
+      // file. The config is the one thing that must never be cached -- the
+      // admin can rewrite it at any moment, and a stale read shows work that
+      // no longer exists. no-store skips the browser cache; the changing
+      // parameter makes it a new object to the CDN, which is what forces the
+      // edge to go back to origin.
+      const res = await fetch(`./config.json?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`config.json could not be read (${res.status})`);
       CONFIG = await res.json();
       if (!CONFIG.flows || !CONFIG.flows.length) throw new Error('config.json has no flows in it');
