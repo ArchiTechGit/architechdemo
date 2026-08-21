@@ -55,7 +55,7 @@ compileTargets.forEach(({ name, src }) => {
 // ── 1a. One engine, used by both pages ─────────────────────────────────
 section('Shared engine');
 [['index.html', indexHtml], ['admin.html', adminMarkup]].forEach(([name, markup]) => {
-  check(name + ' loads the shared engine', /<script src="\.\/engine\.js"><\/script>/.test(markup), true);
+  check(name + ' loads the shared engine', /<script src="\.\/engine\.js\?v=[\d.]+"><\/script>/.test(markup), true);
 });
 // A page redefining these would be a second copy free to drift.
 const ENGINE_OWNED = ['condMet', 'resolve', 'buildLines', 'amountOf', 'assignSlots', 'applySlots',
@@ -187,7 +187,7 @@ section('Accessibility');
   const html = name === 'index.html' ? indexHtml : adminHtml;
   check(name + ' has exactly one h1', (html.match(/<h1\b/g) || []).length, 1);
   check(name + ' has a main landmark', /<main[\s>]/.test(html), true);
-  check(name + ' loads the shared stylesheet', html.indexOf('href="./ui.css"') !== -1, true);
+  check(name + ' loads the shared stylesheet', /href="\.\/ui\.css\?v=[\d.]+"/.test(html), true);
   // Nothing may strip the focus outline without putting one back.
   const strips = /outline\s*:\s*(none|0)/.test(html);
   check(name + ' never removes the outline', strips, false);
@@ -205,6 +205,53 @@ check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(a
 check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
 
 // ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Asset versioning');
+{
+  // A flow deleted in the admin kept showing, then "create estimate" stopped
+  // responding, then editing a task blanked the task list. All three were the
+  // same fault: Pages caches each file for ten minutes independently, so a
+  // browser could hold a new page and an old engine. index.html calls
+  // E.phaseIndex, which only exists in the engine shipped alongside it, so the
+  // handler threw and the button looked dead. Versioned URLs make a mixed set
+  // impossible: one page only ever requests the files it shipped with.
+  const LOCAL = ['ui.css'].concat(ADMIN_SCRIPTS).concat(['engine.js']);
+  const pages = [['index.html', indexHtml], ['admin.html', adminMarkup]];
+
+  const bare = [];
+  pages.forEach(([name, html]) => {
+    [...html.matchAll(/(?:src|href)="\.\/([\w-]+\.(?:js|css))(\?[^"]*)?"/g)].forEach(m => {
+      if (!m[2] || !/\?v=[\d.]+$/.test(m[2])) bare.push(name + ' -> ' + m[1]);
+    });
+  });
+  check('every local asset reference carries a version', bare, []);
+
+  // Two different versions on one page is the same mixed set, shipped on purpose.
+  const versions = new Set();
+  pages.forEach(([, html]) => {
+    [...html.matchAll(/\.(?:js|css)\?v=([\d.]+)"/g)].forEach(m => versions.add(m[1]));
+  });
+  check('all of them agree on one version', [...versions].length, 1);
+
+  // If these drift, the footer reports a version the browser is not running.
+  const gh = adminFiles.find(f => f.name === 'admin-github.js').src;
+  const declared = (gh.match(/ADMIN_VERSION = '([\d.]+)'/) || [])[1];
+  check('and it matches the version the admin reports', [...versions][0], declared);
+
+  // A page cannot report a failure it has nowhere to print.
+  pages.forEach(([name, html]) => {
+    check(name + ' has somewhere to report a failure', /id="fatal"/.test(html), true);
+    check(name + ' listens for a script error', /addEventListener\("error", reportFatal\)/.test(html), true);
+    check(name + ' listens for a rejected promise too',
+      /addEventListener\("unhandledrejection", reportFatal\)/.test(html), true);
+    // The reporter must be above the assets, or it misses their failure.
+    check(name + ' registers the reporter before it loads anything',
+      html.indexOf('reportFatal') < html.indexOf('./ui.css?v='), true);
+    check(name + ' tells the reader what to do about it', /Ctrl\+Shift\+R/.test(html), true);
+    // It is a real fault, so it takes the red edge the rest of the tool uses.
+    check(name + ' reports it as a fault', /id="fatal" class="notice"/.test(html), true);
+  });
+}
+
 section('Config freshness');
 {
   // GitHub Pages serves config.json with max-age=600. A plain fetch handed the
@@ -290,11 +337,17 @@ section('Shared styling');
 // ── 1j. The admin is split into files, each with one job ───────────────
 section('Admin structure');
 {
-  check('the markup carries no inline script', (adminMarkup.match(/<script>/g) || []).length, 0);
-  check('every script it names exists', ADMIN_SCRIPTS.filter(f => !adminMarkup.includes('src="./' + f + '"')), []);
+  const inline = [...adminMarkup.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+  check('the markup carries one inline script', inline.length, 1);
+  // And only the one. Anything else is admin logic creeping back into markup.
+  check('and it is only the failure reporter',
+    inline.filter(s => !s.includes('reportFatal')), []);
+  check('which depends on nothing that could be the thing that broke',
+    /PSEngine|CONFIG|renderAdmin|querySelector\(/.test(inline[0] || ''), false);
+  check('every script it names exists', ADMIN_SCRIPTS.filter(f => !adminMarkup.includes('src="./' + f + '?v=')), []);
 
   // Load order matters: the engine first, then the helpers everything reads.
-  const order = [...adminMarkup.matchAll(/<script src="\.\/([\w-]+\.js)"><\/script>/g)].map(m => m[1]);
+  const order = [...adminMarkup.matchAll(/<script src="\.\/([\w-]+\.js)\?v=[\d.]+"><\/script>/g)].map(m => m[1]);
   check('the engine loads first', order[0], 'engine.js');
   check('the scripts load in a stated order', order.slice(1), ADMIN_SCRIPTS);
 

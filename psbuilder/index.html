@@ -7,7 +7,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./ui.css" />
+  <script>
+    // Both bugs that got here looked like "the button does nothing": a
+    // handler threw, nothing was logged anywhere the reader would look, and
+    // the page kept whatever it had already drawn. This says so instead.
+    // It is inline and first so that it still works when the thing that
+    // broke is one of the files below.
+    window.addEventListener("error", reportFatal);
+    window.addEventListener("unhandledrejection", reportFatal);
+    function reportFatal(e) {
+      var box = document.getElementById("fatal");
+      if (!box) return;
+      var why = (e && (e.message || (e.reason && e.reason.message))) || "a script failed";
+      box.style.display = "block";
+      box.textContent = "This page did not finish loading, so what you are seeing may be "
+        + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
+    }
+  </script>
+  <link rel="stylesheet" href="./ui.css?v=0.9.6" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -62,6 +79,8 @@
 </head>
 <body>
   <div class="page">
+    <div id="fatal" class="notice" role="alert" style="display:none;"></div>
+
     <header class="header">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <span class="header-badge">Internal Sizing Tool · POC</span>
@@ -136,7 +155,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js"></script>
+  <script src="./engine.js?v=0.9.6"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from
