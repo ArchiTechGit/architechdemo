@@ -558,6 +558,108 @@ if (brokenSrc) {
 }
 
 
+// ── 5c. Reading a block pasted out of a PSE ────────────────────────────
+section('Import');
+{
+  const tab = (cells) => cells.join('\t');
+
+  // Excel quotes a cell that contains a newline; splitting naively tears the
+  // row in half.
+  const quoted = E.parseGrid('Design\tCollaboration\tArchiTech Activity\t"One\nTwo"');
+  check('a quoted newline keeps its row whole', quoted.length, 1);
+  check('and the cell survives', quoted[0][3], 'One\nTwo');
+  check('doubled quotes unescape', E.parseGrid('a\t"say ""hi"""')[0][1], 'say "hi"');
+  check('blank rows are dropped', E.parseGrid('a\tb\n\t\nc\td').length, 2);
+
+  // Column detection across the shapes a person actually pastes.
+  check('four columns read positionally',
+    E.detectColumns([['Design', 'Collaboration', 'ArchiTech Activity', 'A task']]).map,
+    { phase: 0, skill: 1, taskType: 2, description: 3 });
+  check('a header row is honoured, in any order',
+    E.detectColumns([['Description', 'Phase', 'Task Type', 'Skill Required']]).map,
+    { phase: 1, skill: 3, taskType: 2, description: 0 });
+  check('one column is descriptions', E.detectColumns([['Just a task']]).map, { description: 0 });
+  check('the full sheet width still reads the first four',
+    E.detectColumns([new Array(24).fill('x')]).map,
+    { phase: 0, skill: 1, taskType: 2, description: 3 });
+  check('an unrecognisable width is refused rather than guessed',
+    E.detectColumns([['a', 'b']]).ambiguous, true);
+
+  // Flagging, rather than quietly coercing.
+  const flagged = E.readPaste([
+    tab(['Deployment', 'Collaboration', 'ArchiTech Activity', 'Unknown phase here']),
+    tab(['Design', 'Collaboration', 'ArchiTech Activity', 'Kick Off Session with Stakeholders']),
+    tab(['Design', 'Collaboration', 'ArchiTech Activity', 'Twice over']),
+    tab(['Design', 'Collaboration', 'ArchiTech Activity', 'Twice over']),
+    tab(['Design', 'Collaboration', 'ArchiTech Activity', '']),
+  ].join('\n'), config, wxcc.tasks.map(t => t.description));
+
+  check('a row with no description is left out', flagged.drafts.length, 4);
+  check('an unknown phase is flagged, not accepted',
+    flagged.drafts[0].issues.map(i => i.kind), ['unknown']);
+  check('and falls back to a real phase', config.phases.includes(flagged.drafts[0].phase), true);
+  check('a description already in the flow is flagged',
+    flagged.drafts[1].issues.map(i => i.kind), ['duplicate']);
+  check('a description repeated inside the paste is flagged',
+    flagged.drafts[3].issues.map(i => i.kind), ['repeated']);
+  check('a clean row is left alone', flagged.drafts[2].issues, []);
+
+  // Descriptions-only paste: everything else has to be assumed, and says so.
+  const bare = E.readPaste('Rack the firewall\nCable and label', config, []);
+  check('descriptions alone still produce tasks', bare.drafts.length, 2);
+  check('and each says what it had to assume',
+    bare.drafts[0].issues.map(i => i.field).sort(), ['phase', 'skill', 'taskType']);
+
+  // The strongest property: what the builder writes, the importer can read.
+  const out = E.estimate(config, wxcc, 'migration', { scope: 'dfd' });
+  const written = E.blockText(config.taskColumns, out.lines);
+  const readBack = E.readPaste(written, config, []);
+  check('every written row reads back', readBack.drafts.length, out.lines.length);
+  check('descriptions survive the round trip',
+    readBack.drafts.map(t => t.description).join('|'),
+    out.lines.map(l => l.description).join('|'));
+  check('phases survive the round trip',
+    readBack.drafts.every((t, i) => t.phase === out.lines[i].phase), true);
+  check('skills and task types survive the round trip',
+    readBack.drafts.every((t, i) => t.skill === out.lines[i].skill && t.taskType === out.lines[i].taskType), true);
+  check('and nothing is flagged, since it is our own output',
+    readBack.drafts.filter(t => t.issues.length).length, 0);
+}
+
+// ── 5d. Committing an import puts real tasks in the flow ───────────────
+section('Import commit');
+{
+  const grab = (re) => (adminHtml.match(re) || [null])[0];
+  const src = [
+    grab(/function slugify\([\s\S]*?\n    \}/),
+    grab(/function uniqueId\([\s\S]*?\n    \}/),
+    grab(/function commitImport\(\)[\s\S]*?\n    \}/),
+  ];
+  check('admin has the commit step', src.every(Boolean), true);
+  if (src.every(Boolean)) {
+    const flow = { id: 'imp', name: 'Imp', vertical: config.verticals[0].id,
+      subflows: [{ id: 'one', name: 'One' }, { id: 'two', name: 'Two' }], inputs: [], tasks: [] };
+    const IMPORT = { rows: [
+      { include: true, description: 'Shared task', phase: 'Design', skill: 'Collaboration', taskType: 'ArchiTech Activity', subflows: 'all' },
+      { include: true, description: 'Only in two', phase: 'Staging', skill: 'Security', taskType: 'Client Dependency', subflows: 'two' },
+      { include: false, description: 'Left behind', phase: 'Design', skill: 'Collaboration', taskType: 'ArchiTech Activity', subflows: 'all' },
+    ] };
+    const fn = new Function('F', 'IMPORT', 'EXPANDED', 'renderAdmin', 'alert',
+      src.join('\n') + '; return commitImport;')(
+      () => flow, IMPORT, new Set(), () => {}, () => {});
+    fn();
+
+    check('only the ticked rows were added', flow.tasks.map(t => t.description),
+      ['Shared task', 'Only in two']);
+    check('an all-subflows row is marked all', flow.tasks[0].subflows, 'all');
+    check('a mapped row goes to just that subflow', flow.tasks[1].subflows, ['two']);
+    check('the fields come through', [flow.tasks[1].phase, flow.tasks[1].skill, flow.tasks[1].taskType],
+      ['Staging', 'Security', 'Client Dependency']);
+    check('effort starts empty, to be costed', flow.tasks[0].effort, []);
+    check('ids are unique and derived from the text', flow.tasks.map(t => t.id), ['shared-task', 'only-in-two']);
+  }
+}
+
 // ── 6. Admin shows every task exactly once ──────────────────────────────
 section('Admin grouping');
 const adminSrc = scripts(adminHtml).find(s => s.includes('function sectionsForFlow'));

@@ -1,4 +1,5 @@
-// The one place that turns a flow plus some answers into PSE rows.
+// The shared logic: turning a flow plus some answers into PSE rows, and
+// reading a pasted block of PSE rows back into draft tasks.
 //
 // Shared by index.html (the builder) and admin.html (the preview), so a preview
 // cannot drift from what the builder actually produces. Nothing here touches the
@@ -203,6 +204,143 @@ const PSEngine = (function () {
       return cell(l[c.from]);
     }).join('\t')).join('\n');
   }
+  // ── importing a pasted block ──
+  // Excel wraps a cell in quotes when it contains a tab or a newline, so
+  // splitting on those alone would tear such a row apart. This walks the text
+  // instead, which is the only way to keep those cells whole.
+  function parseGrid(text) {
+    const s = String(text == null ? '' : text).replace(/\r\n?/g, '\n');
+    const rows = [];
+    let row = [], cellText = '', quoted = false, started = false;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s[i];
+      if (quoted) {
+        if (ch !== '"') { cellText += ch; continue; }
+        if (s[i + 1] === '"') { cellText += '"'; i++; continue; }
+        quoted = false;
+        continue;
+      }
+      if (ch === '"' && cellText === '') { quoted = true; started = true; continue; }
+      if (ch === '\t') { row.push(cellText); cellText = ''; started = true; continue; }
+      if (ch === '\n') { row.push(cellText); rows.push(row); row = []; cellText = ''; started = false; continue; }
+      cellText += ch;
+      started = true;
+    }
+    if (started || cellText !== '' || row.length) { row.push(cellText); rows.push(row); }
+    return rows
+      .map(r => r.map(c => c.trim()))
+      .filter(r => r.some(c => c !== ''));
+  }
+
+  // What the four task-detail columns are called on the sheet.
+  const IMPORT_FIELDS = [
+    { key: 'phase', header: 'phase' },
+    { key: 'skill', header: 'skill required' },
+    { key: 'taskType', header: 'task type' },
+    { key: 'description', header: 'description' },
+  ];
+
+  // Works out which column is which: by the header row if there is one, else
+  // by position, which is safe because the sheet fixes the order.
+  function detectColumns(grid) {
+    if (!grid.length) return { map: {}, headerRow: false, width: 0, note: 'Nothing to read.' };
+    const width = Math.max(...grid.map(r => r.length));
+    const first = grid[0].map(c => c.toLowerCase());
+
+    if (first.some(c => IMPORT_FIELDS.some(f => f.header === c))) {
+      const map = {};
+      IMPORT_FIELDS.forEach(f => {
+        const at = first.indexOf(f.header);
+        if (at !== -1) map[f.key] = at;
+      });
+      const found = Object.keys(map).length;
+      return {
+        map, headerRow: true, width,
+        note: `Read the header row and matched ${found} of the four columns.`,
+      };
+    }
+
+    if (width === 1) {
+      return {
+        map: { description: 0 }, headerRow: false, width,
+        note: 'One column, so it is being read as descriptions only.',
+      };
+    }
+    if (width >= 4) {
+      return {
+        map: { phase: 0, skill: 1, taskType: 2, description: 3 },
+        headerRow: false, width,
+        note: width > 4
+          ? `${width} columns, so the first four are being read as Phase, Skill Required, Task Type and Description, and the rest ignored.`
+          : 'Four columns, read as Phase, Skill Required, Task Type and Description.',
+      };
+    }
+    return {
+      map: {}, headerRow: false, width, ambiguous: true,
+      note: `${width} columns is not a shape this recognises. Paste either the four task-detail columns, or just the descriptions.`,
+    };
+  }
+
+  // Case and spacing should not decide whether a value is accepted.
+  function matchFromList(value, list) {
+    if (!value) return null;
+    const want = String(value).trim().toLowerCase();
+    return list.find(v => v.toLowerCase() === want) || null;
+  }
+
+  // Turns the grid into draft tasks, saying for each one what it could not
+  // work out rather than quietly picking something.
+  function draftTasks(grid, cols, config, existingDescriptions) {
+    const seen = new Set((existingDescriptions || []).map(s => String(s).trim().toLowerCase()));
+    const withinPaste = new Set();
+    const rows = cols.headerRow ? grid.slice(1) : grid;
+    const drafts = [];
+    let skipped = 0;
+
+    rows.forEach((row, n) => {
+      const at = (key) => (cols.map[key] === undefined ? '' : (row[cols.map[key]] || ''));
+      // A row with no description is not a task, whatever else it carries.
+      const description = cell(at('description'));
+      if (!description) { skipped++; return; }
+
+      const issues = [];
+      const pick = (key, list, label) => {
+        const raw = at(key);
+        if (!raw) { issues.push({ field: key, kind: 'missing', note: `No ${label} in the paste` }); return list[0]; }
+        const hit = matchFromList(raw, list);
+        if (!hit) { issues.push({ field: key, kind: 'unknown', value: raw, note: `"${raw}" is not a ${label} the PSE offers` }); return list[0]; }
+        return hit;
+      };
+
+      const key = description.toLowerCase();
+      if (seen.has(key)) issues.push({ field: 'description', kind: 'duplicate', note: 'A task with this description is already in the flow' });
+      if (withinPaste.has(key)) issues.push({ field: 'description', kind: 'repeated', note: 'This description appears more than once in the paste' });
+      withinPaste.add(key);
+
+      drafts.push({
+        row: n + 1,
+        description,
+        phase: pick('phase', config.phases, 'phase'),
+        skill: pick('skill', config.skills, 'skill'),
+        taskType: pick('taskType', config.taskTypes, 'task type'),
+        issues,
+      });
+    });
+
+    return { drafts, skipped };
+  }
+
+  // One call from paste to reviewable drafts.
+  function readPaste(text, config, existingDescriptions) {
+    const grid = parseGrid(text);
+    const cols = detectColumns(grid);
+    if (cols.ambiguous || !Object.keys(cols.map).length) {
+      return { cols, drafts: [], skipped: 0, rows: grid.length };
+    }
+    const { drafts, skipped } = draftTasks(grid, cols, config, existingDescriptions);
+    return { cols, drafts, skipped, rows: grid.length };
+  }
+
   function roleName(config, id) {
     const r = (config.roles || []).find(r => r.id === id);
     return r ? r.name : id;
@@ -237,6 +375,7 @@ const PSEngine = (function () {
     resolve, isRequired, inputsToShow, allRequiredAnswered,
     amountOf, fillText, buildLines, totalHours,
     assignSlots, applySlots, blockText, roleName, estimate,
+    parseGrid, detectColumns, draftTasks, readPaste, IMPORT_FIELDS,
   };
 })();
 
