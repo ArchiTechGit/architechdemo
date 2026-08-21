@@ -344,7 +344,9 @@ section('Adaptation');
   adminFiles.forEach(({ name, src }) => {
     const tables = (src.match(/class="data-table/g) || []).length;
     if (!tables) return;
-    const scrollers = (src.match(/overflow-x:\s*auto/g) || []).length;
+    // Either the named class or an inline style counts; the class is preferred
+    // because it says what it is for.
+    const scrollers = (src.match(/class="scroll-x"|overflow-x:\s*auto/g) || []).length;
     check(name + ' wraps each wide table in a scroller', scrollers >= tables, true);
   });
 
@@ -409,6 +411,39 @@ section('No duplication');
     const twice = consts.filter((c, n) => consts.indexOf(c) !== n);
     check(name + ' declares each constant once', [...new Set(twice)], []);
   });
+}
+
+// ── 1m. Polish that has to stay put ───────────────────────────────────
+section('Polish');
+{
+  // The builder used to show raw tab-separated text while the admin showed a
+  // readable table. The person producing the estimate got the worse view.
+  check('the builder shows the rows as a table', indexHtml.includes('function renderOutputTable'), true);
+  check('and it uses the shared table component', indexHtml.indexOf('out-table') !== -1 && indexHtml.indexOf('class="data-table"') !== -1, true);
+  check('with the copy boxes named as the mechanism', indexHtml.includes('Copy into the spreadsheet'), true);
+
+  // One button was Title Case in a page of sentence case, and it was the
+  // primary one.
+  check('button labels are sentence case', /Create Estimate/.test(indexHtml), false);
+
+  // Motion should be stated once, not written out per rule.
+  check('timings come from tokens', uiCss.split('var(--t-').length - 1 > 8, true);
+  check('no hard-coded seconds remain', uiCss.indexOf('0.2s') === -1 && uiCss.indexOf('0.15s') === -1, true);
+  check('movement eases out rather than stopping dead', uiCss.includes('--ease:'), true);
+
+  // Every button should acknowledge the press, not just the hover.
+  const pressable = ['.btn-primary', '.btn-secondary', '.btn-ghost', '.btn-add', '.btn-x', '.chip'];
+  check('every button has a press state',
+    pressable.filter(sel => !uiCss.includes(sel + ':active')), []);
+
+  // The scroll container is load-bearing, so it has a name.
+  check('the scroll container is a named class', uiCss.includes('.scroll-x'), true);
+
+  // A destructive control should not sit beside a creative one.
+  const barAt = adminMarkup.indexOf('<div class="fbar">');
+  const bar = adminMarkup.slice(barAt, barAt + 900);
+  check('the toolbar no longer offers to forget the token', /forgetToken/.test(bar), false);
+  check('and making a flow is the raised action', /btn-secondary[^>]*openNewFlow/.test(adminMarkup), true);
 }
 
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────

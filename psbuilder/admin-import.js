@@ -201,7 +201,7 @@ function renderImportResult(box, f) {
       <button class="btn-ghost" onclick="setImportAll(true)">Tick all</button>
       <button class="btn-ghost" onclick="setImportAll(false)">Untick all</button>
     </div>
-    <div style="overflow-x:auto;">
+    <div class="scroll-x">
       <table class="data-table">
         <tr><th></th><th>Description</th><th>Phase</th><th>Skill</th><th>Task type</th><th>Goes in</th><th>Hours read</th></tr>
         ${rows}

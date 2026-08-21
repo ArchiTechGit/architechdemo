@@ -55,6 +55,10 @@
       font-size: 12.5px; line-height: 1.7; padding: 16px 18px; white-space: pre; resize: vertical;
     }
 
+    /* The phase repeats down the column, so it should not compete with the
+       description beside it. */
+    .pv-phase { color: var(--muted); white-space: nowrap; }
+
     .step { display: none; }
     .step.active { display: block; }
   </style>
@@ -84,7 +88,7 @@
 
     <div id="question-section" class="step">
       <div id="question-root"></div>
-      <button class="btn-primary" id="create-btn" onclick="createEstimate()">Create Estimate →</button>
+      <button class="btn-primary" id="create-btn" onclick="createEstimate()">Create estimate →</button>
     </div>
 
     <div id="output-section" class="step">
@@ -95,6 +99,10 @@
         <div class="stat"><div class="stat-label">Business / after hours</div><div class="stat-value" id="sum-split">0 / 0</div></div>
       </div>
       <div class="q-sub" id="slot-hint" role="status" aria-live="polite"></div>
+
+      <div class="scroll-x" id="out-table"></div>
+
+      <div class="section-label" style="margin-top:30px;">Copy into the spreadsheet</div>
 
       <div class="out-block">
         <div class="out-head">
@@ -388,6 +396,39 @@
       return String.fromCharCode(first) + "\u2013" + String.fromCharCode(last);
     }
 
+    // The same shape the admin preview uses, so the two agree: what the task
+    // is, then a column per resource slot, then its total.
+    function renderOutputTable(out) {
+      const box = document.getElementById("out-table");
+      if (!out.lines.length) { box.innerHTML = ""; return; }
+
+      const slots = out.slots;
+      const head = slots.map(r => '<th class="num">' + esc(r) + '</th>').join("");
+      const rows = out.lines.map(l => {
+        const cells = slots.map(role => {
+          const e = l.effortLines.find(x => x.role === role);
+          if (!e) return '<td class="num">&nbsp;</td>';
+          const bits = [];
+          if (e.business) bits.push(e.business + "h");
+          if (e.after) bits.push(e.after + "h AH");
+          return '<td class="num" title="' + esc(e.location) + '">' + bits.join(" + ") + "</td>";
+        }).join("");
+        const total = E.totalHours(l);
+        return "<tr>" +
+          '<td class="pv-phase">' + esc(l.phase) + "</td>" +
+          "<td>" + esc(l.description) + "</td>" +
+          cells +
+          '<td class="num">' + (total || "") + "</td>" +
+          "</tr>";
+      }).join("");
+
+      box.innerHTML =
+        '<table class="data-table">' +
+        "<tr><th>Phase</th><th>Description</th>" + head + '<th class="num">Hours</th></tr>' +
+        rows +
+        "</table>";
+    }
+
     function createEstimate() {
       const out = E.estimate(CONFIG, flow, subflow, answers);
       const targets = CONFIG.pasteTargets || { task: "A", resource: "J" };
@@ -395,6 +436,7 @@
       document.getElementById("out-task").value = E.blockText(CONFIG.taskColumns, out.lines);
       document.getElementById("out-resource").value = E.blockText(CONFIG.resourceColumns, out.lines);
 
+      renderOutputTable(out);
       document.getElementById("sum-tasks").textContent = out.lines.length;
       document.getElementById("sum-hours").textContent = out.hours;
       document.getElementById("sum-split").textContent = out.business + " / " + out.after;

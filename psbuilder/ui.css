@@ -26,6 +26,12 @@
   --font:      'Roboto', sans-serif;
 
   --page-width: 900px;
+
+  /* Motion. One quick step for feedback, one for a state change, and an
+     ease-out so movement settles rather than stopping dead. */
+  --t-quick: 120ms;
+  --t-state: 200ms;
+  --ease:    cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── reset and base ─────────────────────────────────────────────────────── */
@@ -102,26 +108,32 @@ h1.page-title, .page-title {
 /* ── buttons ────────────────────────────────────────────────────────────── */
 .btn-primary {
   background: var(--cyan); color: var(--bg); font-size: 14px; font-weight: 700;
-  border: none; padding: 13px 28px; border-radius: 8px; cursor: pointer;
+  border: none; padding: 12px 28px; border-radius: 8px; cursor: pointer;
   font-family: var(--font); margin-top: 10px;
+  transition: opacity var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
 }
 .btn-primary:hover { opacity: 0.9; }
+.btn-primary:active { transform: translateY(1px); }
 .btn-primary:disabled { opacity: 0.45; cursor: default; }
 
 .btn-secondary {
   background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600;
   border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
   font-family: var(--font);
+  transition: opacity var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
 }
 .btn-secondary:hover { opacity: 0.9; }
+.btn-secondary:active { transform: translateY(1px); }
 
 /* Compact by default: most of these sit inside dense rows of controls. */
 .btn-ghost {
   background: transparent; border: 1px solid var(--border); color: var(--muted);
   font-size: 12.5px; padding: 6px 12px; border-radius: 7px; cursor: pointer;
   font-family: var(--font); margin-left: 6px;
+  transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
 }
 .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.btn-ghost:active { transform: translateY(1px); }
 /* For a button standing on its own under a block of content. */
 .btn-ghost--roomy { font-size: 13px; padding: 12px 22px; border-radius: 8px; margin-top: 10px; margin-left: 10px; }
 
@@ -129,14 +141,18 @@ h1.page-title, .page-title {
   background: transparent; border: 1px dashed var(--border); color: var(--muted);
   font-size: 12.5px; padding: 8px 14px; border-radius: 8px; cursor: pointer;
   font-family: var(--font); width: 100%; text-align: left;
+  transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
 }
 .btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
+.btn-add:active { transform: translateY(1px); }
 
 .btn-x {
   background: transparent; border: none; color: var(--muted); font-size: 16px;
   cursor: pointer; min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0;
+  transition: color var(--t-quick) var(--ease), background var(--t-quick) var(--ease);
 }
 .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.btn-x:active { transform: translateY(1px); }
 
 /* ── form controls ──────────────────────────────────────────────────────── */
 input[type="password"], input[type="text"], input[type="number"], select, textarea {
@@ -147,9 +163,11 @@ textarea { resize: vertical; min-height: 48px; }
 
 /* A checkbox and its label on one line. Both pages had this under a different
    name, with a different gap. */
-.check-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.check-row { display: flex; align-items: center; gap: 8px; cursor: pointer;
+  transition: color var(--t-quick) var(--ease); }
 .check-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; flex-shrink: 0; }
 .check-row span { font-size: 13px; color: var(--text); }
+.check-row:hover span { color: var(--cyan); }
 
 /* ── chip ───────────────────────────────────────────────────────────────── */
 .chip {
@@ -157,8 +175,10 @@ textarea { resize: vertical; min-height: 48px; }
   border: 1px solid var(--cyan-mid); color: var(--cyan); font-size: 11.5px;
   font-family: 'SFMono-Regular', Consolas, monospace; padding: 4px 10px;
   min-height: 24px; border-radius: 20px; cursor: pointer; margin: 0 6px 6px 0;
+  transition: background var(--t-quick) var(--ease);
 }
 .chip:hover { background: var(--cyan-mid); }
+.chip:active { transform: translateY(1px); }
 .chip--ghost { background: transparent; border-style: dashed; color: var(--muted); }
 .chip--ghost:hover { color: var(--cyan); border-color: var(--cyan-mid); background: transparent; }
 
@@ -181,6 +201,10 @@ textarea { resize: vertical; min-height: 48px; }
 .stat-row--compact { gap: 26px; padding: 14px 18px; margin-bottom: 0; margin-top: 14px; }
 .stat-row--compact .stat-label { font-size: 10px; margin-bottom: 2px; }
 .stat-row--compact .stat-value { font-size: 20px; line-height: 1.2; }
+
+/* Wraps anything that may be wider than the page. The wide tables depend on
+   this; without it the whole page scrolls sideways instead of the table. */
+.scroll-x { overflow-x: auto; }
 
 /* ── data table ─────────────────────────────────────────────────────────── */
 /* Used by the preview and by the import review. Wrap it in a container with

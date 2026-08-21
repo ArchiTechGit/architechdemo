@@ -151,7 +151,7 @@ function renderPreviewResult(box, out) {
       <div><div class="stat-label">After hours</div><div class="stat-value">${out.after}</div></div>
     </div>
     <div class="q-sub" style="margin-top:10px;">${mapping}</div>${overflow}${capped}
-    <div style="overflow-x:auto;">
+    <div class="scroll-x">
       <table class="data-table pv-table">
         <tr><th>Phase</th><th>Description</th>${header}<th class="num">Total</th></tr>
         ${rows}

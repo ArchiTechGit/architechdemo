@@ -57,7 +57,9 @@
     .block-body { padding: 0 18px 16px 18px; }
 
     .act { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border);
-      border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.02); }
+      border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.02);
+      transition: border-color var(--t-quick) var(--ease); }
+    .act:hover { border-color: rgba(255,255,255,0.14); }
     .act-text { flex: 1; min-width: 0; }
     .act-desc { font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
     .act-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
@@ -85,6 +87,7 @@
        rather than pushing the page sideways. */
     @media (max-width: 860px) {
       .fbar { flex-wrap: wrap; }
+      .fbar-group { flex-wrap: wrap; }
       .fbar select { flex: 1 1 200px; }
       .field-row { flex-wrap: wrap; }
       .field-row .field { min-width: 200px; }
@@ -98,13 +101,21 @@
       .block-body { padding-left: 12px; padding-right: 12px; }
       .pv-answer input[type="number"], .pv-answer select { min-width: 100%; }
     }
+
+    /* The three flow-scoped actions read as one thing, set slightly apart from
+       the picker they act on. */
+    .fbar-group { display: flex; gap: 6px; align-items: center; }
+    .fbar-group .btn-ghost { margin-left: 0; }
   </style>
 </head>
 <body>
   <div class="page">
     <header class="header">
       <span class="header-badge">PS BUILDER — ADMIN <span id="version-badge" style="color:var(--faint);letter-spacing:0.1em;"></span></span>
-      <a href="./index.html">← Back to the builder</a>
+      <span>
+        <button class="btn-ghost" onclick="forgetToken()" title="Removes the token saved in this browser. You will need to paste it again.">Forget token</button>
+        <a href="./index.html">← Back to the builder</a>
+      </span>
     </header>
 
     <h1 class="page-title" style="font-size:22px;margin-bottom:24px;">Flow admin</h1>
@@ -137,13 +148,16 @@
 
     <main id="admin-app" style="display:none;">
       <div class="fbar">
-        <label class="field-label" style="margin:0;white-space:nowrap;">Flow</label>
+        <label class="field-label" for="flow-select" style="margin:0;white-space:nowrap;">Flow</label>
         <select id="flow-select" onchange="switchFlow(this.value)"></select>
-        <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
-        <button class="btn-ghost" onclick="toggleImport()">Import</button>
-        <button class="btn-ghost" onclick="togglePreview()">Preview</button>
-        <button class="btn-ghost" onclick="openNewFlow()">+ New flow</button>
-        <button class="btn-ghost" onclick="forgetToken()" title="Removes the token saved in this browser. You will need to paste it again.">Forget token</button>
+        <!-- These three act on the flow in the picker, so they sit with it. -->
+        <div class="fbar-group">
+          <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
+          <button class="btn-ghost" onclick="toggleImport()">Import</button>
+          <button class="btn-ghost" onclick="togglePreview()">Preview</button>
+        </div>
+        <!-- Making a flow is the one thing here that starts something. -->
+        <button class="btn-secondary" onclick="openNewFlow()">+ New flow</button>
       </div>
       <div id="flow-form-slot"></div>
       <div id="import-slot"></div>
