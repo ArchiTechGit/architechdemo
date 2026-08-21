@@ -4,6 +4,18 @@
 // cannot drift from what the builder actually produces. Nothing here touches the
 // DOM or knows about any particular solution: it is all driven by config.json.
 const PSEngine = (function () {
+  // The PSE has 181 task rows. Emitting more lines than that cannot be pasted
+  // anywhere useful, and a runaway count used to loop until the tab died.
+  const MAX_LINES_PER_TASK = 200;
+
+  // A repeat count has to be a whole, finite, non-negative number. Anything
+  // else means zero lines rather than a hung page.
+  function repeatCount(value) {
+    const n = Math.floor(Number(value));
+    if (!Number.isFinite(n) || n <= 0) return { n: 0, clamped: false };
+    if (n > MAX_LINES_PER_TASK) return { n: MAX_LINES_PER_TASK, clamped: true, asked: n };
+    return { n, clamped: false };
+  }
   function round2(n) { return Math.round(Number(n || 0) * 100) / 100; }
 
   // Both pages build HTML out of config values, so the escaping lives here
@@ -115,8 +127,9 @@ const PSEngine = (function () {
   }
 
   // ── the task lines ──
-  function buildLines(flow, subflowId, resolved) {
+  function buildLines(flow, subflowId, resolved, clamped) {
     const out = [];
+    clamped = clamped || [];
     flow.tasks.forEach(task => {
       if (!inSubflow(task.subflows, subflowId)) return;
       if (!condMet(task.showWhen, resolved)) return;
@@ -136,8 +149,9 @@ const PSEngine = (function () {
       });
 
       if (task.repeatPer) {
-        const n = Number(resolved[task.repeatPer] || 0);
-        for (let i = 1; i <= n; i++) emit(i);
+        const count = repeatCount(resolved[task.repeatPer]);
+        if (count.clamped) clamped.push({ task: task.id, asked: count.asked, used: count.n });
+        for (let i = 1; i <= count.n; i++) emit(i);
       } else {
         emit();
       }
@@ -173,16 +187,22 @@ const PSEngine = (function () {
   }
 
   // ── output ──
+  // A tab would open a new column and a newline a new row, so a description
+  // pasted in from elsewhere could silently shift every cell after it. Both
+  // collapse to a single space.
+  function cell(value) {
+    if (value == null) return '';
+    return String(value).replace(/[\t\r\n]+/g, ' ').trim();
+  }
+
   // Data rows only. These paste onto rows that already exist, and a header row
   // would land in the data and push every task down one.
   function blockText(cols, lines) {
     return lines.map(l => cols.map(c => {
-      if (c.constant !== undefined) return c.constant;
-      const v = l[c.from];
-      return v == null ? '' : v;
+      if (c.constant !== undefined) return cell(c.constant);
+      return cell(l[c.from]);
     }).join('\t')).join('\n');
   }
-
   function roleName(config, id) {
     const r = (config.roles || []).find(r => r.id === id);
     return r ? r.name : id;
@@ -191,7 +211,8 @@ const PSEngine = (function () {
   // Everything a caller needs to go from answers to pasteable rows.
   function estimate(config, flow, subflowId, answers) {
     const resolved = resolve(flow, subflowId, answers);
-    const lines = buildLines(flow, subflowId, resolved);
+    const clamped = [];
+    const lines = buildLines(flow, subflowId, resolved, clamped);
     const allSlots = assignSlots(lines);
     const slots = allSlots.slice(0, 5);
     lines.forEach(l => applySlots(l, slots));
@@ -204,6 +225,7 @@ const PSEngine = (function () {
       lines,
       slots,
       overflow: allSlots.slice(5),
+      clamped,
       business: round2(business),
       after: round2(after),
       hours: round2(business + after),
@@ -211,7 +233,7 @@ const PSEngine = (function () {
   }
 
   return {
-    round2, esc, attr, inSubflow, condMet, defaultFor, visibleOptions, activeInputs,
+    round2, esc, attr, cell, repeatCount, MAX_LINES_PER_TASK, inSubflow, condMet, defaultFor, visibleOptions, activeInputs,
     resolve, isRequired, inputsToShow, allRequiredAnswered,
     amountOf, fillText, buildLines, totalHours,
     assignSlots, applySlots, blockText, roleName, estimate,

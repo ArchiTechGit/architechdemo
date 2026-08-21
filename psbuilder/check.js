@@ -134,6 +134,77 @@ section('New flow');
   }
 }
 
+// ── 1e. Nothing a user types can break the paste grid ──────────────────
+section('Paste integrity');
+// A tab opens a column and a newline opens a row, so either would shift every
+// following cell in the spreadsheet.
+check('a tab in a description collapses', E.cell('Before\tAfter'), 'Before After');
+check('a newline in a description collapses', E.cell('One\nTwo'), 'One Two');
+check('a carriage return collapses', E.cell('One\r\nTwo'), 'One Two');
+check('null becomes empty, not the word null', E.cell(null), '');
+{
+  // Straight through the real block builder, not just the helper.
+  const line = { phase: 'Design\tX', skill: 'A\nB', taskType: 'C', description: 'D\tE' };
+  const row = E.blockText(config.taskColumns, [line]);
+  check('a built row keeps its column count', row.split('\t').length, config.taskColumns.length);
+  check('a built row stays on one line', row.split('\n').length, 1);
+}
+
+// ── 1f. A runaway count cannot hang the page ───────────────────────────
+section('Repeat limits');
+check('there is a cap', typeof E.MAX_LINES_PER_TASK, 'number');
+check('Infinity yields nothing', E.repeatCount(Infinity).n, 0);
+check('NaN yields nothing', E.repeatCount(NaN).n, 0);
+check('a negative count yields nothing', E.repeatCount(-5).n, 0);
+check('a fraction floors', E.repeatCount(2.7).n, 2);
+check('a huge count is capped', E.repeatCount(100000).n, E.MAX_LINES_PER_TASK);
+check('and says it capped', E.repeatCount(100000).clamped, true);
+{
+  const f = { id: 'x', name: 'X', vertical: config.verticals[0].id,
+    subflows: [{ id: 'a', name: 'A' }],
+    inputs: [{ id: 'n', type: 'number', label: 'How many?', default: 1, min: 0, max: 999999 }],
+    tasks: [{ id: 't', phase: config.phases[0], skill: config.skills[0], taskType: config.taskTypes[0],
+      description: 'Item {#}', subflows: 'all', repeatPer: 'n', effort: [] }] };
+  const out = E.estimate(config, f, 'a', { n: 100000 });
+  check('a runaway task emits at most the cap', out.lines.length, E.MAX_LINES_PER_TASK);
+  check('and reports what it dropped', out.clamped.length, 1);
+}
+
+// ── 1g. The accessibility layer is present ─────────────────────────────
+section('Accessibility');
+['index.html', 'admin.html'].forEach(name => {
+  const html = name === 'index.html' ? indexHtml : adminHtml;
+  check(name + ' has exactly one h1', (html.match(/<h1\b/g) || []).length, 1);
+  check(name + ' has a main landmark', /<main[\s>]/.test(html), true);
+  check(name + ' has a visible focus ring', /:focus-visible/.test(html), true);
+  check(name + ' respects reduced motion', /prefers-reduced-motion/.test(html), true);
+  check(name + ' styles its placeholders', /::placeholder/.test(html), true);
+  // Nothing may strip the focus outline without putting one back.
+  const strips = /outline\s*:\s*(none|0)/.test(html);
+  check(name + ' never removes the outline', strips, false);
+});
+
+// The card pickers and the toggle are the builder's primary controls; as bare
+// divs they could not be reached by keyboard at all.
+check('cards announce themselves as radios', /role', 'radio'|setAttribute\('role', 'radio'\)/.test(indexHtml), true);
+check('cards carry a checked state', indexHtml.includes('aria-checked'), true);
+check('cards sit in a labelled group', indexHtml.includes("'radiogroup'"), true);
+check('cards respond to the keyboard', indexHtml.includes('card.onkeydown'), true);
+check('the yes/no control is a switch', indexHtml.includes("'switch'"), true);
+check('generated output is announced', /aria-live="polite"/.test(indexHtml), true);
+check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(adminHtml), true);
+check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
+
+// ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Failure handling');
+check('a failed config load is explained', indexHtml.includes('showLoadFailure'), true);
+check('the load checks the response', indexHtml.includes('if (!res.ok) throw'), true);
+check('an empty config is caught', indexHtml.includes('has no flows in it'), true);
+check('saving twice is refused', adminHtml.includes('if (saving) return;'), true);
+check('the save button disables itself', /btn\.disabled = true/.test(adminHtml), true);
+check('a save failure says nothing was written', adminHtml.includes('Nothing was written'), true);
+check('typed preview numbers are clamped', adminHtml.includes('function clampAnswer'), true);
+
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
 section('PSE lists');
 check('seven engineer roles', (config.roles || []).map(r => r.id),

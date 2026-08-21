@@ -20,7 +20,7 @@
       --cyan-mid:  rgba(5,195,221,0.25);
       --text:      #F0F6FC;
       --muted:     #8FA3BA;
-      --faint:     #4A607A;
+      --faint:     #7C93AD;
       --border:    rgba(255,255,255,0.07);
       --font:      'Roboto', sans-serif;
     }
@@ -33,7 +33,7 @@
     .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
     .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
 
-    .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
+    h1.page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
     .page-desc  { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 30px; max-width: 680px; }
 
     .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
@@ -66,9 +66,9 @@
 
     .toggle-row { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .toggle-switch { width: 40px; height: 22px; border-radius: 11px; background: var(--surface-1); border: 1px solid var(--border); position: relative; transition: background 0.2s; flex-shrink: 0; }
-    .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); top: 2px; left: 2px; transition: left 0.2s, background 0.2s; }
+    .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); top: 2px; left: 2px; transition: transform 0.2s, background 0.2s; }
     .toggle-row.on .toggle-switch { background: var(--cyan-dim); border-color: var(--cyan-mid); }
-    .toggle-row.on .toggle-switch::after { left: 20px; background: var(--cyan); }
+    .toggle-row.on .toggle-switch::after { transform: translateX(18px); background: var(--cyan); }
     .toggle-text { font-size: 13px; color: var(--text); }
 
     .checklist { display: flex; flex-direction: column; gap: 10px; }
@@ -114,17 +114,36 @@
     .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
     .footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
     .footer-note a { color: var(--cyan); text-decoration: none; }
+
+    /* A focus ring that survives on a dark ground. :focus-visible keeps it off
+       mouse clicks while always showing it for keyboard use. */
+    :focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    ::placeholder { color: var(--faint); opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="header">
+    <header class="header">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <span class="header-badge">Internal Sizing Tool · POC</span>
       <a href="./admin.html" style="color:var(--muted);font-size:11px;text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;">Manage flows →</a>
-    </div>
+    </header>
 
-    <div class="page-title">PS Engagement Builder</div>
+    <h1 class="page-title">PS Engagement Builder</h1>
+    <main>
     <div class="page-desc">
       Pick a flow, pick the type of work, answer a short set of scoping questions, then generate a
       line-by-line task list with hours. Tasks common to every variation are added automatically.
@@ -150,7 +169,7 @@
         <div class="summary-item"><div class="summary-label">Hours</div><div class="summary-value" id="sum-hours">0</div></div>
         <div class="summary-item"><div class="summary-label">Business / After</div><div class="summary-value" id="sum-split">0 / 0</div></div>
       </div>
-      <div class="q-sub" id="slot-hint"></div>
+      <div class="q-sub" id="slot-hint" role="status" aria-live="polite"></div>
 
       <div class="out-block">
         <div class="out-head">
@@ -176,13 +195,15 @@
 
       <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
     </div>
-    <div class="footer">
+    </main>
+
+    <footer class="footer">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <div class="footer-note">
         Internal scoping tool. Hours come from the base and per-unit rates set against each task.
         <a href="/" target="_self">← Back to demos</a>
       </div>
-    </div>
+    </footer>
   </div>
 
   <script src="./engine.js"></script>
@@ -197,7 +218,17 @@
 
     async function loadConfig() {
       const res = await fetch('./config.json');
+      if (!res.ok) throw new Error(`config.json could not be read (${res.status})`);
       CONFIG = await res.json();
+      if (!CONFIG.flows || !CONFIG.flows.length) throw new Error('config.json has no flows in it');
+    }
+
+    // Without this a failed or malformed load left the page silently blank.
+    function showLoadFailure(err) {
+      const root = document.getElementById('flow-list');
+      root.innerHTML =
+        '<div class="q-card"><div class="q-label">The tool could not load its configuration</div>' +
+        '<div class="q-sub">' + esc(err.message) + '. Reload the page; if it keeps happening, the config may be mid-edit.</div></div>';
     }
 
     const esc = PSEngine.esc;
@@ -208,6 +239,34 @@
 
     function resolveInputs() { return E.resolve(flow, subflow, answers); }
     // ─── Rendering ──────────────────────────────────────────────────────
+    // A card picker is a radio group, not a row of divs: without this none of
+    // it can be reached by keyboard or announced by a screen reader.
+    function asRadio(card, group, checked, onPick) {
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-checked', checked ? 'true' : 'false');
+      // Only the checked option is tabbable, so the group is one tab stop.
+      card.tabIndex = checked ? 0 : -1;
+      card.onclick = onPick;
+      card.onkeydown = (ev) => {
+        if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); onPick(); return; }
+        const keys = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'];
+        if (!keys.includes(ev.key)) return;
+        ev.preventDefault();
+        const peers = [...card.closest('[role=radiogroup]').querySelectorAll('[role=radio]:not([aria-disabled=true])')];
+        const at = peers.indexOf(card);
+        const step = (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') ? 1 : -1;
+        const next = peers[(at + step + peers.length) % peers.length];
+        if (next) { next.focus(); next.click(); }
+      };
+      return card;
+    }
+
+    function asRadioGroup(el, label) {
+      el.setAttribute('role', 'radiogroup');
+      el.setAttribute('aria-label', label);
+      return el;
+    }
+
     function renderFlows() {
       const root = document.getElementById('flow-list');
       root.innerHTML = '';
@@ -227,14 +286,20 @@
           root.appendChild(none);
           return;
         }
-        const grid = document.createElement('div');
+        const grid = asRadioGroup(document.createElement('div'), v.name + ' flows');
         grid.className = 'product-grid';
         flows.forEach(f => {
           const card = document.createElement('div');
           const disabled = f.enabled === false;
           card.className = 'pick-card' + (disabled ? ' disabled' : '') + (flow && flow.id === f.id ? ' selected' : '');
           card.innerHTML = '<div class="pick-name">' + esc(f.name) + '</div><div class="pick-note">' + esc(f.note || '') + '</div>';
-          if (!disabled) card.onclick = () => selectFlow(f.id);
+          if (disabled) {
+            card.setAttribute('role', 'radio');
+            card.setAttribute('aria-disabled', 'true');
+            card.setAttribute('aria-checked', 'false');
+          } else {
+            asRadio(card, grid, flow && flow.id === f.id, () => selectFlow(f.id));
+          }
           grid.appendChild(card);
         });
         root.appendChild(grid);
@@ -256,13 +321,13 @@
     }
 
     function renderSubflows() {
-      const grid = document.getElementById('subflow-grid');
+      const grid = asRadioGroup(document.getElementById('subflow-grid'), flow.subflowLabel || 'Type of work');
       grid.innerHTML = '';
       flow.subflows.forEach(s => {
         const card = document.createElement('div');
         card.className = 'pick-card' + (subflow === s.id ? ' selected' : '');
         card.innerHTML = '<div class="pick-name">' + esc(s.name) + '</div><div class="pick-note">' + esc(s.note || '') + '</div>';
-        card.onclick = () => selectSubflow(s.id);
+        asRadio(card, grid, subflow === s.id, () => selectSubflow(s.id));
         grid.appendChild(card);
       });
     }
@@ -301,13 +366,13 @@
       label.className = 'section-label';
       label.textContent = (cardIndex + 3) + ' · ' + inp.label;
       wrap.appendChild(label);
-      const grid = document.createElement('div');
+      const grid = asRadioGroup(document.createElement('div'), inp.label);
       grid.className = 'scope-grid';
       E.visibleOptions(inp, resolved).forEach(o => {
         const card = document.createElement('div');
         card.className = 'pick-card' + (resolved[inp.id] === o.id ? ' selected' : '');
         card.innerHTML = '<div class="pick-name">' + esc(o.label) + '</div><div class="pick-note">' + esc(o.note || '') + '</div>';
-        card.onclick = () => { answers[inp.id] = o.id; renderQuestions(); };
+        asRadio(card, grid, resolved[inp.id] === o.id, () => { answers[inp.id] = o.id; renderQuestions(); });
         grid.appendChild(card);
       });
       wrap.appendChild(grid);
@@ -348,7 +413,14 @@
               (inp.help ? '<div class="toggle-text" style="color:var(--muted);">' + esc(inp.help) + '</div>' : '') +
             '</div>' +
           '</div>';
-        card.querySelector('.toggle-row').onclick = () => { answers[inp.id] = !val; renderQuestions(); };
+        const row = card.querySelector('.toggle-row');
+        row.setAttribute('role', 'switch');
+        row.setAttribute('aria-checked', val ? 'true' : 'false');
+        row.setAttribute('aria-label', inp.label);
+        row.tabIndex = 0;
+        const flip = () => { answers[inp.id] = !val; renderQuestions(); };
+        row.onclick = flip;
+        row.onkeydown = (ev) => { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); flip(); } };
       } else if (inp.type === 'checklist') {
         card.innerHTML = '<div class="q-label">' + esc(inp.label) + '</div>' + help + '<div class="checklist"></div>';
         const list = card.querySelector('.checklist');
@@ -433,7 +505,7 @@
       el.select();
       document.execCommand("copy");
     }
-    loadConfig().then(renderFlows);
+    loadConfig().then(renderFlows).catch(showLoadFailure);
   </script>
 </body>
 </html>

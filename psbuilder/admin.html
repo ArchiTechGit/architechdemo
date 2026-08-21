@@ -19,7 +19,7 @@
       --cyan-mid:  rgba(5,195,221,0.25);
       --text:      #F0F6FC;
       --muted:     #8FA3BA;
-      --faint:     #4A607A;
+      --faint:     #7C93AD;
       --border:    rgba(255,255,255,0.07);
       --amber:     #F0A020;
       --font:      'Roboto', sans-serif;
@@ -63,11 +63,11 @@
     .drag-row.dragging { opacity: 0.35; }
     .drag-row.drop-above { box-shadow: inset 0 2px 0 0 var(--cyan); }
     .drag-row.drop-below { box-shadow: inset 0 -2px 0 0 var(--cyan); }
-    .grip { color: var(--faint); font-size: 14px; line-height: 1; user-select: none;
-      flex-shrink: 0; letter-spacing: 2px; padding: 0 2px; }
+    .grip { color: var(--faint); font-size: 14px; line-height: 24px; user-select: none;
+      flex-shrink: 0; letter-spacing: 2px; min-width: 24px; min-height: 24px; text-align: center; }
     .drag-row:hover .grip { color: var(--cyan); }
     .btn-x { background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer;
-      width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
+      min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0; }
     .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
     .chip { display: inline-block; background: var(--cyan-dim); border: 1px solid var(--cyan-mid); color: var(--cyan);
@@ -128,14 +128,16 @@
     .act { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border);
       border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.02); }
     .act-text { flex: 1; min-width: 0; }
-    .act-desc { font-size: 13px; line-height: 1.45; }
+    .act-desc { font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
     .act-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
     .act-hours { font-size: 11.5px; font-weight: 700; color: var(--cyan); flex-shrink: 0; white-space: nowrap; }
 
     .pv-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     .pv-table th { text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
       text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border); }
-    .pv-table td { font-size: 12.5px; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+    .pv-table td { font-size: 12.5px; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top; overflow-wrap: anywhere; }
+    .pv-table td:nth-child(2) { min-width: 220px; }
     .pv-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
     .pv-table tr:hover td { background: rgba(255,255,255,0.02); }
     .pv-phase { color: var(--muted); white-space: nowrap; }
@@ -153,14 +155,34 @@
 
     .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 16px 0; margin-top: 24px;
       border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+
+    /* A focus ring that survives on a dark ground. :focus-visible keeps it off
+       mouse clicks while always showing it for keyboard use. */
+    :focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    ::placeholder { color: var(--faint); opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="header">
+    <header class="header">
       <span class="header-badge">PS BUILDER — ADMIN <span id="version-badge" style="color:var(--faint);letter-spacing:0.1em;"></span></span>
       <a href="./index.html">← Back to the builder</a>
-    </div>
+    </header>
+
+    <h1 class="page-title" style="font-size:22px;margin-bottom:24px;">Flow admin</h1>
 
     <div id="token-gate">
       <h2 class="page-title">Enter GitHub access token</h2>
@@ -187,7 +209,7 @@
         <button class="btn-ghost" id="forget-token" style="display:none;" onclick="forgetToken()">Forget the saved token</button>
       </div>    </div>
 
-    <div id="admin-app" style="display:none;">
+    <main id="admin-app" style="display:none;">
       <div class="fbar">
         <label class="field-label" style="margin:0;white-space:nowrap;">Flow</label>
         <select id="flow-select" onchange="switchFlow(this.value)"></select>
@@ -208,10 +230,10 @@
       <div id="tasks-root"></div>
 
       <div class="save-bar">
-        <button class="btn-primary" onclick="saveConfig()">Save to GitHub</button>
-        <span id="save-status" style="color:var(--muted);font-size:13px;"></span>
+        <button class="btn-primary" id="save-btn" onclick="saveConfig()">Save to GitHub</button>
+        <span id="save-status" role="status" aria-live="polite" style="color:var(--muted);font-size:13px;"></span>
       </div>
-    </div>
+    </main>
   </div>
 
   <script src="./engine.js"></script>
@@ -219,7 +241,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.6.2';
+    const ADMIN_VERSION = '0.7.0';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -290,9 +312,26 @@
     }
     function utf8ToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
 
+    let saving = false;
     async function saveConfig() {
       const statusEl = document.getElementById('save-status');
+      const btn = document.getElementById('save-btn');
+      // A second click would race the first commit and lose to its own sha.
+      if (saving) return;
+      saving = true;
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
       statusEl.textContent = 'Saving...';
+      try {
+        await doSave(statusEl);
+      } catch (e) {
+        statusEl.textContent = 'Save failed: ' + e.message + '. Nothing was written.';
+      } finally {
+        saving = false;
+        if (btn) { btn.disabled = false; btn.textContent = 'Save to GitHub'; }
+      }
+    }
+
+    async function doSave(statusEl) {
       const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_PATH}`, {
         method: 'PUT',
         headers: {
@@ -560,6 +599,21 @@
         makeDraggable(row, 'subflow', n);
       });
     }
+    // Labels were visual only: no for=, so clicking one did nothing and a
+    // screen reader announced an unlabelled field. Wiring them up after each
+    // render keeps it true no matter how the forms change.
+    let labelSeq = 0;
+    function linkLabels(root) {
+      (root || document).querySelectorAll('label.field-label').forEach(label => {
+        if (label.htmlFor) return;
+        const field = label.closest('.field') || label.parentElement;
+        const control = field && field.querySelector('input, select, textarea');
+        if (!control) return;
+        if (!control.id) control.id = 'ctl-' + (++labelSeq);
+        label.htmlFor = control.id;
+      });
+    }
+
     let EDITING = null;
     const EXPANDED = new Set();
 
@@ -615,6 +669,8 @@
 
       renderPreview();
       renderInputs(inputsRoot);
+      // after every render, so newly drawn forms are labelled too
+      setTimeout(() => linkLabels(), 0);
       if (EDITING && EDITING.kind === 'input') renderInputForm(inputSlot, EDITING.idx);
       renderTaskSections(tasksRoot);
     }
@@ -805,6 +861,17 @@
       renderAdmin();
     }
 
+    // Typed straight into the box, so it has to be held inside the range the
+    // question declares rather than trusted.
+    function clampAnswer(id, raw) {
+      const inp = inputById(id);
+      const n = Math.floor(Number(raw));
+      if (!Number.isFinite(n)) return (inp && inp.min) || 0;
+      const lo = inp && inp.min != null ? inp.min : 0;
+      const hi = inp && inp.max != null ? inp.max : 100000;
+      return Math.max(lo, Math.min(hi, n));
+    }
+
     function setPreviewAnswer(id, value) {
       PREVIEW.answers[id] = value;
       renderAdmin();
@@ -861,7 +928,7 @@
         if (inp.type === 'number') {
           return `<div class="pv-answer">${head}<input type="number" value="${v}" min="${inp.min != null ? inp.min : 0}"
             max="${inp.max != null ? inp.max : 999999}"
-            onchange="setPreviewAnswer('${attr(inp.id)}', Number(this.value))" /></div>`;
+            onchange="setPreviewAnswer('${attr(inp.id)}', clampAnswer('${attr(inp.id)}', this.value))" /></div>`;
         }
         if (inp.type === 'yesno') {
           return `<div class="pv-answer">${head}<div class="opts"><label>
@@ -891,6 +958,9 @@
       const mapping = slots.length
         ? slots.map((r, i) => `R${i + 1} = ${esc(PSEngine.roleName(CONFIG, r))}`).join(' \u00b7 ')
         : 'No effort costed, so the resource block would be empty.';
+      const capped = (out.clamped || []).length
+        ? `<div class="q-sub" style="color:var(--amber);margin-top:6px;">Capped at ${PSEngine.MAX_LINES_PER_TASK} lines: ${out.clamped.map(c => esc(c.task) + ' asked for ' + c.asked).join(', ')}.</div>`
+        : '';
       const overflow = out.overflow.length
         ? `<div class="q-sub" style="color:var(--amber);margin-top:6px;">${out.overflow.map(r => esc(PSEngine.roleName(CONFIG, r))).join(', ')} will not fit: the sheet has only five resource columns.</div>`
         : '';
@@ -920,7 +990,7 @@
           <div><div class="pv-total-label">Business</div><div class="pv-total-value">${out.business}</div></div>
           <div><div class="pv-total-label">After hours</div><div class="pv-total-value">${out.after}</div></div>
         </div>
-        <div class="q-sub" style="margin-top:10px;">${mapping}</div>${overflow}
+        <div class="q-sub" style="margin-top:10px;">${mapping}</div>${overflow}${capped}
         <div style="overflow-x:auto;">
           <table class="pv-table">
             <tr><th>Phase</th><th>Description</th>${header}<th class="num">Total</th></tr>
