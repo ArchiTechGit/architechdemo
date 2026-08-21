@@ -9,7 +9,11 @@ const path = require('path');
 const DIR = path.join(__dirname);
 const config = JSON.parse(fs.readFileSync(path.join(DIR, 'config.json'), 'utf8'));
 const indexHtml = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
-const adminHtml = fs.readFileSync(path.join(DIR, 'admin.html'), 'utf8');
+const ADMIN_SCRIPTS = ['admin-github.js', 'admin-render.js', 'admin-forms.js', 'admin-import.js', 'admin-preview.js'];
+const adminMarkup = fs.readFileSync(path.join(DIR, 'admin.html'), 'utf8');
+const adminFiles = ADMIN_SCRIPTS.map(f => ({ name: f, src: fs.readFileSync(path.join(DIR, f), 'utf8') }));
+// Most checks care about the admin as a whole, markup and behaviour together.
+const adminHtml = [adminMarkup].concat(adminFiles.map(f => f.src)).join('\n');
 const E = require(path.join(DIR, 'engine.js'));
 const uiCss = fs.readFileSync(path.join(DIR, 'ui.css'), 'utf8');
 
@@ -28,33 +32,39 @@ function scripts(html) { return [...html.matchAll(/<script>([\s\S]*?)<\/script>/
 
 // ── 1. Both pages parse, and their inline handlers all exist ────────────
 section('Pages compile');
-[['index.html', indexHtml], ['admin.html', adminHtml]].forEach(([name, html]) => {
+// The builder keeps one inline block; the admin is five files. Scraping
+// <script> tags out of the admin would now find nothing and pass vacuously.
+const compileTargets = [{ name: 'index.html', src: scripts(indexHtml).join(String.fromCharCode(10)) }]
+  .concat(adminFiles)
+  .concat([{ name: 'engine.js', src: fs.readFileSync(path.join(DIR, 'engine.js'), 'utf8') }]);
+compileTargets.forEach(({ name, src }) => {
   let ok = true;
-  scripts(html).forEach(src => {
-    try { new Function(src); } catch (e) { ok = false; console.log(`        ${name}: ${e.message}`); }
-  });
-  check(`${name} scripts compile`, ok, true);
+  try { new Function(src); } catch (e) { ok = false; console.log('        ' + name + ': ' + e.message); }
+  check(name + ' compiles', ok, true);
+  // Guards against an empty or unread file reporting success.
+  check(name + ' has something in it', src.length > 200, true);
+});
 
-  const defined = new Set([...html.matchAll(/function\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m => m[1]));
-  const called = [...html.matchAll(/on(?:click|change)="([A-Za-z_$][\w$]*)\(/g)].map(m => m[1]);
-  check(`${name} inline handlers all defined`, [...new Set(called)].filter(c => !defined.has(c)), []);
+// A handler named in markup has to exist in one of the scripts.
+[['index.html', indexHtml], ['admin', adminHtml]].forEach(([name, src]) => {
+  const defined = new Set([...src.matchAll(/function\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m => m[1]));
+  const called = [...src.matchAll(/on(?:click|change)="([A-Za-z_$][\w$]*)\(/g)].map(m => m[1]);
+  check(name + ' handlers all defined', [...new Set(called)].filter(c => !defined.has(c)), []);
 });
 
 // ── 1a. One engine, used by both pages ─────────────────────────────────
 section('Shared engine');
-['index.html', 'admin.html'].forEach(name => {
-  const html = name === 'index.html' ? indexHtml : adminHtml;
-  check(name + ' loads the shared engine', /<script src="\.\/engine\.js"><\/script>/.test(html), true);
+[['index.html', indexHtml], ['admin.html', adminMarkup]].forEach(([name, markup]) => {
+  check(name + ' loads the shared engine', /<script src="\.\/engine\.js"><\/script>/.test(markup), true);
 });
 // A page redefining these would be a second copy free to drift.
 const ENGINE_OWNED = ['condMet', 'resolve', 'buildLines', 'amountOf', 'assignSlots', 'applySlots',
   'blockText', 'estimate', 'esc', 'attr', 'round2', 'visibleOptions'];
-['index.html', 'admin.html'].forEach(name => {
-  const html = name === 'index.html' ? indexHtml : adminHtml;
-  const scriptBody = scripts(html).join('\n');
-  check(name + ' does not redefine engine internals',
-    ENGINE_OWNED.filter(fn => scriptBody.includes('function ' + fn + '(')), []);
-});
+[{ name: 'index.html', src: scripts(indexHtml).join(String.fromCharCode(10)) }]
+  .concat(adminFiles).forEach(({ name, src }) => {
+    check(name + ' does not redefine engine internals',
+      ENGINE_OWNED.filter(fn => src.includes('function ' + fn + '(')), []);
+  });
 check('the engine exports what the pages need',
   ENGINE_OWNED.filter(fn => typeof E[fn] !== 'function'), []);
 
@@ -80,7 +90,7 @@ if (versionMatch) {
 
 // ── 1c. A token is only remembered once it has been proved to work ─────
 section('Token persistence');
-const tryTokenSrc = (adminHtml.match(/async function tryToken\([\s\S]*?\n    \}/) || [''])[0];
+const tryTokenSrc = (adminHtml.match(/async function tryToken\([\s\S]*?\n\}/) || [''])[0];
 check('admin has a tryToken step', tryTokenSrc.length > 0, true);
 if (tryTokenSrc) {
   const fetchAt = tryTokenSrc.indexOf('await fetchConfigFromGitHub()');
@@ -98,9 +108,9 @@ section('New flow');
 {
   const grab = (re) => (adminHtml.match(re) || [null])[0];
   const src = [
-    grab(/function slugify\([\s\S]*?\n    \}/),
-    grab(/function uniqueId\([\s\S]*?\n    \}/),
-    grab(/function createFlow\(\)[\s\S]*?\n    \}/),
+    grab(/function slugify\([\s\S]*?\n\}/),
+    grab(/function uniqueId\([\s\S]*?\n\}/),
+    grab(/function createFlow\(\)[\s\S]*?\n\}/),
   ];
   check('admin has the pieces of the new-flow step', src.every(Boolean), true);
   if (src.every(Boolean)) {
@@ -211,7 +221,7 @@ section('Shared styling');
   // duplicated, which is how --faint came to be fixed twice.
   check('the tokens are defined once', (uiCss.match(/--faint:/g) || []).length, 1);
   check('and only in the shared sheet',
-    [indexHtml, adminHtml].filter(h => /--faint:/.test(h.split('<style>')[1] || '')).length, 0);
+    [indexHtml, adminMarkup].filter(h => /--faint:/.test(h.split('<style>')[1] || '')).length, 0);
 
   ['--bg', '--surface-1', '--surface-2', '--cyan', '--text', '--muted', '--faint', '--border', '--amber', '--font']
     .forEach(t => check('shared sheet defines ' + t, uiCss.includes(t + ':'), true));
@@ -255,6 +265,33 @@ section('Shared styling');
   });
   check('one checkbox row name survives', /checkbox-row/.test(indexHtml + adminHtml), false);
   check('one totals component survives', /pv-total/.test(indexHtml + adminHtml), false);
+}
+
+// ── 1j. The admin is split into files, each with one job ───────────────
+section('Admin structure');
+{
+  check('the markup carries no inline script', (adminMarkup.match(/<script>/g) || []).length, 0);
+  check('every script it names exists', ADMIN_SCRIPTS.filter(f => !adminMarkup.includes('src="./' + f + '"')), []);
+
+  // Load order matters: the engine first, then the helpers everything reads.
+  const order = [...adminMarkup.matchAll(/<script src="\.\/([\w-]+\.js)"><\/script>/g)].map(m => m[1]);
+  check('the engine loads first', order[0], 'engine.js');
+  check('the scripts load in a stated order', order.slice(1), ADMIN_SCRIPTS);
+
+  // No file should creep back towards being the whole page again.
+  const tooBig = adminFiles.filter(f => f.src.split(String.fromCharCode(10)).length > 900);
+  check('no admin script exceeds 900 lines', tooBig.map(f => f.name), []);
+
+  // A function should be defined in exactly one of them.
+  const seen = new Map();
+  const twice = [];
+  adminFiles.forEach(f => {
+    [...f.src.matchAll(/^function\s+([A-Za-z_$][\w$]*)\s*\(/gm)].forEach(m => {
+      if (seen.has(m[1])) twice.push(m[1] + ' in ' + seen.get(m[1]) + ' and ' + f.name);
+      else seen.set(m[1], f.name);
+    });
+  });
+  check('no function is defined in two files', twice, []);
 }
 
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
@@ -473,7 +510,7 @@ check('neither block writes a PSE-owned column',
     .filter(c => RETIRED_FIELDS.includes(c.from)), []);
 // ── 5b. Reordering questions keeps dependencies in front of dependants ──
 section('Question order');
-const brokenSrc = (adminHtml.match(/function firstBrokenDependency\([\s\S]*?\n    \}/) || [''])[0];
+const brokenSrc = (adminHtml.match(/function firstBrokenDependency\([\s\S]*?\n\}/) || [''])[0];
 check('admin can spot a broken dependency', brokenSrc.length > 0, true);
 if (brokenSrc) {
   const broken = new Function(brokenSrc + '; return firstBrokenDependency;')();
@@ -562,9 +599,9 @@ section('Import commit');
 {
   const grab = (re) => (adminHtml.match(re) || [null])[0];
   const src = [
-    grab(/function slugify\([\s\S]*?\n    \}/),
-    grab(/function uniqueId\([\s\S]*?\n    \}/),
-    grab(/function commitImport\(\)[\s\S]*?\n    \}/),
+    grab(/function slugify\([\s\S]*?\n\}/),
+    grab(/function uniqueId\([\s\S]*?\n\}/),
+    grab(/function commitImport\(\)[\s\S]*?\n\}/),
   ];
   check('admin has the commit step', src.every(Boolean), true);
   if (src.every(Boolean)) {
@@ -672,7 +709,7 @@ section('Editor stability');
   check('an open input form resolves by id', adminHtml.includes('function editingInputIndex'), true);
   check('an open task form resolves by id', adminHtml.includes('function editingTaskIndex'), true);
 
-  const resolver = (adminHtml.match(/function editingInputIndex\([\s\S]*?\n    \}/) || [''])[0];
+  const resolver = (adminHtml.match(/function editingInputIndex\([\s\S]*?\n\}/) || [''])[0];
   check('a deleted row closes the form instead of pointing elsewhere',
     /return at === -1 \? null : at/.test(resolver), true);
 
@@ -781,7 +818,7 @@ section('Interface copy');
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────
 section('Admin grouping');
-const adminSrc = scripts(adminHtml).find(s => s.includes('function sectionsForFlow'));
+const adminSrc = (adminFiles.find(f => f.src.includes('function sectionsForFlow')) || {}).src;
 if (!adminSrc) {
   failures++;
   console.log('FAIL  admin exposes its task grouping');
