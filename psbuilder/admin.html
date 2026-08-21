@@ -70,9 +70,9 @@
       min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0; }
     .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
-    .chip { display: inline-block; background: var(--cyan-dim); border: 1px solid var(--cyan-mid); color: var(--cyan);
-      font-size: 11.5px; font-family: 'SFMono-Regular', Consolas, monospace; padding: 4px 9px; border-radius: 20px;
-      cursor: pointer; margin: 0 6px 6px 0; }
+    .chip { display: inline-flex; align-items: center; background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
+      color: var(--cyan); font-size: 11.5px; font-family: 'SFMono-Regular', Consolas, monospace;
+      padding: 4px 10px; min-height: 24px; border-radius: 20px; cursor: pointer; margin: 0 6px 6px 0; }
     .chip:hover { background: var(--cyan-mid); }
     .chip.plain { background: transparent; border-style: dashed; color: var(--muted); }
     .chip.plain:hover { color: var(--cyan); border-color: var(--cyan-mid); background: transparent; }
@@ -265,7 +265,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.9.0';
+    const ADMIN_VERSION = '0.9.1';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -355,7 +355,22 @@
       }
     }
 
+    // The same rules check.js runs. Writing a config that fails them would
+    // break someone else's estimate rather than this session.
+    function blockingProblems() {
+      try { return PSEngine.validateConfig(CONFIG); }
+      catch (e) { return ['the config could not be checked: ' + e.message]; }
+    }
+
     async function doSave(statusEl) {
+      const problems = blockingProblems();
+      if (problems.length) {
+        const shown = problems.slice(0, 4).map(m => '\u2022 ' + m).join('\n');
+        const more = problems.length > 4 ? `\n...and ${problems.length - 4} more.` : '';
+        statusEl.textContent = `Not saved: ${problems.length} problem${problems.length === 1 ? '' : 's'} to fix first.`;
+        alert(`This would write a config the builder cannot use, so nothing was sent:\n\n${shown}${more}`);
+        return;
+      }
       const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_PATH}`, {
         method: 'PUT',
         headers: {
@@ -502,6 +517,8 @@
   <script>
     // ─── Render ───
     // EDITING says which inline form is open so a full re-render restores it.
+    // It holds ids rather than positions: a list can be reordered or added to
+    // while a form is open, and an index would then point at a different row.
     //   { kind:'flow' } { kind:'new-flow' } { kind:'input', idx }
     //   { kind:'task', idx } { kind:'task-new', section }
     // A condition may only look at an input asked earlier, so a move that would
@@ -642,6 +659,21 @@
     const EXPANDED = new Set();
 
     function closeForm() { EDITING = null; renderAdmin(); }
+
+    // -1 means a new row; null means the row it pointed at is gone.
+    function editingInputIndex() {
+      if (!EDITING || EDITING.kind !== 'input') return null;
+      if (!EDITING.id) return -1;
+      const at = F().inputs.findIndex(i => i.id === EDITING.id);
+      return at === -1 ? null : at;
+    }
+
+    function editingTaskIndex() {
+      if (!EDITING || EDITING.kind !== 'task') return null;
+      if (!EDITING.id) return -1;
+      const at = F().tasks.findIndex(t => t.id === EDITING.id);
+      return at === -1 ? null : at;
+    }
     function toggleExpand(key) {
       if (EXPANDED.has(key)) EXPANDED.delete(key); else EXPANDED.add(key);
       renderAdmin();
@@ -697,7 +729,12 @@
       renderInputs(inputsRoot);
       // after every render, so newly drawn forms are labelled too
       setTimeout(() => linkLabels(), 0);
-      if (EDITING && EDITING.kind === 'input') renderInputForm(inputSlot, EDITING.idx);
+      if (EDITING && EDITING.kind === 'input') {
+        const at = editingInputIndex();
+        // The question being edited was deleted from under the form.
+        if (at === null) EDITING = null;
+        else renderInputForm(inputSlot, at);
+      }
       renderTaskSections(tasksRoot);
     }
 
@@ -723,7 +760,7 @@
         const edit = document.createElement('button');
         edit.className = 'btn-ghost';
         edit.textContent = 'Edit';
-        edit.onclick = () => { EDITING = { kind: 'input', idx }; renderAdmin(); };
+        edit.onclick = () => { EDITING = { kind: 'input', id: inp.id }; renderAdmin(); };
         const del = document.createElement('button');
         del.className = 'btn-ghost';
         del.textContent = 'Delete';
@@ -735,7 +772,7 @@
       const add = document.createElement('button');
       add.className = 'btn-secondary';
       add.textContent = '+ Add variable or question';
-      add.onclick = () => { EDITING = { kind: 'input', idx: -1 }; renderAdmin(); };
+      add.onclick = () => { EDITING = { kind: 'input', id: null }; renderAdmin(); };
       root.appendChild(add);
     }
 
@@ -746,7 +783,7 @@
         const matches = tasksIn(section);
         const editingInside = EDITING && (
           (EDITING.kind === 'task-new' && EDITING.section === section.id) ||
-          (EDITING.kind === 'task' && matches.some(m => m.idx === EDITING.idx))
+          (EDITING.kind === 'task' && matches.some(m => m.t.id === EDITING.id))
         );
         const open = EXPANDED.has(key) || editingInside;
         const hours = round2(matches.reduce((n, m) => n + hoursAtDefaults(m.t), 0));
@@ -772,10 +809,10 @@
           body.className = 'block-body';
           matches.forEach(({ t, idx }) => {
             body.appendChild(taskEl(t, idx));
-            if (EDITING && EDITING.kind === 'task' && EDITING.idx === idx) {
+            if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
               const slot = document.createElement('div');
               body.appendChild(slot);
-              renderTaskForm(slot, idx, section);
+              renderTaskForm(slot, editingTaskIndex(), section);
             }
           });
           if (!matches.length) {
@@ -819,10 +856,10 @@
         body.style.paddingTop = '16px';
         orphans.forEach(({ t, idx }) => {
           body.appendChild(taskEl(t, idx));
-          if (EDITING && EDITING.kind === 'task' && EDITING.idx === idx) {
+          if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
             const slot = document.createElement('div');
             body.appendChild(slot);
-            renderTaskForm(slot, idx, { id: 'all', name: 'All subflows', shared: true });
+            renderTaskForm(slot, editingTaskIndex(), { id: 'all', name: 'All subflows', shared: true });
           }
         });
         box.appendChild(body);
@@ -857,7 +894,7 @@
       const edit = document.createElement("button");
       edit.className = "btn-ghost";
       edit.textContent = "Edit";
-      edit.onclick = () => { EDITING = { kind: "task", idx }; renderAdmin(); };
+      edit.onclick = () => { EDITING = { kind: "task", id: t.id }; renderAdmin(); };
       const del = document.createElement("button");
       del.className = "btn-ghost";
       del.textContent = "Delete";
@@ -1878,8 +1915,6 @@
     // ─── Flow settings and new flows ───
     function openFlowSettings() { EDITING = { kind: 'flow' }; renderAdmin(); }
     function openNewFlow() { EDITING = { kind: 'new-flow' }; renderAdmin(); }
-
-    function splitList(str) { return str.split(',').map(s => s.trim()).filter(Boolean); }
 
     function renderNewFlowForm(slot) {
       slot.innerHTML = `

@@ -232,171 +232,49 @@ check('no field appears in both blocks',
   (config.taskColumns || []).map(c => c.from).filter(f => (config.resourceColumns || []).some(r => r.from === f)), []);
 // ── 3. config.json is internally consistent ─────────────────────────────
 section('Config integrity');
-const COND_KEYS = ['input', 'is', 'anySelected', 'isOn', 'moreThanZero'];
-const INPUT_TYPES = ['number', 'yesno', 'checklist', 'choice'];
-// The PSE derives trips, stays and documents, and client or subcontractor
-// effort is typed into the sheet, so a task must not carry any of them.
-const RETIRED_FIELDS = ['trips', 'stays', 'documents', 'clientEffort', 'subcontractorEffort'];
-const COLUMN_FIELDS = ['phase', 'skill', 'taskType', 'description'];
-for (let n = 1; n <= 5; n++) COLUMN_FIELDS.push(`r${n}Location`, `r${n}Business`, `r${n}After`);
-const roleIds = (config.roles || []).map(r => r.id);
-const problems = [];
-const verticalIds = config.verticals.map(v => v.id);
-check('vertical ids are unique', verticalIds.length, new Set(verticalIds).size);
+// The rules live in engine.js so the admin can run them before it writes.
+check('the shipped config has no problems', E.validateConfig(config), []);
 
-config.flows.forEach(f => {
-  const at = (what) => `flow ${f.id}: ${what}`;
-  ['id', 'name', 'vertical', 'subflows', 'inputs', 'tasks'].forEach(k => {
-    if (f[k] === undefined) problems.push(at(`missing "${k}"`));
+// Each rule has to actually bite, or a green run means nothing.
+{
+  const faults = [
+    ['an unknown phase', c => { c.flows[0].tasks[0].phase = 'Deployment'; }, 'does not offer'],
+    ['an unknown skill', c => { c.flows[0].tasks[0].skill = 'Telepathy'; }, 'does not offer'],
+    ['an unknown task type', c => { c.flows[0].tasks[0].taskType = 'Guesswork'; }, 'does not offer'],
+    ['a variable that does not exist', c => { c.flows[0].tasks[0].description = 'Do {mystery} things'; }, 'unknown variable'],
+    ['{#} without repeating', c => { c.flows[0].tasks[0].description = 'Site {#}'; }, 'does not repeat'],
+    ['an unknown role', c => { c.flows[0].tasks[0].effort = [{ role: 'ZZZ', business: { base: 1 } }]; }, 'unknown role'],
+    ['an unknown location', c => { c.flows[0].tasks[0].effort = [{ role: 'SE', location: 'Moon', business: { base: 1 } }]; }, 'does not offer'],
+    ['effort with no hours', c => { c.flows[0].tasks[0].effort = [{ role: 'SE', location: 'Office' }]; }, 'no hours'],
+    ['two effort lines on one role', c => { c.flows[0].tasks[0].effort = [
+      { role: 'SE', business: { base: 1 } }, { role: 'SE', business: { base: 2 } }]; }, 'same role'],
+    ['a retired field', c => { c.flows[0].tasks[0].trips = 2; }, 'works out itself'],
+    ['a per-flow phase list', c => { c.flows[0].phases = ['Design']; }, 'PSE fixes'],
+    ['a condition on a later input', c => { c.flows[0].inputs[0].showWhen = { input: 'reporting', anySelected: true }; }, 'not asked earlier'],
+    ['a condition on a missing input', c => { c.flows[0].tasks[0].showWhen = { input: 'nope', isOn: true }; }, 'missing input'],
+    ['an unknown subflow', c => { c.flows[0].tasks[0].subflows = ['nope']; }, 'unknown subflow'],
+    ['a task in no subflow', c => { c.flows[0].tasks[0].subflows = []; }, 'no subflow at all'],
+    ['a duplicate task id', c => { c.flows[0].tasks.push(Object.assign({}, c.flows[0].tasks[0])); }, 'duplicate task id'],
+    ['a flow in an unknown vertical', c => { c.flows[0].vertical = 'atlantis'; }, 'unknown vertical'],
+    ['a flow with no subflows', c => { c.flows[0].subflows = []; }, 'no subflows'],
+    ['double counting a repeat', c => { const t = c.flows[0].tasks[0];
+      t.repeatPer = 'workshops';
+      t.effort = [{ role: 'SE', location: 'Office', business: { base: 1, per: [{ input: 'workshops', each: 2 }] } }]; }, 'double counting'],
+    ['more roles than the sheet has columns', c => {
+      ['TA', 'SE', 'SSE', 'SCE', 'SA', 'AC'].forEach((role, n) => {
+        c.flows[0].tasks[n].effort = [{ role, location: 'Office', business: { base: 1 } }];
+      }); }, 'resource columns'],
+  ];
+
+  const missed = [];
+  faults.forEach(([label, breakIt, expect]) => {
+    const draft = JSON.parse(JSON.stringify(config));
+    breakIt(draft);
+    const found = E.validateConfig(draft);
+    if (!found.some(m => m.includes(expect))) missed.push(label);
   });
-  if (!verticalIds.includes(f.vertical)) problems.push(at(`sits in unknown vertical "${f.vertical}"`));
-  if (!(f.subflows || []).length) problems.push(at('has no subflows'));
-
-  const subIds = (f.subflows || []).map(s => s.id);
-  if (subIds.length !== new Set(subIds).size) problems.push(at('has duplicate subflow ids'));
-
-  const inputIdx = new Map((f.inputs || []).map((i, n) => [i.id, n]));
-  const numberInputs = new Set((f.inputs || []).filter(i => i.type === 'number').map(i => i.id));
-
-  function checkSubflows(member, label) {
-    if (member === undefined || member === 'all') return;
-    if (!Array.isArray(member)) { problems.push(at(`${label} has a subflows value that is neither "all" nor a list`)); return; }
-    if (!member.length) problems.push(at(`${label} is in no subflow at all`));
-    member.forEach(id => { if (!subIds.includes(id)) problems.push(at(`${label} names unknown subflow "${id}"`)); });
-  }
-
-  // `maxIndex` enforces that inputs only depend on earlier inputs, because
-  // index.html resolves answers in a single forward pass.
-  function checkCond(cond, label, maxIndex) {
-    if (!cond) return;
-    Object.keys(cond).forEach(k => {
-      if (!COND_KEYS.includes(k)) problems.push(at(`${label} uses unknown condition key "${k}"`));
-    });
-    if (!cond.input) { problems.push(at(`${label} has a condition with no input`)); return; }
-    if (!inputIdx.has(cond.input)) { problems.push(at(`${label} points at missing input "${cond.input}"`)); return; }
-    const target = f.inputs[inputIdx.get(cond.input)];
-    if (maxIndex !== undefined && inputIdx.get(cond.input) >= maxIndex) {
-      problems.push(at(`${label} depends on "${cond.input}", which is not asked earlier`));
-    }
-    if (cond.is !== undefined && !(target.options || []).some(o => o.id === cond.is)) {
-      problems.push(at(`${label} points at missing option "${cond.is}" on "${cond.input}"`));
-    }
-    if (cond.is === undefined && !cond.anySelected && !cond.isOn && !cond.moreThanZero) {
-      problems.push(at(`${label} names an input but no test`));
-    }
-    if ((cond.is !== undefined || cond.anySelected) && !['choice', 'checklist'].includes(target.type)) {
-      problems.push(at(`${label} tests options against a ${target.type}`));
-    }
-    if (cond.isOn && target.type !== 'yesno') problems.push(at(`${label} tests on/off against a ${target.type}`));
-    if (cond.moreThanZero && target.type !== 'number') problems.push(at(`${label} tests a count against a ${target.type}`));
-  }
-
-  // An amount is a plain number, or a base plus a per-variable rate.
-  function checkAmount(a, label, repeatPer) {
-    if (a == null) return;
-    if (typeof a === 'number') return;
-    if (typeof a !== 'object') { problems.push(at(`${label} is neither a number nor a base/rate pair`)); return; }
-    if (a.base !== undefined && typeof a.base !== 'number') problems.push(at(`${label} has a non-numeric base`));
-    (a.per || []).forEach(p => {
-      if (!numberInputs.has(p.input)) problems.push(at(`${label} scales with "${p.input}", which is not a variable`));
-      if (typeof p.each !== 'number') problems.push(at(`${label} has a non-numeric rate for "${p.input}"`));
-      // A repeating task already emits one line per unit; scaling each line by
-      // that same unit would count it twice over.
-      if (repeatPer && p.input === repeatPer) {
-        problems.push(at(`${label} repeats per "${p.input}" and also scales with it, double counting`));
-      }
-    });
-  }
-
-  const tokens = new Map();
-  (f.inputs || []).forEach(i => {
-    const t = i.token || i.id;
-    if (tokens.has(t)) problems.push(at(`token "${t}" is claimed by both "${tokens.get(t)}" and "${i.id}"`));
-    tokens.set(t, i.id);
-  });
-
-  const seenI = new Set();
-  (f.inputs || []).forEach((i, n) => {
-    if (seenI.has(i.id)) problems.push(at(`duplicate input id "${i.id}"`));
-    seenI.add(i.id);
-    if (!INPUT_TYPES.includes(i.type)) problems.push(at(`input "${i.id}" has unknown type "${i.type}"`));
-    if (!i.label) problems.push(at(`input "${i.id}" has no label`));
-    checkCond(i.showWhen, `input "${i.id}"`, n);
-    checkSubflows(i.subflows, `input "${i.id}"`);
-    if (['choice', 'checklist'].includes(i.type)) {
-      if (!(i.options || []).length) problems.push(at(`input "${i.id}" is a ${i.type} with no options`));
-      const seenO = new Set();
-      (i.options || []).forEach(o => {
-        if (seenO.has(o.id)) problems.push(at(`input "${i.id}" has duplicate option id "${o.id}"`));
-        seenO.add(o.id);
-        if (!o.label) problems.push(at(`input "${i.id}" has an option with no label`));
-        checkCond(o.showWhen, `option "${o.id}" on "${i.id}"`, n);
-      });
-    }
-    if (i.type === 'number' && i.min != null && i.max != null && i.min > i.max) {
-      problems.push(at(`input "${i.id}" has min above max`));
-    }
-  });
-
-  const seenT = new Set();
-  (f.tasks || []).forEach(t => {
-    if (seenT.has(t.id)) problems.push(at(`duplicate task id "${t.id}"`));
-    seenT.add(t.id);
-    if (!t.description) problems.push(at(`task "${t.id}" has no description`));
-    if (!config.phases.includes(t.phase)) problems.push(at(`task "${t.id}" uses phase "${t.phase}", which the PSE does not offer`));
-
-    // The three PSE dropdowns.
-    if (!t.skill) problems.push(at(`task "${t.id}" has no skill`));
-    else if (!config.skills.includes(t.skill)) problems.push(at(`task "${t.id}" uses skill "${t.skill}", which the PSE does not offer`));
-    if (!t.taskType) problems.push(at(`task "${t.id}" has no task type`));
-    else if (!config.taskTypes.includes(t.taskType)) problems.push(at(`task "${t.id}" uses task type "${t.taskType}", which the PSE does not offer`));
-
-    checkSubflows(t.subflows, `task "${t.id}"`);
-    checkCond(t.showWhen, `task "${t.id}"`);
-    if (t.repeatPer && !numberInputs.has(t.repeatPer)) {
-      problems.push(at(`task "${t.id}" repeats per "${t.repeatPer}", which is not a variable`));
-    }
-
-    RETIRED_FIELDS.forEach(k => {
-      if (t[k] !== undefined) problems.push(at(`task "${t.id}" still carries "${k}", which the PSE works out itself`));
-    });
-    (t.effort || []).forEach((e, n) => {
-      const label = `task "${t.id}" effort ${n + 1}`;
-      if (!roleIds.includes(e.role)) problems.push(at(`${label} names unknown role "${e.role}"`));
-      if (e.location && !config.locations.includes(e.location)) {
-        problems.push(at(`${label} uses location "${e.location}", which the PSE does not offer`));
-      }
-      if (!e.business && !e.after) problems.push(at(`${label} has no hours against it`));
-      checkAmount(e.business, `${label} business hours`, t.repeatPer);
-      checkAmount(e.after, `${label} after hours`, t.repeatPer);
-    });
-    const usedRoles = (t.effort || []).map(e => e.role);
-    if (usedRoles.length !== new Set(usedRoles).size) {
-      problems.push(at(`task "${t.id}" has two effort lines for the same role`));
-    }
-    if (t.defaultLocation && !config.locations.includes(t.defaultLocation)) {
-      problems.push(at(`task "${t.id}" defaults to location "${t.defaultLocation}", which the PSE does not offer`));
-    }
-
-    // Every {brace} must resolve, and {#} only means something when repeating.
-    [...String(t.description).matchAll(/\{([^{}]+)\}/g)].forEach(m => {
-      const key = m[1].trim();
-      if (key === '#') {
-        if (!t.repeatPer) problems.push(at(`task "${t.id}" uses {#} but does not repeat`));
-        return;
-      }
-      if (!tokens.has(key)) problems.push(at(`task "${t.id}" references unknown variable "{${key}}"`));
-    });
-  });
-
-  // The sheet only has five resource columns.
-  const rolesUsed = new Set();
-  (f.tasks || []).forEach(t => (t.effort || []).forEach(e => rolesUsed.add(e.role)));
-  if (rolesUsed.size > 5) {
-    problems.push(at(`uses ${rolesUsed.size} roles, but the PSE only has five resource columns`));
-  }
-});
-check('no config problems', problems, []);
+  check('every rule catches its fault', missed, []);
+}
 
 // ── 4. The engine ──────────────────────────────────────────────────────
 section('Engine');
@@ -528,6 +406,7 @@ check('a resource row lands where the sheet expects it', cell(config.resourceCol
    '', '', '']);
 
 // Nothing the PSE owns may leak into either block.
+const RETIRED_FIELDS = ['trips', 'stays', 'documents', 'clientEffort', 'subcontractorEffort'];
 // The blocks land on rows that already exist, so a header row would push every
 // task down one.
 check('the task block has one row per task, no header',
@@ -730,6 +609,92 @@ section('Import hours');
   check('an unmapped slot yields nothing', E.effortFromSlots(res.drafts[0].effort, {}), []);
   check('a mapped slot yields effort', E.effortFromSlots(res.drafts[0].effort, { 1: 'SA' }),
     [{ role: 'SA', location: 'Client Site', business: { base: 10 } }]);
+}
+
+// ── 5f. An open form follows its row, rather than its position ─────────
+section('Editor stability');
+{
+  // The bug: EDITING held an index, reordering rewrote the array without
+  // clearing it, and the form then saved over a different question.
+  check('EDITING no longer stores a position', /EDITING\.idx/.test(adminHtml), false);
+  check('an open input form resolves by id', adminHtml.includes('function editingInputIndex'), true);
+  check('an open task form resolves by id', adminHtml.includes('function editingTaskIndex'), true);
+
+  const resolver = (adminHtml.match(/function editingInputIndex\([\s\S]*?\n    \}/) || [''])[0];
+  check('a deleted row closes the form instead of pointing elsewhere',
+    /return at === -1 \? null : at/.test(resolver), true);
+
+  // Run the resolver against a reordered list.
+  const fn = new Function('F', 'EDITING', resolver + '; return editingInputIndex;');
+  const inputs = ['scope', 'workshops', 'staging-channels'].map(id => ({ id }));
+  const editing = { kind: 'input', id: 'staging-channels' };
+  check('before a move it points at the right row',
+    fn(() => ({ inputs }), editing)(), 2);
+  // Drag the first question to the end.
+  const moved = [inputs[1], inputs[2], inputs[0]];
+  check('after a move it still points at the same row',
+    fn(() => ({ inputs: moved }), editing)(), 1);
+  check('and the row it names is the one it named before',
+    moved[fn(() => ({ inputs: moved }), editing)()].id, 'staging-changes'.replace('changes', 'channels'));
+  check('a deleted row yields null, not a wrong index',
+    fn(() => ({ inputs: [inputs[0]] }), editing)(), null);
+}
+
+// ── 5g. The admin refuses to write a config it cannot use ──────────────
+section('Save validation');
+{
+  check('the save path runs the shared rules', adminHtml.includes('PSEngine.validateConfig(CONFIG)'), true);
+  // The guard has to come before the request, not merely exist.
+  const doSaveAt = adminHtml.indexOf('async function doSave');
+  const doSaveSrc = adminHtml.slice(doSaveAt, doSaveAt + 1200);
+  check('the guard returns before any request is made',
+    doSaveSrc.indexOf('return;') !== -1 && doSaveSrc.indexOf('return;') < doSaveSrc.indexOf('await fetch'), true);
+  check('and says nothing was sent', adminHtml.includes('nothing was sent'), true);
+
+  // The rules must reject exactly what the builder cannot render.
+  const draft = JSON.parse(JSON.stringify(config));
+  draft.flows[0].tasks[0].description = 'Deploy {mystery} units';
+  check('a config with a dangling variable is rejected',
+    E.validateConfig(draft).some(m => m.includes('unknown variable')), true);
+}
+
+// ── 5h. Pasted braces are flagged, not passed through ──────────────────
+section('Import placeholders');
+{
+  const braced = E.readPaste('Design\tCollaboration\tArchiTech Activity\tDeploy {number of devices} units', config, []);
+  check('a brace with nothing behind it is flagged',
+    braced.drafts[0].issues.map(i => i.kind), ['placeholder']);
+  check('and the message names the token',
+    /number of devices/.test(braced.drafts[0].issues[0].note), true);
+
+  const hashed = E.readPaste('Design\tCollaboration\tArchiTech Activity\tSite {#} of many', config, []);
+  check('a stray {#} is flagged too', hashed.drafts[0].issues.map(i => i.kind), ['placeholder']);
+
+  const clean = E.readPaste('Design\tCollaboration\tArchiTech Activity\tRack the firewall', config, []);
+  check('ordinary text is not flagged', clean.drafts[0].issues, []);
+
+  // A token that does exist somewhere is fair game, not a fault.
+  const known = config.flows.flatMap(f => f.inputs).find(i => i.type === 'number');
+  if (known) {
+    const withKnown = E.readPaste('Design\tCollaboration\tArchiTech Activity\tRun {' + (known.token || known.id) + '} sessions', config, []);
+    check('a token that exists is left alone', withKnown.drafts[0].issues, []);
+  }
+}
+
+// ── 5i. An empty result explains itself ────────────────────────────────
+section('Empty result');
+{
+  check('the builder distinguishes no tasks from no hours',
+    indexHtml.includes('has no tasks for'), true);
+  check('and points at where to fix it', indexHtml.includes('admin page'), true);
+  check('and does not blame effort when there are no tasks',
+    /!out\.lines\.length/.test(indexHtml), true);
+
+  const bare = config.flows.find(f => !f.tasks.length);
+  if (bare) {
+    const out = E.estimate(config, bare, bare.subflows[0].id, {});
+    check('an empty flow really does produce nothing', out.lines.length, 0);
+  }
 }
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────

@@ -22,6 +22,7 @@
       --muted:     #8FA3BA;
       --faint:     #7C93AD;
       --border:    rgba(255,255,255,0.07);
+      --amber:     #F0A020;
       --font:      'Roboto', sans-serif;
     }
 
@@ -475,15 +476,22 @@
       document.getElementById("sum-split").textContent = out.business + " / " + out.after;
 
       // The sheet fixes one role per resource column, so say what to set.
-      const mapping = out.slots.length
-        ? "Set the resource columns on row 41 to: " +
-          out.slots.map((r, i) => "R" + (i + 1) + " = " + E.roleName(CONFIG, r)).join(", ") + "."
-        : "No effort has been costed against these tasks, so the resource block is empty.";
+      // Nothing to paste is a different situation from nothing costed, and the
+      // difference is what the reader needs to act on.
+      const hint = document.getElementById("slot-hint");
+      hint.style.color = out.lines.length ? "" : "var(--amber)";
+      const mapping = !out.lines.length
+        ? "This flow has no tasks for " + (flow.subflows.find(s => s.id === subflow) || {}).name +
+          " yet, so there is nothing to paste. Add tasks in the admin page first."
+        : out.slots.length
+          ? "Set the resource columns on row 41 to: " +
+            out.slots.map((r, i) => "R" + (i + 1) + " = " + E.roleName(CONFIG, r)).join(", ") + "."
+          : "These tasks have no hours costed against them yet, so the resource block is empty."
       const warn = out.overflow.length
         ? " " + out.overflow.map(r => E.roleName(CONFIG, r)).join(", ") +
           " could not fit: the sheet only has five resource columns, and their hours are not in this paste."
         : "";
-      document.getElementById("slot-hint").textContent = mapping + warn;
+      hint.textContent = mapping + warn;
 
       document.getElementById("hint-task").textContent =
         CONFIG.taskColumns.map(c => c.header).join(" \u00b7 ") +
