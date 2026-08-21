@@ -949,36 +949,6 @@
           "defaultLocation": "Client Site"
         }
       ]
-    },
-    {
-      "id": "firewall-installation",
-      "name": "Firewall Installation",
-      "vertical": "secure-networking",
-      "note": "",
-      "enabled": true,
-      "subflows": [
-        {
-          "id": "new-firewall",
-          "name": "New Firewall"
-        },
-        {
-          "id": "modify-firewall",
-          "name": "Modify Firewall"
-        },
-        {
-          "id": "remove-firewall",
-          "name": "Remove Firewall"
-        }
-      ],
-      "inputs": [
-        {
-          "id": "is-it-a-new-installation",
-          "type": "yesno",
-          "label": "Is it a new installation?",
-          "default": true
-        }
-      ],
-      "tasks": []
     }
   ],
   "roles": [
