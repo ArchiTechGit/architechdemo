@@ -46,7 +46,24 @@
   --phase-4:   #1980BD;
   --phase-5:   #7F8FA9;
 
-  --font:      'Roboto', sans-serif;
+  /* Prose. Arial is the fallback only, never specified as primary. */
+  --font:      'Roboto', Arial, sans-serif;
+  /* Data. Hours, role codes, resource slots, and the two blocks you paste
+     into the sheet. The brand forbids Roboto for technical strings, and a
+     column of figures wants tabular numerals anyway. */
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* Everything sat between 10px and 16px, so nothing could be a headline and
+     the eye had nowhere to land first.
+     Five steps, and the gaps are the point: 1.4x, 2.1x, 1.2x, 1.2x. The
+     first pass put the title and the total 1.14x apart, which is the same
+     flatness rebuilt at the top of the page. The total wins -- producing it
+     is what the tool is for; the title is only wayfinding. */
+  --fs-display: clamp(34px, 6vw, 48px);   /* the number the tool exists for */
+  --fs-hero:    clamp(26px, 4vw, 34px);   /* the page title */
+  --fs-body:    16px;                     /* prose, and the name of a thing */
+  --fs-ui:      13px;                     /* controls and dense rows */
+  --fs-micro:   11px;                     /* tracked caps, meta, counts */
 
   --page-width: 900px;
 
@@ -87,26 +104,34 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
 .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
 .header-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
-  text-transform: uppercase; color: var(--cyan);
+  font-family: var(--font-mono); font-size: var(--fs-micro); font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan);
 }
 .header a {
-  color: var(--muted); font-size: 11px; text-decoration: none;
+  color: var(--muted); font-size: var(--fs-micro); text-decoration: none;
   border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px;
 }
 .header a:hover { color: var(--text); }
 
 h1.page-title, .page-title {
-  font-size: clamp(22px, 4vw, 30px); font-weight: 700;
-  margin-bottom: 10px; letter-spacing: -0.01em;
+  font-size: var(--fs-hero); font-weight: 900;
+  margin-bottom: 10px; letter-spacing: -0.02em; line-height: 1.1;
 }
 .page-desc {
-  font-size: 15px; color: var(--muted); line-height: 1.75;
+  font-size: var(--fs-body); color: var(--muted); line-height: 1.7;
   margin-bottom: 26px; max-width: 680px;
 }
 .section-label {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+  position: relative; padding-left: 14px;
+}
+/* Brand section-header treatment. The bar anchors the heading to the block
+   under it, which the tracking alone was not doing. */
+.section-label::before {
+  content: ''; position: absolute; left: 0; top: 1px; bottom: 1px; width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--cyan), rgba(5,195,221,0.35));
 }
 
 .footer {
@@ -115,7 +140,7 @@ h1.page-title, .page-title {
   flex-wrap: wrap; gap: 14px;
 }
 .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
-.footer-note { font-size: 11px; color: var(--muted); line-height: 1.65; max-width: 560px; }
+.footer-note { font-size: var(--fs-micro); color: var(--muted); line-height: 1.65; max-width: 560px; }
 .footer-note a { color: var(--cyan); text-decoration: none; }
 
 /* ── notice ────────────────────────────────────────────────────────────── */
@@ -125,12 +150,12 @@ h1.page-title, .page-title {
 .notice {
   border-left: 3px solid var(--danger); background: rgba(198,40,40,0.07);
   border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0;
-  font-size: 12.5px; line-height: 1.6; color: var(--text);
+  font-size: var(--fs-ui); line-height: 1.6; color: var(--text);
 }
 /* The same signal inside a table cell, where a block will not fit. */
 .notice--inline {
   border-left: 2px solid var(--danger); background: none; border-radius: 0;
-  padding: 2px 0 2px 8px; margin: 6px 0; font-size: 11.5px; line-height: 1.5;
+  padding: 2px 0 2px 8px; margin: 6px 0; font-size: var(--fs-micro); line-height: 1.5;
 }
 /* It landed. Green appears here and nowhere else. */
 .notice--ok { border-left-color: var(--success); background: rgba(0,169,145,0.07); }
@@ -140,14 +165,14 @@ h1.page-title, .page-title {
   background: rgba(255,255,255,0.025); border: 1px solid var(--border);
   border-radius: 12px; padding: 18px 20px; margin-bottom: 12px;
 }
-.q-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-.q-sub { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.q-label { font-size: var(--fs-body); font-weight: 700; margin-bottom: 5px; letter-spacing: -0.01em; }
+.q-sub { font-size: var(--fs-ui); color: var(--muted); line-height: 1.65; }
 /* Helper text that carries the gap under it, rather than the next thing above. */
 .q-sub--spaced { margin-bottom: 14px; }
 
 /* ── buttons ────────────────────────────────────────────────────────────── */
 .btn-primary {
-  background: var(--cyan); color: var(--bg); font-size: 14px; font-weight: 700;
+  background: var(--cyan); color: var(--bg); font-size: var(--fs-body); font-weight: 700;
   border: none; padding: 12px 28px; border-radius: 8px; cursor: pointer;
   font-family: var(--font); margin-top: 10px;
   transition: opacity var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
@@ -157,7 +182,7 @@ h1.page-title, .page-title {
 .btn-primary:disabled { opacity: 0.45; cursor: default; }
 
 .btn-secondary {
-  background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600;
+  background: var(--surface-2); color: var(--text); font-size: var(--fs-ui); font-weight: 700;
   border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
   font-family: var(--font);
   transition: opacity var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
@@ -168,18 +193,18 @@ h1.page-title, .page-title {
 /* Compact by default: most of these sit inside dense rows of controls. */
 .btn-ghost {
   background: transparent; border: 1px solid var(--border); color: var(--muted);
-  font-size: 12.5px; padding: 6px 12px; border-radius: 7px; cursor: pointer;
+  font-size: var(--fs-ui); padding: 6px 12px; border-radius: 7px; cursor: pointer;
   font-family: var(--font); margin-left: 6px;
   transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
 }
 .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
 .btn-ghost:active { transform: translateY(1px); }
 /* For a button standing on its own under a block of content. */
-.btn-ghost--roomy { font-size: 13px; padding: 12px 22px; border-radius: 8px; margin-top: 10px; margin-left: 10px; }
+.btn-ghost--roomy { font-size: var(--fs-ui); padding: 12px 22px; border-radius: 8px; margin-top: 10px; margin-left: 10px; }
 
 .btn-add {
   background: transparent; border: 1px dashed var(--border); color: var(--muted);
-  font-size: 12.5px; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  font-size: var(--fs-ui); padding: 8px 14px; border-radius: 8px; cursor: pointer;
   font-family: var(--font); width: 100%; text-align: left;
   transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
 }
@@ -187,7 +212,7 @@ h1.page-title, .page-title {
 .btn-add:active { transform: translateY(1px); }
 
 .btn-x {
-  background: transparent; border: none; color: var(--muted); font-size: 16px;
+  background: transparent; border: none; color: var(--muted); font-size: 17px; line-height: 1;
   cursor: pointer; min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0;
   transition: color var(--t-quick) var(--ease), background var(--t-quick) var(--ease);
 }
@@ -197,7 +222,7 @@ h1.page-title, .page-title {
 /* ── form controls ──────────────────────────────────────────────────────── */
 input[type="password"], input[type="text"], input[type="number"], select, textarea {
   width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13.5px;
+  background: var(--bg); color: var(--text); font-family: var(--font); font-size: var(--fs-ui);
 }
 textarea { resize: vertical; min-height: 48px; }
 
@@ -206,14 +231,14 @@ textarea { resize: vertical; min-height: 48px; }
 .check-row { display: flex; align-items: center; gap: 8px; cursor: pointer;
   transition: color var(--t-quick) var(--ease); }
 .check-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; flex-shrink: 0; }
-.check-row span { font-size: 13px; color: var(--text); }
+.check-row span { font-size: var(--fs-ui); color: var(--text); }
 .check-row:hover span { color: var(--cyan); }
 
 /* ── chip ───────────────────────────────────────────────────────────────── */
 .chip {
   display: inline-flex; align-items: center; background: var(--cyan-dim);
-  border: 1px solid var(--cyan-mid); color: var(--cyan); font-size: 11.5px;
-  font-family: 'SFMono-Regular', Consolas, monospace; padding: 4px 10px;
+  border: 1px solid var(--cyan-mid); color: var(--cyan); font-size: var(--fs-micro);
+  font-family: var(--font-mono); padding: 4px 10px;
   min-height: 24px; border-radius: 20px; cursor: pointer; margin: 0 6px 6px 0;
   transition: background var(--t-quick) var(--ease);
 }
@@ -232,15 +257,21 @@ textarea { resize: vertical; min-height: 48px; }
 /* One label-and-number pair. min-width:0 lets it shrink instead of pushing the row wide. */
 .stat { min-width: 0; }
 .stat-label {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  font-size: var(--fs-micro); font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
 }
-.stat-value { font-size: 28px; font-weight: 700; color: var(--cyan); line-height: 1; }
+/* The one loud thing in the tool. Tabular figures so the numbers in a row line
+   up on their digits rather than drifting. */
+.stat-value {
+  font-family: var(--font-mono); font-size: var(--fs-display); font-weight: 700;
+  color: var(--cyan); line-height: 1; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
 
 /* Inside a panel rather than at the top of a page. */
 .stat-row--compact { gap: 26px; padding: 14px 18px; margin-bottom: 0; margin-top: 14px; }
-.stat-row--compact .stat-label { font-size: 10px; margin-bottom: 2px; }
-.stat-row--compact .stat-value { font-size: 20px; line-height: 1.2; }
+.stat-row--compact .stat-label { font-size: var(--fs-micro); margin-bottom: 2px; }
+.stat-row--compact .stat-value { font-size: 26px; line-height: 1.15; }
 
 /* Wraps anything that may be wider than the page. The wide tables depend on
    this; without it the whole page scrolls sideways instead of the table. */
@@ -251,12 +282,12 @@ textarea { resize: vertical; min-height: 48px; }
    overflow-x: auto; a wide table must scroll rather than push the page out. */
 .data-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
 .data-table th {
-  text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--muted); padding: 6px 8px;
+  text-align: left; font-size: var(--fs-micro); font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); padding: 7px 8px;
   border-bottom: 1px solid var(--border);
 }
 .data-table td {
-  font-size: 12.5px; padding: 6px 8px; vertical-align: top;
+  font-size: var(--fs-ui); padding: 7px 8px; vertical-align: top;
   border-bottom: 1px solid rgba(255,255,255,0.04); overflow-wrap: anywhere;
 }
 /* The phase repeats down the column, so the word is muted and the colour does
@@ -267,11 +298,14 @@ textarea { resize: vertical; min-height: 48px; }
 .data-table td.pv-phase[data-phase="3"] { border-left-color: var(--phase-3); }
 .data-table td.pv-phase[data-phase="4"] { border-left-color: var(--phase-4); }
 .data-table td.pv-phase[data-phase="5"] { border-left-color: var(--phase-5); }
-.data-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.data-table td.num {
+  text-align: right; white-space: nowrap; font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums; font-size: var(--fs-ui);
+}
 .data-table tr:hover td { background: rgba(255,255,255,0.02); }
 /* A row the reader has chosen to leave out. */
 .data-table tr.is-skipped td { opacity: 0.4; }
-.data-table td input[type="text"], .data-table td select { padding: 6px 8px; font-size: 12.5px; }
+.data-table td input[type="text"], .data-table td select { padding: 6px 8px; font-size: var(--fs-ui); }
 
 /* ── narrower windows ───────────────────────────────────────────────────── */
 /* The real narrow case is this tool in a window beside the spreadsheet it
@@ -285,7 +319,6 @@ textarea { resize: vertical; min-height: 48px; }
 
 @media (max-width: 620px) {
   .stat-row { gap: 16px; padding: 14px 16px; }
-  .stat-value { font-size: 22px; }
 }
 
 /* ── a coarse pointer ───────────────────────────────────────────────────── */

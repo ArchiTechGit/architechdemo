@@ -970,6 +970,111 @@ section('Interface copy');
 }
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────
+section('Typography')
+{
+  const pageCss = ['index.html', 'admin.html'].map((n, i) =>
+    (([indexHtml, adminMarkup][i]).split('<style>')[1] || '').split('</style>')[0]);
+  const allCss = [uiCss, ...pageCss].join('\n');
+
+  // Resolve a token to the size it reaches on a wide window.
+  const px = v => {
+    const c = v.match(/clamp\([^,]+,[^,]+,\s*(\d+)px\s*\)/);
+    if (c) return Number(c[1]);
+    const p = v.match(/^(\d+(?:\.\d+)?)px$/);
+    return p ? Number(p[1]) : null;
+  };
+  const tok = {};
+  [...uiCss.matchAll(/--(fs-[a-z]+):\s*([^;]+);/g)].forEach(m => { tok[m[1]] = px(m[2].trim()); });
+
+  check('the scale is defined once, in the shared sheet', Object.keys(tok).length > 3, true);
+  check('and no page defines its own step',
+    pageCss.filter(c => /--fs-/.test(c.split(':root')[1] || '')).length, 0);
+
+  // The whole point. Adjacent steps 1.1x apart are the flat scale with extra
+  // tokens; the first pass at this shipped a 1.14x gap at the top.
+  const ladder = Object.entries(tok).sort((a, b) => b[1] - a[1]);
+  const tight = [];
+  ladder.forEach(([name, size], i) => {
+    const next = ladder[i + 1];
+    if (next && size / next[1] < 1.15) tight.push(name + '/' + next[0] + ' = ' + (size / next[1]).toFixed(2) + 'x');
+  });
+  check('every step in the scale is a real step', tight, []);
+  check('the loudest thing is at least 2.5x body', ladder[0][1] / tok['fs-body'] >= 2.5, true);
+
+  // The number is the product. It should beat the page title, because producing
+  // it is the job and the title is only wayfinding.
+  check('the total outranks the page title', tok['fs-display'] > tok['fs-hero'], true);
+
+  // Sizes written by hand are how the scale flattened in the first place.
+  const stray = [...new Set((allCss.match(/font-size:\s*(\d+(?:\.\d+)?)px/g) || []))]
+    .map(s => s.replace(/font-size:\s*/, ''))
+    .filter(s => { const n = Number(s.replace('px', '')); return n >= 10 && n <= 16; });
+  check('no hand-written size lands back in the old 10-16px band', stray, []);
+  check('and no half-pixel sizes survive',
+    (allCss.match(/font-size:\s*\d+\.\d+px/g) || []), []);
+
+  // A weight used but not requested renders as a synthesised face, which looks
+  // worse than not asking for it. 600 was doing this in five places.
+  const asked = new Set();
+  [indexHtml, adminMarkup].forEach(h => {
+    const m = h.match(/family=Roboto:wght@([\d;]+)/);
+    if (m) m[1].split(';').forEach(x => asked.add(x));
+  });
+  const usedWeights = [...new Set((allCss.match(/font-weight:\s*(\d+)/g) || [])
+    .map(s => s.replace(/\D/g, '')))];
+  check('every weight used is a weight loaded', usedWeights.filter(w => !asked.has(w)), []);
+  check('the hero weight is loaded', asked.has('900'), true);
+  // A face that is downloaded and never used is bytes the person waits on.
+  const jsWeights = adminFiles.map(f => f.src).join('\n')
+    .match(/font-weight:\s*(\d+)/g) || [];
+  const everyUsed = new Set(usedWeights.concat(jsWeights.map(s => s.replace(/\D/g, ''))));
+  check('no weight is downloaded and never used', [...asked].filter(w => !everyUsed.has(w)), []);
+
+  // Two voices: prose in Roboto, data in mono. The brand forbids Roboto for
+  // technical strings, and this tool is mostly technical strings.
+  check('the mono face is declared once', (uiCss.match(/--font-mono:/g) || []).length, 1);
+  ['JetBrains Mono'].forEach(f => {
+    check('the mono face is actually loaded', [indexHtml, adminMarkup]
+      .every(h => h.includes(f.replace(' ', '+'))), true);
+    check('and named in the token', uiCss.includes("'" + f + "'"), true);
+  });
+  // Every one of these carries figures or tab-separated data.
+  [['.stat-value', uiCss], ['.chip', uiCss], ['.data-table td.num', uiCss],
+   ['.header-badge', uiCss]].forEach(([sel, src]) => {
+    const body = src.split(sel + ' {')[1].split('}')[0];
+    check(sel + ' is set in the data face', /--font-mono/.test(body), true);
+  });
+  check('the paste blocks are set in the data face',
+    /#out-task[\s\S]{0,400}--font-mono|--font-mono[\s\S]{0,400}#out-task/.test(indexHtml)
+      || /font-family: var\(--font-mono\)/.test(indexHtml), true);
+  check('no system mono is reached for outside the token fallback',
+    (allCss.match(/SFMono|Consolas/g) || []).length, 2);
+  // Figures in a column have to line up on their digits.
+  ['.stat-value', '.data-table td.num'].forEach(sel => {
+    const body = uiCss.split(sel + ' {')[1].split('}')[0];
+    check(sel + ' uses tabular figures', /tabular-nums/.test(body), true);
+  });
+
+  // Prose stays prose. A wall of body copy in mono is unreadable.
+  ['.page-desc', '.q-sub'].forEach(sel => {
+    const body = uiCss.split(sel + ' {')[1].split('}')[0];
+    check(sel + ' is not set in the data face', /--font-mono/.test(body), false);
+  });
+
+  // Body text must stay readable on a phone-width window.
+  check('body text never drops below 14px', tok['fs-body'] >= 14, true);
+  // The narrow end of the two clamps, which is what a small window gets.
+  const low = n => Number(uiCss.match(new RegExp('--' + n + ':\\s*clamp\\((\\d+)px'))[1]);
+  check('the title stays a title when the window is narrow', low('fs-hero') >= 24, true);
+  check('and the total stays the loudest thing', low('fs-display') > low('fs-hero'), true);
+
+  // The brand anchors a section heading with a bar. It is a structural mark,
+  // not a glyph colour, so it does not undo cyan meaning "interactive".
+  check('the section heading carries the brand bar', /\.section-label::before/.test(uiCss), true);
+  check('and its text is still muted',
+    /--muted/.test(uiCss.split('.section-label {')[1].split('}')[0]), true);
+}
+
 section('Colour discipline');
 {
   const allCss = [uiCss, (indexHtml.split('<style>')[1] || '').split('</style>')[0],

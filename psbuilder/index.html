@@ -6,7 +6,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./ui.css" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
@@ -23,36 +23,36 @@
     .pick-card:hover:not(.disabled) { border-color: rgba(5,195,221,0.22); background: rgba(5,195,221,0.03); }
     .pick-card.selected { border-color: var(--cyan); background: var(--cyan-dim); }
     .pick-card.disabled { opacity: 0.4; cursor: not-allowed; }
-    .pick-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .pick-note { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+    .pick-name { font-size: var(--fs-body); font-weight: 700; margin-bottom: 4px; }
+    .pick-note { font-size: var(--fs-micro); color: var(--muted); line-height: 1.5; }
 
     /* ─── Step 3: questionnaire ─── */
 
     .stepper { display: flex; align-items: center; gap: 14px; }
     .stepper button {
       width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-1);
-      color: var(--text); font-size: 16px; cursor: pointer; font-family: var(--font);
+      color: var(--text); font-size: var(--fs-body); cursor: pointer; font-family: var(--font);
     }
     .stepper button:hover { border-color: var(--cyan-mid); }
-    .stepper .stepper-input { width: 90px; text-align: center; font-size: 18px; font-weight: 700; color: var(--cyan); background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; font-family: var(--font); }
+    .stepper .stepper-input { width: 90px; text-align: center; font-size: 20px; font-weight: 700; color: var(--cyan); background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
     .toggle-row { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .toggle-switch { width: 40px; height: 22px; border-radius: 11px; background: var(--surface-1); border: 1px solid var(--border); position: relative; transition: background 0.2s; flex-shrink: 0; }
     .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); top: 2px; left: 2px; transition: transform 0.2s, background 0.2s; }
     .toggle-row.on .toggle-switch { background: var(--cyan-dim); border-color: var(--cyan-mid); }
     .toggle-row.on .toggle-switch::after { transform: translateX(18px); background: var(--cyan); }
-    .toggle-text { font-size: 13px; color: var(--text); }
+    .toggle-text { font-size: var(--fs-ui); color: var(--text); }
 
     .checklist { display: flex; flex-direction: column; gap: 10px; }
 
     .out-block { margin-bottom: 22px; }
     .out-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
-    .out-title { font-size: 13px; font-weight: 700; color: var(--text); }
-    .out-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+    .out-title { font-size: var(--fs-ui); font-weight: 700; color: var(--text); }
+    .out-note { font-size: var(--fs-micro); color: var(--muted); line-height: 1.6; margin-top: 3px; }
     #out-task, #out-resource {
       width: 100%; min-height: 200px; background: var(--surface-1); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--text); font-family: 'SFMono-Regular', Consolas, monospace;
-      font-size: 12.5px; line-height: 1.7; padding: 16px 18px; white-space: pre; resize: vertical;
+      border-radius: 10px; color: var(--text); font-family: var(--font-mono);
+      font-size: var(--fs-ui); line-height: 1.7; padding: 16px 18px; white-space: pre; resize: vertical;
     }
 
 
@@ -65,7 +65,7 @@
     <header class="header">
       <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <span class="header-badge">Internal Sizing Tool · POC</span>
-      <a href="./admin.html" style="color:var(--muted);font-size:11px;text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;">Manage flows →</a>
+      <a href="./admin.html" style="color:var(--muted);font-size:var(--fs-micro);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;">Manage flows →</a>
     </header>
 
     <h1 class="page-title">PS Engagement Builder</h1>
@@ -204,7 +204,7 @@
         const flows = CONFIG.flows.filter(f => f.vertical === v.id);
         const label = document.createElement('div');
         label.className = 'pick-note';
-        label.style.cssText = 'margin:0 0 8px;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;font-size:10px;color:var(--muted);';
+        label.style.cssText = 'margin:0 0 8px;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;font-size:var(--fs-micro);color:var(--muted);';
         label.textContent = v.name;
         root.appendChild(label);
 

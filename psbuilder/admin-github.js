@@ -6,7 +6,7 @@
 // ─── GitHub load / save ───
 // Bump this whenever admin behaviour changes. It shows in the header, the
 // browser tab, and the commit message of every config save.
-const ADMIN_VERSION = '0.9.3';
+const ADMIN_VERSION = '0.9.4';
 
 const REPO_OWNER = 'ArchiTechGit';
 const REPO_NAME = 'architechdemo';

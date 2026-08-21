@@ -5,7 +5,7 @@
   <title>PS Builder — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./ui.css" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
@@ -14,12 +14,12 @@
     .drag-row.dragging { opacity: 0.35; }
     .drag-row.drop-above { box-shadow: inset 0 2px 0 0 var(--cyan); }
     .drag-row.drop-below { box-shadow: inset 0 -2px 0 0 var(--cyan); }
-    .grip { color: var(--muted); font-size: 14px; line-height: 24px; user-select: none;
+    .grip { color: var(--muted); font-size: var(--fs-body); line-height: 24px; user-select: none;
       flex-shrink: 0; letter-spacing: 2px; min-width: 24px; min-height: 24px; text-align: center; }
     .drag-row:hover .grip { color: var(--cyan); }
 
     .field { margin-bottom: 14px; }
-    .field-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
+    .field-label { font-size: var(--fs-ui); font-weight: 700; color: var(--muted); margin-bottom: 6px; display: block; }
     .field-row { display: flex; gap: 10px; }
     .field-row .field { flex: 1; min-width: 0; }
 
@@ -28,16 +28,16 @@
     .choice-row:hover { border-color: var(--cyan-mid); }
     .choice-row input[type="radio"] { margin-top: 3px; width: auto; accent-color: var(--cyan); }
     .choice-row .choice-body { flex: 1; min-width: 0; }
-    .choice-row .choice-title { font-size: 13px; font-weight: 600; }
+    .choice-row .choice-title { font-size: var(--fs-ui); font-weight: 700; }
     .choice-row .choice-extra { margin-top: 8px; }
 
     .row-editor { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .row-editor input[type="text"] { flex: 1; min-width: 0; }
     .row-editor input[type="number"] { flex: 0 0 90px; }
     .row-editor select { flex: 0 0 170px; }
-    .row-editor label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .row-editor label { display: flex; align-items: center; gap: 4px; font-size: var(--fs-ui); color: var(--muted); white-space: nowrap; }
     .row-editor label input { width: auto; }
-    .row-editor .rate-label { flex: 1; min-width: 0; font-size: 12.5px; color: var(--muted); }
+    .row-editor .rate-label { flex: 1; min-width: 0; font-size: var(--fs-ui); color: var(--muted); }
 
     .fbar { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
     .fbar select { flex: 1; min-width: 0; }
@@ -45,12 +45,12 @@
     .block { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); overflow: hidden; }
     .block-head { display: flex; align-items: center; gap: 12px; padding: 15px 18px; cursor: pointer; user-select: none; }
     .block-head:hover { background: rgba(255,255,255,0.02); }
-    .block-chevron { color: var(--muted); font-size: 10px; width: 12px; flex-shrink: 0; transition: transform 0.15s; }
+    .block-chevron { color: var(--muted); font-size: var(--fs-micro); width: 12px; flex-shrink: 0; transition: transform 0.15s; }
     .block-chevron.open { transform: rotate(90deg); }
     .block-title { flex: 1; min-width: 0; }
-    .block-name { font-size: 14px; font-weight: 600; line-height: 1.4; }
-    .block-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
-    .block-count { font-size: 11.5px; font-weight: 700; color: var(--cyan); background: var(--cyan-dim);
+    .block-name { font-size: var(--fs-body); font-weight: 700; line-height: 1.4; }
+    .block-meta { font-size: var(--fs-ui); color: var(--muted); margin-top: 3px; }
+    .block-count { font-size: var(--fs-micro); font-weight: 700; color: var(--cyan); background: var(--cyan-dim);
       border: 1px solid var(--cyan-mid); border-radius: 20px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap; }
     .block-count.zero { color: var(--muted); background: transparent; border-color: var(--border); }
     .block-actions { display: flex; flex-shrink: 0; }
@@ -61,21 +61,21 @@
       transition: border-color var(--t-quick) var(--ease); }
     .act:hover { border-color: rgba(255,255,255,0.14); }
     .act-text { flex: 1; min-width: 0; }
-    .act-desc { font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
-    .act-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
-    .act-hours { font-size: 11.5px; font-weight: 700; color: var(--cyan); flex-shrink: 0; white-space: nowrap; }
+    .act-desc { font-size: var(--fs-ui); font-weight: 400; line-height: 1.45; overflow-wrap: anywhere; }
+    .act-meta { font-size: var(--fs-micro); color: var(--muted); margin-top: 2px; }
+    .act-hours { font-size: var(--fs-micro); font-weight: 700; color: var(--cyan); flex-shrink: 0; white-space: nowrap; }
 
     .pv-table td:nth-child(2) { min-width: 220px; }
     .pv-answers { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 10px 0 4px; }
-    .pv-answer { font-size: 12.5px; }
-    .pv-answer label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+    .pv-answer { font-size: var(--fs-ui); }
+    .pv-answer label { display: block; color: var(--muted); font-size: var(--fs-micro); margin-bottom: 4px; }
     .pv-answer input[type="number"], .pv-answer select { width: auto; min-width: 130px; padding: 6px 8px; }
     .pv-answer .opts { display: flex; flex-direction: column; gap: 4px; }
-    .pv-answer .opts label { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: 12px; margin: 0; }
+    .pv-answer .opts label { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: var(--fs-ui); margin: 0; }
     .pv-answer .opts input { width: auto; }
 
     .im-desc { min-width: 260px; }
-    .im-note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 10px 0; }
+    .im-note { font-size: var(--fs-ui); color: var(--muted); line-height: 1.6; margin: 10px 0; }
 
     .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 16px 0; margin-top: 24px;
       border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -126,7 +126,7 @@
       </p>
       <div class="q-card" style="max-width:560px;">
         <div class="q-label">How to get a token</div>
-        <ol style="margin:0;padding-left:18px;font-size:13px;color:var(--text);line-height:1.9;">
+        <ol style="margin:0;padding-left:18px;font-size:var(--fs-ui);color:var(--text);line-height:1.9;">
           <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--cyan);">github.com/settings/personal-access-tokens/new</a> (sign in if asked).</li>
           <li>Give it any <b>Token name</b>, e.g. "psbuilder-admin".</li>
           <li>Under <b>Resource owner</b>, switch the dropdown from your personal account to <b>ArchiTechGit</b> (the org that owns this repo) — repo-scoping only shows up once the owner is set to the org.</li>
@@ -171,7 +171,7 @@
 
       <div class="save-bar">
         <button class="btn-primary" id="save-btn" onclick="saveConfig()">Save to GitHub</button>
-        <span id="save-status" role="status" aria-live="polite" style="color:var(--muted);font-size:13px;"></span>
+        <span id="save-status" role="status" aria-live="polite" style="color:var(--muted);font-size:var(--fs-ui);"></span>
       </div>
     </main>
   </div>
