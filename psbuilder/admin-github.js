@@ -6,7 +6,7 @@
 // ─── GitHub load / save ───
 // Bump this whenever admin behaviour changes. It shows in the header, the
 // browser tab, and the commit message of every config save.
-const ADMIN_VERSION = '0.9.2';
+const ADMIN_VERSION = '0.9.3';
 
 const REPO_OWNER = 'ArchiTechGit';
 const REPO_NAME = 'architechdemo';
@@ -146,7 +146,7 @@ async function doSave(statusEl) {
   }
   const data = await res.json();
   CONFIG_SHA = data.content.sha;
-  statusEl.innerHTML = `Saved — <a href="${data.commit.html_url}" target="_blank" style="color:var(--cyan);">view commit</a>`;
+  statusEl.innerHTML = `<span style="color:var(--success);font-weight:700;">Saved</span> — <a href="${data.commit.html_url}" target="_blank" style="color:var(--cyan);">view commit</a>`;
 }
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -438,6 +438,14 @@ const PSEngine = (function () {
     }).filter(Boolean);
   }
 
+  // Which stage accent a phase takes: its position in the configured phase
+  // list, 1-based, so the colours follow project order rather than the
+  // alphabet. Returns 0 for a phase not in the list, which paints no edge.
+  function phaseIndex(config, phase) {
+    const i = (config.phases || []).indexOf(phase);
+    return i < 0 ? 0 : i + 1;
+  }
+
   function roleName(config, id) {
     const r = (config.roles || []).find(r => r.id === id);
     return r ? r.name : id;
@@ -655,7 +663,7 @@ const PSEngine = (function () {
     round2, esc, attr, cell, repeatCount, MAX_LINES_PER_TASK, inSubflow, condMet, defaultFor, visibleOptions, activeInputs,
     resolve, isRequired, inputsToShow, allRequiredAnswered,
     amountOf, fillText, buildLines, totalHours,
-    assignSlots, applySlots, blockText, roleName, estimate,
+    assignSlots, applySlots, blockText, roleName, phaseIndex, estimate,
     parseGrid, detectColumns, draftTasks, readPaste, IMPORT_FIELDS,
     toHours, effortFromSlots, RESOURCE_SLOTS, validateConfig,
   };

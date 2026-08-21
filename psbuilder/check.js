@@ -218,12 +218,13 @@ check('typed preview numbers are clamped', adminHtml.includes('function clampAns
 section('Shared styling');
 {
   // The tokens and the accessibility baseline live in one file now. They were
-  // duplicated, which is how --faint came to be fixed twice.
-  check('the tokens are defined once', (uiCss.match(/--faint:/g) || []).length, 1);
+  // duplicated, which is how a neutral came to be fixed twice.
+  check('the tokens are defined once', (uiCss.match(/--muted:/g) || []).length, 1);
   check('and only in the shared sheet',
-    [indexHtml, adminMarkup].filter(h => /--faint:/.test(h.split('<style>')[1] || '')).length, 0);
+    [indexHtml, adminMarkup].filter(h => /--muted:/.test(h.split('<style>')[1] || '')).length, 0);
 
-  ['--bg', '--surface-1', '--surface-2', '--cyan', '--text', '--muted', '--faint', '--border', '--amber', '--font']
+  ['--bg', '--surface-1', '--surface-2', '--cyan', '--text', '--muted', '--border',
+   '--success', '--danger', '--phase-1', '--phase-5', '--font']
     .forEach(t => check('shared sheet defines ' + t, uiCss.includes(t + ':'), true));
 
   check('the focus ring lives there', /:focus-visible/.test(uiCss), true);
@@ -969,6 +970,111 @@ section('Interface copy');
 }
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────
+section('Colour discipline');
+{
+  const allCss = [uiCss, (indexHtml.split('<style>')[1] || '').split('</style>')[0],
+                  (adminHtml.split('<style>')[1] || '').split('</style>')[0]].join('\n');
+  const allSrc = [indexHtml, adminMarkup, ...adminFiles.map(s => s.src)].join('\n');
+
+  // Two colours were carried outside the brand palette. They are gone, and the
+  // check is here so they do not come back the next time something needs
+  // marking.
+  ['--amber', '--faint'].forEach(t => {
+    check(t + ' is gone from the stylesheet', /--(amber|faint)/.test(allCss.replace(/\/\*[\s\S]*?\*\//g, '')) && allCss.includes(t + ':'), false);
+    check(t + ' is gone from the pages and scripts', allSrc.includes('var(' + t + ')'), false);
+  });
+
+  // Every colour used must be one the brand names. Anything else is a colour
+  // someone mixed by eye.
+  const BRAND = ['#0D1825', '#13294B', '#1A3460', '#1F3D72', '#05C3DD', '#0055B8', '#54565B',
+    '#55CAFD', '#7F8FA9', '#16CECC', '#517FE3', '#1980BD', '#494B83', '#00A991', '#9594D2',
+    '#C62828', '#F0F6FC', '#FFFFFF'];
+  const hexes = [...new Set((allCss.match(/#[0-9A-Fa-f]{6}/g) || []).map(h => h.toUpperCase()))];
+  check('every hex in the stylesheets is a brand colour', hexes.filter(h => !BRAND.includes(h)), []);
+
+  // The point of the exercise: cyan meant heading and clickable at the same
+  // time, so colour could not tell you which.
+  const label = uiCss.split('.section-label {')[1].split('}')[0];
+  check('section headings are not cyan', /--cyan/.test(label), false);
+  check('section headings are muted', /--muted/.test(label), true);
+  check('the focus ring is still cyan', /outline: 2px solid var\(--cyan\)/.test(uiCss), true);
+  check('the headline number is still cyan',
+    /--cyan/.test(uiCss.split('.stat-value {')[1].split('}')[0]), true);
+
+  // #C62828 is 2.6:1 on a card. It may be an edge or a wash, never a glyph.
+  const dangerAsText = [];
+  allCss.replace(/\/\*[\s\S]*?\*\//g, '').split('}').forEach(chunk => {
+    const body = chunk.split('{')[1];
+    if (!body || !body.includes('--danger')) return;
+    body.split(';').forEach(decl => {
+      const [prop, val] = decl.split(':');
+      if (!val || !val.includes('--danger')) return;
+      const p = prop.trim();
+      if (p === 'color' || p === '-webkit-text-fill-color') {
+        dangerAsText.push(chunk.split('{')[0].trim() + ' { ' + p + ' }');
+      }
+    });
+  });
+  check('red is never a text colour', dangerAsText, []);
+  check('red is a text colour nowhere inline either', /color:\s*var\(--danger\)/.test(allSrc), false);
+  check('the notice puts the red on its edge',
+    /border-left: 3px solid var\(--danger\)/.test(uiCss), true);
+  check('and keeps its own text readable',
+    /color: var\(--text\)/.test(uiCss.split('.notice {')[1].split('}')[0]), true);
+
+  // Green says one thing, in one place.
+  check('green confirms a commit landed', /--success/.test(adminFiles.find(s => s.name === 'admin-github.js').src), true);
+  const successUses = (allSrc.match(/var\(--success\)/g) || []).length;
+  check('and is not spent anywhere else', successUses <= 1, true);
+
+  // The phase edge only works if there is a colour for every phase.
+  check('there is a stage colour per phase',
+    config.phases.every((_, i) => uiCss.includes('--phase-' + (i + 1) + ':')), true);
+  check('and no phase colour without a phase',
+    (uiCss.match(/--phase-\d:/g) || []).length, config.phases.length);
+  config.phases.forEach((p, i) =>
+    check('phase ' + (i + 1) + ' (' + p + ') maps to its stage colour', E.phaseIndex(config, p), i + 1));
+  check('an unknown phase paints no edge', E.phaseIndex(config, 'Not A Phase'), 0);
+  check('a missing phase list does not throw', E.phaseIndex({}, 'Kickoff'), 0);
+  check('the phase cell carries the index in the builder',
+    /data-phase="' \+ E\.phaseIndex/.test(indexHtml), true);
+  check('and in the admin preview',
+    /data-phase="\$\{PSEngine\.phaseIndex/.test(adminFiles.find(s => s.name === 'admin-preview.js').src), true);
+  check('the phase rule lives only in the shared sheet',
+    [indexHtml, adminHtml].filter(h => /pv-phase\s*\{/.test((h.split('<style>')[1] || ''))).length, 0);
+
+  // Contrast, recomputed from the tokens rather than trusted.
+  const lum = h => {
+    const c = [1, 3, 5].map(i => {
+      const v = parseInt(h.substr(i, 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => {
+    const x = lum(a), y = lum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  };
+  const tok = n => uiCss.match(new RegExp('--' + n + ':\\s*(#[0-9A-Fa-f]{6})'))[1];
+  const bg = tok('bg');
+  // A card is a 2.5% white wash over the page, so text on it sits a little lower.
+  const card = '#101B29';
+  ['muted', 'text', 'cyan'].forEach(n => {
+    check(n + ' clears AA on the page', ratio(tok(n), bg) >= 4.5, true);
+    check(n + ' clears AA on a card', ratio(tok(n), card) >= 4.5, true);
+  });
+  // A field is a well on the page ground now, which is what makes this pass.
+  check('the placeholder clears AA in a field',
+    /background: var\(--bg\)/.test(uiCss.split('input[type="password"]')[1].split('}')[0]), true);
+  // The stage edges are non-text, so 3:1 is the bar they have to clear.
+  config.phases.forEach((p, i) => {
+    const c = tok('phase-' + (i + 1));
+    check('the ' + p + ' edge clears 3:1', ratio(c, bg) >= 3, true);
+  });
+  check('green clears AA on the page', ratio(tok('success'), bg) >= 4.5, true);
+  check('red clears 3:1 as an edge', ratio(tok('danger'), bg) >= 3, true);
+}
+
 section('Admin grouping');
 const adminSrc = (adminFiles.find(f => f.src.includes('function sectionsForFlow')) || {}).src;
 if (!adminSrc) {

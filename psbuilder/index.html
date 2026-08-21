@@ -55,9 +55,6 @@
       font-size: 12.5px; line-height: 1.7; padding: 16px 18px; white-space: pre; resize: vertical;
     }
 
-    /* The phase repeats down the column, so it should not compete with the
-       description beside it. */
-    .pv-phase { color: var(--muted); white-space: nowrap; }
 
     .step { display: none; }
     .step.active { display: block; }
@@ -207,7 +204,7 @@
         const flows = CONFIG.flows.filter(f => f.vertical === v.id);
         const label = document.createElement('div');
         label.className = 'pick-note';
-        label.style.cssText = 'margin:0 0 8px;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;font-size:10px;color:var(--faint);';
+        label.style.cssText = 'margin:0 0 8px;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;font-size:10px;color:var(--muted);';
         label.textContent = v.name;
         root.appendChild(label);
 
@@ -415,7 +412,7 @@
         }).join("");
         const total = E.totalHours(l);
         return "<tr>" +
-          '<td class="pv-phase">' + esc(l.phase) + "</td>" +
+          '<td class="pv-phase" data-phase="' + E.phaseIndex(CONFIG, l.phase) + '">' + esc(l.phase) + "</td>" +
           "<td>" + esc(l.description) + "</td>" +
           cells +
           '<td class="num">' + (total || "") + "</td>" +
@@ -445,7 +442,7 @@
       // Nothing to paste is a different situation from nothing costed, and the
       // difference is what the reader needs to act on.
       const hint = document.getElementById("slot-hint");
-      hint.style.color = out.lines.length ? "" : "var(--amber)";
+      hint.style.color = "";
       const mapping = !out.lines.length
         ? "This flow has no tasks for " + (flow.subflows.find(s => s.id === subflow) || {}).name +
           " yet, so there is nothing to paste. Add tasks in the admin page first."

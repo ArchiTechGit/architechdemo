@@ -487,7 +487,7 @@ function renderEffortLines() {
       ${amountEditor('tf-eff' + n + '-ah', e.after, 'After hours')}
     </div>`).join('');
   if (!window._tfEffort.length) {
-    box.innerHTML = '<div class="q-sub" style="font-style:italic;color:var(--faint);margin-bottom:8px;">No effort costed against this task yet.</div>';
+    box.innerHTML = '<div class="q-sub" style="font-style:italic;color:var(--muted);margin-bottom:8px;">No effort costed against this task yet.</div>';
   }
   window._tfEffort.forEach((e, n) => {
     renderAmountRates('tf-eff' + n + '-bh');

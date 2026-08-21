@@ -414,7 +414,7 @@ function renderTaskSections(root) {
       if (!matches.length) {
         const empty = document.createElement('div');
         empty.className = 'q-sub';
-        empty.style.cssText = 'font-style:italic;margin-bottom:8px;color:var(--faint);';
+        empty.style.cssText = 'font-style:italic;margin-bottom:8px;color:var(--muted);';
         empty.textContent = 'No tasks yet.';
         body.appendChild(empty);
       }
@@ -442,7 +442,7 @@ function renderTaskSections(root) {
   if (orphans.length) {
     const warn = document.createElement('div');
     warn.className = 'section-label';
-    warn.style.cssText = 'margin-top:30px;color:var(--amber);';
+    warn.style.cssText = 'margin-top:30px;';
     warn.textContent = 'Not connected to anything — these will never appear';
     root.appendChild(warn);
     const box = document.createElement('div');

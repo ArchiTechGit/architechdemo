@@ -110,7 +110,7 @@ function renderPreviewAnswers(box, resolved) {
 
 function renderPreviewResult(box, out) {
   if (!out.lines.length) {
-    box.innerHTML = '<div class="q-sub" style="margin-top:12px;color:var(--amber);">Nothing comes out of this subflow yet. Add tasks to it below, or answer any question still showing above.</div>';
+    box.innerHTML = '<div class="q-sub" style="margin-top:12px;">Nothing comes out of this subflow yet. Add tasks to it below, or answer any question still showing above.</div>';
     return;
   }
 
@@ -119,10 +119,10 @@ function renderPreviewResult(box, out) {
     ? slots.map((r, i) => `R${i + 1} = ${esc(PSEngine.roleName(CONFIG, r))}`).join(' \u00b7 ')
     : 'No effort costed, so the resource block would be empty.';
   const capped = (out.clamped || []).length
-    ? `<div class="q-sub" style="color:var(--amber);margin-top:6px;">Capped at ${PSEngine.MAX_LINES_PER_TASK} lines: ${out.clamped.map(c => esc(c.task) + ' asked for ' + c.asked).join(', ')}.</div>`
+    ? `<div class="notice">Capped at ${PSEngine.MAX_LINES_PER_TASK} lines: ${out.clamped.map(c => esc(c.task) + ' asked for ' + c.asked).join(', ')}.</div>`
     : '';
   const overflow = out.overflow.length
-    ? `<div class="q-sub" style="color:var(--amber);margin-top:6px;">${out.overflow.map(r => esc(PSEngine.roleName(CONFIG, r))).join(', ')} will not fit: the sheet has only five resource columns.</div>`
+    ? `<div class="notice">${out.overflow.map(r => esc(PSEngine.roleName(CONFIG, r))).join(', ')} will not fit: the sheet has only five resource columns.</div>`
     : '';
 
   const header = slots.map((r, i) => `<th class="num">${esc(r)}</th>`).join('');
@@ -136,7 +136,7 @@ function renderPreviewResult(box, out) {
       return `<td class="num" title="${attr(e.location)}">${bits.join(' + ')}</td>`;
     }).join('');
     return `<tr>
-      <td class="pv-phase">${esc(l.phase)}</td>
+      <td class="pv-phase" data-phase="${PSEngine.phaseIndex(CONFIG, l.phase)}">${esc(l.phase)}</td>
       <td>${esc(l.description)}</td>
       ${cells}
       <td class="num">${PSEngine.totalHours(l) || ''}</td>

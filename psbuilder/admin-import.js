@@ -142,7 +142,7 @@ function renderImport() {
 function renderImportResult(box, f) {
   const res = IMPORT.result;
   if (!IMPORT.rows.length) {
-    box.innerHTML = `<div class="im-note" style="color:var(--amber);">${esc(res.cols.note)}
+    box.innerHTML = `<div class="im-note">${esc(res.cols.note)}
       ${res.rows ? ' Nothing usable came out of ' + count(res.rows, 'row', 'rows') + '.' : ''}</div>`;
     return;
   }
@@ -159,14 +159,14 @@ function renderImportResult(box, f) {
         aria-label="Include row ${r.row}" /></td>
       <td class="im-desc"><input type="text" value="${attr(r.description)}"
         onchange="setImportField(${n}, \'description\', this.value)" aria-label="Description for row ${r.row}" />
-        ${r.issues.length ? `<div class="im-issue">${r.issues.map(i => esc(i.note)).join('<br>')}</div>` : ''}</td>
+        ${r.issues.length ? `<div class="notice notice--inline">${r.issues.map(i => esc(i.note)).join('<br>')}</div>` : ''}</td>
       <td><select onchange="setImportField(${n}, \'phase\', this.value)" aria-label="Phase for row ${r.row}">${listOptions(CONFIG.phases, r.phase)}</select></td>
       <td><select onchange="setImportField(${n}, \'skill\', this.value)" aria-label="Skill for row ${r.row}">${listOptions(CONFIG.skills, r.skill)}</select></td>
       <td><select onchange="setImportField(${n}, \'taskType\', this.value)" aria-label="Task type for row ${r.row}">${listOptions(CONFIG.taskTypes, r.taskType)}</select></td>
       <td><select onchange="setImportField(${n}, \'subflows\', this.value)" aria-label="Subflow for row ${r.row}">${subflowOptions(r.subflows)}</select></td>
       <td class="num" style="white-space:nowrap;">${r.effort.length
         ? r.effort.map(e => `R${e.slot} ${e.business ? e.business + 'h' : ''}${e.after ? ' +' + e.after + 'h AH' : ''}`).join('<br>')
-        : '<span style="color:var(--faint);">&mdash;</span>'}</td>
+        : '<span style="color:var(--muted);">&mdash;</span>'}</td>
     </tr>`).join('');
 
   // A slot with hours but no role chosen would lose those hours silently.
@@ -186,7 +186,7 @@ function renderImportResult(box, f) {
 
   const unmapped = (IMPORT.slots || []).filter(s => !IMPORT.slotRoles[s]);
   const unmappedNote = unmapped.length
-    ? `<div class="im-issue" style="margin:6px 0;">R${unmapped.join(', R')} ${unmapped.length === 1 ? 'has' : 'have'} hours but no role yet, so those hours will be left behind.</div>`
+    ? `<div class="notice notice--inline">R${unmapped.join(', R')} ${unmapped.length === 1 ? 'has' : 'have'} hours but no role yet, so those hours will be left behind.</div>`
     : '';
 
   const flagged = IMPORT.rows.filter(r => r.issues.length).length;

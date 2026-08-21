@@ -15,14 +15,37 @@
   --bg:        #0D1825;
   --surface-1: #13294B;
   --surface-2: #1A3460;
+  /* Cyan is the interactive colour and nothing else: what you can act on,
+     what you have selected, where the focus ring is, and the numbers the
+     estimate exists to produce. It used to colour every section heading too,
+     which meant colour could not tell you what was clickable. Headings are
+     muted now and cyan means one thing. */
   --cyan:      #05C3DD;
   --cyan-dim:  rgba(5,195,221,0.10);
   --cyan-mid:  rgba(5,195,221,0.25);
+
   --text:      #F0F6FC;
-  --muted:     #8FA3BA;
-  --faint:     #7C93AD;
+  /* Brand blue-gray. Replaces two hand-mixed grays that sat 1.2:1 apart and
+     did no work between them. */
+  --muted:     #7F8FA9;
   --border:    rgba(255,255,255,0.07);
-  --amber:     #F0A020;
+
+  /* Semantic. Green confirms a commit reached GitHub. Red marks output that
+     will be wrong if you paste it. Red is 2.6:1 on a card, so it is never
+     text -- it is the edge beside white text. Both replace an amber that was
+     not in the brand palette and marked empty states and real faults alike. */
+  --success:   #00A991;
+  --danger:    #C62828;
+
+  /* The five phases run in a fixed order, so they take the brand's stage
+     sequence in that order. Carried as an edge on the phase cell, which is
+     what lets you see where one phase ends without reading the column. */
+  --phase-1:   #05C3DD;
+  --phase-2:   #517FE3;
+  --phase-3:   #55CAFD;
+  --phase-4:   #1980BD;
+  --phase-5:   #7F8FA9;
+
   --font:      'Roboto', sans-serif;
 
   --page-width: 900px;
@@ -47,7 +70,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
   outline-offset: 2px;
   border-radius: 4px;
 }
-::placeholder { color: var(--faint); opacity: 1; }
+::placeholder { color: var(--muted); opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -83,7 +106,7 @@ h1.page-title, .page-title {
 }
 .section-label {
   font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--cyan); margin-bottom: 14px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
 }
 
 .footer {
@@ -92,8 +115,25 @@ h1.page-title, .page-title {
   flex-wrap: wrap; gap: 14px;
 }
 .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
-.footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
+.footer-note { font-size: 11px; color: var(--muted); line-height: 1.65; max-width: 560px; }
 .footer-note a { color: var(--cyan); text-decoration: none; }
+
+/* ── notice ────────────────────────────────────────────────────────────── */
+/* Something is wrong with what the tool is about to hand you. The text stays
+   white because it has to be read; the red is the edge, which is the only
+   place #C62828 clears contrast on navy. */
+.notice {
+  border-left: 3px solid var(--danger); background: rgba(198,40,40,0.07);
+  border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0;
+  font-size: 12.5px; line-height: 1.6; color: var(--text);
+}
+/* The same signal inside a table cell, where a block will not fit. */
+.notice--inline {
+  border-left: 2px solid var(--danger); background: none; border-radius: 0;
+  padding: 2px 0 2px 8px; margin: 6px 0; font-size: 11.5px; line-height: 1.5;
+}
+/* It landed. Green appears here and nowhere else. */
+.notice--ok { border-left-color: var(--success); background: rgba(0,169,145,0.07); }
 
 /* ── card ───────────────────────────────────────────────────────────────── */
 .q-card {
@@ -157,7 +197,7 @@ h1.page-title, .page-title {
 /* ── form controls ──────────────────────────────────────────────────────── */
 input[type="password"], input[type="text"], input[type="number"], select, textarea {
   width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--surface-1); color: var(--text); font-family: var(--font); font-size: 13.5px;
+  background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13.5px;
 }
 textarea { resize: vertical; min-height: 48px; }
 
@@ -219,6 +259,14 @@ textarea { resize: vertical; min-height: 48px; }
   font-size: 12.5px; padding: 6px 8px; vertical-align: top;
   border-bottom: 1px solid rgba(255,255,255,0.04); overflow-wrap: anywhere;
 }
+/* The phase repeats down the column, so the word is muted and the colour does
+   the grouping. Both pages had their own copy of this rule. */
+.data-table td.pv-phase { color: var(--muted); white-space: nowrap; border-left: 3px solid transparent; }
+.data-table td.pv-phase[data-phase="1"] { border-left-color: var(--phase-1); }
+.data-table td.pv-phase[data-phase="2"] { border-left-color: var(--phase-2); }
+.data-table td.pv-phase[data-phase="3"] { border-left-color: var(--phase-3); }
+.data-table td.pv-phase[data-phase="4"] { border-left-color: var(--phase-4); }
+.data-table td.pv-phase[data-phase="5"] { border-left-color: var(--phase-5); }
 .data-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .data-table tr:hover td { background: rgba(255,255,255,0.02); }
 /* A row the reader has chosen to leave out. */
