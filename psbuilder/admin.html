@@ -207,8 +207,8 @@
     <div id="token-gate">
       <h2 class="page-title">Enter GitHub access token</h2>
       <p class="page-desc">
-        Needs a fine-grained personal access token scoped to this repo only, with Contents: Read and write permission.
-        Stored only in this browser's local storage — never sent anywhere except GitHub's API.
+        You need a fine-grained personal access token, scoped to this repo only, that can read and write Contents.
+        It is kept in this browser and sent nowhere except GitHub.
       </p>
       <div class="q-card" style="max-width:560px;">
         <div class="q-label">How to get a token</div>
@@ -238,7 +238,7 @@
         <button class="btn-ghost" onclick="toggleImport()">Import</button>
         <button class="btn-ghost" onclick="togglePreview()">Preview</button>
         <button class="btn-ghost" onclick="openNewFlow()">+ New flow</button>
-        <button class="btn-ghost" onclick="forgetToken()" title="Clear the token stored in this browser">Token saved</button>
+        <button class="btn-ghost" onclick="forgetToken()" title="Removes the token saved in this browser. You will need to paste it again.">Forget token</button>
       </div>
       <div id="flow-form-slot"></div>
       <div id="import-slot"></div>
@@ -265,7 +265,7 @@
     // ─── GitHub load / save ───
     // Bump this whenever admin behaviour changes. It shows in the header, the
     // browser tab, and the commit message of every config save.
-    const ADMIN_VERSION = '0.9.1';
+    const ADMIN_VERSION = '0.9.2';
 
     const REPO_OWNER = 'ArchiTechGit';
     const REPO_NAME = 'architechdemo';
@@ -355,6 +355,15 @@
       }
     }
 
+    function explainSaveFailure(status) {
+      if (status === 401) return 'Nothing was saved: the token is no longer valid. Paste a new one.';
+      if (status === 403) return 'Nothing was saved: the token is not allowed to write here. If the org has not approved it, an owner has to.';
+      if (status === 404) return 'Nothing was saved: the token cannot see this repo. Check it is scoped to ArchiTechGit/architechdemo.';
+      if (status === 422) return 'Nothing was saved: GitHub rejected the file. Reload the page and try again.';
+      if (status >= 500) return 'Nothing was saved: GitHub is having trouble. Wait a moment and save again.';
+      return 'Nothing was saved: GitHub returned ' + status + '.';
+    }
+
     // The same rules check.js runs. Writing a config that fails them would
     // break someone else's estimate rather than this session.
     function blockingProblems() {
@@ -386,11 +395,12 @@
         }),
       });
       if (res.status === 409) {
-        statusEl.textContent = 'Config changed since you loaded it — reload the page and redo your edit.';
+        statusEl.textContent = 'Nothing was saved: someone else saved changes while you were editing. Reload the page and make your change again.';
         return;
       }
       if (!res.ok) {
-        statusEl.textContent = `Save failed (${res.status}): ${await res.text()}`;
+        // GitHub's raw body is JSON and means nothing to the reader.
+        statusEl.textContent = explainSaveFailure(res.status);
         return;
       }
       const data = await res.json();
@@ -993,7 +1003,7 @@
     function commitImport() {
       const f = F();
       const chosen = IMPORT.rows.filter(r => r.include);
-      if (!chosen.length) { alert('Nothing is ticked.'); return; }
+      if (!chosen.length) { alert('Tick at least one row before adding.'); return; }
       const taken = f.tasks.map(t => t.id);
       chosen.forEach(r => {
         const description = String(r.description).trim();
@@ -1032,7 +1042,7 @@
           <textarea id="im-text" style="min-height:120px;font-family:\'SFMono-Regular\', Consolas, monospace;font-size:12px;"
             placeholder="Design\tCollaboration\tArchiTech Activity\tWxCC — Existing Environment Review">${esc(IMPORT.text)}</textarea>
         </div>
-        <button class="btn-secondary" onclick="readImportPaste()">Read the paste</button>
+        <button class="btn-secondary" onclick="readImportPaste()">Read these rows</button>
         <div id="im-result"></div>`;
       slot.appendChild(card);
 
@@ -1044,7 +1054,7 @@
       const res = IMPORT.result;
       if (!IMPORT.rows.length) {
         box.innerHTML = `<div class="im-note" style="color:var(--amber);">${esc(res.cols.note)}
-          ${res.rows ? ' Nothing usable came out of ' + res.rows + ' row(s).' : ''}</div>`;
+          ${res.rows ? ' Nothing usable came out of ' + count(res.rows, 'row', 'rows') + '.' : ''}</div>`;
         return;
       }
 
@@ -1093,8 +1103,8 @@
       const flagged = IMPORT.rows.filter(r => r.issues.length).length;
       box.innerHTML = `
         <div class="im-note">${esc(res.cols.note)}
-          ${res.skipped ? ' ' + res.skipped + ' row(s) had no description and were left out.' : ''}
-          ${flagged ? ' ' + flagged + ' row(s) need a look, marked below.' : ''}</div>
+          ${res.skipped ? ' ' + count(res.skipped, 'row', 'rows') + ' had no description and were left out.' : ''}
+          ${flagged ? ' ' + count(flagged, 'row needs', 'rows need') + ' a look, marked below.' : ''}</div>
         ${slotPickers}${unmappedNote}
         <div class="row-editor">
           <span class="rate-label" style="flex:0 0 auto;">Put them all in</span>
@@ -1193,7 +1203,7 @@
     function renderPreviewAnswers(box, resolved) {
       const f = F();
       const shown = PSEngine.inputsToShow(f, PREVIEW.subflow, resolved);
-      if (!shown.length) { box.innerHTML = '<div class="q-sub">This subflow asks nothing.</div>'; return; }
+      if (!shown.length) { box.innerHTML = '<div class="q-sub">This subflow has no questions.</div>'; return; }
       box.innerHTML = shown.map(inp => {
         const v = resolved[inp.id];
         const head = `<label title="${attr(inp.id)}">${esc(inp.label)}</label>`;
@@ -1222,7 +1232,7 @@
 
     function renderPreviewResult(box, out) {
       if (!out.lines.length) {
-        box.innerHTML = '<div class="q-sub" style="margin-top:12px;color:var(--amber);">No tasks come out of this. Either nothing is in this subflow yet, or a required answer is missing.</div>';
+        box.innerHTML = '<div class="q-sub" style="margin-top:12px;color:var(--amber);">Nothing comes out of this subflow yet. Add tasks to it below, or answer any question still showing above.</div>';
         return;
       }
 
@@ -1458,7 +1468,7 @@
             <label class="field-label">Ask it only if</label>
             <div id="if-cond"></div>
           </div>
-          <button class="btn-primary" onclick="saveInputForm(${idx})">Save</button>
+          <button class="btn-primary" onclick="saveInputForm(${idx})">Save question</button>
           <button class="btn-ghost" onclick="closeForm()">Cancel</button>
         </div>`;
 
@@ -1526,7 +1536,7 @@
       const f = F();
       const e = window._if;
       const label = document.getElementById('if-label').value.trim();
-      if (!label) { alert('Question text is required.'); return; }
+      if (!label) { alert('Give the question some text first.'); return; }
       const type = document.getElementById('if-type').value;
       const taken = f.inputs.filter((i, n) => n !== idx).map(i => i.id);
       const id = e.id || uniqueId(slugify(label), taken);
@@ -1593,7 +1603,7 @@
           <input type="number" step="0.25" id="${prefix}-base" value="${a.base || 0}" oninput="updateTaskPreview()" />
         </div>
         <div id="${prefix}-rates" style="padding-left:18px;"></div>
-        <button class="btn-ghost" type="button" style="margin-left:18px;" onclick="addAmountRate('${prefix}')">+ scale with a variable</button>`;
+        <button class="btn-ghost" type="button" style="margin-left:18px;" onclick="addAmountRate('${prefix}')">+ Scale with a variable</button>`;
     }
 
     function renderAmountRates(prefix) {
@@ -1623,7 +1633,7 @@
 
     function addAmountRate(prefix) {
       const numbers = numberInputs();
-      if (!numbers.length) { alert('Add a variable first, then effort can scale with it.'); return; }
+      if (!numbers.length) { alert('Add a number variable first, then hours can scale with it.'); return; }
       readAmountRates(prefix);
       window._amounts[prefix].push({ input: numbers[0].id, each: 0 });
       renderAmountRates(prefix);
@@ -1697,7 +1707,7 @@
           <div class="field">
             <label class="field-label">Who does the work, and for how long</label>
             <div id="tf-effort"></div>
-            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addEffortLine()">+ Add a resource</button>
+            <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addEffortLine()">+ Add resource</button>
           </div>
 
           <div class="field">
@@ -1780,7 +1790,7 @@
 
     function addEffortLine() {
       const roles = CONFIG.roles || [];
-      if (!roles.length) { alert('No engineer roles are configured.'); return; }
+      if (!roles.length) { alert('No engineer roles are set up, so there is nobody to assign this to.'); return; }
       if (document.querySelector('[data-effort]')) readEffortLines();
       const used = window._tfEffort.map(e => e.role);
       const next = roles.find(r => !used.includes(r.id)) || roles[0];
@@ -1856,7 +1866,7 @@
       const f = F();
       const e = window._tf;
       const description = document.getElementById('tf-description').value.trim();
-      if (!description) { alert('Description is required.'); return; }
+      if (!description) { alert('Give the task a description first.'); return; }
 
       const repeat = document.getElementById('tf-repeat').value;
       const effort = readEffortLines().filter(x => x.business || x.after);
@@ -1967,10 +1977,10 @@
 
     function createFlow() {
       const name = document.getElementById('nf-name').value.trim();
-      if (!name) { alert('Give the flow a name.'); return; }
+      if (!name) { alert('Give the flow a name first.'); return; }
       const names = Array.from(document.querySelectorAll('#nf-names [data-sf]'))
         .map(el => el.value.trim()).filter(Boolean);
-      if (!names.length) { alert('Name at least one subflow.'); return; }
+      if (!names.length) { alert('Name at least one subflow first.'); return; }
 
       const id = uniqueId(slugify(name), CONFIG.flows.map(f => f.id));
       const subIds = [];
@@ -2017,7 +2027,7 @@
               <input type="text" id="ff-note" value="${attr(f.note)}" placeholder="e.g. Handset rollouts and upgrades" />
             </div>
             <div class="field">
-              <label class="field-label">What the subflow step is called</label>
+              <label class="field-label">What to call this step in the builder</label>
               <input type="text" id="ff-subflow-label" value="${attr(f.subflowLabel || '')}" placeholder="Type of work" />
             </div>
           </div>
@@ -2071,7 +2081,7 @@
     function saveFlowForm() {
       const f = F();
       const name = document.getElementById('ff-name').value.trim();
-      if (!name) { alert('Name is required.'); return; }
+      if (!name) { alert('Give the flow a name first.'); return; }
       const subIds = [];
       const subflows = Array.from(document.querySelectorAll('#ff-subflows .row-editor')).map(row => {
         const subName = row.querySelector('[data-role="sub-name"]').value.trim();
@@ -2081,7 +2091,7 @@
         const prev = f.subflows.find(s => s.id === id);
         return prev ? Object.assign({}, prev, { name: subName }) : { id, name: subName };
       }).filter(Boolean);
-      if (!subflows.length) { alert('At least one subflow is required.'); return; }
+      if (!subflows.length) { alert('Name at least one subflow first.'); return; }
 
       // Tasks and inputs pointing at a removed subflow would silently vanish,
       // so they fall back to every subflow instead.

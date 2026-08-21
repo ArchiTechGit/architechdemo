@@ -697,6 +697,36 @@ section('Empty result');
   }
 }
 
+// ── 5j. Copy that has to stay honest ──────────────────────────────────
+section('Interface copy');
+{
+  // A control has to say what it does, not what state you are in.
+  check('the token control says it forgets', adminHtml.includes('>Forget token<'), true);
+  check('and no longer reads as a status', adminHtml.includes('>Token saved<'), false);
+
+  // A failure message is for the reader, not a dump of the API response.
+  check('a save failure is explained, not pasted', adminHtml.includes('await res.text()'), false);
+  check('each save failure has its own wording', adminHtml.includes('function explainSaveFailure'), true);
+
+  // Every save button says what it saves.
+  check('the question form says what it saves', adminHtml.includes('>Save question<'), true);
+  check('no bare Save button is left', /> *Save *</.test(adminHtml), false);
+
+  // Plurals go through the one helper rather than an (s) suffix.
+  check('import notes pluralise through the shared helper',
+    /count\(res\.rows/.test(adminHtml) && /count\(res\.skipped/.test(adminHtml), true);
+
+  // Words the reader would not use about their own work.
+  ['Config changed since you loaded it', 'its configuration'].forEach(phrase => {
+    check('dropped: "' + phrase + '"', (adminHtml + indexHtml).includes(phrase), false);
+  });
+
+  // Every alert should point at the next move.
+  const alerts = [...adminHtml.matchAll(/alert(.(.{6,90}?).);/g)].map(m => m[1]);
+  const vague = alerts.filter(a => /^(Error|Invalid|Failed|Nothing is|Required)/i.test(a));
+  check('no alert is a bare verdict', vague, []);
+}
+
 // ── 6. Admin shows every task exactly once ──────────────────────────────
 section('Admin grouping');
 const adminSrc = scripts(adminHtml).find(s => s.includes('function sectionsForFlow'));

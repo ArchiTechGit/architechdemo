@@ -168,7 +168,7 @@
       <div class="summary">
         <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
         <div class="summary-item"><div class="summary-label">Hours</div><div class="summary-value" id="sum-hours">0</div></div>
-        <div class="summary-item"><div class="summary-label">Business / After</div><div class="summary-value" id="sum-split">0 / 0</div></div>
+        <div class="summary-item"><div class="summary-label">Business / after hours</div><div class="summary-value" id="sum-split">0 / 0</div></div>
       </div>
       <div class="q-sub" id="slot-hint" role="status" aria-live="polite"></div>
 
@@ -228,8 +228,8 @@
     function showLoadFailure(err) {
       const root = document.getElementById('flow-list');
       root.innerHTML =
-        '<div class="q-card"><div class="q-label">The tool could not load its configuration</div>' +
-        '<div class="q-sub">' + esc(err.message) + '. Reload the page; if it keeps happening, the config may be mid-edit.</div></div>';
+        '<div class="q-card"><div class="q-label">The flows could not be loaded</div>' +
+        '<div class="q-sub">' + esc(err.message) + '. Reload the page. If it keeps happening, someone may be part-way through saving a change in the admin page.</div></div>';
     }
 
     const esc = PSEngine.esc;
