@@ -7,37 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    :root {
-      --bg:        #0D1825;
-      --surface-1: #13294B;
-      --surface-2: #1A3460;
-      --cyan:      #05C3DD;
-      --cyan-dim:  rgba(5,195,221,0.10);
-      --cyan-mid:  rgba(5,195,221,0.25);
-      --text:      #F0F6FC;
-      --muted:     #8FA3BA;
-      --faint:     #7C93AD;
-      --border:    rgba(255,255,255,0.07);
-      --amber:     #F0A020;
-      --font:      'Roboto', sans-serif;
-    }
-
-    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
-
-    .page { max-width: 900px; margin: 0 auto; padding: 48px 24px 100px; }
-
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
-    .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
-    .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
-
-    h1.page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
-    .page-desc  { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 30px; max-width: 680px; }
-
-    .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
+  <link rel="stylesheet" href="./ui.css" />
+  <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
     .product-grid, .scope-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
@@ -53,9 +24,6 @@
     .pick-note { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
 
     /* ─── Step 3: questionnaire ─── */
-    .q-card { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
-    .q-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .q-sub { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
 
     .stepper { display: flex; align-items: center; gap: 14px; }
     .stepper button {
@@ -73,30 +41,6 @@
     .toggle-text { font-size: 13px; color: var(--text); }
 
     .checklist { display: flex; flex-direction: column; gap: 10px; }
-    .check-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .check-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; }
-    .check-row span { font-size: 13px; color: var(--text); }
-
-    .btn-primary {
-      background: var(--cyan); color: #0D1825; font-size: 14px; font-weight: 700; border: none;
-      padding: 14px 30px; border-radius: 8px; cursor: pointer; font-family: var(--font); margin-top: 10px;
-    }
-    .btn-primary:hover { opacity: 0.9; }
-
-    .btn-ghost {
-      background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 13px;
-      padding: 12px 22px; border-radius: 8px; cursor: pointer; font-family: var(--font); margin-top: 10px; margin-left: 10px;
-    }
-    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-    /* ─── Step 4: output ─── */
-    .summary {
-      display: flex; gap: 32px; flex-wrap: wrap; background: var(--cyan-dim);
-      border: 1px solid var(--cyan-mid); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
-    }
-    .summary-item .summary-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-    .summary-item .summary-value { font-size: 28px; font-weight: 700; color: var(--cyan); line-height: 1; }
-
 
     .out-block { margin-bottom: 22px; }
     .out-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
@@ -110,29 +54,6 @@
 
     .step { display: none; }
     .step.active { display: block; }
-
-    .footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
-    .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
-    .footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
-    .footer-note a { color: var(--cyan); text-decoration: none; }
-
-    /* A focus ring that survives on a dark ground. :focus-visible keeps it off
-       mouse clicks while always showing it for keyboard use. */
-    :focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-    ::placeholder { color: var(--faint); opacity: 1; }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-      }
-    }
   </style>
 </head>
 <body>
@@ -165,10 +86,10 @@
 
     <div id="output-section" class="step">
       <div class="section-label">Task List</div>
-      <div class="summary">
-        <div class="summary-item"><div class="summary-label">Tasks</div><div class="summary-value" id="sum-tasks">0</div></div>
-        <div class="summary-item"><div class="summary-label">Hours</div><div class="summary-value" id="sum-hours">0</div></div>
-        <div class="summary-item"><div class="summary-label">Business / after hours</div><div class="summary-value" id="sum-split">0 / 0</div></div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-label">Tasks</div><div class="stat-value" id="sum-tasks">0</div></div>
+        <div class="stat"><div class="stat-label">Hours</div><div class="stat-value" id="sum-hours">0</div></div>
+        <div class="stat"><div class="stat-label">Business / after hours</div><div class="stat-value" id="sum-split">0 / 0</div></div>
       </div>
       <div class="q-sub" id="slot-hint" role="status" aria-live="polite"></div>
 
@@ -178,7 +99,7 @@
             <div class="out-title">1 · Task details</div>
             <div class="out-note" id="hint-task"></div>
           </div>
-          <button class="btn-ghost" onclick="copyBlock('task')">Copy</button>
+          <button class="btn-ghost btn-ghost--roomy" onclick="copyBlock('task')">Copy</button>
         </div>
         <textarea id="out-task" readonly></textarea>
       </div>
@@ -189,12 +110,12 @@
             <div class="out-title">2 · Resource hours</div>
             <div class="out-note" id="hint-resource"></div>
           </div>
-          <button class="btn-ghost" onclick="copyBlock('resource')">Copy</button>
+          <button class="btn-ghost btn-ghost--roomy" onclick="copyBlock('resource')">Copy</button>
         </div>
         <textarea id="out-resource" readonly></textarea>
       </div>
 
-      <button class="btn-ghost" onclick="backToQuestions()">← Back to questions</button>
+      <button class="btn-ghost btn-ghost--roomy" onclick="backToQuestions()">← Back to questions</button>
     </div>
     </main>
 
@@ -384,7 +305,7 @@
       const card = document.createElement('div');
       card.className = 'q-card';
       const val = resolved[inp.id];
-      const help = inp.help ? '<div class="q-sub">' + esc(inp.help) + '</div>' : '';
+      const help = inp.help ? '<div class="q-sub q-sub--spaced">' + esc(inp.help) + '</div>' : '';
 
       if (inp.type === 'number') {
         card.innerHTML =

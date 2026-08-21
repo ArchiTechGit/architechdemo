@@ -6,57 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    :root {
-      --bg:        #0D1825;
-      --surface-1: #13294B;
-      --surface-2: #1A3460;
-      --cyan:      #05C3DD;
-      --cyan-dim:  rgba(5,195,221,0.10);
-      --cyan-mid:  rgba(5,195,221,0.25);
-      --text:      #F0F6FC;
-      --muted:     #8FA3BA;
-      --faint:     #7C93AD;
-      --border:    rgba(255,255,255,0.07);
-      --amber:     #F0A020;
-      --font:      'Roboto', sans-serif;
-    }
-
-    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
-    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 100px; }
-
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-    .header-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cyan); }
-    .header a { color: var(--muted); font-size: 11px; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; }
-    .header a:hover { color: var(--text); }
-
-    .page-title { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
-    .page-desc  { font-size: 14.5px; color: var(--muted); line-height: 1.75; margin-bottom: 26px; max-width: 700px; }
-
-    .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
-
-    .q-card { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; }
-    .q-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .q-sub { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
-
-    .btn-primary { background: var(--cyan); color: #0D1825; font-size: 14px; font-weight: 700; border: none;
-      padding: 13px 28px; border-radius: 8px; cursor: pointer; font-family: var(--font); margin-top: 10px; }
-    .btn-primary:hover { opacity: 0.9; }
-
-    .btn-secondary { background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; border: none;
-      padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font); }
-    .btn-secondary:hover { opacity: 0.9; }
-
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 12.5px;
-      padding: 6px 12px; border-radius: 7px; cursor: pointer; font-family: var(--font); margin-left: 6px; }
-    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-    .btn-add { background: transparent; border: 1px dashed var(--border); color: var(--muted); font-size: 12.5px;
-      padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: var(--font); width: 100%; text-align: left; }
-    .btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
+  <link rel="stylesheet" href="./ui.css" />
+  <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
     .drag-row:active { cursor: grabbing; }
@@ -66,22 +17,6 @@
     .grip { color: var(--faint); font-size: 14px; line-height: 24px; user-select: none;
       flex-shrink: 0; letter-spacing: 2px; min-width: 24px; min-height: 24px; text-align: center; }
     .drag-row:hover .grip { color: var(--cyan); }
-    .btn-x { background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer;
-      min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0; }
-    .btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-
-    .chip { display: inline-flex; align-items: center; background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
-      color: var(--cyan); font-size: 11.5px; font-family: 'SFMono-Regular', Consolas, monospace;
-      padding: 4px 10px; min-height: 24px; border-radius: 20px; cursor: pointer; margin: 0 6px 6px 0; }
-    .chip:hover { background: var(--cyan-mid); }
-    .chip.plain { background: transparent; border-style: dashed; color: var(--muted); }
-    .chip.plain:hover { color: var(--cyan); border-color: var(--cyan-mid); background: transparent; }
-
-    input[type="password"], input[type="text"], input[type="number"], select, textarea {
-      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--surface-1); color: var(--text); font-family: var(--font); font-size: 13.5px;
-    }
-    textarea { resize: vertical; min-height: 48px; }
 
     .field { margin-bottom: 14px; }
     .field-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
@@ -103,10 +38,6 @@
     .row-editor label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
     .row-editor label input { width: auto; }
     .row-editor .rate-label { flex: 1; font-size: 12.5px; color: var(--muted); }
-
-    .checkbox-row { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px; }
-    .checkbox-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; }
-    .checkbox-row span { font-size: 13px; }
 
     .fbar { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
     .fbar select { flex: 1; }
@@ -132,14 +63,7 @@
     .act-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
     .act-hours { font-size: 11.5px; font-weight: 700; color: var(--cyan); flex-shrink: 0; white-space: nowrap; }
 
-    .pv-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    .pv-table th { text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border); }
-    .pv-table td { font-size: 12.5px; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
-      vertical-align: top; overflow-wrap: anywhere; }
     .pv-table td:nth-child(2) { min-width: 220px; }
-    .pv-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .pv-table tr:hover td { background: rgba(255,255,255,0.02); }
     .pv-phase { color: var(--muted); white-space: nowrap; }
     .pv-answers { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 10px 0 4px; }
     .pv-answer { font-size: 12.5px; }
@@ -148,51 +72,17 @@
     .pv-answer .opts { display: flex; flex-direction: column; gap: 4px; }
     .pv-answer .opts label { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: 12px; margin: 0; }
     .pv-answer .opts input { width: auto; }
-    .pv-totals { display: flex; gap: 26px; flex-wrap: wrap; background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
-      border-radius: 10px; padding: 14px 18px; margin-top: 14px; }
-    .pv-total-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-    .pv-total-value { font-size: 20px; font-weight: 700; color: var(--cyan); line-height: 1.2; }
 
-    .im-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .im-table th { text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted); padding: 6px 6px; border-bottom: 1px solid var(--border); }
-    .im-table td { font-size: 12.5px; padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
-    .im-table td input[type="text"], .im-table td select { padding: 6px 8px; font-size: 12.5px; }
-    .im-table tr.skip td { opacity: 0.4; }
     .im-desc { min-width: 260px; }
     .im-issue { font-size: 11.5px; color: var(--amber); line-height: 1.5; }
     .im-note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 10px 0; }
 
-    .im-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .im-table th { text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted); padding: 6px 6px; border-bottom: 1px solid var(--border); }
-    .im-table td { font-size: 12.5px; padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
-    .im-table td input[type="text"], .im-table td select { padding: 6px 8px; font-size: 12.5px; }
-    .im-table tr.skip td { opacity: 0.4; }
     .im-desc { min-width: 260px; }
     .im-issue { font-size: 11.5px; color: var(--amber); line-height: 1.5; }
     .im-note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 10px 0; }
 
     .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 16px 0; margin-top: 24px;
       border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
-
-    /* A focus ring that survives on a dark ground. :focus-visible keeps it off
-       mouse clicks while always showing it for keyboard use. */
-    :focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-    ::placeholder { color: var(--faint); opacity: 1; }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-      }
-    }
   </style>
 </head>
 <body>
@@ -974,7 +864,7 @@
     function toggleImportRow(n, on) {
       IMPORT.rows[n].include = on;
       const tr = document.querySelector('[data-im-row="' + n + '"]');
-      if (tr) tr.classList.toggle('skip', !on);
+      if (tr) tr.classList.toggle('is-skipped', !on);
       updateImportCount();
     }
 
@@ -1065,7 +955,7 @@
         list.map(v => `<option ${v === selected ? 'selected' : ''}>${esc(v)}</option>`).join('');
 
       const rows = IMPORT.rows.map((r, n) => `
-        <tr data-im-row="${n}" class="${r.include ? '' : 'skip'}">
+        <tr data-im-row="${n}" class="${r.include ? '' : 'is-skipped'}">
           <td><input type="checkbox" ${r.include ? 'checked' : ''} onchange="toggleImportRow(${n}, this.checked)"
             aria-label="Include row ${r.row}" /></td>
           <td class="im-desc"><input type="text" value="${attr(r.description)}"
@@ -1113,7 +1003,7 @@
           <button class="btn-ghost" onclick="setImportAll(false)">Untick all</button>
         </div>
         <div style="overflow-x:auto;">
-          <table class="im-table">
+          <table class="data-table">
             <tr><th></th><th>Description</th><th>Phase</th><th>Skill</th><th>Task type</th><th>Goes in</th><th>Hours read</th></tr>
             ${rows}
           </table>
@@ -1266,15 +1156,15 @@
       }).join('');
 
       box.innerHTML = `
-        <div class="pv-totals">
-          <div><div class="pv-total-label">Tasks</div><div class="pv-total-value">${out.lines.length}</div></div>
-          <div><div class="pv-total-label">Hours</div><div class="pv-total-value">${out.hours}</div></div>
-          <div><div class="pv-total-label">Business</div><div class="pv-total-value">${out.business}</div></div>
-          <div><div class="pv-total-label">After hours</div><div class="pv-total-value">${out.after}</div></div>
+        <div class="stat-row stat-row--compact">
+          <div><div class="stat-label">Tasks</div><div class="stat-value">${out.lines.length}</div></div>
+          <div><div class="stat-label">Hours</div><div class="stat-value">${out.hours}</div></div>
+          <div><div class="stat-label">Business</div><div class="stat-value">${out.business}</div></div>
+          <div><div class="stat-label">After hours</div><div class="stat-value">${out.after}</div></div>
         </div>
         <div class="q-sub" style="margin-top:10px;">${mapping}</div>${overflow}${capped}
         <div style="overflow-x:auto;">
-          <table class="pv-table">
+          <table class="data-table pv-table">
             <tr><th>Phase</th><th>Description</th>${header}<th class="num">Total</th></tr>
             ${rows}
           </table>
@@ -1386,13 +1276,13 @@
       const f = F();
       const all = member === undefined || member === 'all';
       container.innerHTML = `
-        <label class="checkbox-row">
+        <label class="check-row">
           <input type="checkbox" id="sf-all" ${all ? 'checked' : ''} onchange="sfToggleAll()" />
           <span>Every subflow</span>
         </label>
         <div id="sf-list" style="padding-left:24px;display:${all ? 'none' : 'block'};">
           ${f.subflows.map(s => `
-            <label class="checkbox-row">
+            <label class="check-row">
               <input type="checkbox" data-subflow="${attr(s.id)}" ${!all && member.includes(s.id) ? 'checked' : ''} />
               <span>${esc(s.name)}</span>
             </label>`).join('')}
@@ -1504,7 +1394,7 @@
           </div>`;
       } else if (type === 'yesno') {
         box.innerHTML = `
-          <label class="checkbox-row field">
+          <label class="check-row field">
             <input type="checkbox" id="if-default-toggle" ${e.default ? 'checked' : ''} />
             <span>On by default</span>
           </label>`;
@@ -1745,8 +1635,8 @@
       if (!box) return;
       box.innerHTML = 'Insert a variable: ' + numberInputs().map(i =>
         `<span class="chip" onclick="insertToken('${attr(tokenOf(i))}')">{${esc(tokenOf(i))}}</span>`
-      ).join('') + '<span class="chip plain" onclick="createVariableInline()">+ New variable</span>' +
-      '<span class="chip plain" onclick="insertToken(\'#\')">{#} line number</span>';
+      ).join('') + '<span class="chip chip--ghost" onclick="createVariableInline()">+ New variable</span>' +
+      '<span class="chip chip--ghost" onclick="insertToken(\'#\')">{#} line number</span>';
     }
 
     function renderEffortLines() {
@@ -2031,7 +1921,7 @@
               <input type="text" id="ff-subflow-label" value="${attr(f.subflowLabel || '')}" placeholder="Type of work" />
             </div>
           </div>
-          <label class="checkbox-row field">
+          <label class="check-row field">
             <input type="checkbox" id="ff-enabled" ${f.enabled !== false ? 'checked' : ''} />
             <span>Selectable in the builder (untick to hide it while you build it out)</span>
           </label>

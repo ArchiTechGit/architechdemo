@@ -11,6 +11,7 @@ const config = JSON.parse(fs.readFileSync(path.join(DIR, 'config.json'), 'utf8')
 const indexHtml = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
 const adminHtml = fs.readFileSync(path.join(DIR, 'admin.html'), 'utf8');
 const E = require(path.join(DIR, 'engine.js'));
+const uiCss = fs.readFileSync(path.join(DIR, 'ui.css'), 'utf8');
 
 let failures = 0;
 function check(name, actual, expected) {
@@ -176,9 +177,7 @@ section('Accessibility');
   const html = name === 'index.html' ? indexHtml : adminHtml;
   check(name + ' has exactly one h1', (html.match(/<h1\b/g) || []).length, 1);
   check(name + ' has a main landmark', /<main[\s>]/.test(html), true);
-  check(name + ' has a visible focus ring', /:focus-visible/.test(html), true);
-  check(name + ' respects reduced motion', /prefers-reduced-motion/.test(html), true);
-  check(name + ' styles its placeholders', /::placeholder/.test(html), true);
+  check(name + ' loads the shared stylesheet', html.indexOf('href="./ui.css"') !== -1, true);
   // Nothing may strip the focus outline without putting one back.
   const strips = /outline\s*:\s*(none|0)/.test(html);
   check(name + ' never removes the outline', strips, false);
@@ -204,6 +203,59 @@ check('saving twice is refused', adminHtml.includes('if (saving) return;'), true
 check('the save button disables itself', /btn\.disabled = true/.test(adminHtml), true);
 check('a save failure says nothing was written', adminHtml.includes('Nothing was written'), true);
 check('typed preview numbers are clamped', adminHtml.includes('function clampAnswer'), true);
+
+// ── 1i. One stylesheet, not two that drift ─────────────────────────────
+section('Shared styling');
+{
+  // The tokens and the accessibility baseline live in one file now. They were
+  // duplicated, which is how --faint came to be fixed twice.
+  check('the tokens are defined once', (uiCss.match(/--faint:/g) || []).length, 1);
+  check('and only in the shared sheet',
+    [indexHtml, adminHtml].filter(h => /--faint:/.test(h.split('<style>')[1] || '')).length, 0);
+
+  ['--bg', '--surface-1', '--surface-2', '--cyan', '--text', '--muted', '--faint', '--border', '--amber', '--font']
+    .forEach(t => check('shared sheet defines ' + t, uiCss.includes(t + ':'), true));
+
+  check('the focus ring lives there', /:focus-visible/.test(uiCss), true);
+  check('reduced motion lives there', /prefers-reduced-motion/.test(uiCss), true);
+  check('placeholder colour lives there', /::placeholder/.test(uiCss), true);
+
+  // A page redefining a shared selector is how the two drifted apart before.
+  const owned = [];
+  const uiNoComments = uiCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  uiNoComments.split('}').forEach(chunk => {
+    const sel = chunk.split('{')[0].trim().replace(/\s+/g, ' ');
+    if (sel && !sel.startsWith('@') && chunk.includes('{')) owned.push(sel);
+  });
+  check('the shared sheet defines a real set of rules', owned.length > 25, true);
+
+  ['index.html', 'admin.html'].forEach(name => {
+    const html = name === 'index.html' ? indexHtml : adminHtml;
+    const own = (html.split('<style>')[1] || '').split('</style>')[0].replace(/\/\*[\s\S]*?\*\//g, '');
+    const redefined = [];
+    own.split('}').forEach(chunk => {
+      const sel = chunk.split('{')[0].trim().replace(/\s+/g, ' ');
+      if (!sel || sel.startsWith('@') || !chunk.includes('{')) return;
+      // :root is allowed, but only to set the page width.
+      if (sel === ':root') {
+        const body = chunk.split('{')[1] || '';
+        if (!/^\s*--page-width:[^;]+;?\s*$/.test(body)) redefined.push(':root (beyond --page-width)');
+        return;
+      }
+      if (owned.includes(sel)) redefined.push(sel);
+    });
+    check(name + ' redefines nothing the shared sheet owns', redefined, []);
+  });
+
+  // The four patterns that did one job under two names.
+  [['.checkbox-row', '.check-row'], ['.pv-totals', '.stat-row'], ['.pv-total-value', '.stat-value'],
+   ['.summary-item', '.stat']].forEach(([gone, kept]) => {
+    check('retired ' + gone + ' in favour of ' + kept,
+      (indexHtml + adminHtml).includes(gone.slice(1)) === false || uiCss.includes(kept), true);
+  });
+  check('one checkbox row name survives', /checkbox-row/.test(indexHtml + adminHtml), false);
+  check('one totals component survives', /pv-total/.test(indexHtml + adminHtml), false);
+}
 
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
 section('PSE lists');

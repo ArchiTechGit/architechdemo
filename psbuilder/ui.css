@@ -1,0 +1,202 @@
+/* PS Builder — shared styling.
+ *
+ * Loaded by index.html and admin.html. Both pages had their own copy of the
+ * tokens and the base rules, which is how --faint came to be fixed twice and
+ * --amber came to be missing from one page. Anything here is the single
+ * definition; a page must not redefine a selector it finds in this file, and
+ * check.js fails the build if one does.
+ *
+ * A page sets --page-width for itself, because the builder wants room to
+ * breathe and the admin wants density. Everything else is common.
+ */
+
+/* ── tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:        #0D1825;
+  --surface-1: #13294B;
+  --surface-2: #1A3460;
+  --cyan:      #05C3DD;
+  --cyan-dim:  rgba(5,195,221,0.10);
+  --cyan-mid:  rgba(5,195,221,0.25);
+  --text:      #F0F6FC;
+  --muted:     #8FA3BA;
+  --faint:     #7C93AD;
+  --border:    rgba(255,255,255,0.07);
+  --amber:     #F0A020;
+  --font:      'Roboto', sans-serif;
+
+  --page-width: 900px;
+}
+
+/* ── reset and base ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+/* ── accessibility baseline ─────────────────────────────────────────────── */
+/* :focus-visible keeps the ring off mouse clicks while always showing it for
+   keyboard use. Nothing may set outline:none without putting one back. */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+::placeholder { color: var(--faint); opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── page frame ─────────────────────────────────────────────────────────── */
+.page { max-width: var(--page-width); margin: 0 auto; padding: 48px 24px 100px; }
+
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+.header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
+.header-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--cyan);
+}
+.header a {
+  color: var(--muted); font-size: 11px; text-decoration: none;
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px;
+}
+.header a:hover { color: var(--text); }
+
+h1.page-title, .page-title {
+  font-size: clamp(22px, 4vw, 30px); font-weight: 700;
+  margin-bottom: 10px; letter-spacing: -0.01em;
+}
+.page-desc {
+  font-size: 15px; color: var(--muted); line-height: 1.75;
+  margin-bottom: 26px; max-width: 680px;
+}
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--cyan); margin-bottom: 14px;
+}
+
+.footer {
+  margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px;
+}
+.footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
+.footer-note { font-size: 11px; color: var(--faint); line-height: 1.65; max-width: 560px; }
+.footer-note a { color: var(--cyan); text-decoration: none; }
+
+/* ── card ───────────────────────────────────────────────────────────────── */
+.q-card {
+  background: rgba(255,255,255,0.025); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px; margin-bottom: 12px;
+}
+.q-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.q-sub { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+/* Helper text that carries the gap under it, rather than the next thing above. */
+.q-sub--spaced { margin-bottom: 14px; }
+
+/* ── buttons ────────────────────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--cyan); color: var(--bg); font-size: 14px; font-weight: 700;
+  border: none; padding: 13px 28px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font); margin-top: 10px;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.45; cursor: default; }
+
+.btn-secondary {
+  background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600;
+  border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font);
+}
+.btn-secondary:hover { opacity: 0.9; }
+
+/* Compact by default: most of these sit inside dense rows of controls. */
+.btn-ghost {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  font-size: 12.5px; padding: 6px 12px; border-radius: 7px; cursor: pointer;
+  font-family: var(--font); margin-left: 6px;
+}
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+/* For a button standing on its own under a block of content. */
+.btn-ghost--roomy { font-size: 13px; padding: 12px 22px; border-radius: 8px; margin-top: 10px; margin-left: 10px; }
+
+.btn-add {
+  background: transparent; border: 1px dashed var(--border); color: var(--muted);
+  font-size: 12.5px; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font); width: 100%; text-align: left;
+}
+.btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
+
+.btn-x {
+  background: transparent; border: none; color: var(--muted); font-size: 16px;
+  cursor: pointer; min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0;
+}
+.btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+
+/* ── form controls ──────────────────────────────────────────────────────── */
+input[type="password"], input[type="text"], input[type="number"], select, textarea {
+  width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-1); color: var(--text); font-family: var(--font); font-size: 13.5px;
+}
+textarea { resize: vertical; min-height: 48px; }
+
+/* A checkbox and its label on one line. Both pages had this under a different
+   name, with a different gap. */
+.check-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.check-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; flex-shrink: 0; }
+.check-row span { font-size: 13px; color: var(--text); }
+
+/* ── chip ───────────────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; background: var(--cyan-dim);
+  border: 1px solid var(--cyan-mid); color: var(--cyan); font-size: 11.5px;
+  font-family: 'SFMono-Regular', Consolas, monospace; padding: 4px 10px;
+  min-height: 24px; border-radius: 20px; cursor: pointer; margin: 0 6px 6px 0;
+}
+.chip:hover { background: var(--cyan-mid); }
+.chip--ghost { background: transparent; border-style: dashed; color: var(--muted); }
+.chip--ghost:hover { color: var(--cyan); border-color: var(--cyan-mid); background: transparent; }
+
+/* ── headline numbers ───────────────────────────────────────────────────── */
+/* One row of totals. The builder shows the estimate's; the admin preview shows
+   the same numbers for a flow being edited, which is why this is shared. */
+.stat-row {
+  display: flex; gap: 32px; flex-wrap: wrap; background: var(--cyan-dim);
+  border: 1px solid var(--cyan-mid); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
+}
+/* One label-and-number pair. min-width:0 lets it shrink instead of pushing the row wide. */
+.stat { min-width: 0; }
+.stat-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+}
+.stat-value { font-size: 28px; font-weight: 700; color: var(--cyan); line-height: 1; }
+
+/* Inside a panel rather than at the top of a page. */
+.stat-row--compact { gap: 26px; padding: 14px 18px; margin-bottom: 0; margin-top: 14px; }
+.stat-row--compact .stat-label { font-size: 10px; margin-bottom: 2px; }
+.stat-row--compact .stat-value { font-size: 20px; line-height: 1.2; }
+
+/* ── data table ─────────────────────────────────────────────────────────── */
+/* Used by the preview and by the import review. Wrap it in a container with
+   overflow-x: auto; a wide table must scroll rather than push the page out. */
+.data-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.data-table th {
+  text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  font-size: 12.5px; padding: 6px 8px; vertical-align: top;
+  border-bottom: 1px solid rgba(255,255,255,0.04); overflow-wrap: anywhere;
+}
+.data-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+/* A row the reader has chosen to leave out. */
+.data-table tr.is-skipped td { opacity: 0.4; }
+.data-table td input[type="text"], .data-table td select { padding: 6px 8px; font-size: 12.5px; }
