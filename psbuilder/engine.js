@@ -240,10 +240,44 @@ const PSEngine = (function () {
     { key: 'description', header: 'description' },
   ];
 
+  // Where the resource columns sit when the whole sheet width is pasted:
+  // Phase..Subcontractor Effort is nine columns, then five groups of three.
+  const FIRST_RESOURCE_COLUMN = 9;
+  const RESOURCE_SLOTS = 5;
+
+  // Reads "R1 Business Hours" and friends out of a header row.
+  function resourcesFromHeader(first) {
+    const found = {};
+    first.forEach((raw, at) => {
+      const m = String(raw).match(/^r(\d)\s+(location|business hours|after hours)$/i);
+      if (!m) return;
+      const slot = Number(m[1]);
+      const key = m[2].toLowerCase() === 'location' ? 'location'
+        : m[2].toLowerCase() === 'business hours' ? 'business' : 'after';
+      found[slot] = found[slot] || { slot };
+      found[slot][key] = at;
+    });
+    return Object.values(found)
+      .filter(r => r.business !== undefined || r.after !== undefined)
+      .sort((a, b) => a.slot - b.slot);
+  }
+
+  // Same groups, worked out by position when there is no header to read.
+  function resourcesByPosition(width) {
+    const out = [];
+    for (let n = 0; n < RESOURCE_SLOTS; n++) {
+      const at = FIRST_RESOURCE_COLUMN + n * 3;
+      if (at + 2 >= width + 1 && at + 1 >= width) break;
+      if (at >= width) break;
+      out.push({ slot: n + 1, location: at, business: at + 1, after: at + 2 });
+    }
+    return out;
+  }
+
   // Works out which column is which: by the header row if there is one, else
   // by position, which is safe because the sheet fixes the order.
   function detectColumns(grid) {
-    if (!grid.length) return { map: {}, headerRow: false, width: 0, note: 'Nothing to read.' };
+    if (!grid.length) return { map: {}, resources: [], headerRow: false, width: 0, note: 'Nothing to read.' };
     const width = Math.max(...grid.map(r => r.length));
     const first = grid[0].map(c => c.toLowerCase());
 
@@ -254,31 +288,46 @@ const PSEngine = (function () {
         if (at !== -1) map[f.key] = at;
       });
       const found = Object.keys(map).length;
+      const resources = resourcesFromHeader(first);
       return {
-        map, headerRow: true, width,
-        note: `Read the header row and matched ${found} of the four columns.`,
+        map, resources, headerRow: true, width,
+        note: `Read the header row and matched ${found} of the four task columns`
+          + (resources.length ? `, plus hours for ${resources.map(r => 'R' + r.slot).join(', ')}.` : '.'),
       };
     }
 
     if (width === 1) {
       return {
-        map: { description: 0 }, headerRow: false, width,
+        map: { description: 0 }, resources: [], headerRow: false, width,
         note: 'One column, so it is being read as descriptions only.',
       };
     }
     if (width >= 4) {
+      // Only the full sheet width can be trusted to line the resource columns
+      // up by position; anything narrower gets the task columns alone.
+      const resources = width >= FIRST_RESOURCE_COLUMN + 2 ? resourcesByPosition(width) : [];
       return {
         map: { phase: 0, skill: 1, taskType: 2, description: 3 },
-        headerRow: false, width,
-        note: width > 4
-          ? `${width} columns, so the first four are being read as Phase, Skill Required, Task Type and Description, and the rest ignored.`
-          : 'Four columns, read as Phase, Skill Required, Task Type and Description.',
+        resources, headerRow: false, width,
+        note: width === 4
+          ? 'Four columns, read as Phase, Skill Required, Task Type and Description.'
+          : `${width} columns, read as the four task columns`
+            + (resources.length ? `, plus hours for ${resources.map(r => 'R' + r.slot).join(', ')}.` : ', with the rest ignored.'),
       };
     }
     return {
-      map: {}, headerRow: false, width, ambiguous: true,
+      map: {}, resources: [], headerRow: false, width, ambiguous: true,
       note: `${width} columns is not a shape this recognises. Paste either the four task-detail columns, or just the descriptions.`,
     };
+  }
+
+  // Spreadsheet cells arrive as text, and an empty one can be blank, a dash or
+  // a stray zero. Anything that is not a positive number means no hours.
+  function toHours(raw) {
+    if (raw === undefined || raw === null) return 0;
+    const n = Number(String(raw).replace(/[^0-9.\-]/g, ''));
+    if (!Number.isFinite(n) || n <= 0) return 0;
+    return Math.round(n * 100) / 100;
   }
 
   // Case and spacing should not decide whether a value is accepted.
@@ -317,8 +366,27 @@ const PSEngine = (function () {
       if (withinPaste.has(key)) issues.push({ field: 'description', kind: 'repeated', note: 'This description appears more than once in the paste' });
       withinPaste.add(key);
 
+      // Hours as recorded against each resource slot. Which role a slot was is
+      // not in the data, so it stays a slot number until the caller maps it.
+      const effort = [];
+      (cols.resources || []).forEach(res => {
+        const business = toHours(row[res.business]);
+        const after = toHours(row[res.after]);
+        if (!business && !after) return;
+        const rawLocation = res.location === undefined ? '' : cell(row[res.location]);
+        const location = matchFromList(rawLocation, config.locations);
+        if (rawLocation && !location) {
+          issues.push({ field: 'location', kind: 'unknown', value: rawLocation,
+            note: `"${rawLocation}" is not a location the PSE offers` });
+        } else if (!rawLocation) {
+          issues.push({ field: 'location', kind: 'missing', note: `No location against R${res.slot}` });
+        }
+        effort.push({ slot: res.slot, location: location || config.locations[0], business, after });
+      });
+
       drafts.push({
         row: n + 1,
+        effort,
         description,
         phase: pick('phase', config.phases, 'phase'),
         skill: pick('skill', config.skills, 'skill'),
@@ -339,6 +407,19 @@ const PSEngine = (function () {
     }
     const { drafts, skipped } = draftTasks(grid, cols, config, existingDescriptions);
     return { cols, drafts, skipped, rows: grid.length };
+  }
+
+  // Slots become roles only when the caller has said which role each column
+  // was, since the sheet keeps that on row 41 rather than in the rows.
+  function effortFromSlots(draftEffort, slotRoles) {
+    return (draftEffort || []).map(e => {
+      const role = slotRoles[e.slot];
+      if (!role) return null;
+      const entry = { role, location: e.location };
+      if (e.business) entry.business = { base: e.business };
+      if (e.after) entry.after = { base: e.after };
+      return entry;
+    }).filter(Boolean);
   }
 
   function roleName(config, id) {
@@ -376,6 +457,7 @@ const PSEngine = (function () {
     amountOf, fillText, buildLines, totalHours,
     assignSlots, applySlots, blockText, roleName, estimate,
     parseGrid, detectColumns, draftTasks, readPaste, IMPORT_FIELDS,
+    toHours, effortFromSlots, RESOURCE_SLOTS,
   };
 })();
 

@@ -639,25 +639,97 @@ section('Import commit');
   if (src.every(Boolean)) {
     const flow = { id: 'imp', name: 'Imp', vertical: config.verticals[0].id,
       subflows: [{ id: 'one', name: 'One' }, { id: 'two', name: 'Two' }], inputs: [], tasks: [] };
-    const IMPORT = { rows: [
-      { include: true, description: 'Shared task', phase: 'Design', skill: 'Collaboration', taskType: 'ArchiTech Activity', subflows: 'all' },
-      { include: true, description: 'Only in two', phase: 'Staging', skill: 'Security', taskType: 'Client Dependency', subflows: 'two' },
-      { include: false, description: 'Left behind', phase: 'Design', skill: 'Collaboration', taskType: 'ArchiTech Activity', subflows: 'all' },
-    ] };
-    const fn = new Function('F', 'IMPORT', 'EXPANDED', 'renderAdmin', 'alert',
+    const IMPORT = {
+      // R1 is mapped, R2 deliberately is not.
+      slotRoles: { 1: 'SSE' },
+      rows: [
+        { include: true, description: 'Shared task', phase: 'Design', skill: 'Collaboration',
+          taskType: 'ArchiTech Activity', subflows: 'all',
+          effort: [{ slot: 1, location: 'Client Site', business: 10, after: 0 }] },
+        { include: true, description: 'Only in two', phase: 'Staging', skill: 'Security',
+          taskType: 'Client Dependency', subflows: 'two',
+          effort: [{ slot: 1, location: 'Office', business: 2, after: 3 }] },
+        { include: true, description: 'Hours on an unmapped column', phase: 'Design', skill: 'Collaboration',
+          taskType: 'ArchiTech Activity', subflows: 'all',
+          effort: [{ slot: 2, location: 'Office', business: 7, after: 0 }] },
+        { include: false, description: 'Left behind', phase: 'Design', skill: 'Collaboration',
+          taskType: 'ArchiTech Activity', subflows: 'all', effort: [] },
+      ],
+    };
+    const fn = new Function('F', 'IMPORT', 'EXPANDED', 'renderAdmin', 'alert', 'PSEngine',
       src.join('\n') + '; return commitImport;')(
-      () => flow, IMPORT, new Set(), () => {}, () => {});
+      () => flow, IMPORT, new Set(), () => {}, () => {}, E);
     fn();
 
     check('only the ticked rows were added', flow.tasks.map(t => t.description),
-      ['Shared task', 'Only in two']);
+      ['Shared task', 'Only in two', 'Hours on an unmapped column']);
     check('an all-subflows row is marked all', flow.tasks[0].subflows, 'all');
     check('a mapped row goes to just that subflow', flow.tasks[1].subflows, ['two']);
     check('the fields come through', [flow.tasks[1].phase, flow.tasks[1].skill, flow.tasks[1].taskType],
       ['Staging', 'Security', 'Client Dependency']);
-    check('effort starts empty, to be costed', flow.tasks[0].effort, []);
-    check('ids are unique and derived from the text', flow.tasks.map(t => t.id), ['shared-task', 'only-in-two']);
+    check('ids are unique and derived from the text', flow.tasks.map(t => t.id),
+      ['shared-task', 'only-in-two', 'hours-on-an-unmapped-column']);
+
+    // The hours read out of the sheet must arrive against the role that was named.
+    check('business hours arrive on the mapped role', flow.tasks[0].effort,
+      [{ role: 'SSE', location: 'Client Site', business: { base: 10 } }]);
+    check('after hours stay separate', flow.tasks[1].effort,
+      [{ role: 'SSE', location: 'Office', business: { base: 2 }, after: { base: 3 } }]);
+    // Better to bring nothing than to guess which role a column was.
+    check('hours on an unmapped column are left behind', flow.tasks[2].effort, []);
+
+    // And the imported effort has to price the same way authored effort does.
+    const imported = { id: 'chk', name: 'Chk', vertical: config.verticals[0].id,
+      subflows: [{ id: 'one', name: 'One' }], inputs: [], tasks: [flow.tasks[1]] };
+    // The task was mapped to subflow "two", which this flow does not have.
+    imported.tasks = [Object.assign({}, flow.tasks[1], { subflows: 'all' })];
+    const out = E.estimate(config, imported, 'one', {});
+    check('imported hours total correctly', out.hours, 5);
+    check('and split business from after', [out.business, out.after], [2, 3]);
+    check('and land in the resource block', E.blockText(config.resourceColumns, out.lines).split('\t').slice(0, 3),
+      ['Office', '2', '3']);
   }
+}
+
+// ── 5e. Reading the resource columns out of a pasted block ─────────────
+section('Import hours');
+{
+  // A row shaped like the real sheet: 24 columns, hours against R1.
+  const wide = (desc, loc, bh, ah) => {
+    const r = new Array(24).fill('');
+    r[0] = 'Design'; r[1] = 'Collaboration'; r[2] = 'ArchiTech Activity'; r[3] = desc;
+    r[9] = loc; r[10] = bh; r[11] = ah;
+    return r.join('\t');
+  };
+  const res = E.readPaste([wide('With hours', 'Client Site', '10', ''),
+    wide('With after hours', 'Office', '2', '3'),
+    wide('No hours at all', 'Office', '0', '')].join('\n'), config, []);
+
+  check('the resource groups are found', res.cols.resources.length, 5);
+  check('R1 sits where the sheet puts it', res.cols.resources[0],
+    { slot: 1, location: 9, business: 10, after: 11 });
+  check('hours are read against the slot', res.drafts[0].effort,
+    [{ slot: 1, location: 'Client Site', business: 10, after: 0 }]);
+  check('after hours are kept apart', res.drafts[1].effort[0].after, 3);
+  check('a row with no hours gets no effort', res.drafts[2].effort, []);
+
+  // Spreadsheet cells are text, and empty comes in several disguises.
+  check('a blank is no hours', E.toHours(''), 0);
+  check('a dash is no hours', E.toHours('-'), 0);
+  check('a negative is no hours', E.toHours('-3'), 0);
+  check('a decimal survives', E.toHours('2.5'), 2.5);
+  check('a stray currency symbol is ignored', E.toHours('$ 430.17'), 430.17);
+
+  // Only the full width can be trusted to line the resource columns up.
+  check('four columns claim no resource groups',
+    E.detectColumns([['Design', 'Collaboration', 'ArchiTech Activity', 'A task']]).resources, []);
+  check('a header row finds them by name',
+    E.detectColumns([['Description', 'R1 Location', 'R1 Business Hours', 'R1 After Hours']]).resources,
+    [{ slot: 1, location: 1, business: 2, after: 3 }]);
+
+  check('an unmapped slot yields nothing', E.effortFromSlots(res.drafts[0].effort, {}), []);
+  check('a mapped slot yields effort', E.effortFromSlots(res.drafts[0].effort, { 1: 'SA' }),
+    [{ role: 'SA', location: 'Client Site', business: { base: 10 } }]);
 }
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────
