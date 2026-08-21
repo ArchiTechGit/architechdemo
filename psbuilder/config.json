@@ -249,10 +249,12 @@
         {
           "id": "existing-env-review",
           "phase": "Design",
-          "description": "WxCC — Existing Environment Review",
-          "subflows": "all",
           "skill": "Collaboration",
           "taskType": "ArchiTech Activity",
+          "description": "WxCC — Existing Environment Review",
+          "subflows": [
+            "migration"
+          ],
           "effort": []
         },
         {
