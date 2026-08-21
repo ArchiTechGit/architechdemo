@@ -359,6 +359,58 @@ section('Adaptation');
   check('no growing row is stuck at its content width', stuck, []);
 }
 
+// ── 1l. Nothing written twice ──────────────────────────────────────────
+section('No duplication');
+{
+  // A second element with the same id is never found by getElementById, so it
+  // sits there doing nothing and looks like a working control.
+  [['index.html', indexHtml], ['admin.html', adminMarkup]].forEach(([name, markup]) => {
+    const ids = [...markup.matchAll(/ id="([^"$]+)"/g)].map(m => m[1]);
+    const twice = ids.filter((id, n) => ids.indexOf(id) !== n);
+    check(name + ' has no duplicate element id', [...new Set(twice)], []);
+  });
+
+  // Two identical buttons in a toolbar both work, which is exactly why the
+  // second one goes unnoticed.
+  [['index.html', indexHtml], ['admin.html', adminMarkup]].forEach(([name, markup]) => {
+    const buttons = [...markup.matchAll(/<button[^>]*onclick="([^"]+)"[^>]*>([^<]*)</g)]
+      .map(m => m[1] + ' -> ' + m[2].trim());
+    const twice = buttons.filter((b, n) => buttons.indexOf(b) !== n);
+    check(name + ' has no button written twice', [...new Set(twice)], []);
+  });
+
+  // A rule declared twice in the same scope is a merge artefact. An override
+  // inside a media query is not - that is how a responsive rule is written -
+  // so each block is compared on its own.
+  const selectorsIn = (css) => [...css.matchAll(/(?:^|\n)\s*([.#][\w-][^{,\n]*)\{/g)].map(m => m[1].trim());
+  const blocksOf = (css) => {
+    const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const media = [];
+    // Pull each @media block out, leaving the base rules behind.
+    const base = clean.replace(/@media[^{]*\{([\s\S]*?\n\s*\})\s*\n/g, (whole, inner) => {
+      media.push(inner);
+      return String.fromCharCode(10);
+    });
+    return [base].concat(media);
+  };
+
+  [['ui.css', uiCss], ['index.html', (indexHtml.split('<style>')[1] || '').split('</style>')[0]],
+   ['admin.html', (adminMarkup.split('<style>')[1] || '').split('</style>')[0]]].forEach(([name, css]) => {
+    const twice = [];
+    blocksOf(css).forEach(block => {
+      const sels = selectorsIn(block);
+      sels.forEach((s, n) => { if (sels.indexOf(s) !== n) twice.push(s); });
+    });
+    check(name + ' declares each selector once per block', [...new Set(twice)], []);
+  });
+  // And the same guard on the scripts: one definition each.
+  adminFiles.forEach(({ name, src }) => {
+    const consts = [...src.matchAll(/^(?:const|let)\s+([A-Z][A-Z_]+)\s*=/gm)].map(m => m[1]);
+    const twice = consts.filter((c, n) => consts.indexOf(c) !== n);
+    check(name + ' declares each constant once', [...new Set(twice)], []);
+  });
+}
+
 // ── 2. The lists lifted from the PSE are intact ─────────────────────────
 section('PSE lists');
 check('seven engineer roles', (config.roles || []).map(r => r.id),
