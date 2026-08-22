@@ -13,7 +13,9 @@ let IMPORT = null;
 function toggleImport() {
   const f = F();
   if (!f) return;
-  IMPORT = IMPORT ? null : { text: '', result: null, rows: [] };
+  const opening = !IMPORT;
+  if (opening) closeOtherPanels('import');
+  IMPORT = opening ? { text: '', result: null, rows: [] } : null;
   renderAdmin();
 }
 
@@ -139,7 +141,7 @@ function renderImport() {
   card.className = 'q-card';
   card.innerHTML = `
     <div class="row-editor" style="margin-bottom:4px;">
-      <span class="q-label" style="flex:1;margin:0;">Import tasks from a PSE</span>
+      <span class="q-label" style="flex:1;margin:0;">Read tasks out of a PSE</span>
       <button class="btn-x" onclick="toggleImport()" title="Close">&#10005;</button>
     </div>
     <div class="q-sub">Select the task rows in <b>Project Technical Tasks</b> and copy them, then paste here.

@@ -208,6 +208,36 @@ function makeDraggable(row, kind, idx, siblings) {
 // re-render. Without it Alt+Down moves once and then focus is gone.
 let REFOCUS = null;
 
+// The panels are alternatives, not layers: each one wants the width and the
+// attention. Opening one puts the others away rather than stacking them down
+// the page where they push the real content out of sight.
+//
+// Each entry names the state that holds the panel open and the toolbar button
+// that opens it, so both the closing and the pressed state come from one list.
+const PANELS = [
+  { key: 'flow',     button: 'btn-settings', isOpen: () => !!EDITING && (EDITING.kind === 'flow' || EDITING.kind === 'new-flow'), close: () => { EDITING = null; } },
+  { key: 'import',   button: 'btn-import',   isOpen: () => !!IMPORT,   close: () => { IMPORT = null; } },
+  { key: 'preview',  button: 'btn-preview',  isOpen: () => !!PREVIEW,  close: () => { PREVIEW = null; } },
+  { key: 'transfer', button: 'btn-transfer', isOpen: () => !!TRANSFER, close: () => { TRANSFER = null; } },
+];
+
+// Called by each toggle before it opens itself.
+function closeOtherPanels(keep) {
+  PANELS.forEach(p => { if (p.key !== keep) p.close(); });
+}
+
+// The toolbar has to say which panel is open, or the only clue is a slab of
+// form appearing somewhere further down.
+function syncToolbar() {
+  PANELS.forEach(p => {
+    const btn = document.getElementById(p.button);
+    if (!btn) return;
+    const open = p.isOpen();
+    btn.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+}
+
 function reorder(kind, from, to, siblings) {
   if (kind === 'input') return reorderInputs(from, to);
   if (kind === 'subflow') return reorderSubflowRows(from, to);
@@ -351,10 +381,11 @@ function renderAdmin() {
 
   const fslot = document.getElementById('flow-form-slot');
   fslot.innerHTML = '';
-  if (EDITING && EDITING.kind === 'new-flow') { renderNewFlowForm(fslot); return renderRest(true); }
+  if (EDITING && EDITING.kind === 'new-flow') { renderNewFlowForm(fslot); renderRest(true); return syncToolbar(); }
   if (EDITING && EDITING.kind === 'flow') renderFlowForm(fslot);
   renderRest(false);
   restoreFocus();
+  syncToolbar();
 }
 
 function renderRest(hideRest) {

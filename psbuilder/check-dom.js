@@ -272,6 +272,61 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── one panel at a time ───────────────────────
+section('Admin: the panels are alternatives');
+{
+  const { window, errors, click, $, $$ } = boot('admin.html', ADMIN_SCRIPTS);
+  window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+  errors.length = 0;
+
+  const PANELS = [
+    ['btn-settings', 'flow-form-slot'],
+    ['btn-import', 'import-slot'],
+    ['btn-preview', 'preview-slot'],
+    ['btn-transfer', 'transfer-slot'],
+  ];
+  const filled = () => PANELS.filter(([, slot]) => $('#' + slot).children.length).map(([b]) => b);
+  const pressed = () => PANELS.filter(([b]) => $('#' + b).classList.contains('is-open')).map(([b]) => b);
+
+  check('nothing is open to begin with', filled(), []);
+  check('and no button looks held down', pressed(), []);
+
+  // Four panels used to be able to stack down one page with nothing saying so.
+  PANELS.forEach(([button, slot]) => {
+    click($('#' + button));
+    check(button + ' opens its panel', $('#' + slot).children.length > 0, true);
+    check('and is the only one open', filled(), [button]);
+    check('and is the only button held down', pressed(), [button]);
+    check('which it also says out loud', $('#' + button).getAttribute('aria-expanded'), 'true');
+  });
+
+  // The last one is still open: pressing it again should put it away.
+  const last = PANELS[PANELS.length - 1][0];
+  click($('#' + last));
+  check('pressing the open one closes it', filled(), []);
+  check('and releases the button', pressed(), []);
+  check('none of that raised an error', errors, []);
+
+  // Opening a task form is not a panel, and must not close the one that is open.
+  click($('#btn-preview'));
+  $$('#tasks-root .block-head').forEach(click);
+  const editBtn = [...$$('#tasks-root .act')[0].parentElement.querySelectorAll('button')]
+    .find(b => b.textContent.trim() === 'Edit');
+  errors.length = 0;
+  click(editBtn);
+  check('editing a task leaves the open panel alone', pressed(), ['btn-preview']);
+  check('and still opens the form', !!$('#tf-description'), true);
+  check('with no error', errors, []);
+
+  // The two buttons that used to read as the same thing.
+  check('one button reads a sheet', $('#btn-import').textContent.trim(), 'Read a sheet');
+  check('the other moves a flow', $('#btn-transfer').textContent.trim(), 'Back up / move');
+  check('and they no longer share a word',
+    $('#btn-import').textContent.trim().split(/\s+/)
+      .filter(w => $('#btn-transfer').textContent.trim().split(/\s+/).includes(w)), []);
+}
+
 // ─────────────────────── pasting a sheet with hours ───────────────────────
 section('Import: hours from a pasted sheet');
 {

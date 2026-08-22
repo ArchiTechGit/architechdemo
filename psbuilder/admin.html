@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.10.1" />
+  <link rel="stylesheet" href="./ui.css?v=0.10.2" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
@@ -146,6 +146,11 @@
     /* The three flow-scoped actions read as one thing, set slightly apart from
        the picker they act on. */
     .fbar-group { display: flex; gap: 6px; align-items: center; }
+    /* Which panel is open. Without this the only clue is a slab of form
+       appearing somewhere further down the page. */
+    .btn-ghost.is-open {
+      color: var(--cyan); border-color: var(--cyan-mid); background: var(--cyan-dim);
+    }
     .fbar-group .btn-ghost { margin-left: 0; }
   </style>
 </head>
@@ -196,10 +201,10 @@
         <select id="flow-select" onchange="switchFlow(this.value)"></select>
         <!-- These three act on the flow in the picker, so they sit with it. -->
         <div class="fbar-group">
-          <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
-          <button class="btn-ghost" onclick="toggleImport()">Import</button>
-          <button class="btn-ghost" onclick="togglePreview()">Preview</button>
-          <button class="btn-ghost" onclick="toggleTransfer()">Export / import</button>
+          <button class="btn-ghost" id="btn-settings" aria-expanded="false" onclick="openFlowSettings()">Settings</button>
+          <button class="btn-ghost" id="btn-import" aria-expanded="false" onclick="toggleImport()">Read a sheet</button>
+          <button class="btn-ghost" id="btn-preview" aria-expanded="false" onclick="togglePreview()">Preview</button>
+          <button class="btn-ghost" id="btn-transfer" aria-expanded="false" onclick="toggleTransfer()">Back up / move</button>
         </div>
         <!-- Making a flow is the one thing here that starts something. -->
         <button class="btn-secondary" onclick="openNewFlow()">+ New flow</button>
@@ -224,13 +229,13 @@
     </main>
   </div>
 
-  <script src="./engine.js?v=0.10.1"></script>
-  <script src="./admin-github.js?v=0.10.1"></script>
-  <script src="./admin-render.js?v=0.10.1"></script>
-  <script src="./admin-forms.js?v=0.10.1"></script>
-  <script src="./admin-import.js?v=0.10.1"></script>
-  <script src="./admin-preview.js?v=0.10.1"></script>
-  <script src="./admin-transfer.js?v=0.10.1"></script>
+  <script src="./engine.js?v=0.10.2"></script>
+  <script src="./admin-github.js?v=0.10.2"></script>
+  <script src="./admin-render.js?v=0.10.2"></script>
+  <script src="./admin-forms.js?v=0.10.2"></script>
+  <script src="./admin-import.js?v=0.10.2"></script>
+  <script src="./admin-preview.js?v=0.10.2"></script>
+  <script src="./admin-transfer.js?v=0.10.2"></script>
 
 </body>
 </html>

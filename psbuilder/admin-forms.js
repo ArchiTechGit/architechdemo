@@ -668,8 +668,8 @@ function saveTaskForm(idx) {
 }
 
 // ─── Flow settings and new flows ───
-function openFlowSettings() { EDITING = { kind: 'flow' }; renderAdmin(); }
-function openNewFlow() { EDITING = { kind: 'new-flow' }; renderAdmin(); }
+function openFlowSettings() { closeOtherPanels('flow'); EDITING = { kind: 'flow' }; renderAdmin(); }
+function openNewFlow() { closeOtherPanels('flow'); EDITING = { kind: 'new-flow' }; renderAdmin(); }
 
 function renderNewFlowForm(slot) {
   slot.innerHTML = `

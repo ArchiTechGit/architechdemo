@@ -13,7 +13,11 @@ function togglePreview() {
   if (!f) return;
   // null is the single path a flow with no subflows has, and is what the engine
   // reads as "everything marked for all subflows".
-  PREVIEW = PREVIEW ? null : { subflow: (f.subflows[0] || {}).id || null, answers: {} };
+  const opening = !PREVIEW;
+  if (opening) closeOtherPanels('preview');
+  // null is the single path a flow with no subflows has, and is what the engine
+  // reads as "everything marked for all subflows".
+  PREVIEW = opening ? { subflow: (f.subflows[0] || {}).id || null, answers: {} } : null;
   renderAdmin();
 }
 

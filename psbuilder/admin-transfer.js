@@ -18,7 +18,9 @@ const CONFIG_FILE_KIND = 'psbuilder.config';
 const FILE_VERSION = 1;
 
 function toggleTransfer() {
-  TRANSFER = TRANSFER ? null : { text: '', report: null, mode: 'add' };
+  const opening = !TRANSFER;
+  if (opening) closeOtherPanels('transfer');
+  TRANSFER = opening ? { text: '', report: null, mode: 'add' } : null;
   renderAdmin();
 }
 
@@ -360,7 +362,7 @@ function renderTransfer() {
 
   box.innerHTML = `
     <div class="q-card" style="margin-bottom:22px;">
-      <div class="q-label">Export and import</div>
+      <div class="q-label">Back up a flow, or move one</div>
       <div class="q-sub q-sub--spaced">
         A flow file carries the flow and the phases, skills, roles and vertical it needs, so it can
         be checked against this config before anything changes. Nothing is written to GitHub until
