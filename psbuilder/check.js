@@ -208,6 +208,64 @@ check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(a
 check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
 
 // ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Hours from a pasted sheet')
+{
+  const imp = adminFiles.find(f => f.name === 'admin-import.js').src;
+
+  // The sheet keeps the role for each resource column on row 41, not in the
+  // rows, so a paste cannot say whose hours these are. Guessing would mis-cost
+  // the work, so it asks -- but the asking used to be a bare dropdown under a
+  // grey note, and the default outcome of pasting a sheet full of hours was no
+  // hours at all.
+  check('nothing is assumed about whose hours they are',
+    /IMPORT.slotRoles = {};/.test(imp), true);
+  check('the panel describes what each column carries',
+    /PSEngine.slotSummary/.test(imp), true);
+  check('and dropping the hours is something you pick',
+    /Do not bring these hours/.test(imp), true);
+  check('the add button refuses while a column is unanswered',
+    /Say whose hours R/.test(imp), true);
+  // Not just a label: the button has to actually stop accepting the click.
+  check('and that refusal is a real disable',
+    imp.indexOf('Say whose hours R') < imp.indexOf('btn.disabled = true'), true);
+
+  // 'none' means unmapped. Read as a role it would put a task against an
+  // engineer that does not exist.
+  check("the engine reads 'none' as no role",
+    /!role || role === 'none'/.test(fs.readFileSync(path.join(DIR, 'engine.js'), 'utf8')), true);
+  const eff = [{ slot: 1, location: 'Office', business: 2, after: 0.5 },
+               { slot: 2, location: 'Client Site', business: 3, after: 0 }];
+  check('so choosing it brings nothing across', E.effortFromSlots(eff, { 1: 'none', 2: 'none' }), []);
+  check('and it never becomes a role',
+    E.effortFromSlots(eff, { 1: 'SE', 2: 'none' }).map(x => x.role), ['SE']);
+  check('an unanswered column is the same as none', E.effortFromSlots(eff, {}), []);
+
+  // The summary is what makes a column recognisable, so it has to add up.
+  const summary = E.slotSummary([{ effort: eff }, { effort: eff }]);
+  check('the summary totals the hours per column',
+    summary.map(s => [s.slot, s.hours]), [[1, 5], [2, 6]]);
+  check('and counts the rows they came from', summary.map(s => s.rows), [2, 2]);
+  check('and keeps the locations apart',
+    summary.map(s => s.locations), [['Office'], ['Client Site']]);
+  check('a column with no hours summarises to nothing',
+    E.slotSummary([]), []);
+
+  // The positional rule the paste relies on: nine columns, then threes.
+  const wide = (n) => {
+    const head = ['Kickoff', 'Collaboration', 'ArchiTech Activity', 'A task', '0', '0', '0', '', ''];
+    for (let i = 0; i < n; i++) head.push('Office', '1', '0');
+    return E.detectColumns(E.parseGrid(head.join('	')));
+  };
+  check('one group of three is R1',
+    wide(1).resources.map(r => [r.slot, r.location, r.business, r.after]), [[1, 9, 10, 11]]);
+  check('two groups are R1 and R2',
+    wide(2).resources.map(r => r.slot), [1, 2]);
+  check('and it stops at the number of columns the sheet has',
+    wide(9).resources.length, E.RESOURCE_SLOTS);
+  check('four columns alone still bring no hours',
+    E.detectColumns(E.parseGrid('Kickoff	Collaboration	ArchiTech Activity	A task')).resources, []);
+}
+
 section('Export and import')
 {
   const tr = adminFiles.find(f => f.name === 'admin-transfer.js').src;

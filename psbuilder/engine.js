@@ -425,12 +425,41 @@ const PSEngine = (function () {
     return { cols, drafts, skipped, rows: grid.length };
   }
 
+  // What a pasted resource column actually holds. The sheet does not say whose
+  // column it was, so the next best thing is to describe it: how many hours,
+  // over how many rows, in which locations. That is usually enough to recognise.
+  function slotSummary(drafts) {
+    const byslot = new Map();
+    (drafts || []).forEach(d => {
+      (d.effort || []).forEach(en => {
+        const s = byslot.get(en.slot) || { slot: en.slot, business: 0, after: 0, rows: 0, locations: new Set() };
+        s.business += en.business || 0;
+        s.after += en.after || 0;
+        if (en.business || en.after) s.rows++;
+        if (en.location) s.locations.add(en.location);
+        byslot.set(en.slot, s);
+      });
+    });
+    return [...byslot.values()]
+      .map(s => ({
+        slot: s.slot,
+        business: round2(s.business),
+        after: round2(s.after),
+        hours: round2(s.business + s.after),
+        rows: s.rows,
+        locations: [...s.locations],
+      }))
+      .sort((a, b) => a.slot - b.slot);
+  }
+
   // Slots become roles only when the caller has said which role each column
   // was, since the sheet keeps that on row 41 rather than in the rows.
   function effortFromSlots(draftEffort, slotRoles) {
     return (draftEffort || []).map(e => {
       const role = slotRoles[e.slot];
-      if (!role) return null;
+      // 'none' is a deliberate 'do not bring these hours', and has to be read
+      // as unmapped rather than as the name of a role.
+      if (!role || role === 'none') return null;
       const entry = { role, location: e.location };
       if (e.business) entry.business = { base: e.business };
       if (e.after) entry.after = { base: e.after };
@@ -671,7 +700,7 @@ const PSEngine = (function () {
     amountOf, fillText, buildLines, totalHours,
     assignSlots, applySlots, blockText, roleName, phaseIndex, estimate,
     parseGrid, detectColumns, draftTasks, readPaste, IMPORT_FIELDS,
-    toHours, effortFromSlots, RESOURCE_SLOTS, validateConfig,
+    toHours, effortFromSlots, slotSummary, RESOURCE_SLOTS, validateConfig,
   };
 })();
 

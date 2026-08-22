@@ -50,6 +50,17 @@ function setSlotRole(slot, role) {
   renderAdmin();
 }
 
+// Which columns still have nobody against them. Choosing to drop the hours
+// counts as answered -- effortFromSlots ignores 'none' the same way it ignores
+// an unknown role, but the difference is that it was chosen.
+function unresolvedSlots() {
+  return (IMPORT.slots || []).filter(s => !IMPORT.slotRoles[s]);
+}
+
+function droppedSlots() {
+  return (IMPORT.slots || []).filter(s => IMPORT.slotRoles[s] === 'none');
+}
+
 // How many hour entries will actually come across, given the mapping so far.
 function mappedEffortCount() {
   return IMPORT.rows.reduce((n, r) => n + (r.include
@@ -84,6 +95,13 @@ function updateImportCount() {
   if (!btn) return;
   const n = IMPORT.rows.filter(r => r.include).length;
   const hours = mappedEffortCount();
+  const waiting = unresolvedSlots();
+  if (waiting.length) {
+    btn.textContent = 'Say whose hours R' + waiting.join(', R') + ' ' +
+      (waiting.length === 1 ? 'is' : 'are') + ' first';
+    btn.disabled = true;
+    return;
+  }
   btn.textContent = (n === 1 ? 'Add 1 task' : 'Add ' + n + ' tasks')
     + (hours ? ' with ' + hours + ' hour entr' + (hours === 1 ? 'y' : 'ies') : '');
   btn.disabled = n === 0;
@@ -169,25 +187,55 @@ function renderImportResult(box, f) {
         : '<span style="color:var(--muted);">&mdash;</span>'}</td>
     </tr>`).join('');
 
-  // A slot with hours but no role chosen would lose those hours silently.
+  // The hours are the reason to paste the full width rather than four columns,
+  // so this reads like the hours panel in the task form rather than like a
+  // setting. Dropping them is a choice in the list, not what happens when a
+  // dropdown goes unnoticed.
   const roleOptions = (slot) =>
-    `<option value="">Choose a role...</option>` +
+    `<option value="">Whose hours are these?</option>` +
     (CONFIG.roles || []).map(role =>
-      `<option value="${attr(role.id)}" ${IMPORT.slotRoles[slot] === role.id ? 'selected' : ''}>${esc(role.name)}</option>`).join('');
+      `<option value="${attr(role.id)}" ${IMPORT.slotRoles[slot] === role.id ? 'selected' : ''}>${esc(role.name)}</option>`).join('')
+    + `<option value="none" ${IMPORT.slotRoles[slot] === 'none' ? 'selected' : ''}>Do not bring these hours</option>`;
 
+  const summary = PSEngine.slotSummary(IMPORT.rows.filter(r => r.include));
+  const describe = (s) => {
+    if (!s || !s.hours) return 'no hours';
+    const bits = [s.hours + 'h across ' + count(s.rows, 'task', 'tasks')];
+    if (s.after) bits.push(s.after + 'h of it after hours');
+    if (s.locations.length) bits.push(s.locations.join(' and '));
+    return bits.join(' · ');
+  };
+
+  const willCross = mappedEffortCount();
+  const dropping = droppedSlots();
   const slotPickers = (IMPORT.slots || []).length ? `
-    <div class="im-note" style="margin-bottom:6px;">The sheet keeps the role for each resource column on row 41, not in the rows,
-      so it has to be named here. Any column left unset brings no hours across.</div>
-    ${IMPORT.slots.map(slot => `
-      <div class="row-editor">
-        <span class="rate-label" style="flex:0 0 auto;">R${slot} was</span>
-        <select onchange="setSlotRole(${slot}, this.value)" style="flex:1;">${roleOptions(slot)}</select>
-      </div>`).join('')}` : '';
+    <div class="tf-hours">
+      <div class="tf-hours-head">
+        <div>
+          <div class="tf-hours-title">Whose hours are these?</div>
+          <div class="q-sub">The sheet keeps the role for each resource column on row 41, not in the
+            rows, so the paste cannot say. Name each one and the hours come across with the tasks.</div>
+        </div>
+        <div>
+          <div class="stat-label">Entries</div>
+          <div id="im-hours-total" class="tf-hours-figure">${willCross}</div>
+        </div>
+      </div>
+      ${IMPORT.slots.map(slot => {
+        const s = summary.find(x => x.slot === slot);
+        return `
+        <div class="row-editor">
+          <span class="rate-label" style="flex:1;">
+            <b>R${slot}</b> &mdash; ${esc(describe(s))}
+          </span>
+          <select onchange="setSlotRole(${slot}, this.value)" style="flex:0 0 240px;">${roleOptions(slot)}</select>
+        </div>`;
+      }).join('')}
+      ${dropping.length ? `<div class="q-sub" style="margin-top:8px;">R${dropping.join(', R')}
+        will be left behind, as asked.</div>` : ''}
+    </div>` : '';
 
-  const unmapped = (IMPORT.slots || []).filter(s => !IMPORT.slotRoles[s]);
-  const unmappedNote = unmapped.length
-    ? `<div class="notice notice--inline">R${unmapped.join(', R')} ${unmapped.length === 1 ? 'has' : 'have'} hours but no role yet, so those hours will be left behind.</div>`
-    : '';
+  const unmappedNote = '';
 
   const flagged = IMPORT.rows.filter(r => r.issues.length).length;
   box.innerHTML = `

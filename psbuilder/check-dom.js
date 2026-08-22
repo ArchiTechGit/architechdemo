@@ -272,6 +272,124 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── pasting a sheet with hours ───────────────────────
+section('Import: hours from a pasted sheet');
+{
+  // The real shape of a copy out of the PSE: the four task columns, then the
+  // three yellow counts, the two grey effort columns, and then the resource
+  // columns in threes -- R1 location, business, after, then R2, and so on.
+  const TAB = '\t';
+  const row = (phase, desc, ...tail) =>
+    [phase, 'Collaboration', 'ArchiTech Activity', desc, '0', '0', '0', '', ''].concat(tail).join(TAB);
+  const paste = [
+    row('Kickoff', 'Imported kickoff session', 'Office', '1', ''),
+    // The sheet carries rows like this one; they must not become tasks.
+    ['', '', '', '', '0', '0', '0', '', '', '', '', ''].join(TAB),
+    row('Design', 'Imported design review', 'Office', '6', ''),
+    row('Implementation', 'Imported cutover', 'Client Site', '2', '1.5'),
+  ].join('\n');
+
+  const { window, errors, click, $, $$ } = boot('admin.html', ADMIN_SCRIPTS);
+  window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+  errors.length = 0;
+  window.eval('toggleImport();');
+  window.eval(`document.getElementById('im-text').value = ${JSON.stringify(paste)}; readImportPaste();`);
+  check('the paste is read without error', errors, []);
+
+  const cols = JSON.parse(window.eval('JSON.stringify(IMPORT.result.cols)'));
+  check('it works out the width', cols.width, 12);
+  check('and finds the resource columns in threes',
+    cols.resources.map(r => [r.slot, r.location, r.business, r.after]),
+    [[1, 9, 10, 11]]);
+  check('the blank row is not a task', window.eval('IMPORT.result.skipped'), 1);
+  check('the real rows are', window.eval('IMPORT.rows.length'), 3);
+
+  // The hours are read off the sheet, before anything about roles.
+  const drafts = JSON.parse(window.eval('JSON.stringify(IMPORT.result.drafts)'));
+  check('every row carries its hours', drafts.filter(d => !(d.effort || []).length), []);
+  check('including after hours where there are some',
+    drafts[2].effort[0].after, 1.5);
+  check('and the location it was done in',
+    drafts.map(d => d.effort[0].location), ['Office', 'Office', 'Client Site']);
+
+  // The sheet cannot say whose column it was, so the panel has to ask -- and
+  // must not let the tasks in without their cost by default.
+  check('a role is asked for', window.eval('IMPORT.slots.length'), 1);
+  check('and nothing is assumed', JSON.parse(window.eval('JSON.stringify(IMPORT.slotRoles)')), {});
+  // It describes only what will actually come across, so a row unticked as a
+  // duplicate is not counted in it.
+  check('the panel says what that column holds',
+    /10\.5h across 3 tasks/.test($('#import-slot').textContent), true);
+  check('and the Add button refuses until it is answered',
+    $('#im-add').disabled, true);
+  check('saying why', /whose hours R1/.test($('#im-add').textContent), true);
+
+  // Answer it, and the hours come across.
+  window.eval("setSlotRole(1, 'SE');");
+  check('once answered the button allows it', $('#im-add').disabled, false);
+  check('and says how many entries', /3 hour entries/.test($('#im-add').textContent), true);
+  const before = window.eval('F().tasks.length');
+  window.eval('commitImport();');
+  const added = JSON.parse(window.eval(
+    'JSON.stringify(F().tasks.slice(-3).map(t => ({ d: t.description, e: t.effort })))'));
+  check('three tasks arrive', window.eval('F().tasks.length'), before + 3);
+  check('each with its role', added.map(t => t.e[0].role), ['SE', 'SE', 'SE']);
+  check('its business hours', added.map(t => t.e[0].business.base), [1, 6, 2]);
+  check('and after hours only where there were any',
+    added.map(t => (t.e[0].after || {}).base), [undefined, undefined, 1.5]);
+  check('the config still validates',
+    JSON.parse(window.eval('JSON.stringify(PSEngine.validateConfig(CONFIG))')), []);
+  check('none of that raised an error', errors, []);
+
+  // Choosing to drop the hours must be possible, and must not invent a role
+  // called "none".
+  const two = boot('admin.html', ADMIN_SCRIPTS);
+  two.window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  two.window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+  two.window.eval('toggleImport();');
+  two.window.eval(`document.getElementById('im-text').value = ${JSON.stringify(paste)}; readImportPaste();`);
+  two.errors.length = 0;
+  two.window.eval("setSlotRole(1, 'none');");
+  check('dropping the hours is allowed on purpose', two.$('#im-add').disabled, false);
+  check('and the panel says they will be left behind',
+    /left behind, as asked/.test(two.$('#import-slot').textContent), true);
+  const n0 = two.window.eval('F().tasks.length');
+  two.window.eval('commitImport();');
+  const dropped = JSON.parse(two.window.eval(
+    'JSON.stringify(F().tasks.slice(-3).map(t => t.effort))'));
+  check('the tasks arrive with no effort at all', dropped, [[], [], []]);
+  check('no task claims a role called none',
+    JSON.parse(two.window.eval('JSON.stringify(F().tasks.filter(t => (t.effort||[]).some(e => e.role === "none")))')), []);
+  check('and that config validates too',
+    JSON.parse(two.window.eval('JSON.stringify(PSEngine.validateConfig(CONFIG))')), []);
+  check('with no error', two.errors, []);
+
+  // Two resources, which is the "more of them, in threes" case.
+  const wide = [
+    row('Kickoff', 'Two resources', 'Office', '1', '0', 'Client Site', '4', '0.5'),
+  ].join('\n');
+  const three = boot('admin.html', ADMIN_SCRIPTS);
+  three.window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  three.window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+  three.window.eval('toggleImport();');
+  three.window.eval(`document.getElementById('im-text').value = ${JSON.stringify(wide)}; readImportPaste();`);
+  const wideCols = JSON.parse(three.window.eval('JSON.stringify(IMPORT.result.cols.resources)'));
+  check('a second group of three is a second resource',
+    wideCols.map(r => [r.slot, r.location, r.business, r.after]),
+    [[1, 9, 10, 11], [2, 12, 13, 14]]);
+  check('and both are asked about', three.window.eval('IMPORT.slots.length'), 2);
+  check('answering only one still refuses',
+    (three.window.eval("setSlotRole(1, 'SE');"), three.$('#im-add').disabled), true);
+  three.window.eval("setSlotRole(2, 'TA');");
+  three.window.eval('commitImport();');
+  const both = JSON.parse(three.window.eval('JSON.stringify(F().tasks.slice(-1)[0].effort)'));
+  check('both resources land on the task', both.map(x => x.role), ['SE', 'TA']);
+  check('with their own locations', both.map(x => x.location), ['Office', 'Client Site']);
+  check('and their own hours', both.map(x => x.business.base), [1, 4]);
+  check('after hours on the one that had them', (both[1].after || {}).base, 0.5);
+}
+
 // ─────────────────────── export and import ───────────────────────
 section('Admin: export and import');
 {

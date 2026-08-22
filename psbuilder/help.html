@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.10.0" />
+  <link rel="stylesheet" href="./ui.css?v=0.10.1" />
   <style>
     :root { --page-width: 820px; }
 
@@ -235,6 +235,40 @@
         </p>
       </section>
 
+      <!-- ── importing from the sheet ──────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2">Reading an existing sheet in</div>
+        <p class="hp-body">
+          <strong>Import</strong> in the toolbar takes a copy straight out of a PSE and turns it into
+          tasks. Select the task rows and copy the <strong>full width</strong> &mdash; not just the four
+          description columns &mdash; and the hours come with them.
+        </p>
+        <p class="hp-body">
+          The columns are read by position, which is safe because the sheet fixes their order: four
+          task columns, then the three counts, then the two effort columns, and then the resource
+          columns in groups of three.
+        </p>
+        <div class="hp-eg">Phase  Skill  Task type  Description  <em>· · ·</em>  R1 loc  R1 hrs  R1 after  R2 loc  R2 hrs  R2 after
+
+<em>each further group of three is another resource</em></div>
+        <p class="hp-body">
+          One thing the paste cannot tell you is <strong>whose</strong> hours those are. The sheet keeps
+          the role for each resource column on row 41, once, rather than on every row. So the panel
+          asks, and describes what each column holds &mdash; <em>10.5h across 3 tasks · Office</em>
+          &mdash; which is usually enough to recognise whose column it was.
+        </p>
+        <p class="hp-body hp-note">
+          Until every column with hours has an answer, the button will not add anything. Guessing
+           would put the hours against the wrong engineer and quietly change the price. If you do
+          want the tasks without their hours, that is the last option in the list rather than
+          something that happens because you did not notice the question.
+        </p>
+        <p class="hp-body hp-note">
+          Rows already in the flow arrive unticked, so pasting the same sheet twice does not double
+          it. Blank rows are ignored.
+        </p>
+      </section>
+
       <!-- ── moving a flow ────────────────────────────────────────────────── -->
       <section class="hp-section">
         <div class="hp-h2">Moving a flow, and keeping a backup</div>
@@ -282,7 +316,7 @@
     </div>
   </div>
 
-  <script src="./engine.js?v=0.10.0"></script>
+  <script src="./engine.js?v=0.10.1"></script>
   <script>
     const esc = PSEngine.esc;
 
