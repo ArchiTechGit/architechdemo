@@ -1304,6 +1304,40 @@ section('Interface copy');
 }
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────
+section('The three pages read as one tool')
+{
+  const pages = [['index.html', indexHtml], ['admin.html', adminMarkup], ['help.html', helpHtml]];
+  const badge = (html) => {
+    const at = html.indexOf('class="header-badge"');
+    if (at < 0) return null;
+    return html.slice(html.indexOf('>', at) + 1, html.indexOf('</span>', at))
+      .replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  };
+
+  // The badge says which page of the tool you are on, so all three have to be
+  // recognisably the same label with a different tail.
+  pages.forEach(([name, html]) => {
+    const b = badge(html);
+    check(name + ' names itself in the header', !!b, true);
+    check(name + ' names the tool first', /^PS Builder — /.test(b || ''), true);
+  });
+  const tails = pages.map(([, html]) => (badge(html) || '').replace('PS Builder — ', ''));
+  check('and each one names a different page', tails.length, new Set(tails).size);
+
+  // A maturity label is a claim nobody ever comes back to update, and it reads
+  // as an apology for the thing it is attached to. This one said "POC".
+  const maturity = /\b(poc|proof of concept|beta|alpha|wip|prototype|experimental|draft|v?[01]\.0 ?release)\b/i;
+  check('no page apologises for itself in its header',
+    pages.filter(([, html]) => maturity.test(badge(html) || '')).map(([n]) => n), []);
+  // Nor anywhere else a reader would take as a status claim.
+  pages.forEach(([name, html]) => {
+    const title = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+    const h1 = (html.match(/<h1[^>]*>([^<]*)<\/h1>/) || [])[1] || '';
+    check(name + ': neither its title nor its heading does either',
+      maturity.test(title + ' ' + h1), false);
+  });
+}
+
 section('Every colour follows the theme')
 {
   const pageStyle = h => (h.split('<style>')[1] || '').split('</style>')[0];
