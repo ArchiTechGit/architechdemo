@@ -57,7 +57,7 @@
     }
     document.addEventListener("DOMContentLoaded", syncThemeButton);
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.11.1" />
+  <link rel="stylesheet" href="./ui.css?v=0.11.2" />
   <style>
     :root { --page-width: 820px; }
 
@@ -122,7 +122,7 @@
         </p>
         <div class="scroll-x">
           <table class="data-table">
-            <tr><th>Field</th><th>What goes in it</th></tr>
+            <tr><th scope="col">Field</th><th scope="col">What goes in it</th></tr>
             <tr><td>Role</td><td id="hp-roles">The engineer doing the work</td></tr>
             <tr><td>Location</td><td id="hp-locations">Where they do it</td></tr>
             <tr><td>Business hours</td><td>Hours in normal time, in quarter-hour steps</td></tr>
@@ -199,7 +199,7 @@
         <div class="section-label">So which one do I want</div>
         <div class="scroll-x">
           <table class="data-table">
-            <tr><th>You want</th><th>Set</th><th>Rows</th><th>Hours counted</th></tr>
+            <tr><th scope="col">You want</th><th scope="col">Set</th><th scope="col">Rows</th><th scope="col">Hours counted</th></tr>
             <tr>
               <td>One job, and the text should mention a number</td>
               <td>A <span class="hp-token">{variable}</span> in the description</td>
@@ -245,7 +245,7 @@
         </p>
         <div class="scroll-x">
           <table class="data-table">
-            <tr><th>Copy this</th><th>Paste at column</th><th>It holds</th></tr>
+            <tr><th scope="col">Copy this</th><th scope="col">Paste at column</th><th scope="col">It holds</th></tr>
             <tr>
               <td>1 · Task details</td>
               <td><span class="hp-token">A</span></td>
@@ -365,7 +365,7 @@
     </div>
   </div>
 
-  <script src="./engine.js?v=0.11.1"></script>
+  <script src="./engine.js?v=0.11.2"></script>
   <script>
     const esc = PSEngine.esc;
 
@@ -401,10 +401,10 @@
               ${(f.tasks || []).length} task${(f.tasks || []).length === 1 ? '' : 's'}
             </div>
             ${tokens ? `<div class="scroll-x"><table class="data-table">
-              <tr><th>Variable</th><th>Type</th><th>Question</th></tr>${tokens}
+              <tr><th scope="col">Variable</th><th scope="col">Type</th><th scope="col">Question</th></tr>${tokens}
             </table></div>` : '<div class="q-sub">No variables yet.</div>'}
             ${repeats.length ? `<div class="scroll-x"><table class="data-table">
-              <tr><th>Repeats one row per</th><th>Task</th></tr>
+              <tr><th scope="col">Repeats one row per</th><th scope="col">Task</th></tr>
               ${repeats.map(t => `<tr>
                 <td><span class="hp-token">{${esc(t.repeatPer)}}</span></td>
                 <td>${esc(t.description)}</td>

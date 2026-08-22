@@ -327,7 +327,7 @@ function renderTransfer() {
     const t = r.flow;
     rows.push(`
       <div class="scroll-x"><table class="data-table">
-        <tr><th>Flow</th><th>Subflows</th><th class="num">Variables</th><th class="num">Tasks</th></tr>
+        <tr><th scope="col">Flow</th><th scope="col">Subflows</th><th scope="col" class="num">Variables</th><th scope="col" class="num">Tasks</th></tr>
         <tr>
           <td>${esc(t.name)}</td>
           <td>${(t.subflows || []).map(s => esc(s.name)).join(', ')}</td>

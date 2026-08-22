@@ -131,7 +131,7 @@ function renderPreviewResult(box, out) {
     ? `<div class="notice">${out.overflow.map(r => esc(PSEngine.roleName(CONFIG, r))).join(', ')} will not fit: the sheet has only five resource columns.</div>`
     : '';
 
-  const header = slots.map((r, i) => `<th class="num">${esc(r)}</th>`).join('');
+  const header = slots.map((r, i) => `<th scope="col" class="num">${esc(r)}</th>`).join('');
   const rows = out.lines.map(l => {
     const cells = slots.map(role => {
       const e = l.effortLines.find(x => x.role === role);
@@ -159,7 +159,7 @@ function renderPreviewResult(box, out) {
     <div class="q-sub" style="margin-top:10px;">${mapping}</div>${overflow}${capped}
     <div class="scroll-x">
       <table class="data-table pv-table">
-        <tr><th>Phase</th><th>Description</th>${header}<th class="num">Total</th></tr>
+        <tr><th scope="col">Phase</th><th scope="col">Description</th>${header}<th scope="col" class="num">Total</th></tr>
         ${rows}
       </table>
     </div>`;

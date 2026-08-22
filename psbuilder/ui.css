@@ -414,6 +414,11 @@ textarea { resize: vertical; min-height: 48px; }
   .btn-add { padding: 12px 14px; min-height: 44px; }
   .btn-x { min-width: 44px; min-height: 44px; }
   .chip { min-height: 34px; padding: 6px 12px; }
+  /* Both of these were added after this block was written, so they kept the
+     32px they were given for a mouse. */
+  .theme-btn { min-height: 44px; padding: 10px 14px; }
+  /* A field you tap has to be as tappable as a button beside it. */
+  input, select, textarea { min-height: 44px; }
   .check-row input { width: 20px; height: 20px; }
   .data-table td, .data-table th { padding: 10px 8px; }
 }

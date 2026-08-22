@@ -272,6 +272,57 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── named, labelled, reachable ───────────────────────
+section('Accessibility, on the built page');
+{
+  // An audit that counts aria-labels in total says twelve and looks fine. The
+  // question is whether the buttons that are only an icon have one.
+  const pages = [['index.html', []], ['admin.html', ADMIN_SCRIPTS], ['help.html', []]];
+  pages.forEach(([page, scripts]) => {
+    const { window, click, $, $$ } = boot(page, scripts);
+    const d2 = window.document;
+    if (page === 'admin.html') {
+      window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+      window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+      $$('#tasks-root .block-head').forEach(click);
+      window.eval('toggleImport();');
+      const edit = [...$$('#tasks-root .act')[0].parentElement.querySelectorAll('button')]
+        .find(x => x.textContent.trim() === 'Edit');
+      if (edit) click(edit);
+      window.eval('addEffortLine();');
+    }
+
+    // A button whose text is a glyph needs a name, and the name has to say which
+    // thing it acts on -- five buttons all saying "remove" would not help.
+    const glyphOnly = [...d2.querySelectorAll('button')].filter(b2 => {
+      const t = (b2.textContent || '').trim();
+      return t.length <= 2 && !/[a-z0-9]/i.test(t);
+    });
+    const unnamed = glyphOnly.filter(b2 => !b2.getAttribute('aria-label'));
+    check(page + ': every icon-only button has a name', unnamed.length, 0);
+    const names = glyphOnly.map(b2 => b2.getAttribute('aria-label')).filter(Boolean);
+    if (names.length > 1) {
+      check(page + ': and the names say which thing', new Set(names).size > 1, true);
+    }
+
+    // A placeholder disappears the moment you type, so it is not a label.
+    const fields = [...d2.querySelectorAll('input, select, textarea')].filter(e => e.type !== 'hidden');
+    const unlabelled = fields.filter(el => {
+      if (el.id && d2.querySelector('label[for="' + el.id + '"]')) return false;
+      if (el.closest('label')) return false;
+      return !(el.getAttribute('aria-label') || el.getAttribute('aria-labelledby'));
+    });
+    check(page + ': every field has a label that is not the placeholder',
+      unlabelled.map(e => e.id || e.tagName.toLowerCase()), []);
+
+    // Without scope, a screen reader reads a number without saying which
+    // resource column it belongs to, which is what these tables are for.
+    const ths = [...d2.querySelectorAll('.data-table th')];
+    check(page + ': every column header says it is one',
+      ths.filter(t => t.getAttribute('scope') !== 'col').length, 0);
+  });
+}
+
 // ─────────────────────── light and dark ───────────────────────
 section('The theme switch');
 {

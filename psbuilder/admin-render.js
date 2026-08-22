@@ -415,9 +415,14 @@ function renderAdmin() {
 
   const fslot = document.getElementById('flow-form-slot');
   fslot.innerHTML = '';
-  if (EDITING && EDITING.kind === 'new-flow') { renderNewFlowForm(fslot); renderRest(true); return syncToolbar(); }
+  if (EDITING && EDITING.kind === 'new-flow') { renderNewFlowForm(fslot); renderRest(true); linkLabels(); return syncToolbar(); }
   if (EDITING && EDITING.kind === 'flow') renderFlowForm(fslot);
   renderRest(false);
+  // Once, at the end, when every form on the page exists. This used to be a
+  // setTimeout because it ran before the forms were drawn; they are now drawn
+  // into containers that are already attached, so it can be synchronous -- and
+  // there is no longer a tick where the fields have no labels.
+  linkLabels();
   restoreFocus();
   syncToolbar();
 }
@@ -446,8 +451,6 @@ function renderRest(hideRest) {
   renderPreview();
   renderTransfer();
   renderInputs(inputsRoot);
-  // after every render, so newly drawn forms are labelled too
-  setTimeout(() => linkLabels(), 0);
   if (EDITING && EDITING.kind === 'input') {
     const at = editingInputIndex();
     // The question being edited was deleted from under the form.
@@ -507,6 +510,7 @@ function renderTaskFilter(root) {
   bar.className = 'row-editor';
   bar.style.marginBottom = '12px';
   bar.innerHTML = `
+    <label class="field-label" for="task-filter" style="margin:0;white-space:nowrap;">Find</label>
     <input type="text" id="task-filter" value="${attr(TASK_FILTER)}"
            placeholder="Find a task — words from its text, phase or skill"
            oninput="setTaskFilter(this.value)" style="flex:1;" />

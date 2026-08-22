@@ -58,7 +58,7 @@
     }
     document.addEventListener("DOMContentLoaded", syncThemeButton);
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.11.1" />
+  <link rel="stylesheet" href="./ui.css?v=0.11.2" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -161,23 +161,23 @@
       <div class="out-block">
         <div class="out-head">
           <div>
-            <div class="out-title">1 · Task details</div>
+            <div class="out-title" id="out-task-title">1 · Task details</div>
             <div class="out-note" id="hint-task"></div>
           </div>
           <button class="btn-ghost btn-ghost--roomy" onclick="copyBlock('task')">Copy</button>
         </div>
-        <textarea id="out-task" readonly></textarea>
+        <textarea id="out-task" readonly aria-labelledby="out-task-title"></textarea>
       </div>
 
       <div class="out-block">
         <div class="out-head">
           <div>
-            <div class="out-title">2 · Resource hours</div>
+            <div class="out-title" id="out-resource-title">2 · Resource hours</div>
             <div class="out-note" id="hint-resource"></div>
           </div>
           <button class="btn-ghost btn-ghost--roomy" onclick="copyBlock('resource')">Copy</button>
         </div>
-        <textarea id="out-resource" readonly></textarea>
+        <textarea id="out-resource" readonly aria-labelledby="out-resource-title"></textarea>
       </div>
 
       <button class="btn-ghost btn-ghost--roomy" onclick="backToQuestions()">← Back to questions</button>
@@ -193,7 +193,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js?v=0.11.1"></script>
+  <script src="./engine.js?v=0.11.2"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from
@@ -469,7 +469,7 @@
       if (!out.lines.length) { box.innerHTML = ""; return; }
 
       const slots = out.slots;
-      const head = slots.map(r => '<th class="num">' + esc(r) + '</th>').join("");
+      const head = slots.map(r => '<th scope="col" class="num">' + esc(r) + '</th>').join("");
       const rows = out.lines.map(l => {
         const cells = slots.map(role => {
           const e = l.effortLines.find(x => x.role === role);
@@ -490,7 +490,7 @@
 
       box.innerHTML =
         '<table class="data-table">' +
-        "<tr><th>Phase</th><th>Description</th>" + head + '<th class="num">Hours</th></tr>' +
+        '<tr><th scope="col">Phase</th><th scope="col">Description</th>' + head + '<th scope="col" class="num">Hours</th></tr>' +
         rows +
         "</table>";
     }

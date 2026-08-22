@@ -250,7 +250,7 @@ function optionRowHtml(o) {
     <div class="row-editor" data-option-id="${attr(o.id || '')}">
       <input type="text" placeholder="e.g. Web chat widget" value="${attr(o.label)}" data-role="opt-label" />
       <label><input type="checkbox" data-role="opt-default" ${o.default ? 'checked' : ''} /> on by default${o.showWhen ? ' · gated' : ''}</label>
-      <button class="btn-x" type="button" onclick="this.closest('.row-editor').remove()">&#10005;</button>
+      <button class="btn-x" type="button" aria-label="Remove this option" onclick="this.closest('.row-editor').remove()">&#10005;</button>
     </div>`;
 }
 
@@ -323,8 +323,9 @@ function amountEditor(prefix, amount, label) {
   window._amounts[prefix] = JSON.parse(JSON.stringify(a.per || []));
   return `
     <div class="row-editor">
-      <span class="rate-label">${esc(label)}</span>
-      <input type="number" step="0.25" id="${prefix}-base" value="${a.base || 0}" oninput="updateTaskPreview()" />
+      <span class="rate-label" id="${prefix}-label">${esc(label)}</span>
+      <input type="number" step="0.25" id="${prefix}-base" value="${a.base || 0}"
+             aria-labelledby="${prefix}-label" oninput="updateTaskPreview()" />
     </div>
     <div id="${prefix}-rates" style="padding-left:18px;"></div>
     <button class="btn-ghost" type="button" style="margin-left:18px;" onclick="addAmountRate('${prefix}')">+ Scale with a variable</button>`;
@@ -338,11 +339,11 @@ function renderAmountRates(prefix) {
     <div class="row-editor" data-rate="${n}">
       <span class="rate-label" style="flex:0 0 auto;">plus</span>
       <input type="number" step="0.25" data-role="rate-each" value="${r.each}"
-             oninput="readAmountRates('${prefix}');updateTaskPreview()" />
-      <select data-role="rate-input" onchange="readAmountRates('${prefix}');updateTaskPreview()" style="flex:1;">
+             aria-label="Hours per unit" oninput="readAmountRates('${prefix}');updateTaskPreview()" />
+      <select data-role="rate-input" aria-label="Which variable these hours scale with" onchange="readAmountRates('${prefix}');updateTaskPreview()" style="flex:1;">
         ${numbers.map(i => `<option value="${attr(i.id)}" ${r.input === i.id ? 'selected' : ''}>per ${esc(tokenOf(i))}</option>`).join('')}
       </select>
-      <button class="btn-x" type="button" onclick="removeAmountRate('${prefix}',${n})">&#10005;</button>
+      <button class="btn-x" type="button" aria-label="Remove this scaling rule" onclick="removeAmountRate('${prefix}',${n})">&#10005;</button>
     </div>`).join('');
 }
 
@@ -507,13 +508,13 @@ function renderEffortLines() {
   box.innerHTML = window._tfEffort.map((e, n) => `
     <div class="q-card" style="background:rgba(255,255,255,0.02);margin-bottom:10px;" data-effort="${n}">
       <div class="row-editor">
-        <select data-role="eff-role" onchange="readEffortLines();updateTaskPreview()" style="flex:1;">
+        <select data-role="eff-role" aria-label="Role for resource ${n + 1}" onchange="readEffortLines();updateTaskPreview()" style="flex:1;">
           ${roles.map(r => `<option value="${attr(r.id)}" ${e.role === r.id ? 'selected' : ''}>${esc(r.name)}</option>`).join('')}
         </select>
-        <select data-role="eff-location" onchange="readEffortLines()" style="flex:0 0 150px;">
+        <select data-role="eff-location" aria-label="Where resource ${n + 1} does the work" onchange="readEffortLines()" style="flex:0 0 150px;">
           ${CONFIG.locations.map(l => `<option ${e.location === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}
         </select>
-        <button class="btn-x" type="button" onclick="removeEffortLine(${n})">&#10005;</button>
+        <button class="btn-x" type="button" aria-label="Remove this resource" onclick="removeEffortLine(${n})">&#10005;</button>
       </div>
       ${amountEditor('tf-eff' + n + '-bh', e.business, 'Business hours')}
       ${amountEditor('tf-eff' + n + '-ah', e.after, 'After hours')}
@@ -802,7 +803,7 @@ function renderFlowForm(slot) {
         <div id="ff-subflows">${f.subflows.map(s => `
           <div class="row-editor" data-sub-id="${attr(s.id)}">
             <input type="text" value="${attr(s.name)}" data-role="sub-name" placeholder="e.g. New install" />
-            <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
+            <button class="btn-x" type="button" aria-label="Remove this subflow" onclick="removeSubflowRow(this)">&#10005;</button>
           </div>`).join('')}</div>
         <button class="btn-ghost" type="button" style="margin-left:0;" onclick="addSubflowRow()">+ Add subflow</button>
       </div>
@@ -823,7 +824,7 @@ function addSubflowRow() {
   document.getElementById('ff-subflows').insertAdjacentHTML('beforeend', `
     <div class="row-editor" data-sub-id="">
       <input type="text" value="" data-role="sub-name" placeholder="New subflow" />
-      <button class="btn-x" type="button" onclick="removeSubflowRow(this)">&#10005;</button>
+      <button class="btn-x" type="button" aria-label="Remove this subflow" onclick="removeSubflowRow(this)">&#10005;</button>
     </div>`);
   wireSubflowDrag();
 }

@@ -142,7 +142,7 @@ function renderImport() {
   card.innerHTML = `
     <div class="row-editor" style="margin-bottom:4px;">
       <span class="q-label" style="flex:1;margin:0;">Read tasks out of a PSE</span>
-      <button class="btn-x" onclick="toggleImport()" title="Close">&#10005;</button>
+      <button class="btn-x" onclick="toggleImport()" aria-label="Close the sheet reader" title="Close">&#10005;</button>
     </div>
     <div class="q-sub">Select the task rows in <b>Project Technical Tasks</b> and copy them, then paste here.
       Either the four task-detail columns, or the full width including the resource hours, or just the descriptions.</div>
@@ -253,7 +253,7 @@ function renderImportResult(box, f) {
     </div>
     <div class="scroll-x">
       <table class="data-table">
-        <tr><th></th><th>Description</th><th>Phase</th><th>Skill</th><th>Task type</th><th>Goes in</th><th>Hours read</th></tr>
+        <tr><th scope="col"></th><th scope="col">Description</th><th scope="col">Phase</th><th scope="col">Skill</th><th scope="col">Task type</th><th scope="col">Goes in</th><th scope="col">Hours read</th></tr>
         ${rows}
       </table>
     </div>

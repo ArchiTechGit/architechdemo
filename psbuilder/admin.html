@@ -57,7 +57,7 @@
     }
     document.addEventListener("DOMContentLoaded", syncThemeButton);
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.11.1" />
+  <link rel="stylesheet" href="./ui.css?v=0.11.2" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
@@ -205,6 +205,12 @@
       color: var(--accent); border-color: var(--accent-mid); background: var(--accent-dim);
     }
     .fbar-group .btn-ghost { margin-left: 0; }
+
+    @media (pointer: coarse) {
+      /* Added after the shared touch block was written, so it kept the 32px
+         it was given for a mouse. */
+      .tf-more > summary { min-height: 44px; }
+    }
   </style>
 </head>
 <body>
@@ -241,7 +247,8 @@
           <li>Paste it below and click Continue.</li>
         </ol>
       </div>
-      <input type="password" id="token-input" placeholder="github_pat_..." style="max-width:480px;margin-bottom:12px;" />
+      <label class="field-label" for="token-input">Fine-grained personal access token</label>
+        <input type="password" id="token-input" placeholder="github_pat_..." style="max-width:480px;margin-bottom:12px;" />
       <div id="token-error" class="notice" style="display:none;max-width:560px;"></div>
       <div>
         <button class="btn-primary" onclick="useTypedToken()">Continue</button>
@@ -283,13 +290,13 @@
     </main>
   </div>
 
-  <script src="./engine.js?v=0.11.1"></script>
-  <script src="./admin-github.js?v=0.11.1"></script>
-  <script src="./admin-render.js?v=0.11.1"></script>
-  <script src="./admin-forms.js?v=0.11.1"></script>
-  <script src="./admin-import.js?v=0.11.1"></script>
-  <script src="./admin-preview.js?v=0.11.1"></script>
-  <script src="./admin-transfer.js?v=0.11.1"></script>
+  <script src="./engine.js?v=0.11.2"></script>
+  <script src="./admin-github.js?v=0.11.2"></script>
+  <script src="./admin-render.js?v=0.11.2"></script>
+  <script src="./admin-forms.js?v=0.11.2"></script>
+  <script src="./admin-import.js?v=0.11.2"></script>
+  <script src="./admin-preview.js?v=0.11.2"></script>
+  <script src="./admin-transfer.js?v=0.11.2"></script>
 
 </body>
 </html>
