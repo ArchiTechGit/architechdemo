@@ -272,6 +272,111 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── finding a task ───────────────────────
+section('Admin: the task filter');
+{
+  const { window, errors, click, $, $$ } = boot('admin.html', ADMIN_SCRIPTS);
+  window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+  errors.length = 0;
+
+  const rows = () => $$('#tasks-root .act');
+  const descs = () => rows().map(r => r.querySelector('.act-desc').textContent);
+  check('the box is there once there are tasks to lose', !!$('#task-filter'), true);
+  check('and starts empty', $('#task-filter').value, '');
+
+  // A word that appears in some descriptions and not others.
+  window.eval("setTaskFilter('training');");
+  check('filtering narrows the list', descs().length > 0, true);
+  check('to only what matches',
+    descs().filter(d => !/training/i.test(d)), []);
+  check('and it opens the sections holding a match',
+    $$('#tasks-root .block-body').length > 0, true);
+  const expected = CONFIG.flows[0].tasks.filter(t => /training/i.test(t.description)).length;
+  check('finding every one of them', descs().length, expected);
+  check('the count says how many of how many',
+    /\d+ of \d+/.test($('#tasks-root').textContent), true);
+
+  // Two words, not necessarily next to each other.
+  window.eval("setTaskFilter('design doc');");
+  check('two words both have to appear',
+    descs().every(d => /design/i.test(d) && /doc/i.test(d)), true);
+
+  // It matches on more than the description.
+  window.eval("setTaskFilter('Staging');");
+  check('a phase name finds its tasks', descs().length > 0, true);
+
+  // Reordering while filtered would jump a task over the hidden rows.
+  window.eval("setTaskFilter('training');");
+  check('dragging is off while filtering',
+    rows().filter(r => r.classList.contains('drag-row')), []);
+  check('and no grip is offered', rows().filter(r => r.querySelector('.grip')), []);
+
+  // Nothing found should say so rather than look broken.
+  window.eval("setTaskFilter('zzzzz no such task');");
+  check('a filter that finds nothing says so',
+    /No task matches that/.test($('#tasks-root').textContent), true);
+  check('and shows no sections', $$('#tasks-root .block').length, 0);
+
+  window.eval('clearTaskFilter();');
+  check('clearing brings everything back', $$('#tasks-root .block').length > 0, true);
+  check('and dragging with it',
+    (($$('#tasks-root .block-head').forEach(click)), rows().every(r => r.classList.contains('drag-row'))), true);
+  check('the filter raised no error', errors, []);
+
+  // A filtered task must still be editable, and edit the right one.
+  window.eval("setTaskFilter('Hypercare');");
+  const target = descs()[0];
+  const edit = [...rows()[0].parentElement.querySelectorAll('button')]
+    .find(b => b.textContent.trim() === 'Edit');
+  errors.length = 0;
+  click(edit);
+  check('a filtered task can still be edited', !!$('#tf-description'), true);
+  check('and it is the one that was clicked', $('#tf-description').value, target);
+  check('with no error', errors, []);
+}
+
+// ─────────────────────── the task form's weight ───────────────────────
+section('Admin: the task form leads with what matters');
+{
+  const { window, errors, click, $, $$ } = boot('admin.html', ADMIN_SCRIPTS);
+  window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+  $$('#tasks-root .block-head').forEach(click);
+  errors.length = 0;
+  click([...$$('#tasks-root .act')[0].parentElement.querySelectorAll('button')]
+    .find(b => b.textContent.trim() === 'Edit'));
+
+  // What you came for stays out in the open.
+  ['#tf-description', '.tf-hours', '#tf-phase', '#tf-subflows'].forEach(sel =>
+    check(sel + ' is not hidden behind a disclosure',
+      !!$(sel) && !$(sel).closest('.tf-more'), true));
+  // What is set once and left goes away.
+  ['#tf-skill', '#tf-tasktype', '#tf-cond'].forEach(sel =>
+    check(sel + ' is folded away', !!$(sel) && !!$(sel).closest('.tf-more'), true));
+  check('the fold is shut by default', $('.tf-more').open, false);
+  check('but the fields still exist inside it',
+    ['#tf-skill', '#tf-tasktype', '#tf-cond'].filter(s => !$(s)), []);
+
+  // Saving has to keep reading them, or folding them away would lose them.
+  const before = JSON.parse(window.eval(
+    'JSON.stringify((function(){var t=F().tasks[editingTaskIndex()];return {s:t.skill,y:t.taskType};})())'));
+  window.eval('saveTaskForm(editingTaskIndex());');
+  const after = JSON.parse(window.eval(
+    'JSON.stringify(F().tasks.map(t => ({ s: t.skill, y: t.taskType })).slice(0,1))'));
+  check('saving with the fold shut keeps the skill', after[0].s, before.s);
+  check('and the task type', after[0].y, before.y);
+  check('and raises no error', errors, []);
+
+  // A task that has a condition should not hide it.
+  const withCond = CONFIG.flows[0].tasks.findIndex(t => t.showWhen);
+  if (withCond >= 0) {
+    window.eval(`EDITING = { kind: 'task', id: ${JSON.stringify(CONFIG.flows[0].tasks[withCond].id)} }; renderAdmin();`);
+    check('a task with a condition opens the fold', $('.tf-more').open, true);
+    check('and says so on the summary', /has a condition/.test($('.tf-more').textContent), true);
+  }
+}
+
 // ─────────────────────── one panel at a time ───────────────────────
 section('Admin: the panels are alternatives');
 {

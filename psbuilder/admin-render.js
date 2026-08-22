@@ -29,6 +29,34 @@ function numberInputs() { return F().inputs.filter(i => i.type === 'number'); }
 // The sections the admin lays tasks out in: one for tasks shared by every
 // subflow, then one per subflow. A task listing several subflows shows up
 // under each of them, which is the point of listing several.
+// What is typed in the box above the task list. Held here rather than read from
+// the field each time, because the list is rebuilt on every keystroke and the
+// field would be gone by then.
+let TASK_FILTER = '';
+
+function setTaskFilter(text) {
+  TASK_FILTER = text;
+  renderAdmin();
+  // The field is rebuilt by the render, so put the caret back in it.
+  const box = document.getElementById('task-filter');
+  if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
+}
+
+function clearTaskFilter() { TASK_FILTER = ''; renderAdmin(); }
+
+// Matches on everything you might remember about a task: what it says, which
+// phase it is in, the skill, and the variable it repeats over.
+function matchesFilter(t) {
+  if (!TASK_FILTER.trim()) return true;
+  const hay = [t.description, t.phase, t.skill, t.taskType, t.repeatPer]
+    .filter(Boolean).join(' ').toLowerCase();
+  // Every word has to appear somewhere, so "design doc" finds a design
+  // document without the two words having to be adjacent.
+  return TASK_FILTER.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+
+function filtering() { return !!TASK_FILTER.trim(); }
+
 function sectionsForFlow(f) {
   const subs = f.subflows || [];
   // With no subflows there is one section and it holds everything, so calling it
@@ -39,6 +67,12 @@ function sectionsForFlow(f) {
 }
 
 function tasksIn(section) {
+  return allTasksIn(section).filter(({ t }) => matchesFilter(t));
+}
+
+// The unfiltered membership, which the counts and the orphan check need: a task
+// hidden by the filter is still in the flow.
+function allTasksIn(section) {
   return F().tasks.map((t, idx) => ({ t, idx })).filter(({ t }) => {
     const m = t.subflows;
     if (section.shared) return m === undefined || m === 'all';
@@ -420,6 +454,7 @@ function renderRest(hideRest) {
     if (at === null) EDITING = null;
     else renderInputForm(inputSlot, at);
   }
+  renderTaskFilter(tasksRoot);
   renderTaskSections(tasksRoot);
 }
 
@@ -461,17 +496,48 @@ function renderInputs(root) {
   root.appendChild(add);
 }
 
+function renderTaskFilter(root) {
+  const f = F();
+  const total = (f.tasks || []).length;
+  // Not worth the row until there are enough tasks to lose one in.
+  if (total < 8 && !filtering()) return;
+  const shown = (f.tasks || []).filter(matchesFilter).length;
+
+  const bar = document.createElement('div');
+  bar.className = 'row-editor';
+  bar.style.marginBottom = '12px';
+  bar.innerHTML = `
+    <input type="text" id="task-filter" value="${attr(TASK_FILTER)}"
+           placeholder="Find a task — words from its text, phase or skill"
+           oninput="setTaskFilter(this.value)" style="flex:1;" />
+    <span class="rate-label" style="flex:0 0 auto;">${
+      filtering() ? shown + ' of ' + total : count(total, 'task', 'tasks')}</span>
+    ${filtering() ? '<button class="btn-ghost" onclick="clearTaskFilter()">Clear</button>' : ''}`;
+  root.appendChild(bar);
+
+  if (filtering() && !shown) {
+    const none = document.createElement('div');
+    none.className = 'q-sub';
+    none.style.cssText = 'font-style:italic;margin-bottom:10px;';
+    none.textContent = 'No task matches that. Clear the filter to see them all.';
+    root.appendChild(none);
+  }
+}
+
 function renderTaskSections(root) {
   const f = F();
   sectionsForFlow(f).forEach(section => {
     const key = `${f.id}:sec:${section.id}`;
     const matches = tasksIn(section);
+    const held = allTasksIn(section).length;
     const editingInside = EDITING && (
       (EDITING.kind === 'task-new' && EDITING.section === section.id) ||
       (EDITING.kind === 'task' && matches.some(m => m.t.id === EDITING.id))
     );
-    const open = EXPANDED.has(key) || editingInside;
-    const hours = round2(matches.reduce((n, m) => n + hoursAtDefaults(m.t), 0));
+    const open = EXPANDED.has(key) || editingInside || (filtering() && matches.length > 0);
+    const hours = round2(allTasksIn(section).reduce((n, m) => n + hoursAtDefaults(m.t), 0));
+
+    if (filtering() && !matches.length) return;
 
     const block = document.createElement('div');
     block.className = 'block';
@@ -487,7 +553,10 @@ function renderTaskSections(root) {
             ? 'Included in every subflow'
             : esc(section.note || 'Only this subflow') + ' · plus everything in All subflows'}</div>
       </div>
-      <span class="block-count ${matches.length === 0 ? 'zero' : ''}">${matches.length === 0 ? 'none' : count(matches.length, 'task', 'tasks') + (hours ? ` · ${hours}h` : '')}</span>`;
+      <span class="block-count ${matches.length === 0 ? 'zero' : ''}">${
+        filtering() ? matches.length + ' of ' + held
+        : matches.length === 0 ? 'none'
+        : count(matches.length, 'task', 'tasks') + (hours ? ` · ${hours}h` : '')}</span>`;
     head.onclick = () => toggleExpand(key);
     block.appendChild(head);
     // Attached now, not at the end: renderTaskForm draws a form that finds its
@@ -503,7 +572,12 @@ function renderTaskSections(root) {
       // to the next row on screen rather than the next slot in the array.
       const order = matches.map(m => m.idx);
       matches.forEach(({ t, idx }) => {
-        body.appendChild(makeDraggable(taskEl(t, idx), 'task:' + section.id, idx, order));
+        // Dragging is off while filtering: the rows either side on screen are
+        // not the rows either side in the section, so a move would jump the
+        // task over whatever the filter is hiding.
+        body.appendChild(filtering()
+          ? taskEl(t, idx)
+          : makeDraggable(taskEl(t, idx), 'task:' + section.id, idx, order));
         if (EDITING && EDITING.kind === 'task' && EDITING.id === t.id) {
           const slot = document.createElement('div');
           body.appendChild(slot);

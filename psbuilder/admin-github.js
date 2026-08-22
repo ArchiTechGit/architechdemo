@@ -6,7 +6,7 @@
 // ─── GitHub load / save ───
 // Bump this whenever admin behaviour changes. It shows in the header, the
 // browser tab, and the commit message of every config save.
-const ADMIN_VERSION = '0.10.2';
+const ADMIN_VERSION = '0.10.3';
 
 const REPO_OWNER = 'ArchiTechGit';
 const REPO_NAME = 'architechdemo';
@@ -92,8 +92,23 @@ async function saveConfig() {
     statusEl.textContent = 'Save failed: ' + e.message + '. Nothing was written.';
   } finally {
     saving = false;
-    if (btn) { btn.disabled = false; btn.textContent = 'Save to GitHub'; }
+    if (btn) btn.disabled = false;
   }
+}
+
+// Committing to GitHub is the one thing this tool exists to do, and the button
+// used to go straight back to "Save to GitHub" as though nothing had happened.
+// It holds the confirmation long enough to be read, then returns.
+let confirmTimer = null;
+function confirmSaved(btn) {
+  if (!btn) return;
+  clearTimeout(confirmTimer);
+  btn.textContent = 'Saved \u2713';
+  btn.classList.add('is-saved');
+  confirmTimer = setTimeout(() => {
+    btn.textContent = 'Save to GitHub';
+    btn.classList.remove('is-saved');
+  }, 4000);
 }
 
 function explainSaveFailure(status) {
@@ -146,6 +161,7 @@ async function doSave(statusEl) {
   }
   const data = await res.json();
   CONFIG_SHA = data.content.sha;
+  confirmSaved(document.getElementById('save-btn'));
   statusEl.innerHTML = `<span style="color:var(--success);font-weight:700;">Saved</span> — <a href="${data.commit.html_url}" target="_blank" style="color:var(--cyan);">view commit</a>`;
 }
 

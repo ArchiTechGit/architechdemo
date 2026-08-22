@@ -442,29 +442,38 @@ function renderTaskForm(slot, idx, section) {
         </div>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label">Phase</label>
+      <div class="field">
+        <label class="field-label">Phase</label>
           <select id="tf-phase">${CONFIG.phases.map(p => `<option ${existing.phase === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
         </div>
-        <div class="field">
-          <label class="field-label">Skill required</label>
-          <select id="tf-skill">${(CONFIG.skills || []).map(s => `<option ${existing.skill === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
-        </div>
-      </div>
-      <div class="field">
-        <label class="field-label">Task type</label>
-        <select id="tf-tasktype" onchange="updateTaskPreview()">${(CONFIG.taskTypes || []).map(t => `<option ${existing.taskType === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
-      </div>
-
       <div class="field">
         <label class="field-label">Include it in</label>
         <div id="tf-subflows"></div>
       </div>
-      <div class="field">
-        <label class="field-label">Include it only if</label>
-        <div id="tf-cond"></div>
-      </div>
+
+      <!-- Skill and task type are set once and then left alone, and most tasks
+           carry no condition. They stay reachable without taking up the space of
+           the two fields you actually came to change. -->
+      <details class="tf-more" ${existing.showWhen ? 'open' : ''}>
+        <summary>
+          Skill, task type and conditions
+          ${existing.showWhen ? '<span class="chip" style="cursor:default;margin-left:8px;">has a condition</span>' : ''}
+        </summary>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field">
+            <label class="field-label">Skill required</label>
+            <select id="tf-skill">${(CONFIG.skills || []).map(s => `<option ${existing.skill === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
+          </div>
+          <div class="field">
+            <label class="field-label">Task type</label>
+            <select id="tf-tasktype" onchange="updateTaskPreview()">${(CONFIG.taskTypes || []).map(t => `<option ${existing.taskType === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Include it only if</label>
+          <div id="tf-cond"></div>
+        </div>
+      </details>
 
       <div class="q-sub" id="tf-preview" style="margin-bottom:12px;"></div>
       <button class="btn-primary" onclick="saveTaskForm(${idx})">Save task</button>

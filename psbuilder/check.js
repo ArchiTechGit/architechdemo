@@ -1462,10 +1462,24 @@ section('Colour discipline');
   check('and keeps its own text readable',
     /color: var\(--text\)/.test(uiCss.split('.notice {')[1].split('}')[0]), true);
 
-  // Green says one thing, in one place.
+  // Green says one thing: the commit reached GitHub. It may say it in more than
+  // one place -- the button and the status line are the same event - but it may
+  // not start meaning anything else.
   check('green confirms a commit landed', /--success/.test(adminFiles.find(s => s.name === 'admin-github.js').src), true);
-  const successUses = (allSrc.match(/var\(--success\)/g) || []).length;
-  check('and is not spent anywhere else', successUses <= 1, true);
+  const greenRules = [];
+  [uiCss, (adminMarkup.split('<style>')[1] || '').split('</style>')[0],
+   (indexHtml.split('<style>')[1] || '').split('</style>')[0]]
+    .join('\n').replace(/\/\*[\s\S]*?\*\//g, '').split('}').forEach(chunk => {
+      const body = chunk.split('{')[1] || '';
+      // :root is where the token is declared, which is not a use of it.
+      if (!body.includes('--success') || body.includes('--success:')) return;
+      greenRules.push(chunk.split('{')[0].trim().replace(/\s+/g, ' '));
+    });
+  // The notice variant and the saved button, both of which are "it landed".
+  check('and only on things that mean it landed', greenRules, ['.notice--ok', '.btn-primary.is-saved']);
+  // Anywhere green is set from script, it has to be the save path.
+  const greenFiles = adminFiles.filter(s => /var\(--success\)/.test(s.src)).map(s => s.name);
+  check('and only the save path paints it', greenFiles, ['admin-github.js']);
 
   // The phase edge only works if there is a colour for every phase.
   check('there is a stage colour per phase',

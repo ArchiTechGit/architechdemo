@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.10.2" />
+  <link rel="stylesheet" href="./ui.css?v=0.10.3" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
@@ -65,6 +65,25 @@
       .tf-hours { padding: 14px 16px; }
       .tf-hours-figure { text-align: left; }
     }
+
+    /* The fields that are set once and then left. Reachable, without taking the
+       space of the two you came to change. */
+    .tf-more { margin-bottom: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+    .tf-more > summary {
+      cursor: pointer; font-size: var(--fs-ui); font-weight: 700; color: var(--muted);
+      list-style: none; display: flex; align-items: center; min-height: 32px;
+    }
+    .tf-more > summary::-webkit-details-marker { display: none; }
+    /* A disclosure needs to look like one, and the arrow has to turn. */
+    .tf-more > summary::before {
+      content: '\u25B6'; font-size: 9px; margin-right: 8px; color: var(--muted);
+      transition: transform var(--t-state) var(--ease);
+    }
+    .tf-more[open] > summary::before { transform: rotate(90deg); }
+    .tf-more > summary:hover { color: var(--text); }
+
+    /* The commit landed. Green appears here and on the status line, nowhere else. */
+    .btn-primary.is-saved { background: var(--success); }
 
     .choice-group { display: flex; flex-direction: column; gap: 8px; }
     .choice-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
@@ -229,13 +248,13 @@
     </main>
   </div>
 
-  <script src="./engine.js?v=0.10.2"></script>
-  <script src="./admin-github.js?v=0.10.2"></script>
-  <script src="./admin-render.js?v=0.10.2"></script>
-  <script src="./admin-forms.js?v=0.10.2"></script>
-  <script src="./admin-import.js?v=0.10.2"></script>
-  <script src="./admin-preview.js?v=0.10.2"></script>
-  <script src="./admin-transfer.js?v=0.10.2"></script>
+  <script src="./engine.js?v=0.10.3"></script>
+  <script src="./admin-github.js?v=0.10.3"></script>
+  <script src="./admin-render.js?v=0.10.3"></script>
+  <script src="./admin-forms.js?v=0.10.3"></script>
+  <script src="./admin-import.js?v=0.10.3"></script>
+  <script src="./admin-preview.js?v=0.10.3"></script>
+  <script src="./admin-transfer.js?v=0.10.3"></script>
 
 </body>
 </html>
