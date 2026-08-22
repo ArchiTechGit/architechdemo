@@ -11,7 +11,9 @@ let PREVIEW = null;
 function togglePreview() {
   const f = F();
   if (!f) return;
-  PREVIEW = PREVIEW ? null : { subflow: f.subflows[0] && f.subflows[0].id, answers: {} };
+  // null is the single path a flow with no subflows has, and is what the engine
+  // reads as "everything marked for all subflows".
+  PREVIEW = PREVIEW ? null : { subflow: (f.subflows[0] || {}).id || null, answers: {} };
   renderAdmin();
 }
 

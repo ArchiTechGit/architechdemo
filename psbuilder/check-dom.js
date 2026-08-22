@@ -28,8 +28,10 @@ try {
 }
 
 const CONFIG = JSON.parse(read('config.json'));
+// The harness sometimes needs the engine itself, not a page's copy of it.
+const PSEngine = require(path.join(DIR, 'engine.js'));
 const ADMIN_SCRIPTS = ['engine.js', 'admin-github.js', 'admin-render.js',
-  'admin-forms.js', 'admin-import.js', 'admin-preview.js'];
+  'admin-forms.js', 'admin-import.js', 'admin-preview.js', 'admin-transfer.js'];
 
 let failures = 0;
 function check(name, actual, expected) {
@@ -268,6 +270,141 @@ section('Builder: producing an estimate');
   const rWidths = [...new Set($('#out-resource').value.split('\n').filter(Boolean)
     .map(l => l.split('\t').length))];
   check('every resource line is the same width', rWidths.length, 1);
+}
+
+// ─────────────────────── export and import ───────────────────────
+section('Admin: export and import');
+{
+  const { window, errors, click, $, $$ } = boot('admin.html', ADMIN_SCRIPTS);
+  window.eval('CONFIG = ' + JSON.stringify(CONFIG) + ';');
+  window.eval('switchFlow(' + JSON.stringify(CONFIG.flows[0].id) + ');');
+
+  // Downloads need a Blob URL, which jsdom does not create. Capture what would
+  // have been written instead.
+  const saved = [];
+  window.eval(`
+    window.__saved = [];
+    saveFile = function (name, text) { window.__saved.push({ name, text }); };
+  `);
+
+  errors.length = 0;
+  window.eval('toggleTransfer();');
+  check('the panel opens', !!$('#tr-text'), true);
+  check('and raises no error', errors, []);
+
+  window.eval('exportFlow();');
+  const files = window.eval('JSON.stringify(window.__saved.map(f => f.name))');
+  check('exporting a flow writes one file', JSON.parse(files).length, 1);
+  const payload = JSON.parse(window.eval('window.__saved[0].text'));
+  check('it says what kind of file it is', payload.kind, 'psbuilder.flow');
+  check('and carries the flow', payload.flow.id, CONFIG.flows[0].id);
+  check('with every task', (payload.flow.tasks || []).length, CONFIG.flows[0].tasks.length);
+  // The point of the format: a flow alone would import into a broken config.
+  check('and the vertical it needs', payload.requires.vertical.id, CONFIG.flows[0].vertical);
+  const usedPhases = [...new Set(CONFIG.flows[0].tasks.map(t => t.phase).filter(Boolean))];
+  check('and every phase its tasks name',
+    usedPhases.filter(p => !payload.requires.phases.includes(p)), []);
+  const usedSkills = [...new Set(CONFIG.flows[0].tasks.map(t => t.skill).filter(Boolean))];
+  check('and every skill', usedSkills.filter(s => !payload.requires.skills.includes(s)), []);
+
+  // ── round trip: the same file, back in ──
+  errors.length = 0;
+  window.eval(`document.getElementById('tr-text').value = window.__saved[0].text; readTransfer();`);
+  check('reading it back finds no problems',
+    JSON.parse(window.eval('JSON.stringify(TRANSFER.report.problems)')), []);
+  check('and notices the id is already here',
+    window.eval('TRANSFER.report.clash.id'), CONFIG.flows[0].id);
+  check('and nothing is missing from this config',
+    JSON.parse(window.eval('JSON.stringify(TRANSFER.report.missing)')), []);
+  check('it offers to keep both or replace', $$('input[name="tr-mode"]').length, 2);
+
+  // Keeping both must not quietly shadow the existing flow behind a shared id.
+  window.eval('applyTransfer();');
+  const ids = JSON.parse(window.eval('JSON.stringify(CONFIG.flows.map(f => f.id))'));
+  check('adding it keeps the original', ids.includes(CONFIG.flows[0].id), true);
+  check('and gives the copy its own id', ids.length, CONFIG.flows.length + 1);
+  check('so no two flows share an id', ids.length, new Set(ids).size);
+  check('the result still validates',
+    JSON.parse(window.eval('JSON.stringify(PSEngine.validateConfig(CONFIG))')), []);
+  check('the round trip raises no error', errors, []);
+
+  // ── a file it should refuse ──
+  const bad = [
+    ['not JSON at all', 'this is not json'],
+    ['JSON that is not an export', '{"hello":"world"}'],
+    ['a flow naming a phase this config lacks', JSON.stringify({
+      kind: 'psbuilder.flow', version: 1,
+      requires: { vertical: { id: 'x', name: 'X' }, phases: ['Phase From Another Planet'],
+                  skills: [], taskTypes: [], roles: [], locations: [] },
+      flow: { id: 'imported', name: 'Imported', vertical: 'x', subflows: [], inputs: [], tasks: [] },
+    })],
+  ];
+  bad.forEach(([what, text]) => {
+    window.eval(`document.getElementById('tr-text').value = ${JSON.stringify(text)}; readTransfer();`);
+    const problems = JSON.parse(window.eval('JSON.stringify(TRANSFER.report.problems)'));
+    check('it refuses ' + what, problems.length > 0, true);
+    const countBefore = window.eval('CONFIG.flows.length');
+    window.eval('applyTransfer();');
+    check('and changes nothing when it does', window.eval('CONFIG.flows.length'), countBefore);
+  });
+
+  // ── the whole-config backup ──
+  window.eval('window.__saved = []; exportConfig();');
+  const backup = JSON.parse(window.eval('window.__saved[0].text'));
+  check('a backup says what it is', backup.kind, 'psbuilder.config');
+  check('and holds every flow', backup.config.flows.length, window.eval('CONFIG.flows.length'));
+}
+
+// ─────────────────────── a flow with no subflows ───────────────────────
+section('A flow may have no subflows');
+{
+  // One path, every task in it. The engine already read a null subflow as
+  // "everything marked for all subflows"; this is about the pages that assumed
+  // there would be at least one to show.
+  const plain = JSON.parse(JSON.stringify(CONFIG));
+  const f = plain.flows[0];
+  f.subflows = [];
+  f.tasks.forEach(t => { t.subflows = 'all'; });
+  f.inputs.forEach(i => { delete i.subflows; });
+  check('such a config is valid', PSEngine.validateConfig(plain), []);
+
+  const admin = boot('admin.html', ADMIN_SCRIPTS);
+  admin.window.eval('CONFIG = ' + JSON.stringify(plain) + ';');
+  admin.errors.length = 0;
+  admin.window.eval('switchFlow(' + JSON.stringify(f.id) + ');');
+  check('the admin renders it', admin.errors, []);
+  const blocks = admin.$$('#tasks-root .block-head');
+  check('as a single section', blocks.length, 1);
+  check('named for what it holds', blocks[0].querySelector('.block-name').textContent, 'All tasks');
+  check('and says why there is only one',
+    /no subflows/.test(blocks[0].querySelector('.block-meta').textContent), true);
+  admin.click(blocks[0]);
+  check('holding every task', admin.$$('#tasks-root .act').length, f.tasks.length);
+
+  // The task form has nothing to scope against, so it should say so rather than
+  // show an empty list of checkboxes.
+  admin.click([...admin.$$('#tasks-root .act')[0].parentElement.querySelectorAll('button')]
+    .find(b => b.textContent.trim() === 'Edit'));
+  check('the task form offers no subflow picker',
+    /no subflows/.test(admin.$('#tf-subflows').textContent), true);
+  check('and opening it raises no error', admin.errors, []);
+  admin.window.eval('closeForm(); togglePreview();');
+  check('the preview opens on the single path', admin.errors, []);
+
+  const b = boot('index.html', []);
+  b.window.eval('CONFIG = ' + JSON.stringify(plain) + '; renderFlows();');
+  b.errors.length = 0;
+  b.click(b.$$('#flow-list [role="radio"]')[0]);
+  // The question nobody needs to be asked.
+  check('the builder skips the subflow step',
+    b.$('#subflow-section').classList.contains('active'), false);
+  check('and goes straight to the questions', b.$('#question-root').children.length > 0, true);
+  check('without error', b.errors, []);
+  b.click(b.$('#create-btn'));
+  check('an estimate comes out', b.$('#out-task').value.split('\n').filter(Boolean).length > 0, true);
+  check('and the resource block with it',
+    b.$('#out-resource').value.split('\n').filter(Boolean).length > 0, true);
+  check('creating it raises no error', b.errors, []);
 }
 
 // ─────────────────────── the help page ───────────────────────

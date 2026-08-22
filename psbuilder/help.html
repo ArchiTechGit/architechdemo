@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.9.9" />
+  <link rel="stylesheet" href="./ui.css?v=0.10.0" />
   <style>
     :root { --page-width: 820px; }
 
@@ -73,7 +73,8 @@
       <div class="page-desc">
         A <strong>flow</strong> is one kind of engagement. A <strong>subflow</strong> is a variation
         of it — a new build against a migration, say — and a task can belong to one subflow, several,
-        or all of them. Everything below is about the tasks.
+        or all of them. A flow can have no subflows at all, in which case it has a single shape and
+        every task is in it. Everything below is about the tasks.
       </div>
 
       <!-- Hours first: it is the question that brings people here. -->
@@ -234,6 +235,33 @@
         </p>
       </section>
 
+      <!-- ── moving a flow ────────────────────────────────────────────────── -->
+      <section class="hp-section">
+        <div class="hp-h2">Moving a flow, and keeping a backup</div>
+        <p class="hp-body">
+          <strong>Export / import</strong> in the toolbar writes the flow you are looking at to a
+          file, and reads one back. There is also a whole-config export, which is the one to keep as
+          a backup.
+        </p>
+        <p class="hp-body">
+          A flow on its own would not be enough. It names a vertical, and its tasks name phases,
+          skills, task types and roles that all live outside the flow — so a file carries those
+          alongside it, and an import checks every one against this config before it changes
+          anything.
+        </p>
+        <p class="hp-body">
+          Skills, task types, roles and verticals that are missing get added for you, and the panel
+          says which. Phases and locations do not: they are the columns of the spreadsheet, so a file
+          cannot introduce one. If a flow needs a phase this config has not got, you are told, and
+          nothing is imported until it is sorted out.
+        </p>
+        <p class="hp-body hp-note">
+          If a flow with the same id is already here you choose between keeping both — the incoming
+          one is renamed — and replacing what is there. Either way nothing reaches GitHub until you
+          press <strong>Save</strong>, and the same validation that guards a normal save guards this.
+        </p>
+      </section>
+
       <!-- ── live reference ───────────────────────────────────────────────── -->
       <section class="hp-section">
         <div class="section-label">What is configured right now</div>
@@ -254,7 +282,7 @@
     </div>
   </div>
 
-  <script src="./engine.js?v=0.9.9"></script>
+  <script src="./engine.js?v=0.10.0"></script>
   <script>
     const esc = PSEngine.esc;
 

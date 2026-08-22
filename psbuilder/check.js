@@ -9,7 +9,7 @@ const path = require('path');
 const DIR = path.join(__dirname);
 const config = JSON.parse(fs.readFileSync(path.join(DIR, 'config.json'), 'utf8'));
 const indexHtml = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
-const ADMIN_SCRIPTS = ['admin-github.js', 'admin-render.js', 'admin-forms.js', 'admin-import.js', 'admin-preview.js'];
+const ADMIN_SCRIPTS = ['admin-github.js', 'admin-render.js', 'admin-forms.js', 'admin-import.js', 'admin-preview.js', 'admin-transfer.js'];
 const adminMarkup = fs.readFileSync(path.join(DIR, 'admin.html'), 'utf8');
 const adminFiles = ADMIN_SCRIPTS.map(f => ({ name: f, src: fs.readFileSync(path.join(DIR, f), 'utf8') }));
 // Most checks care about the admin as a whole, markup and behaviour together.
@@ -208,6 +208,90 @@ check('admin announces its save status', /id="save-status"[^>]*aria-live/.test(a
 check('admin links labels to controls', adminHtml.includes('function linkLabels'), true);
 
 // ── 1h. Failures and double-clicks ─────────────────────────────────────
+section('Export and import')
+{
+  const tr = adminFiles.find(f => f.name === 'admin-transfer.js').src;
+
+  // A flow is not self-contained: it names a vertical, and its tasks name
+  // phases, skills, task types, roles and locations that all live at the top of
+  // the config. A file carrying only the flow would import into a config that
+  // cannot describe it.
+  ['vertical', 'phases', 'skills', 'taskTypes', 'roles', 'locations'].forEach(k =>
+    check('an export carries the ' + k + ' the flow needs', new RegExp(k + ':').test(tr), true));
+  // Collected from the flow, not from a list someone has to remember to update.
+  check('and collects them from the flow itself', /\(flow\.tasks \|\| \[\]\)\.forEach/.test(tr), true);
+
+  // The file says what it is, so a wrong file is refused rather than half-read.
+  check('a file declares its kind', /psbuilder\.flow/.test(tr), true);
+  check('and its format version', /FILE_VERSION/.test(tr), true);
+  check('a newer format is reported, not guessed at',
+    /newer version of this tool/.test(tr), true);
+
+  // The import must not invent its own idea of a valid flow.
+  check('an import validates through the engine', /PSEngine\.validateConfig\(trial\)/.test(tr), true);
+  check('and checks before it changes anything',
+    tr.indexOf('function inspectTransfer') < tr.indexOf('function applyTransfer'), true);
+  check('it refuses to apply a report with problems',
+    /if \(!r \|\| r\.problems\.length\) return;/.test(tr), true);
+
+  // Phases and locations are the shape of the spreadsheet.
+  check('phases cannot be added from a file', /what: 'phase', value: p, fixable: false/.test(tr), true);
+  check('nor locations', /what: 'location', value: l, fixable: false/.test(tr), true);
+  check('but a skill can be', /what: 'skill', value: s, fixable: true/.test(tr), true);
+
+  // Two flows answering to one id would leave the second unreachable.
+  check('an added flow gets a free id', /while \(CONFIG\.flows\.some\(x => x\.id === base/.test(tr), true);
+  check('replacing an existing flow is confirmed first',
+    /confirm\(`Replace "\$\{r\.clash\.name\}"/.test(tr), true);
+  check('and replacing the whole config too', /Replace everything in this config/.test(tr), true);
+
+  // Nothing here may commit: Save is the only thing that writes, and it is what
+  // runs the full validation.
+  check('nothing in here writes to GitHub', /api\.github\.com|doSave|saveConfig\(/.test(tr), false);
+  check('and it says so', /until you press Save/.test(tr), true);
+
+  // The panel has to exist and be reachable.
+  check('the admin has a slot for the panel', /id="transfer-slot"/.test(adminMarkup), true);
+  check('and a button that opens it', /onclick="toggleTransfer\(\)"/.test(adminMarkup), true);
+  check('and renders it every time', /renderTransfer\(\)/.test(
+    adminFiles.find(f => f.name === 'admin-render.js').src), true);
+}
+
+section('A flow may have no subflows')
+{
+  const forms = adminFiles.find(f => f.name === 'admin-forms.js').src;
+  const render = adminFiles.find(f => f.name === 'admin-render.js').src;
+
+  // Not every engagement has variations. The engine already read a null subflow
+  // as "everything marked for all subflows"; these are the places that assumed
+  // there would be at least one to show.
+  check('the count can be stepped to none', /Math\.max\(0, Math\.min\(12/.test(forms), true);
+  check('naming one is not required', /Name at least one subflow first/.test(forms), false);
+  check('the task form says there is nothing to scope against',
+    /no subflows, so the task is simply in it/.test(forms), true);
+  check('the one section is not called "All subflows"',
+    /name: 'All tasks', shared: true, only: true/.test(render), true);
+  check('the builder skips the step it cannot ask',
+    /if \(!flow\.subflows\.length\) \{ hide\('subflow-section'\)/.test(indexHtml), true);
+
+  // And the engine agrees it is a legal shape.
+  const plain = JSON.parse(JSON.stringify(config));
+  plain.flows.forEach(f => {
+    f.subflows = [];
+    f.tasks.forEach(t => { t.subflows = 'all'; });
+    f.inputs.forEach(i => { delete i.subflows; });
+  });
+  check('a flow with none validates', E.validateConfig(plain), []);
+  // But a task cannot claim membership of one that is not there.
+  const bad = JSON.parse(JSON.stringify(plain));
+  bad.flows[0].tasks[0].subflows = ['gone'];
+  check('and a task naming one that is gone does not',
+    E.validateConfig(bad).some(p => p.includes('this flow has none')), true);
+  // The estimate still comes out on the single path.
+  const out = E.estimate(plain, plain.flows[0], null, {});
+  check('an estimate builds on the single path', out.lines.length > 0, true);
+}
+
 section('Help page')
 {
   // A help page that describes mechanics the tool no longer has is worse than
@@ -669,7 +753,16 @@ check('the shipped config has no problems', E.validateConfig(config), []);
     ['a task in no subflow', c => { c.flows[0].tasks[0].subflows = []; }, 'no subflow at all'],
     ['a duplicate task id', c => { c.flows[0].tasks.push(Object.assign({}, c.flows[0].tasks[0])); }, 'duplicate task id'],
     ['a flow in an unknown vertical', c => { c.flows[0].vertical = 'atlantis'; }, 'unknown vertical'],
-    ['a flow with no subflows', c => { c.flows[0].subflows = []; }, 'no subflows'],
+    // A flow with no subflows is a legal shape now -- one path, every task in
+    // it. What is still wrong is a task claiming membership of a subflow that
+    // the flow does not have.
+    ['a missing subflows list', c => { delete c.flows[0].subflows; }, 'no subflows list'],
+    ['a task scoped to a subflow in a flow with none', c => {
+      c.flows[0].subflows = [];
+      c.flows[0].tasks.forEach(t => { t.subflows = 'all'; });
+      c.flows[0].inputs.forEach(i => { delete i.subflows; });
+      c.flows[0].tasks[0].subflows = ['gone'];
+    }, 'this flow has none'],
     ['double counting a repeat', c => { const t = c.flows[0].tasks[0];
       t.repeatPer = 'workshops';
       t.effort = [{ role: 'SE', location: 'Office', business: { base: 1, per: [{ input: 'workshops', each: 2 }] } }]; }, 'double counting'],

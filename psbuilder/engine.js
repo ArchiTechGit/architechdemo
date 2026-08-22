@@ -485,7 +485,10 @@ const PSEngine = (function () {
         if (f[k] === undefined) problems.push(at(`missing "${k}"`));
       });
       if (!verticalIds.includes(f.vertical)) problems.push(at(`sits in unknown vertical "${f.vertical}"`));
-      if (!(f.subflows || []).length) problems.push(at('has no subflows'));
+      // A flow with no subflows is allowed: it has one path, and every task
+      // belongs to it. A task naming a subflow that is not there is still wrong,
+      // and is caught further down.
+      if (!Array.isArray(f.subflows)) problems.push(at('has no subflows list'));
       ['phases', 'locations', 'columns'].forEach(k => {
         if (f[k] !== undefined) problems.push(at(`carries its own "${k}", which the PSE fixes for every flow`));
       });
@@ -501,6 +504,9 @@ const PSEngine = (function () {
         if (member === undefined || member === 'all') return;
         if (!Array.isArray(member)) { problems.push(at(`${label} has a subflows value that is neither "all" nor a list`)); return; }
         if (!member.length) problems.push(at(`${label} is in no subflow at all`));
+        if (member.length && !subIds.length) {
+          problems.push(at(`${label} names a subflow, but this flow has none -- it should be in all of them`));
+        }
         member.forEach(id => { if (!subIds.includes(id)) problems.push(at(`${label} names unknown subflow "${id}"`)); });
       };
 

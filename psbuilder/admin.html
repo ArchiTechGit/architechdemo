@@ -23,7 +23,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.9.9" />
+  <link rel="stylesheet" href="./ui.css?v=0.10.0" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
@@ -199,6 +199,7 @@
           <button class="btn-ghost" onclick="openFlowSettings()">Settings</button>
           <button class="btn-ghost" onclick="toggleImport()">Import</button>
           <button class="btn-ghost" onclick="togglePreview()">Preview</button>
+          <button class="btn-ghost" onclick="toggleTransfer()">Export / import</button>
         </div>
         <!-- Making a flow is the one thing here that starts something. -->
         <button class="btn-secondary" onclick="openNewFlow()">+ New flow</button>
@@ -206,6 +207,7 @@
       <div id="flow-form-slot"></div>
       <div id="import-slot"></div>
       <div id="preview-slot"></div>
+      <div id="transfer-slot"></div>
       <p class="page-desc" id="admin-intro"></p>
 
       <div class="section-label">Variables and questions</div>
@@ -222,12 +224,13 @@
     </main>
   </div>
 
-  <script src="./engine.js?v=0.9.9"></script>
-  <script src="./admin-github.js?v=0.9.9"></script>
-  <script src="./admin-render.js?v=0.9.9"></script>
-  <script src="./admin-forms.js?v=0.9.9"></script>
-  <script src="./admin-import.js?v=0.9.9"></script>
-  <script src="./admin-preview.js?v=0.9.9"></script>
+  <script src="./engine.js?v=0.10.0"></script>
+  <script src="./admin-github.js?v=0.10.0"></script>
+  <script src="./admin-render.js?v=0.10.0"></script>
+  <script src="./admin-forms.js?v=0.10.0"></script>
+  <script src="./admin-import.js?v=0.10.0"></script>
+  <script src="./admin-preview.js?v=0.10.0"></script>
+  <script src="./admin-transfer.js?v=0.10.0"></script>
 
 </body>
 </html>

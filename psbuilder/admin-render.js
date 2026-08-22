@@ -30,8 +30,12 @@ function numberInputs() { return F().inputs.filter(i => i.type === 'number'); }
 // subflow, then one per subflow. A task listing several subflows shows up
 // under each of them, which is the point of listing several.
 function sectionsForFlow(f) {
+  const subs = f.subflows || [];
+  // With no subflows there is one section and it holds everything, so calling it
+  // "All subflows" would be describing something that is not there.
+  if (!subs.length) return [{ id: 'all', name: 'All tasks', shared: true, only: true }];
   return [{ id: 'all', name: 'All subflows', shared: true }]
-    .concat(f.subflows.map(s => ({ id: s.id, name: s.name, note: s.note })));
+    .concat(subs.map(s => ({ id: s.id, name: s.name, note: s.note })));
 }
 
 function tasksIn(section) {
@@ -375,6 +379,7 @@ function renderRest(hideRest) {
 
   renderImport();
   renderPreview();
+  renderTransfer();
   renderInputs(inputsRoot);
   // after every render, so newly drawn forms are labelled too
   setTimeout(() => linkLabels(), 0);
@@ -445,9 +450,11 @@ function renderTaskSections(root) {
       <span class="block-chevron ${open ? 'open' : ''}">&#9654;</span>
       <div class="block-title">
         <div class="block-name">${esc(section.name)}</div>
-        <div class="block-meta">${section.shared
-          ? 'Included in every subflow'
-          : esc(section.note || 'Only this subflow') + ' · plus everything in All subflows'}</div>
+        <div class="block-meta">${section.only
+          ? 'This flow has no subflows, so every task is in it'
+          : section.shared
+            ? 'Included in every subflow'
+            : esc(section.note || 'Only this subflow') + ' · plus everything in All subflows'}</div>
       </div>
       <span class="block-count ${matches.length === 0 ? 'zero' : ''}">${matches.length === 0 ? 'none' : count(matches.length, 'task', 'tasks') + (hours ? ` · ${hours}h` : '')}</span>`;
     head.onclick = () => toggleExpand(key);

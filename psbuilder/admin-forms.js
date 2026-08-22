@@ -107,6 +107,11 @@ function readCondEditor() {
 // ─── Subflow membership editor ───
 function renderSubflowPicker(container, member) {
   const f = F();
+  if (!(f.subflows || []).length) {
+    container.innerHTML =
+      '<div class="q-sub">This flow has no subflows, so the task is simply in it.</div>';
+    return;
+  }
   const all = member === undefined || member === 'all';
   container.innerHTML = `
     <label class="check-row">
@@ -687,7 +692,9 @@ function renderNewFlowForm(slot) {
           <span id="nf-count" style="font-size:18px;font-weight:700;color:var(--cyan);min-width:22px;text-align:center;">3</span>
           <button class="btn-ghost" type="button" style="margin:0;" onclick="stepSubflowCount(1)">+</button>
         </div>
-        <div class="q-sub" style="margin-top:6px;">The variations of this work, e.g. a new install versus an upgrade.</div>
+        <div class="q-sub" style="margin-top:6px;">The variations of this work, e.g. a new install versus
+          an upgrade. Set it to none if this work has only one shape &mdash; the builder then goes
+          straight to the questions.</div>
       </div>
       <div class="field" id="nf-names"></div>
       <button class="btn-primary" onclick="createFlow()">Create flow</button>
@@ -701,13 +708,17 @@ function renderNewFlowForm(slot) {
 function stepSubflowCount(delta) {
   // Keep whatever has been typed before redrawing the list.
   const typed = Array.from(document.querySelectorAll('#nf-names [data-sf]')).map(el => el.value);
-  window._nfCount = Math.max(1, Math.min(12, window._nfCount + delta));
+  window._nfCount = Math.max(0, Math.min(12, window._nfCount + delta));
   document.getElementById('nf-count').textContent = window._nfCount;
   renderSubflowNameFields(typed);
 }
 
 function renderSubflowNameFields(typed) {
   const box = document.getElementById('nf-names');
+  if (!window._nfCount) {
+    box.innerHTML = '<div class="q-sub">No subflows: every task in this flow will simply be in it.</div>';
+    return;
+  }
   let html = '<label class="field-label">Name each subflow</label>';
   for (let n = 0; n < window._nfCount; n++) {
     html += `<input type="text" data-sf="${n}" value="${attr((typed && typed[n]) || '')}" placeholder="${['e.g. New install', 'e.g. Add handsets', 'e.g. Upgrade handsets'][n] || 'e.g. Another variation'}" style="margin-bottom:8px;" />`;
@@ -720,7 +731,7 @@ function createFlow() {
   if (!name) { alert('Give the flow a name first.'); return; }
   const names = Array.from(document.querySelectorAll('#nf-names [data-sf]'))
     .map(el => el.value.trim()).filter(Boolean);
-  if (!names.length) { alert('Name at least one subflow first.'); return; }
+  // None is allowed: the flow then has a single path and every task is in it.
 
   const id = uniqueId(slugify(name), CONFIG.flows.map(f => f.id));
   const subIds = [];
@@ -831,7 +842,16 @@ function saveFlowForm() {
     const prev = f.subflows.find(s => s.id === id);
     return prev ? Object.assign({}, prev, { name: subName }) : { id, name: subName };
   }).filter(Boolean);
-  if (!subflows.length) { alert('Name at least one subflow first.'); return; }
+  // None is allowed: the flow then has a single shape and every task is in it.
+  // The fallback below already re-homes anything that pointed at a subflow being
+  // removed, so this only needs saying out loud -- it changes the scope of every
+  // task that was not in all of them.
+  if (!subflows.length && (f.subflows || []).length) {
+    const scoped = (f.tasks || []).filter(t => Array.isArray(t.subflows)).length;
+    if (!confirm(`Remove all ${count(f.subflows.length, 'subflow', 'subflows')} from "${f.name}"?` +
+      (scoped ? ` ${count(scoped, 'task', 'tasks')} scoped to one will move into the whole flow.` : '') +
+      ` The builder will stop asking which one to use.`)) return;
+  }
 
   // Tasks and inputs pointing at a removed subflow would silently vanish,
   // so they fall back to every subflow instead.

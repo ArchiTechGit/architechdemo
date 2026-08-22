@@ -24,7 +24,7 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.9.9" />
+  <link rel="stylesheet" href="./ui.css?v=0.10.0" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -158,7 +158,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js?v=0.9.9"></script>
+  <script src="./engine.js?v=0.10.0"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from
@@ -276,8 +276,11 @@
       hide('output-section');
       document.getElementById('subflow-label').textContent = '2 · ' + (flow.subflowLabel || 'Type of work');
       renderSubflows();
+      // Nothing to choose between: one subflow needs no question, and none at
+      // all means the flow has a single path, which is the null subflow the
+      // engine already treats as "everything marked for all subflows".
+      if (!flow.subflows.length) { hide('subflow-section'); selectSubflow(null); return; }
       show('subflow-section');
-      // A flow with a single subflow does not need to be asked about it.
       if (flow.subflows.length === 1) selectSubflow(flow.subflows[0].id);
     }
 
