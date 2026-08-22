@@ -55,8 +55,10 @@ function boot(page, scripts) {
     beforeParse(w) { w.PSEngine = require(path.join(DIR, 'engine.js')); },
   });
   const { window } = dom;
-  // jsdom has no layout, so these are absent rather than broken.
+  // jsdom has no layout, so these are absent rather than broken. Stubbing them
+  // keeps the output to real problems.
   window.Element.prototype.scrollIntoView = function () {};
+  window.scrollTo = function () {};
   const errors = [];
   window.addEventListener('error', e => errors.push(e.message || String(e.error)));
   window.onerror = (m) => { errors.push(String(m)); return false; };
@@ -270,6 +272,73 @@ section('Builder: producing an estimate');
   const rWidths = [...new Set($('#out-resource').value.split('\n').filter(Boolean)
     .map(l => l.split('\t').length))];
   check('every resource line is the same width', rWidths.length, 1);
+}
+
+// ─────────────────────── starting again ───────────────────────
+section('Builder: starting over');
+{
+  const { window, errors, click, $, $$ } = boot('index.html', []);
+  window.eval('CONFIG = ' + JSON.stringify(CONFIG) + '; renderFlows();');
+  // Nothing to confirm while nothing has been answered.
+  let asked = null;
+  window.confirm = (m) => { asked = m; return true; };
+
+  const active = (id) => $('#' + id).classList.contains('active');
+  const goToQuestions = () => {
+    click($$('#flow-list [role="radio"]')[0]);
+    const subs = $$('#subflow-grid [role="radio"]');
+    if (subs.length) click(subs[0]);
+  };
+
+  goToQuestions();
+  check('the reset button is there once you are answering', !!$('#reset-btn'), true);
+  check('and it says what it does', $('#reset-btn').textContent.trim(), 'Start over');
+  check('the questions are showing', active('question-section'), true);
+
+  // With nothing answered it should not stop to ask.
+  errors.length = 0;
+  click($('#reset-btn'));
+  check('an untouched form resets without a dialog', asked, null);
+  check('the questions are gone', active('question-section'), false);
+  check('so is the type-of-work step', active('subflow-section'), false);
+  check('the flow is deselected', $$('#flow-list .pick-card.selected').length, 0);
+  check('but the flows are still listed', $$('#flow-list [role="radio"]').length > 0, true);
+  check('resetting raises no error', errors, []);
+
+  // Answer something, generate, then reset: it has to clear the output too.
+  goToQuestions();
+  const num = $$('#question-root input[type="number"]')[0];
+  if (num) { num.value = '3'; num.dispatchEvent(new window.Event('input', { bubbles: true })); }
+  window.eval("answers['workshops'] = 3;");
+  click($('#create-btn'));
+  check('an estimate was produced', active('output-section'), true);
+  check('and it has content', $('#out-task').value.length > 0, true);
+
+  asked = null;
+  click($('#reset-btn'));
+  check('a form with answers asks first', typeof asked, 'string');
+  check('and the question names what is lost', /answer/.test(asked || ''), true);
+  check('the output is put away', active('output-section'), false);
+  check('the answers are cleared', window.eval('Object.keys(answers).length'), 0);
+  check('and the flow is cleared', window.eval('flow === null'), true);
+
+  // Declining must change nothing at all.
+  goToQuestions();
+  window.eval("answers['workshops'] = 4;");
+  window.confirm = () => false;
+  click($('#reset-btn'));
+  check('declining keeps the questions', active('question-section'), true);
+  check('and keeps the answers', window.eval("answers['workshops']"), 4);
+
+  // And the whole thing still works afterwards, which is where reset usually
+  // leaves something behind.
+  window.confirm = () => true;
+  click($('#reset-btn'));
+  goToQuestions();
+  errors.length = 0;
+  click($('#create-btn'));
+  check('a second estimate builds after a reset', $('#out-task').value.length > 0, true);
+  check('with no error', errors, []);
 }
 
 // ─────────────────────── the first screen ───────────────────────

@@ -58,7 +58,7 @@
     }
     document.addEventListener("DOMContentLoaded", syncThemeButton);
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.11.3" />
+  <link rel="stylesheet" href="./ui.css?v=0.11.4" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -159,6 +159,7 @@
     <div id="question-section" class="step">
       <div id="question-root"></div>
       <button class="btn-primary" id="create-btn" onclick="createEstimate()">Create estimate →</button>
+      <button class="btn-ghost btn-ghost--roomy" id="reset-btn" onclick="startOver()">Start over</button>
     </div>
 
     <div id="output-section" class="step">
@@ -209,7 +210,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js?v=0.11.3"></script>
+  <script src="./engine.js?v=0.11.4"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from
@@ -339,6 +340,31 @@
         });
         root.appendChild(grid);
       });
+    }
+
+    // Back to an empty page. Everything here is held in three variables, so
+    // there is nothing to undo beyond clearing them and drawing the first step
+    // again.
+    function startOver() {
+      // Only ask when there is something to lose. An answer lands in `answers`
+      // only once it has been changed, so an untouched form needs no dialog.
+      const answered = Object.keys(answers).length;
+      if (answered && !confirm('Start over? The ' +
+          answered + (answered === 1 ? ' answer' : ' answers') +
+          ' you have given will be cleared.')) return;
+
+      flow = null;
+      subflow = null;
+      answers = {};
+      renderFlows();
+      hide('subflow-section');
+      hide('question-section');
+      hide('output-section');
+      // A keyboard user has just had the thing they were on taken away, so put
+      // them on the first choice rather than at the top of the document.
+      const first = document.querySelector('#flow-list [role="radio"]:not([aria-disabled="true"])');
+      if (first) first.focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function selectFlow(id) {
