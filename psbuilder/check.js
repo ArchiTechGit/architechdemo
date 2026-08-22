@@ -527,11 +527,14 @@ section('Shared styling');
 {
   // The tokens and the accessibility baseline live in one file now. They were
   // duplicated, which is how a neutral came to be fixed twice.
-  check('the tokens are defined once', (uiCss.match(/--muted:/g) || []).length, 1);
+  // Once per theme now. Two is right; three would mean a page had grown its own.
+  check('each theme defines the tokens once', (uiCss.match(/--muted:/g) || []).length, 2);
+  check('and there are exactly two themes',
+    (uiCss.match(/^:root(\[data-theme="[a-z]+"\])? \{/gm) || []).length, 2);
   check('and only in the shared sheet',
     [indexHtml, adminMarkup].filter(h => /--muted:/.test(h.split('<style>')[1] || '')).length, 0);
 
-  ['--bg', '--surface-1', '--surface-2', '--cyan', '--text', '--muted', '--border',
+  ['--bg', '--surface-1', '--surface-2', '--accent', '--text', '--muted', '--border',
    '--success', '--danger', '--phase-1', '--phase-5', '--font']
     .forEach(t => check('shared sheet defines ' + t, uiCss.includes(t + ':'), true));
 
@@ -579,12 +582,14 @@ section('Shared styling');
 section('Admin structure');
 {
   const inline = [...adminMarkup.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
-  check('the markup carries one inline script', inline.length, 1);
-  // And only the one. Anything else is admin logic creeping back into markup.
-  check('and it is only the failure reporter',
-    inline.filter(s => !s.includes('reportFatal')), []);
-  check('which depends on nothing that could be the thing that broke',
-    /PSEngine|CONFIG|renderAdmin|querySelector\(/.test(inline[0] || ''), false);
+  // Two, and both have to be inline for the same reason: they run before the
+  // files they affect. The reporter has to survive a broken script; the theme
+  // has to be set before the stylesheet paints.
+  check('the markup carries two inline scripts', inline.length, 2);
+  check('and they are only the reporter and the theme',
+    inline.filter(s => !s.includes('reportFatal') && !s.includes('psbuilder-theme')), []);
+  check('neither depends on anything that could be the thing that broke',
+    inline.filter(s => /PSEngine|CONFIG|renderAdmin/.test(s)), []);
   check('every script it names exists', ADMIN_SCRIPTS.filter(f => !adminMarkup.includes('src="./' + f + '?v=')), []);
 
   // Load order matters: the engine first, then the helpers everything reads.
@@ -1428,18 +1433,27 @@ section('Colour discipline');
   // someone mixed by eye.
   const BRAND = ['#0D1825', '#13294B', '#1A3460', '#1F3D72', '#05C3DD', '#0055B8', '#54565B',
     '#55CAFD', '#7F8FA9', '#16CECC', '#517FE3', '#1980BD', '#494B83', '#00A991', '#9594D2',
-    '#C62828', '#F0F6FC', '#FFFFFF'];
+    '#C62828', '#F0F6FC', '#FFFFFF',
+    // Two values the light theme needs that are not verbatim brand hexes.
+    // Both are a brand colour moved for contrast, not a new hue, and the
+    // contrast battery below proves why each one had to move.
+    '#F8F9FA',   // ArchiTech Navy at 3% over white: a page ground with some
+                 // temperature, rather than the pure white the skill warns off
+                 // for large areas.
+    '#008270',   // The brand teal-green taken down until it clears AA on that
+                 // ground, where #00A991 is 2.8:1.
+  ];
   const hexes = [...new Set((allCss.match(/#[0-9A-Fa-f]{6}/g) || []).map(h => h.toUpperCase()))];
   check('every hex in the stylesheets is a brand colour', hexes.filter(h => !BRAND.includes(h)), []);
 
   // The point of the exercise: cyan meant heading and clickable at the same
   // time, so colour could not tell you which.
   const label = uiCss.split('.section-label {')[1].split('}')[0];
-  check('section headings are not cyan', /--cyan/.test(label), false);
+  check('section headings are not cyan', /--accent/.test(label), false);
   check('section headings are muted', /--muted/.test(label), true);
-  check('the focus ring is still cyan', /outline: 2px solid var\(--cyan\)/.test(uiCss), true);
+  check('the focus ring is still cyan', /outline: 2px solid var\(--accent\)/.test(uiCss), true);
   check('the headline number is still cyan',
-    /--cyan/.test(uiCss.split('.stat-value {')[1].split('}')[0]), true);
+    /--accent/.test(uiCss.split('.stat-value {')[1].split('}')[0]), true);
 
   // #C62828 is 2.6:1 on a card. It may be an edge or a wash, never a glyph.
   const dangerAsText = [];
@@ -1484,8 +1498,8 @@ section('Colour discipline');
   // The phase edge only works if there is a colour for every phase.
   check('there is a stage colour per phase',
     config.phases.every((_, i) => uiCss.includes('--phase-' + (i + 1) + ':')), true);
-  check('and no phase colour without a phase',
-    (uiCss.match(/--phase-\d:/g) || []).length, config.phases.length);
+  check('and no phase colour without a phase, in either theme',
+    (uiCss.match(/--phase-\d:/g) || []).length, config.phases.length * 2);
   config.phases.forEach((p, i) =>
     check('phase ' + (i + 1) + ' (' + p + ') maps to its stage colour', E.phaseIndex(config, p), i + 1));
   check('an unknown phase paints no edge', E.phaseIndex(config, 'Not A Phase'), 0);
@@ -1509,24 +1523,66 @@ section('Colour discipline');
     const x = lum(a), y = lum(b);
     return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
   };
-  const tok = n => uiCss.match(new RegExp('--' + n + ':\\s*(#[0-9A-Fa-f]{6})'))[1];
-  const bg = tok('bg');
-  // A card is a 2.5% white wash over the page, so text on it sits a little lower.
-  const card = '#101B29';
-  ['muted', 'text', 'cyan'].forEach(n => {
-    check(n + ' clears AA on the page', ratio(tok(n), bg) >= 4.5, true);
-    check(n + ' clears AA on a card', ratio(tok(n), card) >= 4.5, true);
+  // Each theme's own block, so a value is never read out of the other one.
+  const themeBlock = (sel) => {
+    const at = uiCss.indexOf(sel + ' {');
+    if (at < 0) throw new Error('no ' + sel + ' block');
+    return uiCss.slice(at, uiCss.indexOf('\n}', at));
+  };
+  const THEMES = [
+    { name: 'dark', css: themeBlock(':root'), card: '#101B29' },
+    // A white card on the light ground, which is what --card resolves to there.
+    { name: 'light', css: themeBlock(':root[data-theme="light"]'), card: '#FFFFFF' },
+  ];
+
+  THEMES.forEach(t => {
+    const tok = n => {
+      const m = t.css.match(new RegExp('--' + n + ':\\s*(#[0-9A-Fa-f]{6})'));
+      if (!m) throw new Error(t.name + ' theme has no --' + n);
+      return m[1];
+    };
+    const bg = tok('bg');
+    const at = (s) => s + ' in ' + t.name;
+
+    ['muted', 'text', 'accent'].forEach(n => {
+      check(at(n + ' clears AA on the page'), ratio(tok(n), bg) >= 4.5, true);
+      check(at(n + ' clears AA on a card'), ratio(tok(n), t.card) >= 4.5, true);
+    });
+    // The stage edges are non-text, so 3:1 is the bar. Five of them, and in the
+    // light theme several brand values had to move to clear it.
+    config.phases.forEach((p, i) => {
+      check(at('the ' + p + ' edge clears 3:1'), ratio(tok('phase-' + (i + 1)), bg) >= 3, true);
+    });
+    // And they have to stay distinguishable from each other, or the sequence
+    // stops carrying anything.
+    const edges = config.phases.map((_, i) => tok('phase-' + (i + 1)));
+    check(at('no two phase edges are the same colour'), edges.length, new Set(edges).size);
+
+    check(at('green clears AA on the page'), ratio(tok('success'), bg) >= 4.5, true);
+    check(at('red clears 3:1 as an edge'), ratio(tok('danger'), bg) >= 3, true);
+    // The two grounds have to actually be different, or the theme does nothing.
+    check(at('the page and a card are told apart'), ratio(bg, t.card) > 1.02, true);
   });
-  // A field is a well on the page ground now, which is what makes this pass.
+
+  // A field is a well on the page ground, which is what makes the placeholder
+  // pass in both themes.
   check('the placeholder clears AA in a field',
     /background: var\(--bg\)/.test(uiCss.split('input[type="password"]')[1].split('}')[0]), true);
-  // The stage edges are non-text, so 3:1 is the bar they have to clear.
-  config.phases.forEach((p, i) => {
-    const c = tok('phase-' + (i + 1));
-    check('the ' + p + ' edge clears 3:1', ratio(c, bg) >= 3, true);
+
+  // Dark is the brand's theme, so it is what an unset browser gets.
+  check('dark is the default', /saved === "light" \? "light" : "dark"/.test(indexHtml), true);
+  check('and the choice is remembered', /psbuilder-theme/.test(indexHtml), true);
+  check('the theme is set before the stylesheet loads',
+    indexHtml.indexOf('data-theme') < indexHtml.indexOf('./ui.css?v='), true);
+  ['index.html', 'admin.html', 'help.html'].forEach((name, n) => {
+    const html = [indexHtml, adminMarkup, helpHtml][n];
+    check(name + ' offers the switch', /id="theme-btn"/.test(html), true);
+    // The admin has no logo at all -- its header is a text badge -- so the rule
+    // is that a page showing the mark shows the right one for its ground, not
+    // that every page shows one.
+    check(name + ' shows a mark for each ground, or none at all',
+      /logo-dark/.test(html) === /logo-light/.test(html), true);
   });
-  check('green clears AA on the page', ratio(tok('success'), bg) >= 4.5, true);
-  check('red clears 3:1 as an edge', ratio(tok('danger'), bg) >= 3, true);
 }
 
 section('Admin grouping');

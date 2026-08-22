@@ -15,20 +15,27 @@
   --bg:        #0D1825;
   --surface-1: #13294B;
   --surface-2: #1A3460;
-  /* Cyan is the interactive colour and nothing else: what you can act on,
-     what you have selected, where the focus ring is, and the numbers the
-     estimate exists to produce. It used to colour every section heading too,
-     which meant colour could not tell you what was clickable. Headings are
-     muted now and cyan means one thing. */
-  --cyan:      #05C3DD;
-  --cyan-dim:  rgba(5,195,221,0.10);
-  --cyan-mid:  rgba(5,195,221,0.25);
+  /* One interactive colour: what you can act on, what you have selected, where
+     the focus ring is, and the numbers the estimate exists to produce. It used
+     to colour every section heading too, which meant colour could not tell you
+     what was clickable.
+
+     It is a token rather than a fixed cyan because the value has to change with
+     the theme. ArchiTech Cyan is 2.0:1 on a light ground, which no link or label
+     can use; the brand names ArchiTech Blue for that job on light. Same role,
+     same meaning, two values. */
+  --accent:      #05C3DD;
+  --accent-dim:  rgba(5,195,221,0.10);
+  --accent-mid:  rgba(5,195,221,0.25);
 
   --text:      #F0F6FC;
   /* Brand blue-gray. Replaces two hand-mixed grays that sat 1.2:1 apart and
      did no work between them. */
   --muted:     #7F8FA9;
   --border:    rgba(255,255,255,0.07);
+  /* A card. On dark it is a wash of light over the page; on light it is white
+     against a tinted page. Same idea, opposite direction. */
+  --card:      rgba(255,255,255,0.025);
 
   /* Semantic. Green confirms a commit reached GitHub. Red marks output that
      will be wrong if you paste it. Red is 2.6:1 on a card, so it is never
@@ -74,6 +81,45 @@
   --ease:    cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ── the light theme ─────────────────────────────────────────────────────── */
+/* The brand's digital theme is dark, so this is opt-in and dark stays the
+   default. Every value is a brand colour; the two that are not verbatim are
+   noted, and both are a brand colour moved to clear AA rather than a new hue.
+   Contrast for all of them is recomputed from these tokens in check.js. */
+:root[data-theme="light"] {
+  /* Not pure white: ArchiTech Navy at 3% over white, so a large area has some
+     temperature to it and the white cards have something to lift off. */
+  --bg:        #F8F9FA;
+  --surface-1: #FFFFFF;
+  --surface-2: #FFFFFF;
+
+  /* ArchiTech Blue. The brand's stated role is links and interactive, which is
+     exactly what this token means. 6.66:1 here; cyan would be 2.0:1. */
+  --accent:      #0055B8;
+  --accent-dim:  rgba(0,85,184,0.06);
+  --accent-mid:  rgba(0,85,184,0.28);
+
+  --text:      #13294B;              /* ArchiTech Navy, 13.8:1 */
+  --muted:     #54565B;              /* ArchiTech Gray. The brand names this one
+                                        for UI on light backgrounds. 7.0:1 */
+  --border:    rgba(19,41,75,0.14);
+  --card:      #FFFFFF;
+
+  /* ArchiTech teal-green is 2.8:1 on this ground, so it is taken down until it
+     clears AA. Same hue, still the brand's success colour. */
+  --success:   #008270;              /* 4.5:1 */
+  --danger:    #C62828;              /* 5.3:1, unchanged */
+
+  /* The phase sequence has to survive as 3px edges, so it moves to the brand's
+     darker blues and greys. The order is what carries the meaning, and the order
+     is unchanged. */
+  --phase-1:   #0055B8;
+  --phase-2:   #517FE3;
+  --phase-3:   #1980BD;
+  --phase-4:   #494B83;
+  --phase-5:   #54565B;
+}
+
 /* ── reset and base ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -83,7 +129,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 /* :focus-visible keeps the ring off mouse clicks while always showing it for
    keyboard use. Nothing may set outline:none without putting one back. */
 :focus-visible {
-  outline: 2px solid var(--cyan);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -103,9 +149,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
 .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
+/* The brand ships a mark for each ground. Screen blending is what makes the
+   dark one sit on navy, and it would wash the light one out. */
+:root[data-theme="light"] .header img,
+:root[data-theme="light"] .footer img { mix-blend-mode: normal; }
+.logo-light { display: none; }
+:root[data-theme="light"] .logo-dark { display: none; }
+:root[data-theme="light"] .logo-light { display: inline; }
 .header-badge {
   font-family: var(--font-mono); font-size: var(--fs-micro); font-weight: 700;
-  letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan);
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
 }
 .header a {
   color: var(--muted); font-size: var(--fs-micro); text-decoration: none;
@@ -131,7 +184,7 @@ h1.page-title, .page-title {
 .section-label::before {
   content: ''; position: absolute; left: 0; top: 1px; bottom: 1px; width: 3px;
   border-radius: 2px;
-  background: linear-gradient(180deg, var(--cyan), rgba(5,195,221,0.35));
+  background: linear-gradient(180deg, var(--accent), rgba(5,195,221,0.35));
 }
 
 .footer {
@@ -141,7 +194,21 @@ h1.page-title, .page-title {
 }
 .footer img { width: 80px; mix-blend-mode: screen; opacity: 0.45; }
 .footer-note { font-size: var(--fs-micro); color: var(--muted); line-height: 1.65; max-width: 560px; }
-.footer-note a { color: var(--cyan); text-decoration: none; }
+.footer-note a { color: var(--accent); text-decoration: none; }
+
+/* ── the theme switch ────────────────────────────────────────────────────── */
+/* Small, in the header with the other page-level controls. It says what you
+   would get, not what you have, which is the way a switch reads fastest. */
+.theme-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  font-family: var(--font); font-size: var(--fs-micro); font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  min-height: 32px; margin-left: 6px;
+  transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
+}
+.theme-btn:hover { color: var(--text); border-color: var(--accent-mid); }
+.theme-btn:active { transform: translateY(1px); }
 
 /* ── notice ────────────────────────────────────────────────────────────── */
 /* Something is wrong with what the tool is about to hand you. The text stays
@@ -162,7 +229,7 @@ h1.page-title, .page-title {
 
 /* ── card ───────────────────────────────────────────────────────────────── */
 .q-card {
-  background: rgba(255,255,255,0.025); border: 1px solid var(--border);
+  background: var(--card); border: 1px solid var(--border);
   border-radius: 12px; padding: 18px 20px; margin-bottom: 12px;
 }
 .q-label { font-size: var(--fs-body); font-weight: 700; margin-bottom: 5px; letter-spacing: -0.01em; }
@@ -172,7 +239,7 @@ h1.page-title, .page-title {
 
 /* ── buttons ────────────────────────────────────────────────────────────── */
 .btn-primary {
-  background: var(--cyan); color: var(--bg); font-size: var(--fs-body); font-weight: 700;
+  background: var(--accent); color: var(--bg); font-size: var(--fs-body); font-weight: 700;
   border: none; padding: 12px 28px; border-radius: 8px; cursor: pointer;
   font-family: var(--font); margin-top: 10px;
   transition: opacity var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
@@ -208,7 +275,7 @@ h1.page-title, .page-title {
   font-family: var(--font); width: 100%; text-align: left;
   transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
 }
-.btn-add:hover { color: var(--cyan); border-color: var(--cyan-mid); }
+.btn-add:hover { color: var(--accent); border-color: var(--accent-mid); }
 .btn-add:active { transform: translateY(1px); }
 
 .btn-x {
@@ -230,29 +297,29 @@ textarea { resize: vertical; min-height: 48px; }
    name, with a different gap. */
 .check-row { display: flex; align-items: center; gap: 8px; cursor: pointer;
   transition: color var(--t-quick) var(--ease); }
-.check-row input { width: 16px; height: 16px; accent-color: var(--cyan); cursor: pointer; flex-shrink: 0; }
+.check-row input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 .check-row span { font-size: var(--fs-ui); color: var(--text); }
-.check-row:hover span { color: var(--cyan); }
+.check-row:hover span { color: var(--accent); }
 
 /* ── chip ───────────────────────────────────────────────────────────────── */
 .chip {
-  display: inline-flex; align-items: center; background: var(--cyan-dim);
-  border: 1px solid var(--cyan-mid); color: var(--cyan); font-size: var(--fs-micro);
+  display: inline-flex; align-items: center; background: var(--accent-dim);
+  border: 1px solid var(--accent-mid); color: var(--accent); font-size: var(--fs-micro);
   font-family: var(--font-mono); padding: 4px 10px;
   min-height: 24px; border-radius: 20px; cursor: pointer; margin: 0 6px 6px 0;
   transition: background var(--t-quick) var(--ease);
 }
-.chip:hover { background: var(--cyan-mid); }
+.chip:hover { background: var(--accent-mid); }
 .chip:active { transform: translateY(1px); }
 .chip--ghost { background: transparent; border-style: dashed; color: var(--muted); }
-.chip--ghost:hover { color: var(--cyan); border-color: var(--cyan-mid); background: transparent; }
+.chip--ghost:hover { color: var(--accent); border-color: var(--accent-mid); background: transparent; }
 
 /* ── headline numbers ───────────────────────────────────────────────────── */
 /* One row of totals. The builder shows the estimate's; the admin preview shows
    the same numbers for a flow being edited, which is why this is shared. */
 .stat-row {
-  display: flex; gap: 32px; flex-wrap: wrap; background: var(--cyan-dim);
-  border: 1px solid var(--cyan-mid); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
+  display: flex; gap: 32px; flex-wrap: wrap; background: var(--accent-dim);
+  border: 1px solid var(--accent-mid); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
 }
 /* One label-and-number pair. min-width:0 lets it shrink instead of pushing the row wide. */
 .stat { min-width: 0; }
@@ -264,7 +331,7 @@ textarea { resize: vertical; min-height: 48px; }
    up on their digits rather than drifting. */
 .stat-value {
   font-family: var(--font-mono); font-size: var(--fs-display); font-weight: 700;
-  color: var(--cyan); line-height: 1; letter-spacing: -0.02em;
+  color: var(--accent); line-height: 1; letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 

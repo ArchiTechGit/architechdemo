@@ -698,7 +698,7 @@ function renderNewFlowForm(slot) {
         <label class="field-label">How many subflows?</label>
         <div class="stepper" style="display:flex;align-items:center;gap:12px;">
           <button class="btn-ghost" type="button" style="margin:0;" onclick="stepSubflowCount(-1)">&minus;</button>
-          <span id="nf-count" style="font-size:18px;font-weight:700;color:var(--cyan);min-width:22px;text-align:center;">3</span>
+          <span id="nf-count" style="font-size:18px;font-weight:700;color:var(--accent);min-width:22px;text-align:center;">3</span>
           <button class="btn-ghost" type="button" style="margin:0;" onclick="stepSubflowCount(1)">+</button>
         </div>
         <div class="q-sub" style="margin-top:6px;">The variations of this work, e.g. a new install versus

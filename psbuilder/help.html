@@ -23,7 +23,35 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.10.3" />
+  <script>
+    // Before the stylesheet, so the page never paints dark and then flips.
+    // The brand theme is dark, so that is the default and the stored choice
+    // is the only thing that changes it -- the OS preference does not, or an
+    // ArchiTech tool would come up light on half the machines it runs on.
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("psbuilder-theme"); } catch (e) {}
+      document.documentElement.setAttribute("data-theme", saved === "light" ? "light" : "dark");
+    })();
+    function toggleTheme() {
+      var root = document.documentElement;
+      var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("psbuilder-theme", next); } catch (e) {}
+      syncThemeButton();
+    }
+    // The label names what you would get, which reads faster than naming
+    // what you already have.
+    function syncThemeButton() {
+      var btn = document.getElementById("theme-btn");
+      if (!btn) return;
+      var light = document.documentElement.getAttribute("data-theme") === "light";
+      btn.textContent = light ? "Dark" : "Light";
+      btn.setAttribute("aria-label", "Switch to " + (light ? "dark" : "light") + " theme");
+    }
+    document.addEventListener("DOMContentLoaded", syncThemeButton);
+  </script>
+  <link rel="stylesheet" href="./ui.css?v=0.11.0" />
   <style>
     :root { --page-width: 820px; }
 
@@ -33,8 +61,8 @@
     .hp-body + .hp-body { margin-top: 14px; }
     .hp-body strong { color: var(--text); font-weight: 700; }
     .hp-body code, .hp-token {
-      font-family: var(--font-mono); font-size: 0.9em; color: var(--cyan);
-      background: var(--cyan-dim); border-radius: 4px; padding: 1px 5px;
+      font-family: var(--font-mono); font-size: 0.9em; color: var(--accent);
+      background: var(--accent-dim); border-radius: 4px; padding: 1px 5px;
     }
 
     .hp-section { margin-bottom: 44px; }
@@ -46,7 +74,7 @@
     /* A worked example. Mono, because it is what you would actually type. */
     .hp-eg {
       font-family: var(--font-mono); font-size: var(--fs-ui); line-height: 1.9;
-      background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--cyan);
+      background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--accent);
       border-radius: 0 8px 8px 0; padding: 14px 16px; margin: 14px 0;
       color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere;
     }
@@ -60,9 +88,11 @@
     <div id="fatal" class="notice" role="alert" style="display:none;"></div>
 
     <header class="header">
-      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <img class="logo-dark" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <img class="logo-light" src="/brand_assets/logo_lightbackground.png" alt="ArchiTech" />
       <span class="header-badge">PS Builder — Help</span>
       <span>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">Light</button>
         <a href="./admin.html">Manage flows</a>
         <a href="./index.html">← Back to the builder</a>
       </span>
@@ -296,6 +326,20 @@
         </p>
       </section>
 
+      <section class="hp-section">
+        <div class="hp-h2">Light and dark</div>
+        <p class="hp-body">
+          <strong>Light</strong> in the header switches theme, and the choice is remembered on that
+          browser. Dark is the default because it is the theme the ArchiTech brand specifies.
+        </p>
+        <p class="hp-body hp-note">
+          The light theme is not the dark one inverted. Cyan reads at 2:1 on a pale ground, which no
+          label or link can use, so on light the interactive colour becomes ArchiTech Blue &mdash;
+          which is the role the brand gives it. The phase edges move to darker blues for the same
+          reason. Every colour in both themes is checked against WCAG AA on the build.
+        </p>
+      </section>
+
       <!-- ── live reference ───────────────────────────────────────────────── -->
       <section class="hp-section">
         <div class="section-label">What is configured right now</div>
@@ -308,7 +352,8 @@
     </main>
 
     <div class="footer">
-      <img src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <img class="logo-dark" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
+      <img class="logo-light" src="/brand_assets/logo_lightbackground.png" alt="ArchiTech" />
       <div class="footer-note">
         Internal tool. The PSE workbook owns the commercials — this only produces the task list and
         the hours against it.
@@ -316,7 +361,7 @@
     </div>
   </div>
 
-  <script src="./engine.js?v=0.10.3"></script>
+  <script src="./engine.js?v=0.11.0"></script>
   <script>
     const esc = PSEngine.esc;
 

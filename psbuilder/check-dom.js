@@ -272,6 +272,64 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── light and dark ───────────────────────
+section('The theme switch');
+{
+  ['index.html', 'admin.html', 'help.html'].forEach(page => {
+    const { window, errors, click, $ } = boot(page, page === 'admin.html' ? ADMIN_SCRIPTS : []);
+    const root = window.document.documentElement;
+    const btn = $('#theme-btn');
+
+    // Dark is the brand's theme, so it is what you get without asking.
+    check(page + ' starts dark', root.getAttribute('data-theme'), 'dark');
+    check(page + ' offers a switch', !!btn, true);
+    check(page + ' names what you would get', btn.textContent.trim(), 'Light');
+
+    click(btn);
+    check(page + ' switches to light', root.getAttribute('data-theme'), 'light');
+    check(page + ' then offers the way back', btn.textContent.trim(), 'Dark');
+    check(page + ' remembers the choice',
+      window.localStorage.getItem('psbuilder-theme'), 'light');
+    check(page + ' says what the switch does',
+      /light|dark/.test(btn.getAttribute('aria-label') || ''), true);
+
+    click(btn);
+    check(page + ' switches back', root.getAttribute('data-theme'), 'dark');
+    check(page + ' and remembers that too',
+      window.localStorage.getItem('psbuilder-theme'), 'dark');
+    check(page + ' switching raises no error', errors, []);
+  });
+
+  // A stored choice has to survive a reload, applied before the first paint.
+  const dom = new JSDOM(read('index.html'), {
+    runScripts: 'dangerously', pretendToBeVisual: true,
+    url: 'https://architechdemo.com/psbuilder/index.html',
+    beforeParse(w) {
+      w.PSEngine = require(path.join(DIR, 'engine.js'));
+      w.localStorage.setItem('psbuilder-theme', 'light');
+    },
+  });
+  check('a saved choice is applied on load',
+    dom.window.document.documentElement.getAttribute('data-theme'), 'light');
+
+  // Nothing about the theme may depend on storage being available: a browser
+  // with it blocked should still render, dark.
+  const blocked = new JSDOM(read('index.html'), {
+    runScripts: 'dangerously', pretendToBeVisual: true,
+    url: 'https://architechdemo.com/psbuilder/index.html',
+    beforeParse(w) {
+      w.PSEngine = require(path.join(DIR, 'engine.js'));
+      Object.defineProperty(w, 'localStorage', {
+        get() { throw new Error('storage is blocked'); },
+      });
+    },
+  });
+  check('blocked storage still renders, dark',
+    blocked.window.document.documentElement.getAttribute('data-theme'), 'dark');
+  const fatal = blocked.window.document.getElementById('fatal');
+  check('and does not report a failure over it', fatal.style.display, 'none');
+}
+
 // ─────────────────────── finding a task ───────────────────────
 section('Admin: the task filter');
 {

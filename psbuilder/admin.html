@@ -23,17 +23,45 @@
         + "incomplete or out of date. Reload with Ctrl+Shift+R. (" + why + ")";
     }
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.10.3" />
+  <script>
+    // Before the stylesheet, so the page never paints dark and then flips.
+    // The brand theme is dark, so that is the default and the stored choice
+    // is the only thing that changes it -- the OS preference does not, or an
+    // ArchiTech tool would come up light on half the machines it runs on.
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("psbuilder-theme"); } catch (e) {}
+      document.documentElement.setAttribute("data-theme", saved === "light" ? "light" : "dark");
+    })();
+    function toggleTheme() {
+      var root = document.documentElement;
+      var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("psbuilder-theme", next); } catch (e) {}
+      syncThemeButton();
+    }
+    // The label names what you would get, which reads faster than naming
+    // what you already have.
+    function syncThemeButton() {
+      var btn = document.getElementById("theme-btn");
+      if (!btn) return;
+      var light = document.documentElement.getAttribute("data-theme") === "light";
+      btn.textContent = light ? "Dark" : "Light";
+      btn.setAttribute("aria-label", "Switch to " + (light ? "dark" : "light") + " theme");
+    }
+    document.addEventListener("DOMContentLoaded", syncThemeButton);
+  </script>
+  <link rel="stylesheet" href="./ui.css?v=0.11.0" />
   <style>    /* Only what is specific to the admin. Everything shared is in ui.css. */
 
     .drag-row { cursor: grab; }
     .drag-row:active { cursor: grabbing; }
     .drag-row.dragging { opacity: 0.35; }
-    .drag-row.drop-above { box-shadow: inset 0 2px 0 0 var(--cyan); }
-    .drag-row.drop-below { box-shadow: inset 0 -2px 0 0 var(--cyan); }
+    .drag-row.drop-above { box-shadow: inset 0 2px 0 0 var(--accent); }
+    .drag-row.drop-below { box-shadow: inset 0 -2px 0 0 var(--accent); }
     .grip { color: var(--muted); font-size: var(--fs-body); line-height: 24px; user-select: none;
       flex-shrink: 0; letter-spacing: 2px; min-width: 24px; min-height: 24px; text-align: center; }
-    .drag-row:hover .grip { color: var(--cyan); }
+    .drag-row:hover .grip { color: var(--accent); }
 
     .field { margin-bottom: 14px; }
     .field-label { font-size: var(--fs-ui); font-weight: 700; color: var(--muted); margin-bottom: 6px; display: block; }
@@ -44,7 +72,7 @@
        field down carrying the same weight as "Skill required". This is the one
        part of the form allowed to look like the important one. */
     .tf-hours {
-      background: var(--cyan-dim); border: 1px solid var(--cyan-mid);
+      background: var(--accent-dim); border: 1px solid var(--accent-mid);
       border-radius: 12px; padding: 18px 20px; margin-bottom: 18px;
     }
     .tf-hours-head {
@@ -55,12 +83,12 @@
     /* The running total, in the data face like every other figure in the tool. */
     .tf-hours-figure {
       font-family: var(--font-mono); font-size: 26px; font-weight: 700;
-      color: var(--cyan); line-height: 1; letter-spacing: -0.02em;
+      color: var(--accent); line-height: 1; letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums; text-align: right;
     }
     /* The repeat multiplies the hours above it, so it sits inside the same panel
        rather than looking like an unrelated setting further down. */
-    .tf-hours-repeat { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--cyan-mid); }
+    .tf-hours-repeat { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--accent-mid); }
     @media (max-width: 620px) {
       .tf-hours { padding: 14px 16px; }
       .tf-hours-figure { text-align: left; }
@@ -87,8 +115,8 @@
 
     .choice-group { display: flex; flex-direction: column; gap: 8px; }
     .choice-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
-    .choice-row:hover { border-color: var(--cyan-mid); }
-    .choice-row input[type="radio"] { margin-top: 3px; width: auto; accent-color: var(--cyan); }
+    .choice-row:hover { border-color: var(--accent-mid); }
+    .choice-row input[type="radio"] { margin-top: 3px; width: auto; accent-color: var(--accent); }
     .choice-row .choice-body { flex: 1; min-width: 0; }
     .choice-row .choice-title { font-size: var(--fs-ui); font-weight: 700; }
     .choice-row .choice-extra { margin-top: 8px; }
@@ -112,8 +140,8 @@
     .block-title { flex: 1; min-width: 0; }
     .block-name { font-size: var(--fs-body); font-weight: 700; line-height: 1.4; }
     .block-meta { font-size: var(--fs-ui); color: var(--muted); margin-top: 3px; }
-    .block-count { font-size: var(--fs-micro); font-weight: 700; color: var(--cyan); background: var(--cyan-dim);
-      border: 1px solid var(--cyan-mid); border-radius: 20px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap; }
+    .block-count { font-size: var(--fs-micro); font-weight: 700; color: var(--accent); background: var(--accent-dim);
+      border: 1px solid var(--accent-mid); border-radius: 20px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap; }
     .block-count.zero { color: var(--muted); background: transparent; border-color: var(--border); }
     .block-actions { display: flex; flex-shrink: 0; }
     .block-body { padding: 0 18px 16px 18px; }
@@ -125,7 +153,7 @@
     .act-text { flex: 1; min-width: 0; }
     .act-desc { font-size: var(--fs-ui); font-weight: 400; line-height: 1.45; overflow-wrap: anywhere; }
     .act-meta { font-size: var(--fs-micro); color: var(--muted); margin-top: 2px; }
-    .act-hours { font-size: var(--fs-micro); font-weight: 700; color: var(--cyan); flex-shrink: 0; white-space: nowrap; }
+    .act-hours { font-size: var(--fs-micro); font-weight: 700; color: var(--accent); flex-shrink: 0; white-space: nowrap; }
 
     .pv-table td:nth-child(2) { min-width: 220px; }
     .pv-answers { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 10px 0 4px; }
@@ -168,7 +196,7 @@
     /* Which panel is open. Without this the only clue is a slab of form
        appearing somewhere further down the page. */
     .btn-ghost.is-open {
-      color: var(--cyan); border-color: var(--cyan-mid); background: var(--cyan-dim);
+      color: var(--accent); border-color: var(--accent-mid); background: var(--accent-dim);
     }
     .fbar-group .btn-ghost { margin-left: 0; }
   </style>
@@ -181,6 +209,7 @@
       <span class="header-badge">PS BUILDER — ADMIN <span id="version-badge" style="color:var(--muted);letter-spacing:0.1em;"></span></span>
       <span>
         <button class="btn-ghost" onclick="forgetToken()" title="Removes the token saved in this browser. You will need to paste it again.">Forget token</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">Light</button>
         <a href="./help.html">How it works</a>
         <a href="./index.html">← Back to the builder</a>
       </span>
@@ -197,7 +226,7 @@
       <div class="q-card" style="max-width:560px;">
         <div class="q-label">How to get a token</div>
         <ol style="margin:0;padding-left:18px;font-size:var(--fs-ui);color:var(--text);line-height:1.9;">
-          <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--cyan);">github.com/settings/personal-access-tokens/new</a> (sign in if asked).</li>
+          <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--accent);">github.com/settings/personal-access-tokens/new</a> (sign in if asked).</li>
           <li>Give it any <b>Token name</b>, e.g. "psbuilder-admin".</li>
           <li>Under <b>Resource owner</b>, switch the dropdown from your personal account to <b>ArchiTechGit</b> (the org that owns this repo) — repo-scoping only shows up once the owner is set to the org.</li>
           <li>Under <b>Repository access</b>, select <b>Only select repositories</b>, then use <b>Select repositories</b> to pick <b>ArchiTechGit/architechdemo</b>.</li>
@@ -248,13 +277,13 @@
     </main>
   </div>
 
-  <script src="./engine.js?v=0.10.3"></script>
-  <script src="./admin-github.js?v=0.10.3"></script>
-  <script src="./admin-render.js?v=0.10.3"></script>
-  <script src="./admin-forms.js?v=0.10.3"></script>
-  <script src="./admin-import.js?v=0.10.3"></script>
-  <script src="./admin-preview.js?v=0.10.3"></script>
-  <script src="./admin-transfer.js?v=0.10.3"></script>
+  <script src="./engine.js?v=0.11.0"></script>
+  <script src="./admin-github.js?v=0.11.0"></script>
+  <script src="./admin-render.js?v=0.11.0"></script>
+  <script src="./admin-forms.js?v=0.11.0"></script>
+  <script src="./admin-import.js?v=0.11.0"></script>
+  <script src="./admin-preview.js?v=0.11.0"></script>
+  <script src="./admin-transfer.js?v=0.11.0"></script>
 
 </body>
 </html>
