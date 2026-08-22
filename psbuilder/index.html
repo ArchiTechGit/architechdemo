@@ -44,15 +44,21 @@
     // The label names what you would get, which reads faster than naming
     // what you already have.
     function syncThemeButton() {
-      var btn = document.getElementById("theme-btn");
-      if (!btn) return;
       var light = document.documentElement.getAttribute("data-theme") === "light";
-      btn.textContent = light ? "Dark" : "Light";
-      btn.setAttribute("aria-label", "Switch to " + (light ? "dark" : "light") + " theme");
+      var btn = document.getElementById("theme-btn");
+      if (btn) {
+        btn.textContent = light ? "Dark" : "Light";
+        btn.setAttribute("aria-label", "Switch to " + (light ? "dark" : "light") + " theme");
+      }
+      // One mark, swapped. Two images with one hidden still fetches both.
+      var marks = document.querySelectorAll(".brand-logo");
+      for (var i = 0; i < marks.length; i++) {
+        marks[i].src = "/brand_assets/logo_" + (light ? "light" : "dark") + "background.png";
+      }
     }
     document.addEventListener("DOMContentLoaded", syncThemeButton);
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.11.0" />
+  <link rel="stylesheet" href="./ui.css?v=0.11.1" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -62,10 +68,10 @@
     @media (max-width: 860px) { .product-grid, .scope-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
     @media (max-width: 560px) { .product-grid, .scope-grid { grid-template-columns: 1fr; } }
     .pick-card {
-      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;
+      background: var(--wash); border: 1px solid var(--border); border-radius: 12px;
       padding: 18px; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none;
     }
-    .pick-card:hover:not(.disabled) { border-color: rgba(5,195,221,0.22); background: rgba(5,195,221,0.03); }
+    .pick-card:hover:not(.disabled) { border-color: var(--accent-mid); background: var(--accent-dim); }
     .pick-card.selected { border-color: var(--accent); background: var(--accent-dim); }
     .pick-card.disabled { opacity: 0.4; cursor: not-allowed; }
     .pick-name { font-size: var(--fs-body); font-weight: 700; margin-bottom: 4px; }
@@ -110,8 +116,7 @@
     <div id="fatal" class="notice" role="alert" style="display:none;"></div>
 
     <header class="header">
-      <img class="logo-dark" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
-      <img class="logo-light" src="/brand_assets/logo_lightbackground.png" alt="ArchiTech" />
+      <img class="brand-logo" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <span class="header-badge">Internal Sizing Tool · POC</span>
       <span>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">Light</button>
@@ -180,8 +185,7 @@
     </main>
 
     <footer class="footer">
-      <img class="logo-dark" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
-      <img class="logo-light" src="/brand_assets/logo_lightbackground.png" alt="ArchiTech" />
+      <img class="brand-logo" src="/brand_assets/logo_darkbackground.png" alt="ArchiTech" />
       <div class="footer-note">
         Internal scoping tool. Hours come from the base and per-unit rates set against each task.
         <a href="/" target="_self">← Back to demos</a>
@@ -189,7 +193,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js?v=0.11.0"></script>
+  <script src="./engine.js?v=0.11.1"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from

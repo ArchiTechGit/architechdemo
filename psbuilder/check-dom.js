@@ -300,6 +300,23 @@ section('The theme switch');
     check(page + ' switching raises no error', errors, []);
   });
 
+  // The mark follows the theme by swapping src. Two images with one hidden
+  // fetched both, which cost 414 kB of light logo on every dark page view.
+  ['index.html', 'help.html'].forEach(page => {
+    const { window, click, $, $$ } = boot(page, []);
+    const marks = $$('.brand-logo');
+    check(page + ' has a mark in the header and the footer', marks.length, 2);
+    check(page + ' loads only the dark one to begin with',
+      marks.every(m => /logo_darkbackground/.test(m.src)), true);
+    check(page + ' gives each one alt text', marks.filter(m => !m.alt), []);
+    click($('#theme-btn'));
+    check(page + ' swaps them for light',
+      $$('.brand-logo').every(m => /logo_lightbackground/.test(m.src)), true);
+    click($('#theme-btn'));
+    check(page + ' and back again',
+      $$('.brand-logo').every(m => /logo_darkbackground/.test(m.src)), true);
+  });
+
   // A stored choice has to survive a reload, applied before the first paint.
   const dom = new JSDOM(read('index.html'), {
     runScripts: 'dangerously', pretendToBeVisual: true,

@@ -34,15 +34,25 @@
   --muted:     #7F8FA9;
   --border:    rgba(255,255,255,0.07);
   /* A card. On dark it is a wash of light over the page; on light it is white
-     against a tinted page. Same idea, opposite direction. */
+     against a tinted page. Same idea, opposite direction.
+     Everything below it is the same trick: a tint has to run *away* from the
+     page, so on a dark ground it is white and on a light ground it is navy. A
+     literal rgba(255,255,255,...) here is invisible in the light theme, which is
+     what these tokens exist to stop. */
   --card:      rgba(255,255,255,0.025);
+  --wash:      rgba(255,255,255,0.02);   /* a tint inside a surface */
+  --hover:     rgba(255,255,255,0.05);   /* the tint under the pointer */
+  --line:      rgba(255,255,255,0.20);   /* a border that has to be noticed */
+  --rule:      rgba(255,255,255,0.04);   /* a divider that has not */
 
   /* Semantic. Green confirms a commit reached GitHub. Red marks output that
      will be wrong if you paste it. Red is 2.6:1 on a card, so it is never
      text -- it is the edge beside white text. Both replace an amber that was
      not in the brand palette and marked empty states and real faults alike. */
-  --success:   #00A991;
-  --danger:    #C62828;
+  --success:     #00A991;
+  --success-dim: rgba(0,169,145,0.07);
+  --danger:      #C62828;
+  --danger-dim:  rgba(198,40,40,0.07);
 
   /* The five phases run in a fixed order, so they take the brand's stage
      sequence in that order. Carried as an edge on the phase cell, which is
@@ -104,11 +114,17 @@
                                         for UI on light backgrounds. 7.0:1 */
   --border:    rgba(19,41,75,0.14);
   --card:      #FFFFFF;
+  --wash:      rgba(19,41,75,0.035);
+  --hover:     rgba(19,41,75,0.05);
+  --line:      rgba(19,41,75,0.28);
+  --rule:      rgba(19,41,75,0.08);
 
   /* ArchiTech teal-green is 2.8:1 on this ground, so it is taken down until it
      clears AA. Same hue, still the brand's success colour. */
-  --success:   #008270;              /* 4.5:1 */
-  --danger:    #C62828;              /* 5.3:1, unchanged */
+  --success:     #008270;            /* 4.5:1 */
+  --success-dim: rgba(0,130,112,0.09);
+  --danger:      #C62828;            /* 5.3:1, unchanged */
+  --danger-dim:  rgba(198,40,40,0.06);
 
   /* The phase sequence has to survive as 3px edges, so it moves to the brand's
      darker blues and greys. The order is what carries the meaning, and the order
@@ -149,13 +165,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
 .header img { width: 130px; mix-blend-mode: screen; opacity: 0.9; }
-/* The brand ships a mark for each ground. Screen blending is what makes the
-   dark one sit on navy, and it would wash the light one out. */
+/* The brand ships a mark for each ground, and the theme swaps the src rather
+   than hiding one of two images -- display:none does not stop a fetch, so that
+   version downloaded 414 kB of light logo on every dark page view. Screen
+   blending is what makes the dark mark sit on navy; it would wash out the
+   light one. */
 :root[data-theme="light"] .header img,
 :root[data-theme="light"] .footer img { mix-blend-mode: normal; }
-.logo-light { display: none; }
-:root[data-theme="light"] .logo-dark { display: none; }
-:root[data-theme="light"] .logo-light { display: inline; }
 .header-badge {
   font-family: var(--font-mono); font-size: var(--fs-micro); font-weight: 700;
   letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
@@ -184,7 +200,7 @@ h1.page-title, .page-title {
 .section-label::before {
   content: ''; position: absolute; left: 0; top: 1px; bottom: 1px; width: 3px;
   border-radius: 2px;
-  background: linear-gradient(180deg, var(--accent), rgba(5,195,221,0.35));
+  background: linear-gradient(180deg, var(--accent), var(--accent-mid));
 }
 
 .footer {
@@ -215,7 +231,7 @@ h1.page-title, .page-title {
    white because it has to be read; the red is the edge, which is the only
    place #C62828 clears contrast on navy. */
 .notice {
-  border-left: 3px solid var(--danger); background: rgba(198,40,40,0.07);
+  border-left: 3px solid var(--danger); background: var(--danger-dim);
   border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0;
   font-size: var(--fs-ui); line-height: 1.6; color: var(--text);
 }
@@ -225,7 +241,7 @@ h1.page-title, .page-title {
   padding: 2px 0 2px 8px; margin: 6px 0; font-size: var(--fs-micro); line-height: 1.5;
 }
 /* It landed. Green appears here and nowhere else. */
-.notice--ok { border-left-color: var(--success); background: rgba(0,169,145,0.07); }
+.notice--ok { border-left-color: var(--success); background: var(--success-dim); }
 
 /* ── card ───────────────────────────────────────────────────────────────── */
 .q-card {
@@ -264,7 +280,7 @@ h1.page-title, .page-title {
   font-family: var(--font); margin-left: 6px;
   transition: color var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease);
 }
-.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--line); }
 .btn-ghost:active { transform: translateY(1px); }
 /* For a button standing on its own under a block of content. */
 .btn-ghost--roomy { font-size: var(--fs-ui); padding: 12px 22px; border-radius: 8px; margin-top: 10px; margin-left: 10px; }
@@ -283,7 +299,7 @@ h1.page-title, .page-title {
   cursor: pointer; min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0;
   transition: color var(--t-quick) var(--ease), background var(--t-quick) var(--ease);
 }
-.btn-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.btn-x:hover { color: var(--text); background: var(--hover); }
 .btn-x:active { transform: translateY(1px); }
 
 /* ── form controls ──────────────────────────────────────────────────────── */
@@ -355,7 +371,7 @@ textarea { resize: vertical; min-height: 48px; }
 }
 .data-table td {
   font-size: var(--fs-ui); padding: 7px 8px; vertical-align: top;
-  border-bottom: 1px solid rgba(255,255,255,0.04); overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--rule); overflow-wrap: anywhere;
 }
 /* The phase repeats down the column, so the word is muted and the colour does
    the grouping. Both pages had their own copy of this rule. */
@@ -369,7 +385,7 @@ textarea { resize: vertical; min-height: 48px; }
   text-align: right; white-space: nowrap; font-family: var(--font-mono);
   font-variant-numeric: tabular-nums; font-size: var(--fs-ui);
 }
-.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.data-table tr:hover td { background: var(--hover); }
 /* A row the reader has chosen to leave out. */
 .data-table tr.is-skipped td { opacity: 0.4; }
 .data-table td input[type="text"], .data-table td select { padding: 6px 8px; font-size: var(--fs-ui); }

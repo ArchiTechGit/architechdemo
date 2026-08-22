@@ -1304,6 +1304,70 @@ section('Interface copy');
 }
 
 // ── 6. Admin shows every task exactly once ──────────────────────────────
+section('Every colour follows the theme')
+{
+  const pageStyle = h => (h.split('<style>')[1] || '').split('</style>')[0];
+  const sheets = [['ui.css', uiCss], ['index.html', pageStyle(indexHtml)],
+                  ['admin.html', pageStyle(adminMarkup)], ['help.html', pageStyle(helpHtml)]];
+
+  // A tint has to run away from the page: white over a dark ground, navy over a
+  // light one. Written as a literal it can only do one of those, which is how
+  // eleven hover states and surfaces came to be invisible in the light theme.
+  const strays = [];
+  sheets.forEach(([name, src]) => {
+    src.replace(/\/\*[\s\S]*?\*\//g, '').split('}').forEach(chunk => {
+      const sel = (chunk.split('{')[0] || '').trim().replace(/\s+/g, ' ');
+      const body = chunk.split('{')[1] || '';
+      // The token blocks are where a literal belongs; everywhere else is a bug.
+      if (/^:root/.test(sel)) return;
+      const hits = body.match(/(?:color|background(?:-color)?|border(?:-[a-z]+)?(?:-color)?)\s*:[^;]*(?:rgba?\([^)]*\)|#[0-9a-fA-F]{3,6})/g) || [];
+      hits.forEach(h => strays.push(name + ' · ' + sel + ' · ' + h.trim().slice(0, 54)));
+    });
+  });
+  check('no rule paints a colour that cannot follow the theme', strays, []);
+
+  // Each tint token has to exist in both themes, or one of them falls back to
+  // nothing and the surface disappears.
+  const block = (sel) => {
+    const at = uiCss.indexOf(sel + ' {');
+    return at < 0 ? '' : uiCss.slice(at, uiCss.indexOf('\n}', at));
+  };
+  const dark = block(':root');
+  const light = block(':root[data-theme="light"]');
+  ['card', 'wash', 'hover', 'line', 'rule', 'accent', 'accent-dim', 'accent-mid',
+   'bg', 'surface-1', 'text', 'muted', 'border', 'success', 'danger',
+   'success-dim', 'danger-dim']
+    .forEach(t => {
+      check('--' + t + ' is set in the dark theme', dark.includes('--' + t + ':'), true);
+      check('--' + t + ' is set in the light theme', light.includes('--' + t + ':'), true);
+    });
+
+  // And the two values have to differ, or the token is decoration.
+  const valOf = (src, t) => (src.match(new RegExp('--' + t + ':\\s*([^;]+);')) || [])[1];
+  const same = ['card', 'wash', 'hover', 'line', 'rule', 'accent', 'bg', 'text', 'muted']
+    .filter(t => valOf(dark, t) === valOf(light, t));
+  check('and no tint has the same value in both themes', same, []);
+
+  // The light washes must be navy over a pale page, not white over it.
+  const lightWashes = ['card', 'wash', 'hover', 'line', 'rule']
+    .map(t => [t, (valOf(light, t) || '').trim()])
+    .filter(([, v]) => /rgba\(255,\s*255,\s*255/.test(v));
+  check('the light theme tints with navy, not white', lightWashes, []);
+
+  // One mark, swapped by the theme. Two images with one hidden still fetches
+  // both, which cost 414 kB on every dark page view.
+  [['index.html', indexHtml], ['help.html', helpHtml]].forEach(([name, html]) => {
+    // Two references is right -- header and footer. Two *variants* is the fault,
+    // because the hidden one is fetched anyway.
+    check(name + ' references one logo variant, not both',
+      [...new Set(html.match(/logo_\w+background\.png/g) || [])].length, 1);
+    check(name + ' lets the theme choose which',
+      /marks\[i\]\.src = "\/brand_assets\/logo_"/.test(html), true);
+  });
+  check('and no page hides an image it has already fetched',
+    /logo-light|logo-dark/.test(indexHtml + adminMarkup + helpHtml), false);
+}
+
 section('Typography')
 {
   const pageCss = [indexHtml, adminMarkup, helpHtml].map(h =>
