@@ -58,7 +58,7 @@
     }
     document.addEventListener("DOMContentLoaded", syncThemeButton);
   </script>
-  <link rel="stylesheet" href="./ui.css?v=0.11.2" />
+  <link rel="stylesheet" href="./ui.css?v=0.11.3" />
   <style>    /* Only what is specific to the builder. Everything shared is in ui.css. */
 
     /* ─── Step 1 & 2: card pickers ─── */
@@ -76,6 +76,23 @@
     .pick-card.disabled { opacity: 0.4; cursor: not-allowed; }
     .pick-name { font-size: var(--fs-body); font-weight: 700; margin-bottom: 4px; }
     .pick-note { font-size: var(--fs-micro); color: var(--muted); line-height: 1.5; }
+
+    /* Which vertical the cards under it belong to. */
+    .vertical-label {
+      margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.14em;
+      font-weight: 700; font-size: var(--fs-micro); color: var(--muted);
+    }
+    /* A vertical with nothing in it. An invitation, so it does not whisper. */
+    .vertical-empty {
+      font-size: var(--fs-ui); color: var(--muted); line-height: 1.6; margin-bottom: 22px;
+    }
+    .vertical-empty a { color: var(--accent); }
+    /* What the flow holds. Figures, so it reads in the data face, and tabular so
+       the numbers line up between one card and the next. */
+    .pick-meta {
+      font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--accent);
+      font-variant-numeric: tabular-nums; margin-bottom: 4px;
+    }
 
     /* ─── Step 3: questionnaire ─── */
 
@@ -128,8 +145,7 @@
     <h1 class="page-title">PS Engagement Builder</h1>
     <main>
     <div class="page-desc">
-      Pick a flow, pick the type of work, answer a short set of scoping questions, then generate a
-      line-by-line task list with hours. Tasks common to every variation are added automatically.
+      Ends with two blocks to paste into the PSE: the task list, and the hours against it.
     </div>
 
     <div class="section-label">1 · Flow</div>
@@ -193,7 +209,7 @@
     </footer>
   </div>
 
-  <script src="./engine.js?v=0.11.2"></script>
+  <script src="./engine.js?v=0.11.3"></script>
   <script>
     // Nothing here knows about any particular solution: the flows, their
     // subflows, inputs, tasks, hours and output columns all come from
@@ -263,22 +279,42 @@
       return el;
     }
 
+    // What is actually in a flow, so the first screen shows the shape of the
+    // work rather than describing the process of getting to it. Phases are
+    // counted from the tasks rather than from the config, because what matters
+    // is how many this flow spans, not how many exist.
+    function describeFlow(f) {
+      const phases = new Set();
+      (f.tasks || []).forEach(t => { if (t.phase) phases.add(t.phase); });
+      const bits = [plural((f.tasks || []).length, 'task')];
+      if (phases.size) bits.push(plural(phases.size, 'phase'));
+      // One variation is not a variation, and none is not worth saying.
+      if ((f.subflows || []).length > 1) bits.push(plural(f.subflows.length, 'variation'));
+      return bits.join(' · ');
+    }
+
+    function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
     function renderFlows() {
       const root = document.getElementById('flow-list');
       root.innerHTML = '';
       CONFIG.verticals.forEach(v => {
         const flows = CONFIG.flows.filter(f => f.vertical === v.id);
         const label = document.createElement('div');
-        label.className = 'pick-note';
-        label.style.cssText = 'margin:0 0 8px;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;font-size:var(--fs-micro);color:var(--muted);';
+        label.className = 'vertical-label';
         label.textContent = v.name;
         root.appendChild(label);
 
         if (!flows.length) {
           const none = document.createElement('div');
-          none.className = 'pick-note';
-          none.style.cssText = 'margin-bottom:22px;font-style:italic;';
-          none.textContent = 'No flows built yet.';
+          none.className = 'vertical-empty';
+          const named = v.name.toLowerCase();
+          // "a integrated workspaces flow" -- the vertical names are data, so
+          // the article has to be worked out rather than written in.
+          const article = /^[aeiou]/.test(named) ? 'an' : 'a';
+          none.innerHTML = 'Nothing here yet. ' +
+            '<a href="./admin.html">Build ' + article + ' ' +
+            esc(named) + ' flow</a> and it will show up here.';
           root.appendChild(none);
           return;
         }
@@ -288,7 +324,10 @@
           const card = document.createElement('div');
           const disabled = f.enabled === false;
           card.className = 'pick-card' + (disabled ? ' disabled' : '') + (flow && flow.id === f.id ? ' selected' : '');
-          card.innerHTML = '<div class="pick-name">' + esc(f.name) + '</div><div class="pick-note">' + esc(f.note || '') + '</div>';
+          card.innerHTML =
+            '<div class="pick-name">' + esc(f.name) + '</div>' +
+            '<div class="pick-meta">' + esc(describeFlow(f)) + '</div>' +
+            (f.note ? '<div class="pick-note">' + esc(f.note) + '</div>' : '');
           if (disabled) {
             card.setAttribute('role', 'radio');
             card.setAttribute('aria-disabled', 'true');

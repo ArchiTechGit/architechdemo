@@ -272,6 +272,69 @@ section('Builder: producing an estimate');
   check('every resource line is the same width', rWidths.length, 1);
 }
 
+// ─────────────────────── the first screen ───────────────────────
+section('Builder: what the first screen says');
+{
+  const build = (cfg) => {
+    const b2 = boot('index.html', []);
+    b2.window.eval('CONFIG = ' + JSON.stringify(cfg) + '; renderFlows();');
+    return b2;
+  };
+
+  const { window, errors, $, $$ } = build(CONFIG);
+  check('it renders without error', errors, []);
+
+  // The card says what the flow holds, so the opening screen shows the shape of
+  // the work rather than describing the process of getting to it.
+  const meta = $('.pick-meta');
+  check('a flow card says what is in the flow', !!meta, true);
+  const flow = CONFIG.flows[0];
+  const phases = new Set(flow.tasks.map(t => t.phase).filter(Boolean));
+  check('the task count is the real one',
+    meta.textContent.includes(flow.tasks.length + ' tasks'), true);
+  check('and the phase count is the ones this flow spans',
+    meta.textContent.includes(phases.size + ' phases'), true);
+  check('and it reads in the data face',
+    /--font-mono/.test(read('index.html').split('.pick-meta {')[1].split('}')[0]), true);
+
+  // The intro must not repeat the numbered steps below it.
+  const intro = $('.page-desc').textContent.toLowerCase();
+  check('the intro does not restate the steps',
+    ['pick a flow', 'answer a short set'].filter(p => intro.includes(p)), []);
+  check('it says what you end up with', /paste|task list|hours/.test(intro), true);
+
+  // An empty screen is an invitation, not a full stop.
+  const bare = JSON.parse(JSON.stringify(CONFIG));
+  bare.flows = [];
+  const empty = build(bare);
+  const rows = empty.$$('#flow-list .vertical-empty');
+  check('an empty vertical offers a way forward', rows.length > 0, true);
+  check('and every one of them links to the admin',
+    rows.filter(r => !r.querySelector('a[href="./admin.html"]')).length, 0);
+  check('and none of them just states the absence',
+    rows.filter(r => /^No .* yet.?$/.test(r.textContent.trim())).length, 0);
+  // The vertical names are data, so the article has to be worked out.
+  const wrong = rows.map(r => r.textContent)
+    .filter(t => /a (?=[aeiou])/i.test(t) || /an (?=[^aeious])/i.test(t));
+  check('the article agrees with the name that follows it', wrong, []);
+
+  // Counting things is where copy usually goes wrong.
+  const one = JSON.parse(JSON.stringify(CONFIG));
+  one.flows[0].subflows = [one.flows[0].subflows[0]];
+  one.flows[0].tasks.forEach(t => { t.subflows = 'all'; });
+  one.flows[0].inputs.forEach(i => { delete i.subflows; });
+  check('one variation is not called variations',
+    /variation/.test(build(one).$('.pick-meta').textContent), false);
+  const zero = JSON.parse(JSON.stringify(one));
+  zero.flows[0].subflows = [];
+  check('and no subflows says nothing about them',
+    /variation/.test(build(zero).$('.pick-meta').textContent), false);
+  const tiny = JSON.parse(JSON.stringify(CONFIG));
+  tiny.flows[0].tasks = [{ id: 'a', phase: 'Kickoff', description: 'One thing', subflows: 'all', effort: [] }];
+  check('one task is singular', build(tiny).$('.pick-meta').textContent.includes('1 task ·'), true);
+  check('and so is one phase', build(tiny).$('.pick-meta').textContent.includes('1 phase'), true);
+}
+
 // ─────────────────────── named, labelled, reachable ───────────────────────
 section('Accessibility, on the built page');
 {
