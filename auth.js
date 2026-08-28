@@ -1,7 +1,6 @@
 /* ArchiTech Demo — Password Gate
  * To change the password, replace HASH with the SHA-256 of your new password.
  * Generate with: echo -n "YourNewPassword" | sha256sum
- * Current password: DHF#2026
  */
 (function () {
   var HASH = 'b89ac9cd490377608eb7c2f48fb57b31791d1bf0cbc122d4113647aed9f3d977';

@@ -10,29 +10,29 @@
 
 | # | Path | Description | Source |
 |---|------|-------------|--------|
-| 01 | `/wxcc/` | Webex CC Workflow Demo | `thesenate/projects/wxccworkflowdemo` |
-| 02 | `/wxccroi/` | Webex CC ROI Calculator | `thesenate/projects/wxccroi` |
+| 01 | `/wxcc/` | Webex CC Workflow Demo | `<internal-source-repo>/wxccworkflowdemo` |
+| 02 | `/wxccroi/` | Webex CC ROI Calculator | `<internal-source-repo>/wxccroi` |
 
 ## How to Update a Demo
 
 ### wxccroi (Next.js app)
-Source: `h:/My Drive/thesenate/projects/wxccroi`
+Source: `<local-drive>/projects/wxccroi`
 
-**Build steps (must build locally, NOT on Google Drive — symlink issues):**
+**Build steps (must build locally, NOT on a synced/cloud-mounted drive — symlink issues):**
 ```bash
 # 1. Copy source to local temp (exclude node_modules, .next, out)
-find "h:/My Drive/thesenate/projects/wxccroi" -maxdepth 1 \
+find "<local-drive>/projects/wxccroi" -maxdepth 1 \
   -not -name 'node_modules' -not -name '.next' -not -name 'out' \
-  -not -wholename "h:/My Drive/thesenate/projects/wxccroi" \
-  | xargs -I{} cp -r {} C:/Users/senate/temp/wxccroi-build/
+  -not -wholename "<local-drive>/projects/wxccroi" \
+  | xargs -I{} cp -r {} <local-temp>/wxccroi-build/
 
 # 2. Install and build
-cd C:/Users/senate/temp/wxccroi-build
+cd <local-temp>/wxccroi-build
 npm install --legacy-peer-deps
 npm run build
 
 # 3. Copy output to this repo
-cp -r C:/Users/senate/temp/wxccroi-build/out/. C:/Users/senate/repos/architechdemo/wxccroi/
+cp -r <local-temp>/wxccroi-build/out/. <this-repo>/wxccroi/
 ```
 
 **next.config.mjs must have:**
@@ -51,6 +51,6 @@ basePath: '/wxccroi',
 3. Add a TOC entry in `index.html` with the next sequential number
 
 ## Key Notes
-- pnpm fails on Google Drive paths (Windows symlink issue) — always use `npm --legacy-peer-deps` for builds
+- pnpm fails on cloud-synced drive paths (Windows symlink issue) — always use `npm --legacy-peer-deps` for builds
 - The `index.html` at root is the TOC/landing page only
 - No server-side rendering — everything must be static export
